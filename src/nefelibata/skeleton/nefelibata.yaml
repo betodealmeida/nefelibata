@@ -1,0 +1,31 @@
+title: Roberto De Almeida
+subtitle: since 1978
+author: Roberto De Almeida <roberto@dealmeida.net>
+location: http://blog.dealmeida.net/
+posts-to-show: 10
+
+publish-to: S3
+announce-on: twitter, facebook
+
+# Apply for S3 here: http://aws.amazon.com/s3/
+S3:
+    AWS_ACCESS_KEY_ID: 
+    AWS_SECRET_ACCESS_KEY: 
+
+# Visit the Twitter developer page and create a new application:
+# 
+#     https://dev.twitter.com/apps/new
+# 
+# This will get you a CONSUMER_KEY and CONSUMER_SECRET. After creating your
+# application you can request the oauth_token and oauth_secret at the same
+# page.
+twitter:
+    CONSUMER_KEY: 
+    CONSUMER_SECRET: 
+    oauth_token: 
+    oauth_secret: 
+
+# Grab an access token here: https://developers.facebook.com/tools/explorer/
+# Be sure to check "publish_stream" in "Extended Permissions".
+facebook:
+    access_token: 
