@@ -13,6 +13,7 @@ install_requires = [
     # For more details, see:
     # http://packages.python.org/distribute/setuptools.html#declaring-dependencies
     'docopt>=0.6.1',
+    'PyYAML>=3.08',
     'Markdown>=2.2.1',
     'jinja2>=2.6',
     'boto>=2.8.0',

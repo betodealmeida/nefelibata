@@ -24,6 +24,8 @@ import os
 import shutil
 from pkg_resources import resource_listdir, resource_filename
 
+import yaml
+
 
 def init(directory):
     """
@@ -60,12 +62,25 @@ def build(directory):
     if directory is None:
         directory = os.getcwd()
         while not os.path.exists(os.path.join(directory, 'nefelibata.yaml')):
-            directory = os.path.abspath(os.path.join(directory, '..'))
-            if directory == '/':
+            parent = os.path.abspath(os.path.join(directory, '..'))
+            if directory == parent:
                 raise SystemExit('No configuration found!')
-    posts = os.path.join(directory, 'posts')
+            directory = parent
+    with open(os.path.join(directory, 'nefelibata.yaml')) as fp:
+        config = yaml.load(fp)
 
     # check all files that need to be processed
+    path = os.path.join(directory, 'posts')
+    posts = list(iter_posts(path))
+    posts.sort(key=lambda x: x.date, reverse=True)
+    for post in posts:
+        if not post.updated:
+            post.create()
+
+    # build the index
+    create_index(**config)
+
+    print 'Blog built!'
 
 
 def publish(target):
