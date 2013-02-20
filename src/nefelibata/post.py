@@ -72,7 +72,7 @@ class Post(object):
         Create HTML file.
 
         """
-        pass
+        print 'called on', self.file_path
 
 
 def iter_posts(directory):
@@ -80,7 +80,10 @@ def iter_posts(directory):
     Return all posts from a given directory.
 
     """
-    pass
+    for dirpath, dirnames, filenames in os.walk(directory):
+        for filename in filenames:
+            if filename.endswith(".md"):
+                 yield Post(os.path.join(dirpath, filename))
 
 
 if __name__ == '__main__':

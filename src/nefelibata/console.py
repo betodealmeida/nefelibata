@@ -27,6 +27,7 @@ from pkg_resources import resource_listdir, resource_filename
 import yaml
 
 from nefelibata import find_directory
+from nefelibata.post import iter_posts
 
 
 def init(directory):
