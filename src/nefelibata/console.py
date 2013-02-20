@@ -26,6 +26,8 @@ from pkg_resources import resource_listdir, resource_filename
 
 import yaml
 
+from nefelibata import find_directory
+
 
 def init(directory):
     """
@@ -60,12 +62,9 @@ def build(directory):
 
     """
     if directory is None:
-        directory = os.getcwd()
-        while not os.path.exists(os.path.join(directory, 'nefelibata.yaml')):
-            parent = os.path.abspath(os.path.join(directory, '..'))
-            if directory == parent:
-                raise SystemExit('No configuration found!')
-            directory = parent
+        directory = find_directory(os.getcwd())
+
+    # load configuration
     with open(os.path.join(directory, 'nefelibata.yaml')) as fp:
         config = yaml.load(fp)
 
