@@ -1,0 +1,28 @@
+{% extends "bootstrap.html" %}
+
+{% block title %}{{ config.title }}{% endblock %}
+
+{% block css %}
+    {% for stylesheet in stylesheets %}
+        <link href="{{ stylesheet }}" rel="stylesheet">
+    {% endfor %}
+{% endblock %}
+
+{% block javascript %}
+    {% for script in scripts %}
+        <script src="{{ script }}"></script>
+    {% endfor %}
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+
+        <h1>{{ config.title }}</h1>
+        <h2>{{ config.subtitle }}</h2>
+
+        <h3>{{ title }}</h3> 
+        <h4>{{ date }}</h4>
+        {{ content }}
+
+    </div> <!-- /container -->
+{% endblock %}

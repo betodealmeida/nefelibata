@@ -47,6 +47,9 @@ def init(directory):
     for resource in resources:
         origin = resource_filename('nefelibata', os.path.join('skeleton', resource))
         target = os.path.join(directory, resource)
+        # good guy Greg does not overwrite existing files
+        if os.path.exists(target):
+            continue
         if os.path.isdir(origin):
             shutil.copytree(origin, target)
         else:
@@ -75,10 +78,10 @@ def build(directory):
     posts.sort(key=lambda x: x.date, reverse=True)
     for post in posts:
         if not post.updated:
-            post.create()
+            post.create(config)
 
     # build the index
-    create_index(**config)
+    #create_index(**config)
 
     print 'Blog built!'
 
