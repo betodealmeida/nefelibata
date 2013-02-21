@@ -4,16 +4,19 @@ Nefelibata blog engine.
 Usage:
   nb init [DIRECTORY]
   nb build [DIRECTORY]
+  nb preview [-p PORT] [DIRECTORY]
   nb publish [DIRECTORY]
 
 Actions:
   init          Create a new blog skeleton.
   build         Build blog HTML files.
+  preview       Runs SimpleHTTPServer and opens the browser.
   publish       Publish blog to configured locations and announce new posts.
 
 Options:
   -h --help     Show this screen.
   --version     Show version.
+  -p PORT       Port to run the web server for preview. [default: 8000]
 
 Released under the MIT license.
 (c) 2013 Roberto De Almeida <roberto@dealmeida.net>
@@ -23,6 +26,9 @@ Released under the MIT license.
 import os
 import shutil
 from pkg_resources import resource_listdir, resource_filename
+import SimpleHTTPServer
+import SocketServer
+import webbrowser
 
 import yaml
 
@@ -86,6 +92,22 @@ def build(directory):
     print 'Blog built!'
 
 
+def preview(directory, port=8000):
+    # enter blog directory
+    if directory is None:
+        directory = find_directory(os.getcwd())
+    os.chdir(directory)
+
+    Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+    httpd = SocketServer.TCPServer(("", port), Handler)
+    print "serving at port %s" % port
+    webbrowser.open("http://localhost:%d/" % port)
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print "exiting..."
+
+
 def publish(target):
     """
     Publish the blog to the defined storages.
@@ -102,6 +124,8 @@ def main():
         init(arguments['DIRECTORY'])
     elif arguments['build']:
         build(arguments['DIRECTORY'])
+    elif arguments['preview']:
+        preview(arguments['DIRECTORY'], int(arguments['-p']))
     elif arguments['publish']:
         publish(arguments['DIRECTORY'])
 
