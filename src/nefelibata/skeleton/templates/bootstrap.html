@@ -8,13 +8,9 @@
         <meta name="author" content="">
 
         <!-- Le styles -->
-        <link href="css/bootstrap.css" rel="stylesheet">
-        <style>
-            body {
-                padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-            }
-        </style>
-        <link href="css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="{{ config.url }}css/bootstrap.css" rel="stylesheet">
+        <link href="{{ config.url }}css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="{{ config.url }}css/nefelibata.css" rel="stylesheet">
 
         {% block css %}{% endblock %}
 
@@ -24,11 +20,11 @@
         <![endif]-->
 
         <!-- Fav and touch icons -->
-        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="ico/apple-touch-icon-144-precomposed.png">
-        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="ico/apple-touch-icon-114-precomposed.png">
-        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="ico/apple-touch-icon-72-precomposed.png">
-        <link rel="apple-touch-icon-precomposed" href="ico/apple-touch-icon-57-precomposed.png">
-        <link rel="shortcut icon" href="ico/favicon.png">
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ config.url }}ico/apple-touch-icon-144-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{{ config.url }}ico/apple-touch-icon-114-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{{ config.url }}ico/apple-touch-icon-72-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" href="{{ config.url }}ico/apple-touch-icon-57-precomposed.png">
+        <link rel="shortcut icon" href="{{ config.url }}ico/favicon.png">
     </head>
 
     <body>
@@ -38,19 +34,19 @@
         <!-- Le javascript
         ================================================== -->
         <!-- Placed at the end of the document so the pages load faster -->
-        <script src="js/jquery.js"></script>
-        <script src="js/bootstrap-transition.js"></script>
-        <script src="js/bootstrap-alert.js"></script>
-        <script src="js/bootstrap-modal.js"></script>
-        <script src="js/bootstrap-dropdown.js"></script>
-        <script src="js/bootstrap-scrollspy.js"></script>
-        <script src="js/bootstrap-tab.js"></script>
-        <script src="js/bootstrap-tooltip.js"></script>
-        <script src="js/bootstrap-popover.js"></script>
-        <script src="js/bootstrap-button.js"></script>
-        <script src="js/bootstrap-collapse.js"></script>
-        <script src="js/bootstrap-carousel.js"></script>
-        <script src="js/bootstrap-typeahead.js"></script>
+        <script src="{{ config.url }}js/jquery.js"></script>
+        <script src="{{ config.url }}js/bootstrap-transition.js"></script>
+        <script src="{{ config.url }}js/bootstrap-alert.js"></script>
+        <script src="{{ config.url }}js/bootstrap-modal.js"></script>
+        <script src="{{ config.url }}js/bootstrap-dropdown.js"></script>
+        <script src="{{ config.url }}js/bootstrap-scrollspy.js"></script>
+        <script src="{{ config.url }}js/bootstrap-tab.js"></script>
+        <script src="{{ config.url }}js/bootstrap-tooltip.js"></script>
+        <script src="{{ config.url }}js/bootstrap-popover.js"></script>
+        <script src="{{ config.url }}js/bootstrap-button.js"></script>
+        <script src="{{ config.url }}js/bootstrap-collapse.js"></script>
+        <script src="{{ config.url }}js/bootstrap-carousel.js"></script>
+        <script src="{{ config.url }}js/bootstrap-typeahead.js"></script>
 
         {% block javascript %}{% endblock %}
 

@@ -1,28 +1,40 @@
 {% extends "bootstrap.html" %}
 
-{% block title %}{{ config.title }}{% endblock %}
+{% block title %}{{ config.title }}: {{ post.title }}{% endblock %}
 
 {% block css %}
-    {% for stylesheet in stylesheets %}
-        <link href="{{ stylesheet }}" rel="stylesheet">
-    {% endfor %}
+{% for stylesheet in stylesheets %}
+<link href="{{ stylesheet }}" rel="stylesheet">
+{% endfor %}
 {% endblock %}
 
 {% block javascript %}
-    {% for script in scripts %}
-        <script src="{{ script }}"></script>
-    {% endfor %}
+{% for script in scripts %}
+<script src="{{ script }}"></script>
+{% endfor %}
 {% endblock %}
 
 {% block main %}
-    <div class="container">
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div id="sidebar" class="span3">
+            <h1><a href="{{ config.url }}">{{ config.title }}</a></h1>
+            <p><small>{{ config.subtitle }}</small></p>
+            <!--Sidebar content-->
 
-        <h1>{{ config.title }}</h1>
-        <h2>{{ config.subtitle }}</h2>
+            <p>You are reading <strong>{{ post.title }}</strong>, a post written on {{ post.date }}.</p>
 
-        <h3>{{ title }}</h3> 
-        <h4>{{ date }}</h4>
-        {{ content }}
+            <p>You can discuss this post on <a href="#">Facebook</a> or <a href="#">Twitter</a>. From time to time comments will be synchronized in this page.</p>
+        </div>
+        <div id="content" class="span9">
+            <!--Body content-->
+            {{ post.html }}
+        </div>
+    </div>
+    <hr>
 
-    </div> <!-- /container -->
+    <footer class="pull-right">
+    <p><small><em>Walk the clouds.</em></small></p>
+    </footer>
+</div>
 {% endblock %}

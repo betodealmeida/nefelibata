@@ -1,0 +1,16 @@
+#sidebar {
+    text-align: right;
+}
+
+#sidebar h1 {
+    text-transform: lowercase;
+}
+
+#content h1 {
+    font-family: serif;
+}
+
+#content p {
+    max-width: 33em;
+}
+
