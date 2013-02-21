@@ -34,30 +34,27 @@ import yaml
 from path import path
 
 from nefelibata import find_directory
-from nefelibata.post import iter_posts
+from nefelibata.post import iter_posts, create_index
 
 
-def init(directory):
+def init(root):
     """
     Create the basic structure copying from skeleton.
 
     By default, we create the blog in the current directory.
 
     """
-    if directory is None:
-        directory = '.'
-
     # list all resources in the skeleton directory
     resources = resource_listdir('nefelibata', 'skeleton')
 
     # and extract them to our target
     for resource in resources:
-        origin = resource_filename('nefelibata', os.path.join('skeleton', resource))
-        target = os.path.join(directory, resource)
+        origin = path(resource_filename('nefelibata', os.path.join('skeleton', resource)))
+        target = root/resource
         # good guy Greg does not overwrite existing files
-        if os.path.exists(target):
-            continue
-        if os.path.isdir(origin):
+        if target.exists():
+            raise IOError('File already exists!')
+        if origin.isdir():
             shutil.copytree(origin, target)
         else:
             shutil.copy(origin, target)
@@ -72,12 +69,6 @@ def build(root):
     If no directory is specified we go up until we find a configuration file.
 
     """
-    # let's use path.py for our sanity ;)
-    if root is None:
-        root = find_directory(os.getcwd())
-    else:
-        root = path(root)
-
     # load configuration
     with open(root/'nefelibata.yaml') as fp:
         config = yaml.load(fp)
@@ -105,17 +96,14 @@ def build(root):
             post.create(config)
 
     # build the index
-    #create_index(**config)
+    create_index(posts, config)
 
     print 'Blog built!'
 
 
-def preview(directory, port=8000):
-    # enter blog directory
-    if directory is None:
-        directory = find_directory(os.getcwd())
-    build_dir = os.path.join(directory, 'build')
-    os.chdir(build_dir)
+def preview(root, port=8000):
+    build = root/'build'
+    os.chdir(build)
 
     Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
     httpd = SocketServer.TCPServer(("", port), Handler)
@@ -139,14 +127,23 @@ def main():
     from docopt import docopt
 
     arguments = docopt(__doc__)
+
+    # Get the root directory from our blog. If not defined we assume we're 
+    # insider the blog, so we may need to go up the filesystem in order to find
+    # the root.
+    if arguments['DIRECTORY'] is None:
+        root = find_directory(os.getcwd())
+    else:
+        root = path(arguments['DIRECTORY'])
+
     if arguments['init']:
-        init(arguments['DIRECTORY'])
+        init(root)
     elif arguments['build']:
-        build(arguments['DIRECTORY'])
+        build(root)
     elif arguments['preview']:
-        preview(arguments['DIRECTORY'], int(arguments['-p']))
+        preview(root, int(arguments['-p']))
     elif arguments['publish']:
-        publish(arguments['DIRECTORY'])
+        publish(root)
 
 
 if __name__ == '__main__':
