@@ -31,6 +31,7 @@ import SocketServer
 import webbrowser
 
 import yaml
+from path import path
 
 from nefelibata import find_directory
 from nefelibata.post import iter_posts
@@ -64,23 +65,40 @@ def init(directory):
     print 'Blog created!'
 
 
-def build(directory):
+def build(root):
     """
     Build all static pages from posts.
 
     If no directory is specified we go up until we find a configuration file.
 
     """
-    if directory is None:
-        directory = find_directory(os.getcwd())
+    # let's use path.py for our sanity ;)
+    if root is None:
+        root = find_directory(os.getcwd())
+    else:
+        root = path(root)
 
     # load configuration
-    with open(os.path.join(directory, 'nefelibata.yaml')) as fp:
+    with open(root/'nefelibata.yaml') as fp:
         config = yaml.load(fp)
 
+    # create build directory if necessary and copy css/js
+    build = root/'build'
+    if not build.exists():
+        os.mkdir(build)
+        os.mkdir(build/'css')
+        os.mkdir(build/'js')
+
+    # sync stylesheets and scripts
+    css = root/'templates/css'
+    for stylesheet in css.files('*.css'):
+        shutil.copy(css/stylesheet, build/'css')
+    js = root/'templates/js'
+    for script in js.files('*.js'):
+        shutil.copy(css/script, build/'js')
+
     # check all files that need to be processed
-    path = os.path.join(directory, 'posts')
-    posts = list(iter_posts(path))
+    posts = list(iter_posts(root/'posts'))
     posts.sort(key=lambda x: x.date, reverse=True)
     for post in posts:
         if not post.updated:
@@ -96,7 +114,8 @@ def preview(directory, port=8000):
     # enter blog directory
     if directory is None:
         directory = find_directory(os.getcwd())
-    os.chdir(directory)
+    build_dir = os.path.join(directory, 'build')
+    os.chdir(build_dir)
 
     Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
     httpd = SocketServer.TCPServer(("", port), Handler)

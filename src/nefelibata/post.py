@@ -87,10 +87,8 @@ class Post(object):
         target = os.path.join(build_dir, relative_path)
 
         # create target dir
-        try:
-            os.makedirs(target)
-        except OSError:
-            pass
+        if not os.path.exists(target):
+            os.mkdir(target)
 
         # symlink all files from origin to target
         for dirpath, dirnames, filenames in os.walk(origin):
@@ -101,8 +99,9 @@ class Post(object):
             for filename in filenames:
                 source = os.path.join(dirpath, filename)
                 link_name = os.path.join(target, source[len(origin)+1:])
-                if not os.path.exists(link_name):
-                    os.link(source, link_name)
+                if os.path.exists(link_name):
+                    os.unlink(link_name)
+                os.link(source, link_name)
 
         # find javascript and css
         scripts = []

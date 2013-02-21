@@ -1,4 +1,4 @@
-import os
+from path import path
 
 
 def find_directory(cwd):
@@ -8,11 +8,12 @@ def find_directory(cwd):
     Given a path we go up the filesystem until we find the configuration file.
 
     """
-    directory = cwd
-    while not os.path.exists(os.path.join(directory, 'nefelibata.yaml')):
-        parent = os.path.abspath(os.path.join(directory, '..'))
-        if directory == parent:
-            raise SystemExit('No configuration found!')
-        directory = parent
+    cwd = path(cwd)
 
-    return directory
+    while not (cwd/'nefelibata.yaml').exists():
+        parent = cwd/'..'
+        if cwd == parent.abspath():
+            raise SystemExit('No configuration found!')
+        cwd = parent
+
+    return cwd.abspath()

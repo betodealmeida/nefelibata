@@ -12,6 +12,7 @@ install_requires = [
     # List your project dependencies here.
     # For more details, see:
     # http://packages.python.org/distribute/setuptools.html#declaring-dependencies
+    'path.py>=3.0.1',
     'docopt>=0.6.1',
     'PyYAML>=3.08',
     'Markdown>=2.2.1',
