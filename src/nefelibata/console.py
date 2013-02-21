@@ -82,11 +82,14 @@ def build(root):
 
     # sync stylesheets and scripts
     css = root/'templates/css'
-    for stylesheet in css.files('*.css'):
+    for stylesheet in css.files():
         shutil.copy(css/stylesheet, build/'css')
     js = root/'templates/js'
-    for script in js.files('*.js'):
-        shutil.copy(css/script, build/'js')
+    for script in js.files():
+        shutil.copy(js/script, build/'js')
+    imgs = root/'templates/img'
+    for img in imgs.files():
+        shutil.copy(imgs/img, build/'img')
 
     # check all files that need to be processed
     posts = list(iter_posts(root/'posts'))
@@ -96,7 +99,7 @@ def build(root):
             post.create(config)
 
     # build the index
-    create_index(posts, config)
+    create_index(root, posts, config)
 
     print 'Blog built!'
 

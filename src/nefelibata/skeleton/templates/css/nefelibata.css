@@ -6,6 +6,10 @@
     text-transform: lowercase;
 }
 
+footer, #sidebar p {
+    font-size: 90%;
+}
+
 #content h1 {
     font-family: serif;
 }
@@ -14,3 +18,11 @@
     max-width: 33em;
 }
 
+.summary {
+    max-height: 230px;
+    overflow: hidden;
+}
+
+.navigation {
+    font-size: 500%;
+}

@@ -1,6 +1,6 @@
 {% extends "bootstrap.html" %}
 
-{% block title %}{{ config.title }}: {{ post.title }}{% endblock %}
+{% block title %}{{ config.title }}{% endblock %}
 
 {% block css %}
 {% for stylesheet in stylesheets %}
@@ -21,15 +21,26 @@
             <h1><a href="{{ config.url }}">{{ config.title }}</a></h1>
             <p>{{ config.subtitle }}</p>
             <hr>
+            <div class="navigation">
+                <p>
+                {% if previous %}
+                <a title="Previous posts" href="{{ previous }}">&laquo;</a>
+                {% endif %}
+                {% if next %}
+                <a title="Next posts" href="{{ next }}">&raquo;</a>
+                {% endif %}
+                </p>
+            </div>
             <!--Sidebar content-->
-
-            <p>You are reading <strong>{{ post.title }}</strong>, a post written on {{ post.date }}.</p>
-
-            <p>You can discuss this post on <a href="#">Facebook</a> or <a href="#">Twitter</a>. From time to time comments will be synchronized in this page.</p>
         </div>
         <div id="content" class="span9">
+            {% for post in posts %}
             <!--Body content-->
-            {{ post.html }}
+            <div class="summary">
+                <h1><a href="{{ post.url }}">{{ post.title }}</a></h1>
+                {{ post.html }}
+            </div>
+            {% endfor %}
         </div>
     </div>
     <hr>

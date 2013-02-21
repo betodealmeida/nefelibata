@@ -1,3 +1,5 @@
+from __future__ import division
+import math
 import os
 from stat import ST_MTIME
 from email.parser import Parser
@@ -6,6 +8,7 @@ from xml.etree import cElementTree
 
 import markdown
 from jinja2 import Template, FileSystemLoader, Environment
+from path import path
 
 from nefelibata import find_directory
 
@@ -47,7 +50,13 @@ class Post(object):
                 fp.write(str(self.post))
 
     @property
+    def url(self):
+        root = find_directory(os.path.dirname(self.file_path))
+        return self.file_path[len(root)+1:]
+
+    @property
     def date(self):
+        # TODO XXX return parsed as datetime
         return self.post['date']
 
     @property
@@ -130,15 +139,36 @@ class Post(object):
         os.unlink(md_file)
 
 
-def iter_posts(directory):
+def iter_posts(root):
     """
     Return all posts from a given directory.
 
     """
-    for dirpath, dirnames, filenames in os.walk(directory):
-        for filename in filenames:
-            if filename.endswith(".md"):
-                 yield Post(os.path.join(dirpath, filename))
+    for file_path in root.walk('*.md'):
+        yield Post(file_path)
+
+
+def create_index(root, posts, config):
+    """
+    Build the index.html page and archives.
+
+    """
+    env = Environment(loader=FileSystemLoader(root/'templates'))
+    template = env.get_template('index.html')
+
+    show = config.get('posts-to-show', 10)
+    pages = int(math.ceil(len(posts) / show))
+    previous, name = None, 'index.html'
+    for page in range(pages):
+        if page+1 < pages:
+            next = 'archive%d.html' % (page+1)
+        else:
+            next = None
+        html = template.render(config=config, posts=posts[page*show:(page+1)*show],
+                previous=previous, next=next)
+        with open(root/'build'/name, 'w') as fp:
+            fp.write(html)
+        previous, name = name, next
 
 
 if __name__ == '__main__':
