@@ -79,6 +79,7 @@ def build(root):
         os.mkdir(build)
         os.mkdir(build/'css')
         os.mkdir(build/'js')
+        os.mkdir(build/'img')
 
     # sync stylesheets and scripts
     css = root/'templates/css'
@@ -116,6 +117,7 @@ def preview(root, port=8000):
         httpd.serve_forever()
     except KeyboardInterrupt:
         print "exiting..."
+        httpd.shutdown()
 
 
 def publish(target):
