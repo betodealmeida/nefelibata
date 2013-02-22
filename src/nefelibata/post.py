@@ -1,9 +1,10 @@
 from __future__ import division
 import math
 import os
-from stat import ST_MTIME
 from email.parser import Parser
-from email.utils import formatdate
+from email.utils import formatdate, parsedate
+import time
+from datetime import datetime
 from xml.etree import cElementTree
 
 import markdown
@@ -21,17 +22,17 @@ class Post(object):
     
     """
     def __init__(self, file_path):
-        self.file_path = file_path
+        self.file_path = path(file_path)
 
+        # process post
         with open(file_path) as fp:
             self.post = Parser().parse(fp)
-
         self.html = markdown.markdown(self.post.get_payload(), output_format='html5')
 
         # add metadata
         modified = False
         if 'date' not in self.post:
-            date = os.stat(file_path)[ST_MTIME]
+            date = file_path.stat().st_mtime
             self.post['date'] = formatdate(date, localtime=True)
             modified = True
         if 'subject' not in self.post:
@@ -41,26 +42,37 @@ class Post(object):
             if h1 is not None:
                 self.post['subject'] = h1.text
             else:
-                self.post['subject'] = os.path.splitext(os.path.basename(file_path))[0]
+                self.post['subject'] = file_path.namebase
             modified = True
 
-        # rewrite 
+        # rewrite
         if modified:
             with open(file_path, 'w') as fp:
                 fp.write(str(self.post))
 
     @property
     def url(self):
-        root = find_directory(os.path.dirname(self.file_path))
-        return self.file_path[len(root)+1:]
+        """
+        Relative URL for the post.
+
+        """
+        root = find_directory(self.file_path.dirname())
+        return (root/'posts').relpathto(self.file_path).stripext() + '.html'
 
     @property
     def date(self):
-        # TODO XXX return parsed as datetime
-        return self.post['date']
+        """
+        Date when the post was written, as datetime object.
+
+        """
+        return datetime.fromtimestamp(time.mktime(parsedate(self.post['date'])))
 
     @property
     def title(self):
+        """
+        Title of the post.
+
+        """
         return self.post['subject']
 
     @property
@@ -70,17 +82,14 @@ class Post(object):
 
         """
         # check if the HTML version exists
-        root = find_directory(os.path.dirname(self.file_path))
-        build_dir = os.path.join(root, 'build')
-        posts = os.path.join(root, 'posts')
-        relative_path = self.file_path[len(posts)+1:]
-        new_file = os.path.splitext(relative_path)[0] + '.html'
-        html = os.path.join(build_dir, new_file)
-        if not os.path.exists(html):
+        root = find_directory(self.file_path.dirname())
+        relative = (root/'posts').relpathto(self.file_path)
+        html = (root/'build'/relative).stripext() + '.html'
+        if not html.exists():
             return False
 
         # check if file is up-to-date
-        return os.stat(html)[ST_MTIME] >= os.stat(self.file_path)[ST_MTIME]
+        return html.stat().st_mtime >= self.file_path.stat().st_mtime
 
     def create(self, config):
         """
@@ -88,43 +97,26 @@ class Post(object):
 
         """
         # find the build directory
-        origin = os.path.dirname(self.file_path)
+        origin = self.file_path.dirname()
         root = find_directory(origin)
-        posts = os.path.join(root, 'posts')
-        relative_path = origin[len(posts)+1:]
-        build_dir = os.path.join(root, 'build')
-        target = os.path.join(build_dir, relative_path)
-
-        # create target dir
-        if not os.path.exists(target):
-            os.mkdir(target)
+        relative = (root/'posts').relpathto(origin)
+        target = root/'build'/relative
+        if not target.exists():
+            target.mkdir()
 
         # symlink all files from origin to target
-        for dirpath, dirnames, filenames in os.walk(origin):
-            for dirname in dirnames:
-                dir = os.path.join(target, dirpath[len(origin)+1:], dirname)
-                if not os.path.exists(dir):
-                    os.mkdir(dir)
-            for filename in filenames:
-                source = os.path.join(dirpath, filename)
-                link_name = os.path.join(target, source[len(origin)+1:])
-                if os.path.exists(link_name):
-                    os.unlink(link_name)
-                os.link(source, link_name)
+        for dir in origin.walkdirs():
+            new = target/origin.relpathto(dir)
+            if not new.exists():
+                new.mkdir()
+        for file in origin.walkfiles():
+            link = target/origin.relpathto(file)
+            link.remove_p()
+            file.link(link)
 
         # find javascript and css
-        scripts = []
-        js = os.path.join(origin, 'js')
-        if os.path.exists(js) and os.path.isdir(js):
-            for file in os.listdir(js):
-                if os.path.isfile(os.path.join(js, file)):
-                    scripts.append('js/%s' % file)
-        stylesheets = []
-        css = os.path.join(origin, 'css')
-        if os.path.exists(css) and os.path.isdir(css):
-            for file in os.listdir(css):
-                if os.path.isfile(os.path.join(css, file)):
-                    stylesheets.append('css/%s' % file)
+        scripts = [ 'js/%s' % file for file in origin.files('*.js') ]
+        stylesheets = [ 'css/%s' % file for file in origin.files('*.css') ]
 
         # compile template
         env = Environment(loader=FileSystemLoader(os.path.join(root, 'templates')))
@@ -132,11 +124,9 @@ class Post(object):
         html = template.render(config=config, post=self, 
                 stylesheets=stylesheets, scripts=scripts)
 
-        md_file = os.path.join(build_dir, self.file_path[len(posts)+1:])
-        html_file = os.path.splitext(md_file)[0] + '.html'
-        with open(html_file, 'w') as fp:
+        filename = self.file_path.namebase + '.html'
+        with open(target/filename, 'w') as fp:
             fp.write(html)
-        os.unlink(md_file)
 
 
 def iter_posts(root):
@@ -169,8 +159,3 @@ def create_index(root, posts, config):
         with open(root/'build'/name, 'w') as fp:
             fp.write(html)
         previous, name = name, next
-
-
-if __name__ == '__main__':
-    import sys
-    print Post(sys.argv[1]).updated
