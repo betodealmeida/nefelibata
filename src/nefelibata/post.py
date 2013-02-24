@@ -8,7 +8,7 @@ from datetime import datetime
 from xml.etree import cElementTree
 
 import markdown
-from jinja2 import Template, FileSystemLoader, Environment
+from jinja2 import Environment, FileSystemLoader
 from path import path
 
 from nefelibata import find_directory
@@ -115,8 +115,8 @@ class Post(object):
             file.link(link)
 
         # find javascript and css
-        scripts = [ 'js/%s' % file for file in origin.files('*.js') ]
-        stylesheets = [ 'css/%s' % file for file in origin.files('*.css') ]
+        scripts = [ origin.relpathto(file) for file in origin.walk('*.js') ]
+        stylesheets = [ oring.relpathto(file) for file in origin.walk('*.css') ]
 
         # compile template
         env = Environment(loader=FileSystemLoader(os.path.join(root, 'templates')))
