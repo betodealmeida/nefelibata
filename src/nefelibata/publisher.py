@@ -18,7 +18,7 @@ class S3(object):
 
         for filepath in build.walkfiles():
             k = Key(bucket)
-            k.key = filepath
+            k.key = filepath[len(build)+1:]  # relative path
             k.set_contents_from_filename(filepath, policy='public-read')
 
         bucket.configure_website('index.html')
