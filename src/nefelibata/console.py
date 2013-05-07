@@ -24,8 +24,7 @@ Released under the MIT license.
 """
 
 import os
-import shutil
-from pkg_resources import resource_listdir, resource_filename
+from pkg_resources import resource_listdir, resource_filename, iter_entry_points
 import SimpleHTTPServer
 import SocketServer
 import webbrowser
@@ -49,15 +48,16 @@ def init(root):
 
     # and extract them to our target
     for resource in resources:
-        origin = path(resource_filename('nefelibata', os.path.join('skeleton', resource)))
+        origin = path(resource_filename('nefelibata',
+            os.path.join('skeleton', resource)))
         target = root/resource
         # good guy Greg does not overwrite existing files
         if target.exists():
             raise IOError('File already exists!')
         if origin.isdir():
-            shutil.copytree(origin, target)
+            origin.copytree(target)
         else:
-            shutil.copy(origin, target)
+            origin.copy(target)
 
     print 'Blog created!'
 
@@ -65,8 +65,6 @@ def init(root):
 def build(root):
     """
     Build all static pages from posts.
-
-    If no directory is specified we go up until we find a configuration file.
 
     """
     # load configuration
@@ -76,21 +74,21 @@ def build(root):
     # create build directory if necessary and copy css/js
     build = root/'build'
     if not build.exists():
-        os.mkdir(build)
-        os.mkdir(build/'css')
-        os.mkdir(build/'js')
-        os.mkdir(build/'img')
+        build.mkdir()
+        (build/'css').mkdir()
+        (build/'js').mkdir()
+        (build/'img').mkdir()
 
     # sync stylesheets and scripts
     css = root/'templates/css'
     for stylesheet in css.files():
-        shutil.copy(css/stylesheet, build/'css')
+        (css/stylesheet).copy(build/'css')
     js = root/'templates/js'
     for script in js.files():
-        shutil.copy(js/script, build/'js')
+        (js/script).copy(build/'js')
     imgs = root/'templates/img'
     for img in imgs.files():
-        shutil.copy(imgs/img, build/'img')
+        (imgs/img).copy(build/'img')
 
     # check all files that need to be processed
     posts = list(iter_posts(root/'posts'))
@@ -120,12 +118,27 @@ def preview(root, port=8000):
         httpd.shutdown()
 
 
-def publish(target):
+def publish(root):
     """
     Publish the blog to the defined storages.
 
     """
-    pass
+    # load configuration
+    with open(root/'nefelibata.yaml') as fp:
+        config = yaml.load(fp)
+
+    publishers = {
+        p.name: p.load() for p in iter_entry_points('nefelibata.publisher')
+    }
+
+    names = config['publish-to']
+    if isinstance(names, basestring):
+        names = [names]
+
+    for name in names:
+        section = config[name]
+        publisher = publishers[name](**section)
+        publisher.publish(root/'build')
 
 
 def main():
@@ -133,8 +146,8 @@ def main():
 
     arguments = docopt(__doc__)
 
-    # Get the root directory from our blog. If not defined we assume we're 
-    # insider the blog, so we may need to go up the filesystem in order to find
+    # Get the directory from our blog. If not defined we assume we're 
+    # inside the blog, so we may need to go up the filesystem in order to find
     # the root.
     if arguments['DIRECTORY'] is None:
         root = find_directory(os.getcwd())
