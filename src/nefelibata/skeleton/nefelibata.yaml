@@ -11,6 +11,7 @@ announce-on: twitter, facebook
 S3:
     AWS_ACCESS_KEY_ID: 
     AWS_SECRET_ACCESS_KEY: 
+    bucket: blog.dealmeida.net
 
 # Visit the Twitter developer page and create a new application:
 # 
