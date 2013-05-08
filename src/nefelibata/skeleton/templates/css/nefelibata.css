@@ -1,28 +1,47 @@
-#sidebar {
-    text-align: right;
+html {
+    font-family: Georgia;
 }
 
-#sidebar h1 {
-    text-transform: lowercase;
+body {
+    background-color: #fff;
+    color: #444;
 }
 
-footer, #sidebar p {
-    font-size: 90%;
+h1, h2, h3, h4, h5, h6 {
+    font-family: Gill Sans;
 }
 
-#content h1 {
-    font-family: serif;
+a {
+    color: #012;
+    text-decoration: none;
+    font-weight: bold;
+}
+a:hover {
+    color: #012;
+}
+a:visited {
+    color: #012;
 }
 
-#content p {
-    max-width: 33em;
+p {
+    /*max-width: 44em;*/
+    max-width: 65ex;
 }
 
-.summary {
-    max-height: 230px;
-    overflow: hidden;
+code.block {
+    margin: 1em 40px;
+    display: block;
 }
 
-.navigation {
-    font-size: 500%;
+div.body {
+    padding: 20px 40px;
+}
+
+h2.title {
+    background-color: #012;
+    padding: 5px 40px;
+}
+h2.title a {
+    color: #fff;
+    font-weight: normal;
 }

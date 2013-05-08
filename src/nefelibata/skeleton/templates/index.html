@@ -1,52 +1,46 @@
-{% extends "bootstrap.html" %}
-
-{% block title %}{{ config.title }}{% endblock %}
-
-{% block css %}
-{% for stylesheet in stylesheets %}
-<link href="{{ stylesheet }}" rel="stylesheet">
-{% endfor %}
-{% endblock %}
-
-{% block javascript %}
-{% for script in scripts %}
-<script src="{{ script }}"></script>
-{% endfor %}
-{% endblock %}
-
+{% extends "boilerplate.html" %}                                                  
+                                                                                
+{% block title %}{{ config.title }}: {{ post.title }}{% endblock %}             
+                                                                                
+{% block css %}                                                                 
+{% for stylesheet in stylesheets %}                                             
+<link href="{{ stylesheet }}" rel="stylesheet">                                 
+{% endfor %}                                                                    
+{% endblock %}                                                                  
+                                                                                
+{% block javascript %}                                                          
+{% for script in scripts %}                                                     
+<script src="{{ script }}"></script>                                            
+{% endfor %}                                                                    
+{% endblock %}                                                                  
+                                                                                
 {% block main %}
-<div class="container-fluid">
-    <div class="row-fluid">
-        <div id="sidebar" class="span3">
-            <h1><a href="{{ config.url }}">{{ config.title }}</a></h1>
-            <p>{{ config.subtitle }}</p>
-            <hr>
-            <div class="navigation">
-                <p>
-                {% if previous %}
-                <a title="Previous posts" href="{{ previous }}">&laquo;</a>
-                {% endif %}
-                {% if next %}
-                <a title="Next posts" href="{{ next }}">&raquo;</a>
-                {% endif %}
-                </p>
-            </div>
-            <!--Sidebar content-->
-        </div>
-        <div id="content" class="span9">
-            {% for post in posts %}
-            <!--Body content-->
-            <div class="summary">
-                <h1><a href="{{ post.url }}">{{ post.title }}</a></h1>
-                {{ post.html }}
-            </div>
-            {% endfor %}
-        </div>
-    </div>
+<div class="header">
+    <h1><a href="{{ config.url }}">{{ config.title }}</a></h1>          
+    <p>{{ config.subtitle }}</p>                                        
     <hr>
 
-    <footer class="pull-right">
-    <p><em>Walk the clouds.</em></p>
-    </footer>
+    <div class="navigation">
+        <p>
+        {% if previous %}                                               
+        <a title="Previous posts" href="{{ previous }}">&laquo;</a>     
+        {% endif %}                                                     
+        {% if next %}                                                   
+        <a title="Next posts" href="{{ next }}">&raquo;</a>             
+        {% endif %}                                                     
+        </p>                                                            
+    </div>
+</div>
+
+<div class="post">
+    {% for post in posts %}
+    <h2 class="title">
+        <a href="{{ post.url }}">{{ post.title }}</a>
+    </h2>
+    {% endfor %}
+
+<div class="body">
+    {{ post.html }}
+            </div>
 </div>
 {% endblock %}
