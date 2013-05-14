@@ -1,33 +1,42 @@
-{% extends "boilerplate.html" %}                                                  
-                                                                                
+{% extends "template.html" %}                                                  
+
+{% block meta %}
+<meta name="description" content="{{ post.summary }}">
+{% if post.post['keywords'] %}
+<meta name="keywords" content="{{ post.post.keywords }}">
+{% endif %}
+{% if post.post['authors'] %}
+<meta name="author" content="Hege Refsnes">
+{% endif %}
+{% endblock %}
+
 {% block title %}{{ config.title }}: {{ post.title }}{% endblock %}             
-                                                                                
+
 {% block css %}                                                                 
 {% for stylesheet in stylesheets %}                                             
 <link href="{{ stylesheet }}" rel="stylesheet">                                 
 {% endfor %}                                                                    
 {% endblock %}                                                                  
-                                                                                
+
 {% block javascript %}                                                          
 {% for script in scripts %}                                                     
 <script src="{{ script }}"></script>                                            
 {% endfor %}                                                                    
-{% endblock %}                                                                  
-                                                                                
-{% block main %}
-<div class="header">
-    <h1><a href="{{ config.url }}">{{ config.title }}</a></h1>          
-    <p>{{ config.subtitle }}</p>                                        
-    <hr>
-</div>
+{% endblock %}
 
-<div class="post">
-    <h2 class="title">
-        <a href="{{ post.url }}">{{ post.title }}</a>
-    </h2>
+{% block content %}
+<article role="main">
+<h1>{{ post.title }}</h1>
 
-<div class="body">
-    {{ post.html }}
-            </div>
-</div>
+{{ post.html }}
+<footer>
+<p class='meta'>
+Published
+on
+<time datetime="{{ post.date.isoformat() }}" pubdate>
+{{ post.date.strftime('%Y-%m-%d') }}
+</time>
+</p>
+</footer>
+</article>
 {% endblock %}

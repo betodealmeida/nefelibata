@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
+        {% block meta %}{% endblock %}
         <title>{% block title %}{% endblock %}</title>
 
         <link href="{{ config.url }}css/master.css" media="screen" rel="stylesheet">
@@ -32,22 +33,6 @@
             </nav>
             <div id="content">
                 {% block content %}{% endblock %}
-            </div>
-            <div id="sidebar">
-                <nav class="categories">
-                <h1>Articles</h1>
-                <ul class="menu">
-                    <li class="current">
-                    <a href="/">Home</a>
-                    </li>
-                    <li>
-                    <a href="/resume">Resumé</a>
-                    </li>
-                </ul>
-                </nav>
-                <div class="feed">
-                    <a href="http://nathany.com/articles.xml" title="Atom feed">Atom feed</a>
-                </div>
             </div>
         </div>
         <footer class="branding">

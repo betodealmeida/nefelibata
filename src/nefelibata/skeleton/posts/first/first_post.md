@@ -42,7 +42,25 @@ Note again how the actual text starts at 4 columns in (4 characters
 from the left side). Here's a Python code sample:
 
     #!python
-    # Let me re-iterate ...
-    for i in 1 .. 10 { do-something(i) }
+    class DatasetType(StructureType):                                               
+        def __setitem__(self, key, item):                                           
+            if key != item.name:                                                    
+                raise KeyError('Key "%s" is different from variable name "%s"!' %   
+                    (key, item.name))                                               
+            StructureType.__setitem__(self, key, item)                              
+                                                                                    
+            # The dataset name does not goes into the children ids.                 
+            item.id = item.name                                                     
+                                                                                    
+        def _set_id(self, id):                                                      
+            """                                                                     
+            The method must be implemented so that the dataset name is not included 
+            in the children ids.                                                    
+                                                                                    
+            """                                                                     
+            self._id = id                                                           
+                                                                                    
+            for child in self.children():                                           
+                child.id = child.name
 
 As you probably guessed, indented 4 spaces. 
