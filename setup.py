@@ -20,6 +20,7 @@ install_requires = [
     'boto>=2.8.0',
     'twitter>=1.9.1',
     'facepy>=0.8.4',
+    'Pygments>=1.6',
 ]
 
 

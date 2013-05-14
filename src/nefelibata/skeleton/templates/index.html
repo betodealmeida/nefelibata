@@ -1,45 +1,36 @@
-{% extends "boilerplate.html" %}                                                  
-                                                                                
+{% extends "template.html" %}                                                  
+
 {% block title %}{{ config.title }}{% endblock %}             
-                                                                                
-{% block css %}                                                                 
-{% for stylesheet in stylesheets %}                                             
-<link href="{{ stylesheet }}" rel="stylesheet">                                 
-{% endfor %}                                                                    
-{% endblock %}                                                                  
-                                                                                
-{% block javascript %}                                                          
-{% for script in scripts %}                                                     
-<script src="{{ script }}"></script>                                            
-{% endfor %}                                                                    
-{% endblock %}                                                                  
-                                                                                
-{% block main %}
-<div class="header">
-    <h1><a href="{{ config.url }}">{{ config.title }}</a></h1>          
-    <p>{{ config.subtitle }}</p>                                        
-    <hr>
 
-    <div class="navigation">
-        <p>
-        {% if previous %}                                               
-        <a title="Previous posts" href="{{ previous }}">&laquo;</a>     
-        {% endif %}                                                     
-        {% if next %}                                                   
-        <a title="Next posts" href="{{ next }}">&raquo;</a>             
-        {% endif %}                                                     
-        </p>                                                            
-    </div>
-</div>
-
+{% block content %}
+<article role="main">
+<section class="articles">
+<ol>
 {% for post in posts %}
-<div class="post">
-    <h2 class="title">
+    <li>
+    <article>
+    <header>
+    <h1>
         <a href="{{ post.url }}">{{ post.title }}</a>
-    </h2>
-    <div class="body">
-        {{ post.html }}
-    </div>
-    {% endfor %}
+    </h1>
+    </header>
+    <p>{{ post.summary }}</p>
+    <p class="read_more">
+    <a href="{{ post.url }}">Continue reading</a>
+    </p>
+    <footer>
+    <p class="meta">
+    Published
+    on
+    <time datetime="{{ post.date.isoformat() }}" pubdate>
+    {{ post.date.strftime('%Y-%m-%d') }}
+    </time>
+    </p>
+    </footer>
+    </article>
+    </li>
+{% endfor %}
+</ol>
+</section>
+</article>
 {% endblock %}
-</div>

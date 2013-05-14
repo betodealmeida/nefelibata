@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import division
 import math
 import os
@@ -27,7 +29,10 @@ class Post(object):
         # process post
         with open(file_path) as fp:
             self.post = Parser().parse(fp)
-        self.html = markdown.markdown(self.post.get_payload(), output_format='html5')
+        self.html = markdown.markdown(
+            self.post.get_payload(),
+            extensions=['codehilite'],
+            output_format='html5')
 
         # add metadata
         modified = False
@@ -74,6 +79,23 @@ class Post(object):
 
         """
         return self.post['subject']
+
+    @property
+    def summary(self):
+        """
+        A short summary of the post.
+
+        """
+        if self.post['summary'] is not None:
+            return self.post['summary']
+
+        # try to find an H1 tag or use the filename
+        tree = cElementTree.fromstring('<html>%s</html>' % self.html)
+        p = tree.find('p')
+        if p is not None:
+            return tree.find('p').text
+
+        return 'No summary.'
 
     @property
     def updated(self):
@@ -126,7 +148,7 @@ class Post(object):
 
         filename = self.file_path.namebase + '.html'
         with open(target/filename, 'w') as fp:
-            fp.write(html)
+            fp.write(html.encode('utf-8'))
 
 
 def iter_posts(root):
@@ -154,8 +176,11 @@ def create_index(root, posts, config):
             next = 'archive%d.html' % (page+1)
         else:
             next = None
-        html = template.render(config=config, posts=posts[page*show:(page+1)*show],
-                previous=previous, next=next)
+        html = template.render(
+            config=config, 
+            posts=posts[page*show:(page+1)*show],
+            previous=previous, 
+            next=next)
         with open(root/'build'/name, 'w') as fp:
-            fp.write(html)
+            fp.write(html.encode('utf-8'))
         previous, name = name, next
