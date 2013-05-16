@@ -138,7 +138,7 @@ class Post(object):
 
         # find javascript and css
         scripts = [ origin.relpathto(file) for file in origin.walk('*.js') ]
-        stylesheets = [ oring.relpathto(file) for file in origin.walk('*.css') ]
+        stylesheets = [ origin.relpathto(file) for file in origin.walk('*.css') ]
 
         # compile template
         env = Environment(loader=FileSystemLoader(os.path.join(root, 'templates')))
