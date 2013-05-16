@@ -1,245 +1,175 @@
-.highlight {
-  background: #f6f6f6;
-  /* ? */
-  /* Token & Text */
-  /* Text.Whitespace */
-  /* Error */
-  /* Other */
-  /* Keyword */
-  /* Keyword.Constant */
-  /* Keyword.Declaration */
-  /* Keyword.Namespace */
-  /* Keyword.Pseudo */
-  /* Keyword.Reserved */
-  /* Keyword.Type */
-  /* Name */
-  /* Name.Attribute */
-  /* Name.Builtin */
-  /* Name.Builtin.Pseudo */
-  /* Name.Class */
-  /* Name.Constant */
-  /* Name.Decorator */
-  /* Name.Entity */
-  /* Name.Exception */
-  /* Name.Function */
-  /* Name.Label */
-  /* Name.Namespace */
-  /* Name.Other */
-  /* Name.Property */
-  /* Name.Tag */
-  /* Name.Variable */
-  /* Name.Variable.Class */
-  /* Name.Variable.Global */
-  /* Name.Variable.Instance */
-  /* Literal */
-  /* Literal.Date */
-  /* Literal.String */
-  /* Literal.String.Backtick */
-  /* Literal.String.Char */
-  /* Literal.String.Doc */
-  /* Literal.String.Double */
-  /* Literal.String.Escape */
-  /* Literal.String.Heredoc */
-  /* Literal.String.Interpol */
-  /* Literal.String.Other */
-  /* Literal.String.Regex */
-  /* Literal.String.Single */
-  /* Literal.String.Symbol */
-  /* Literal.Number */
-  /* Literal.Number.Float */
-  /* Literal.Number.Hex */
-  /* Literal.Number.Integer */
-  /* Literal.Number.Integer.Long */
-  /* Literal.Number.Oct */
-  /* Operator */
-  /* Operator.Word */
-  /* Punctuation */
-  /* Comment */
-  /* Comment.Multiline */
-  /* Comment.Preproc */
-  /* Comment.Single */
-  /* Comment.Special */
-  /* Generic */
-  /* Generic.Deleted */
-  /* Generic.Emph */
-  /* Generic.Error */
-  /* Generic.Heading */
-  /* Generic.Inserted */
-  /* Generic.Output */
-  /* Generic.Prompt */
-  /* Generic.Strong */
-  /* Generic.Subheading */
-  /* Generic.Traceback */ }
-  .highlight .hll {
+.codehilite {
+  background: #f6f6f6; }
+  .codehilite .hll {
     background-color: #ffffcc; }
-  .highlight .w {
+  .codehilite .w {
     color: #f8f8f8;
     text-decoration: underline; }
-  .highlight .err {
+  .codehilite .err {
     color: #a40000;
     border: 1px solid #ef2929; }
-  .highlight .x {
+  .codehilite .x {
     color: black; }
-  .highlight .k {
+  .codehilite .k {
     color: #204a87;
     font-weight: bold; }
-  .highlight .kc {
+  .codehilite .kc {
     color: #204a87;
     font-weight: bold; }
-  .highlight .kd {
+  .codehilite .kd {
     color: #204a87;
     font-weight: bold; }
-  .highlight .kn {
+  .codehilite .kn {
     color: #204a87;
     font-weight: bold; }
-  .highlight .kp {
+  .codehilite .kp {
     color: #204a87;
     font-weight: bold; }
-  .highlight .kr {
+  .codehilite .kr {
     color: #204a87;
     font-weight: bold; }
-  .highlight .kt {
+  .codehilite .kt {
     color: #204a87;
     font-weight: bold; }
-  .highlight .n {
+  .codehilite .n {
     color: black; }
-  .highlight .na {
+  .codehilite .na {
     color: #c4a000; }
-  .highlight .nb {
+  .codehilite .nb {
     color: #204a87; }
-  .highlight .bp {
+  .codehilite .bp {
     color: #3465a4; }
-  .highlight .nc {
+  .codehilite .nc {
     color: black; }
-  .highlight .no {
+  .codehilite .no {
     color: black; }
-  .highlight .nd {
+  .codehilite .nd {
     color: #5c35cc;
     font-weight: bold; }
-  .highlight .ni {
+  .codehilite .ni {
     color: #ce5c00; }
-  .highlight .ne {
+  .codehilite .ne {
     color: #cc0000;
     font-weight: bold; }
-  .highlight .nf {
+  .codehilite .nf {
     color: black; }
-  .highlight .nl {
+  .codehilite .nl {
     color: #f57900; }
-  .highlight .nn {
+  .codehilite .nn {
     color: black; }
-  .highlight .nx {
+  .codehilite .nx {
     color: black; }
-  .highlight .py {
+  .codehilite .py {
     color: black; }
-  .highlight .nt {
+  .codehilite .nt {
     color: #204a87;
     font-weight: bold; }
-  .highlight .nv {
+  .codehilite .nv {
     color: black;
     font-weight: bold; }
-  .highlight .vc {
+  .codehilite .vc {
     color: black; }
-  .highlight .vg {
+  .codehilite .vg {
     color: black; }
-  .highlight .vi {
+  .codehilite .vi {
     color: black; }
-  .highlight .l {
+  .codehilite .l {
     color: black; }
-  .highlight .ld {
+  .codehilite .ld {
     color: black; }
-  .highlight .s {
+  .codehilite .s {
     color: #4e9a06; }
-  .highlight .sb {
+  .codehilite .sb {
     color: #4e9a06; }
-  .highlight .sc {
+  .codehilite .sc {
     color: #4e9a06; }
-  .highlight .sd {
+  .codehilite .sd {
     color: #8f5902;
     font-style: italic; }
-  .highlight .s2 {
+  .codehilite .s2 {
     color: #4e9a06; }
-  .highlight .se {
+  .codehilite .se {
     color: #4e9a06; }
-  .highlight .sh {
+  .codehilite .sh {
     color: #4e9a06; }
-  .highlight .si {
+  .codehilite .si {
     color: #4e9a06; }
-  .highlight .sx {
+  .codehilite .sx {
     color: #4e9a06; }
-  .highlight .sr {
+  .codehilite .sr {
     color: #4e9a06; }
-  .highlight .s1 {
+  .codehilite .s1 {
     color: #4e9a06; }
-  .highlight .ss {
+  .codehilite .ss {
     color: #4e9a06; }
-  .highlight .m {
+  .codehilite .m {
     color: #0000cf;
     font-weight: bold; }
-  .highlight .mf {
+  .codehilite .mf {
     color: #0000cf;
     font-weight: bold; }
-  .highlight .mh {
+  .codehilite .mh {
     color: #0000cf;
     font-weight: bold; }
-  .highlight .mi {
+  .codehilite .mi {
     color: #0000cf;
     font-weight: bold; }
-  .highlight .il {
+  .codehilite .il {
     color: #0000cf;
     font-weight: bold; }
-  .highlight .mo {
+  .codehilite .mo {
     color: #0000cf;
     font-weight: bold; }
-  .highlight .o {
+  .codehilite .o {
     color: #ce5c00;
     font-weight: bold; }
-  .highlight .ow {
+  .codehilite .ow {
     color: #204a87;
     font-weight: bold; }
-  .highlight .p {
+  .codehilite .p {
     color: black;
     font-weight: bold; }
-  .highlight .c {
+  .codehilite .c {
     color: #8f5902;
     font-style: italic; }
-  .highlight .cm {
+  .codehilite .cm {
     color: #8f5902;
     font-style: italic; }
-  .highlight .cp {
+  .codehilite .cp {
     color: #8f5902;
     font-style: italic; }
-  .highlight .c1 {
+  .codehilite .c1 {
     color: #8f5902;
     font-style: italic; }
-  .highlight .cs {
+  .codehilite .cs {
     color: #8f5902;
     font-style: italic; }
-  .highlight .g {
+  .codehilite .g {
     color: black; }
-  .highlight .gd {
+  .codehilite .gd {
     color: #a40000; }
-  .highlight .ge {
+  .codehilite .ge {
     color: black;
     font-style: italic; }
-  .highlight .gr {
+  .codehilite .gr {
     color: #ef2929; }
-  .highlight .gh {
+  .codehilite .gh {
     collar: navy;
     font-weight: bold; }
-  .highlight .gi {
+  .codehilite .gi {
     color: #00a000; }
-  .highlight .go {
+  .codehilite .go {
     color: black;
     font-style: italic; }
-  .highlight .gp {
+  .codehilite .gp {
     color: #8f5902; }
-  .highlight .gs {
+  .codehilite .gs {
     color: black;
     font-weight: bold; }
-  .highlight .gu {
+  .codehilite .gu {
     color: purple;
     font-weight: bold; }
-  .highlight .gt {
+  .codehilite .gt {
     color: #a40000;
     font-weight: bold; }
 

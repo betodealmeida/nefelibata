@@ -143,8 +143,12 @@ class Post(object):
         # compile template
         env = Environment(loader=FileSystemLoader(os.path.join(root, 'templates')))
         template = env.get_template('post.html')
-        html = template.render(config=config, post=self, 
-                stylesheets=stylesheets, scripts=scripts)
+        html = template.render(
+            config=config, 
+            post=self, 
+            breadcrumbs=[('Home', '..'), (self.title, None)],
+            stylesheets=stylesheets, 
+            scripts=scripts)
 
         filename = self.file_path.namebase + '.html'
         with open(target/filename, 'w') as fp:
@@ -179,6 +183,7 @@ def create_index(root, posts, config):
         html = template.render(
             config=config, 
             posts=posts[page*show:(page+1)*show],
+            breadcrumbs=[('Home', None)],
             previous=previous, 
             next=next)
         with open(root/'build'/name, 'w') as fp:

@@ -6,7 +6,6 @@
         <title>{% block title %}{% endblock %}</title>
 
         <link href="{{ config.url }}css/master.css" media="screen" rel="stylesheet">
-        <link href="{{ config.url }}css/pygments.css" rel="stylesheet">
         <link href="//netdna.bootstrapcdn.com/font-awesome/3.1.1/css/font-awesome.css" rel="stylesheet">
 
         <!-- any extra CSS -->
@@ -26,9 +25,15 @@
             </header>
             <nav class="breadcrumb">
             <ul>
+                {% for name, target in breadcrumbs %}
                 <li>
-                Home
+                {% if target %}
+                <a href="{{ target }}">{{ name }}</a>
+                {% else %}
+                {{ name }}
+                {% endif %}
                 </li>
+                {% endfor %}
             </ul>
             </nav>
             <div id="content">
