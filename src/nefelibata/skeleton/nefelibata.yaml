@@ -1,17 +1,23 @@
 title: Roberto De Almeida
 subtitle: since 1978
 author: Roberto De Almeida <roberto@dealmeida.net>
-location: http://blog.dealmeida.net/
-posts-to-show: 10
+url: http://blog.dealmeida.net/
+posts-to-show: 5
 
 publish-to: S3
 announce-on: twitter, facebook
 
 # Apply for S3 here: http://aws.amazon.com/s3/
 S3:
+    # These will be read from the environment if not set.
     AWS_ACCESS_KEY_ID: 
     AWS_SECRET_ACCESS_KEY: 
     bucket: blog.dealmeida.net
+
+    # Nefelibata will configure the bucket as website and also set your DNS
+    # if you're using Route 53
+    configure_website: true
+    configure_route53: blog.dealmeida.net
 
 # Visit the Twitter developer page and create a new application:
 # 
