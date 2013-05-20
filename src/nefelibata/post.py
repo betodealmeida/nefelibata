@@ -138,6 +138,7 @@ class Post(object):
 
         # find javascript and css
         scripts = [ origin.relpathto(file) for file in origin.walk('*.js') ]
+        scripts.sort()
         stylesheets = [ origin.relpathto(file) for file in origin.walk('*.css') ]
 
         # compile template
