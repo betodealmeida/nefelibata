@@ -30,7 +30,7 @@ class Post(object):
         with open(file_path) as fp:
             self.post = Parser().parse(fp)
         self.html = markdown.markdown(
-            self.post.get_payload(),
+            self.post.get_payload(decode=True),
             extensions=['codehilite'],
             output_format='html5')
 
