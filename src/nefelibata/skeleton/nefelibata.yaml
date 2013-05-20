@@ -23,12 +23,12 @@ S3:
 # 
 #     https://dev.twitter.com/apps/new
 # 
-# This will get you a CONSUMER_KEY and CONSUMER_SECRET. After creating your
+# This will get you a consumer_key and consumer_secret. After creating your
 # application you can request the oauth_token and oauth_secret at the same
 # page.
 twitter:
-    CONSUMER_KEY: 
-    CONSUMER_SECRET: 
+    consumer_key: 
+    consumer_secret: 
     oauth_token: 
     oauth_secret: 
 
