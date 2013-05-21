@@ -29,8 +29,9 @@ class Post(object):
         # process post
         with open(file_path) as fp:
             self.post = Parser().parse(fp)
+        self.raw = self.post.get_payload(decode=True)
         self.html = markdown.markdown(
-            self.post.get_payload(decode=True),
+            self.raw,
             extensions=['codehilite'],
             output_format='html5')
 
@@ -52,8 +53,15 @@ class Post(object):
 
         # rewrite
         if modified:
-            with open(file_path, 'w') as fp:
-                fp.write(str(self.post))
+            self.save()
+
+    def save(self):
+        """
+        Save back a post, after modifying it.
+
+        """
+        with open(self.file_path, 'w') as fp:
+            fp.write(str(self.post))
 
     @property
     def url(self):
@@ -93,7 +101,10 @@ class Post(object):
         tree = cElementTree.fromstring('<html>%s</html>' % self.html)
         p = tree.find('p')
         if p is not None:
-            return tree.find('p').text
+            summary = ''.join(tree.find('p').itertext())
+            if len(summary) > 140:
+                summary = summary[:140] + '&#8230;'
+            return summary
 
         return 'No summary.'
 
