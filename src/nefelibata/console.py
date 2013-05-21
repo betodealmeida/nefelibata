@@ -129,18 +129,36 @@ def publish(root):
     with open(root/'nefelibata.yaml') as fp:
         config = yaml.load(fp)
 
+    # load publishers
     publishers = {
         p.name: p.load() for p in iter_entry_points('nefelibata.publisher')
     }
 
+    # publish site
     names = config['publish-to']
     if isinstance(names, basestring):
         names = [names]
-
     for name in names:
         section = config[name]
         publisher = publishers[name](**section)
         publisher.publish(root/'build')
+
+    # load announcers
+    announcers = {
+        a.name: a.load() for a in iter_entry_points('nefelibata.announcer')
+    }
+
+    # announce them
+    posts = list(iter_posts(root/'posts'))
+    posts.sort(key=lambda x: x.date, reverse=True)
+    for post in posts:
+        names = post.post.get('announce-on', config['announce-on'])
+        if isinstance(names, basestring):
+            names = [names]
+        for name in names:
+            section = config[name]
+            announcer = announcers[name](post, **section)
+            announcer.announce()
 
 
 def main():
