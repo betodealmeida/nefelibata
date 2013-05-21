@@ -1,6 +1,8 @@
-from twitter import Twitter as Twitter_
-from twitter import OAuth
+import operator 
+
+import twitter
 from facepy import GraphAPI
+from simplejson import load, dump
 
 
 class Twitter(object):
@@ -25,8 +27,9 @@ class Twitter(object):
         self.post = post
 
         # create twitter communicator
-        auth = OAuth(oauth_token, oauth_secret, consumer_key, consumer_secret)
-        self.twitter = Twitter_(auth=auth)
+        auth = twitter.OAuth(
+                oauth_token, oauth_secret, consumer_key, consumer_secret)
+        self.twitter = twitter.Twitter(auth=auth)
 
     def announce(self):
         """
@@ -36,7 +39,7 @@ class Twitter(object):
         if 'twitter-id' not in self.post.post:
             response = self.twitter.statuses.update(
                     status=self.post.summary[:140])
-            self.post.post['twitter-id'] = response['id']
+            self.post.post['twitter-id'] = response['id_str']
             self.post.save()
 
     def collect(self):
@@ -48,15 +51,43 @@ class Twitter(object):
         a reply.
 
         """
-        mentions = self.twitter.statuses.mentions_timeline(
-                count=200,
-                since_id=self.post.post['twitter-id'],
-                trim_user=False,
-                contributor_details=True,
-                include_entities=True)
+        if 'twitter-id' not in self.post.post:
+            return
+
+        # load replies
+        directory = self.post.file_path.dirname()
+        storage = directory/'twitter.json'
+        if storage.exists():
+            with open(storage) as fp:
+                replies = load(fp)
+        else:
+            replies = []
+        count = len(replies)
+
+        tweet = self.post.post['twitter-id']
+        try:
+            mentions = self.twitter.statuses.mentions_timeline(
+                    count=200,
+                    since_id=tweet,
+                    trim_user=False,
+                    contributor_details=True,
+                    include_entities=True)
+        except twitter.api.TwitterHTTPError:
+            return
+
         for mention in mentions:
-            if mention['in_reply_to_status_id_str'] == post:
-                mention
+            if mention['in_reply_to_status_id_str'] == tweet:
+                if mention not in replies:
+                    replies.append(mention)
+
+        # save replies
+        replies.sort(operator.itemgetter('id_str'))
+        with open(storage, 'w') as fp:
+            dump(replies, fp)
+
+        # touch post for rebuild
+        if count < len(replies):
+            self.post.save()
 
 
 class Facebook(object):

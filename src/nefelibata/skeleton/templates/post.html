@@ -42,5 +42,9 @@ on
 </time>
 </p>
 </footer>
+
+{% for reply in json['twitter.json'] %}
+{{ reply.text }}
+{% endfor %}
 </article>
 {% endblock %}

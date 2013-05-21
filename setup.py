@@ -21,6 +21,7 @@ install_requires = [
     'twitter>=1.9.1',
     'facepy>=0.8.4',
     'Pygments>=1.6',
+    'simplejson>=3.3.0',
 ]
 
 

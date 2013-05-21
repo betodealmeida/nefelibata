@@ -12,6 +12,7 @@ from xml.etree import cElementTree
 import markdown
 from jinja2 import Environment, FileSystemLoader
 from path import path
+from simplejson import load
 
 from nefelibata import find_directory
 
@@ -148,9 +149,15 @@ class Post(object):
             file.link(link)
 
         # find javascript and css
-        scripts = [ origin.relpathto(file) for file in origin.walk('*.js') ]
+        scripts = [origin.relpathto(file) for file in origin.walk('*.js')]
         scripts.sort()
-        stylesheets = [ origin.relpathto(file) for file in origin.walk('*.css') ]
+        stylesheets = [origin.relpathto(file) for file in origin.walk('*.css')]
+
+        # load json files in the scope
+        json = {}
+        for file in origin.walk('*.json'):
+            with open(file) as fp:
+                json[file.name] = load(fp)
 
         # compile template
         env = Environment(loader=FileSystemLoader(os.path.join(root, 'templates')))
@@ -160,7 +167,8 @@ class Post(object):
             post=self, 
             breadcrumbs=[('Home', '..'), (self.title, None)],
             stylesheets=stylesheets, 
-            scripts=scripts)
+            scripts=scripts,
+            json=json)
 
         filename = self.file_path.namebase + '.html'
         with open(target/filename, 'w') as fp:

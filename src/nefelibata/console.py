@@ -92,10 +92,24 @@ def build(root):
     for img in imgs.files():
         (imgs/img).copy(build/'img')
 
+    # load announcers to collect interactions
+    announcers = {
+        a.name: a.load() for a in iter_entry_points('nefelibata.announcer')
+    }
+    names = config['announce-on']
+    if isinstance(names, basestring):
+        names = [names]
+
     # check all files that need to be processed
     posts = list(iter_posts(root/'posts'))
     posts.sort(key=lambda x: x.date, reverse=True)
     for post in posts:
+        for name in names:
+            section = config[name]
+            announcer = announcers[name](post, **section)
+            announcer.collect()
+
+        # create HTML 
         if not post.updated:
             post.create(config)
 
