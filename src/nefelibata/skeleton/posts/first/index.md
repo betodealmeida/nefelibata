@@ -1,9 +1,9 @@
 From nobody Tue May 14 10:41:10 2013
 subject: This is your first post
-publish-to: 
 keywords: python, blog
 date: Tue, 14 May 2013 10:40:28 -0700
 summary: Just a simple summary of the Markdown syntax.
+announce-on: twitter
 
 ## Welcome ##
 
@@ -20,7 +20,7 @@ look like:
   * that one
   * the other one
 
-Note that --- not considering the asterisk --- the actual text
+Note that -- not considering the asterisk -- the actual text
 content starts at 4-columns in.
 
 > Block quotes are
