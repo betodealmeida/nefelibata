@@ -22,7 +22,7 @@ class Twitter(object):
     can also request oauth_token and oauth_secret.
 
     """
-    def __init__(self, post,
+    def __init__(self, post, username,
             consumer_key, consumer_secret, oauth_token, oauth_secret):
         self.post = post
 
@@ -75,13 +75,14 @@ class Twitter(object):
         except twitter.api.TwitterHTTPError:
             return
 
+        ids = [reply['id'] for reply in replies]
         for mention in mentions:
             if mention['in_reply_to_status_id_str'] == tweet:
-                if mention not in replies:
+                if mention['id'] not in ids:
                     replies.append(mention)
 
         # save replies
-        replies.sort(operator.itemgetter('id_str'))
+        replies.sort(key=operator.itemgetter('id_str'))
         with open(storage, 'w') as fp:
             dump(replies, fp)
 
