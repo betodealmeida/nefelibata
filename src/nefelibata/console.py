@@ -96,7 +96,7 @@ def build(root):
     announcers = {
         a.name: a.load() for a in iter_entry_points('nefelibata.announcer')
     }
-    names = config['announce-on']
+    names = config['announce-on'] or []
     if isinstance(names, basestring):
         names = [names]
 
@@ -149,7 +149,7 @@ def publish(root):
     }
 
     # publish site
-    names = config['publish-to']
+    names = config['publish-to'] or []
     if isinstance(names, basestring):
         names = [names]
     for name in names:
@@ -166,7 +166,7 @@ def publish(root):
     posts = list(iter_posts(root/'posts'))
     posts.sort(key=lambda x: x.date, reverse=True)
     for post in posts:
-        names = post.post.get('announce-on', config['announce-on'])
+        names = post.post.get('announce-on', config['announce-on']) or []
         if isinstance(names, basestring):
             names = [names]
         for name in names:
