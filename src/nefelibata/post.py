@@ -157,7 +157,7 @@ class Post(object):
         json = {}
         for file in origin.walk('*.json'):
             with open(file) as fp:
-                json[file.name] = load(fp)
+                json[file.namebase] = load(fp)
 
         # compile template
         env = Environment(loader=FileSystemLoader(os.path.join(root, 'templates')))
