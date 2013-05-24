@@ -106,7 +106,7 @@ def build(root):
     for post in posts:
         for name in names:
             section = config[name]
-            announcer = announcers[name](post, **section)
+            announcer = announcers[name](post, config, **section)
             announcer.collect()
 
         # create HTML 
@@ -171,7 +171,7 @@ def publish(root):
             names = [names]
         for name in names:
             section = config[name]
-            announcer = announcers[name](post, **section)
+            announcer = announcers[name](post, config, **section)
             announcer.announce()
 
 

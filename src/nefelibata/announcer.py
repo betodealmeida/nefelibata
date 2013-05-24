@@ -22,9 +22,10 @@ class Twitter(object):
     can also request oauth_token and oauth_secret.
 
     """
-    def __init__(self, post, username,
+    def __init__(self, post, config, username,
             consumer_key, consumer_secret, oauth_token, oauth_secret):
         self.post = post
+        self.config = config
 
         # create twitter communicator
         auth = twitter.OAuth(
@@ -103,22 +104,53 @@ class Facebook(object):
     Request an access_token at https://developers.facebook.com/tools/explorer/.
 
     """
-    def __init__(self, config):
+    def __init__(self, post, config, username, access_token):
+        self.post = post
         self.config = config
+        self.graph = GraphAPI(access_token)
 
-    def __call__(self, message):
-        graph = GraphAPI(self.config['access_token'])
-        return graph.post(path='me/feed', message=message)
+    def announce(self):
+        if 'facebook-id' not in self.post.post:
+            response = self.graph.post(
+                path='me/feed',
+                message="%s\n\n-- %s%s" % (
+                    self.post.summary, self.config['url'], self.post.url))
+            self.post.post['facebook-id'] = response['id']
+            self.post.save()
 
+    def collect(self):
+        if 'facebook-id' not in self.post.post:
+            return
 
-if __name__ == '__main__':
-    t = Twitter(dict(
-        consumer_key="2paRtbx3rihL6Bbl54aAw",
-        consumer_secret="rUblWfCCDtIXn2IidQMSjRN5Hx8xfkZcGAsf6xhOD54",
-        oauth_token="569313051-oFVOkxMQFxus0PjRuED7uvxgb9201DeM9YEf22tt",
-        oauth_secret="GygkFTMCulXnhGtlbhCcnuivm2YtrJbbVgmxzpwhHc"))
-    t.collect("335472083901497345")
-    #result = t('again testing... 1... 2... 3.')
-    #print result
-    #{u'favorited': False, u'contributors': None, u'truncated': False, u'text': u'again testing... 1... 2... 3.', u'in_reply_to_status_id': None, u'user': {u'follow_request_sent': False, u'profile_use_background_image': True, u'id': 569313051, u'description': None, u'verified': False, u'profile_text_color': u'333333', u'profile_image_url_https': u'https://si0.twimg.com/sticky/default_profile_images/default_profile_6_normal.png', u'profile_sidebar_fill_color': u'DDEEF6', u'is_translator': False, u'entities': {u'description': {u'urls': []}}, u'followers_count': 4, u'protected': False, u'location': None, u'default_profile_image': True, u'listed_count': 0, u'utc_offset': None, u'statuses_count': 2, u'profile_background_color': u'C0DEED', u'friends_count': 0, u'profile_background_image_url_https': u'https://si0.twimg.com/images/themes/theme1/bg.png', u'profile_link_color': u'0084B4', u'profile_image_url': u'http://a0.twimg.com/sticky/default_profile_images/default_profile_6_normal.png', u'notifications': False, u'geo_enabled': False, u'id_str': u'569313051', u'profile_background_image_url': u'http://a0.twimg.com/images/themes/theme1/bg.png', u'screen_name': u'zen_of_data', u'lang': u'en', u'profile_background_tile': False, u'favourites_count': 0, u'name': u'Zen of Data', u'url': None, u'created_at': u'Wed May 02 16:27:34 +0000 2012', u'contributors_enabled': False, u'time_zone': None, u'profile_sidebar_border_color': u'C0DEED', u'default_profile': True, u'following': False}, u'geo': None, u'in_reply_to_user_id_str': None, u'source': u'<a href="http://pypi.python.org/pypi/nefelibata" rel="nofollow">Test nefelibate</a>', u'created_at': u'Fri May 17 19:09:12 +0000 2013', u'retweeted': False, u'coordinates': None, u'id': 335472083901497345, u'entities': {u'user_mentions': [], u'hashtags': [], u'urls': []}, u'in_reply_to_status_id_str': None, u'in_reply_to_screen_name': None, u'in_reply_to_user_id': None, u'place': None, u'retweet_count': 0, u'id_str': u'335472083901497345'}
+        # load replies
+        directory = self.post.file_path.dirname()
+        storage = directory/'facebook.json'
+        if storage.exists():
+            with open(storage) as fp:
+                replies = load(fp)
+        else:
+            replies = []
+        count = len(replies)
+        ids = [reply['id'] for reply in replies]
 
+        post = self.post.post['facebook-id']
+        result = self.graph.get(path='/%s' % post)
+        for comment in result['comments']['data']:
+            # add user info and picture
+            comment['from']['info'] = self.graph.get(
+                    path='/%s' % comment['from']['id'])
+            comment['from']['picture'] = \
+                    "http://graph.facebook.com/%s/picture" % (
+                            comment['from']['info']['username'])
+
+            if comment['id'] not in ids:
+                replies.append(comment)
+
+        # save replies
+        replies.sort(key=operator.itemgetter('id'))
+        with open(storage, 'w') as fp:
+            dump(replies, fp)
+
+        # touch post for rebuild
+        if count < len(replies):
+            self.post.save()
