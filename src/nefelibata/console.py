@@ -8,12 +8,14 @@ Usage:
   nb build [DIRECTORY]
   nb preview [-p PORT] [DIRECTORY]
   nb publish [DIRECTORY]
+  nb facebook <short_access_token> <app_key> <app_secret>
 
 Actions:
   init          Create a new blog skeleton.
   build         Build blog HTML files.
   preview       Runs SimpleHTTPServer and opens the browser.
   publish       Publish blog to configured locations and announce new posts.
+  facebook      Create a long term token for Facebook Graph API.
 
 Options:
   -h --help     Show this screen.
@@ -196,6 +198,12 @@ def main():
         preview(root, int(arguments['-p']))
     elif arguments['publish']:
         publish(root)
+    elif arguments['facebook']:
+        import facepy
+        print facepy.utils.get_extended_access_token(
+            access_token=arguments['<short_access_token>'],
+            application_id=arguments['<app_key>'],
+            application_secret_key=arguments['<app_secret>'])[0]
 
 
 if __name__ == '__main__':

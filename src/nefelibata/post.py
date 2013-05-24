@@ -179,6 +179,10 @@ class Post(object):
 
 
 def formatdate(obj, fmt):
+    """
+    Jinja filter for formatting dates.
+
+    """
     if isinstance(obj, basestring):
         obj = dateutil.parser.parse(obj)
     return obj.strftime(fmt)

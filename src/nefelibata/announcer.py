@@ -38,8 +38,10 @@ class Twitter(object):
 
         """
         if 'twitter-id' not in self.post.post:
-            response = self.twitter.statuses.update(
-                    status=self.post.summary[:140])
+            link = "%s%s" % (self.config['url'], self.post.url)
+            # shorten url? XXX
+            status = "%s %s" % (self.post.summary[:140-1-len(link)], link)
+            response = self.twitter.statuses.update(status=status)
             self.post.post['twitter-id'] = response['id_str']
             self.post.save()
 
@@ -135,6 +137,9 @@ class Facebook(object):
 
         post = self.post.post['facebook-id']
         result = self.graph.get(path='/%s' % post)
+        if "comments" not in result:
+            return
+
         for comment in result['comments']['data']:
             # add user info and picture
             comment['from']['info'] = self.graph.get(
