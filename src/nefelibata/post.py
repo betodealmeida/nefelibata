@@ -2,7 +2,6 @@
 
 from __future__ import division
 import math
-import os
 from email.parser import Parser
 from email.utils import formatdate, parsedate
 import time
@@ -13,6 +12,7 @@ import markdown
 from jinja2 import Environment, FileSystemLoader
 from path import path
 from simplejson import load
+import dateutil.parser
 
 from nefelibata import find_directory
 
@@ -79,7 +79,8 @@ class Post(object):
         Date when the post was written, as datetime object.
 
         """
-        return datetime.fromtimestamp(time.mktime(parsedate(self.post['date'])))
+        return datetime.fromtimestamp(
+                time.mktime(parsedate(self.post['date'])))
 
     @property
     def title(self):
@@ -160,7 +161,9 @@ class Post(object):
                 json[file.namebase] = load(fp)
 
         # compile template
-        env = Environment(loader=FileSystemLoader(os.path.join(root, 'templates')))
+        env = Environment(
+                loader=FileSystemLoader(root/'templates'/config['theme']))
+        env.filters['formatdate'] = formatdate
         template = env.get_template('post.html')
         html = template.render(
             config=config, 
@@ -173,6 +176,12 @@ class Post(object):
         filename = self.file_path.namebase + '.html'
         with open(target/filename, 'w') as fp:
             fp.write(html.encode('utf-8'))
+
+
+def formatdate(obj, fmt):
+    if isinstance(obj, basestring):
+        obj = dateutil.parser.parse(obj)
+    return obj.strftime(fmt)
 
 
 def iter_posts(root):
@@ -189,7 +198,8 @@ def create_index(root, posts, config):
     Build the index.html page and archives.
 
     """
-    env = Environment(loader=FileSystemLoader(root/'templates'))
+    env = Environment(
+        loader=FileSystemLoader(root/'templates'/config['theme']))
     template = env.get_template('index.html')
 
     show = config.get('posts-to-show', 10)

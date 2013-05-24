@@ -3,6 +3,7 @@ subtitle: since 1978
 author: Roberto De Almeida <roberto@dealmeida.net>
 url: http://blog.dealmeida.net/
 posts-to-show: 5
+theme: default
 
 publish-to: S3
 announce-on: twitter, facebook

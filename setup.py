@@ -22,6 +22,7 @@ install_requires = [
     'facepy>=0.8.4',
     'Pygments>=1.6',
     'simplejson>=3.3.0',
+    'python-dateutil>=2.1',
 ]
 
 

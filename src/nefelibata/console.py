@@ -82,13 +82,13 @@ def build(root):
         (build/'img').mkdir()
 
     # sync stylesheets and scripts
-    css = root/'templates/css'
+    css = root/'templates'/config['theme']/'css'
     for stylesheet in css.files():
         (css/stylesheet).copy(build/'css')
-    js = root/'templates/js'
+    js = root/'templates'/config['theme']/'js'
     for script in js.files():
         (js/script).copy(build/'js')
-    imgs = root/'templates/img'
+    imgs = root/'templates'/config['theme']/'img'
     for img in imgs.files():
         (imgs/img).copy(build/'img')
 
@@ -166,7 +166,7 @@ def publish(root):
     posts = list(iter_posts(root/'posts'))
     posts.sort(key=lambda x: x.date, reverse=True)
     for post in posts:
-        names = post.post.get('announce-on', config['announce-on']) or []
+        names = post.post.get('announce-on') or config['announce-on'] or []
         if isinstance(names, basestring):
             names = [names]
         for name in names:
