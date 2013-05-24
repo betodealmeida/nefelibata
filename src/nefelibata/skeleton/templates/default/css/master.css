@@ -450,3 +450,42 @@ nav.categories ul.menu {
 
 div.feed {
   margin: 1.75em 0; }
+
+
+.comment {
+    padding: 15px 10px 5px;
+    border: none;
+    margin-bottom: 0;
+    background: none;
+    position: relative;
+}
+
+.comment .comment-header,
+.comment .comment-footer {
+    font-size: 90.9%;
+    border: none;
+    margin: 0 0 10px 0;
+    padding: 0;
+}
+
+.comment-data {
+    margin-left: 66px;
+}
+
+.comment-avatar {
+    float: left;
+    padding: 2px;
+}
+
+.comment a img {
+    border: none;
+}
+
+.comment .comment-footer {
+    clear: both;
+}
+
+.comment .comment-footer .comment-datetime {
+    float: right;
+    clear: right;
+}

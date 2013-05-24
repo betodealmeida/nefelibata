@@ -43,10 +43,10 @@
         <footer class="branding">
         <div id="container">
             <div id="social">
-                <a href="https://twitter.com/dealmeida" title="Twitter"><i class="icon-twitter"></i></a>
-                <a href="https://code.dealmeida.net/" title="Code repositories"><i class="icon-code-fork"></i></a>
-                <a href="https://plus.google.com/117162105820600956580" title="Google+"><i class="icon-google-plus"></i></a>
-                <a href="https://www.facebook.com/robdealmeida" title="Facebook"><i class="icon-facebook"></i></a>
+                {% for link in config.social %}
+                <a href="{{ link.url }}" title="{{ link.title }}">
+                    <i class="{{ link.icon}}"></i></a>
+                {% endfor %}
             </div>
             <p>
             Powered by <a href="https://pypi.python.org/pypi/nefelibata">Nefelibata</a>.
