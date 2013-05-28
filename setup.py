@@ -23,6 +23,8 @@ install_requires = [
     'Pygments>=1.6',
     'simplejson>=3.3.0',
     'python-dateutil>=2.1',
+    'beautifulsoup4>=4.2.0',
+    'requests>=1.2.3',
 ]
 
 
