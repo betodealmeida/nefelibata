@@ -37,7 +37,7 @@ import yaml
 from path import path
 
 from nefelibata import find_directory
-from nefelibata.post import iter_posts, create_index
+from nefelibata.post import iter_posts, create_index, create_feed
 
 
 def init(root):
@@ -117,6 +117,7 @@ def build(root):
 
     # build the index
     create_index(root, posts, config)
+    create_feed(root, posts, config)
 
     print 'Blog built!'
 
