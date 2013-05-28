@@ -1,18 +1,23 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division
+import re
+import glob
 import math
 from email.parser import Parser
 from email.utils import formatdate, parsedate
 import time
 from datetime import datetime
 from xml.etree import cElementTree
+import md5
 
 import markdown
 from jinja2 import Environment, FileSystemLoader
 from path import path
 from simplejson import load
 import dateutil.parser
+import requests
+from bs4 import BeautifulSoup
 
 from nefelibata import find_directory
 
@@ -154,7 +159,7 @@ class Post(object):
         scripts.sort()
         stylesheets = [origin.relpathto(file) for file in origin.walk('*.css')]
 
-        # load json files in the scope
+        # load json files into the scope
         json = {}
         for file in origin.walk('*.json'):
             with open(file) as fp:
@@ -163,7 +168,7 @@ class Post(object):
         # compile template
         env = Environment(
                 loader=FileSystemLoader(root/'templates'/config['theme']))
-        env.filters['formatdate'] = formatdate
+        env.filters['formatdate'] = jinja2_formatdate
         template = env.get_template('post.html')
         html = template.render(
             config=config, 
@@ -173,12 +178,49 @@ class Post(object):
             scripts=scripts,
             json=json)
 
+        # make local copies of external images
+        html = mirror_images(html, origin/'img')
+
         filename = self.file_path.namebase + '.html'
         with open(target/filename, 'w') as fp:
             fp.write(html.encode('utf-8'))
 
 
-def formatdate(obj, fmt):
+def mirror_images(html, mirror):
+    """
+    Mirror remote images locally.
+
+    """
+    # create post image directory if necessary
+    if not mirror.exists():
+        mirror.mkdir()
+
+    # replace all external links
+    soup = BeautifulSoup(html)
+    for el in soup.find_all('img', src=re.compile("http")):
+        # local name is a hash of the url
+        url = el.attrs['src']
+        m = md5.new()
+        m.update(url)
+        local = m.hexdigest()
+
+        # download and store locally
+        existing = glob.glob(mirror/"%s.*" % hash)
+        if not existing:
+            r = requests.get(url)
+            suffix = r.headers['content-type'].split('/')[1]
+            filename = "%s.%s" % (local, suffix)
+            with open(mirror/filename, 'w') as fp:
+                fp.write(r.content)
+        else:
+            filename = existing[0]
+
+        el.attrs['src'] = 'img/%s' % filename
+
+    return unicode(soup)
+
+
+def jinja2_formatdate(obj, fmt):
     """
     Jinja filter for formatting dates.
 
