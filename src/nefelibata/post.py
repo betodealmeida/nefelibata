@@ -265,3 +265,21 @@ def create_index(root, posts, config):
         with open(root/'build'/name, 'w') as fp:
             fp.write(html.encode('utf-8'))
         previous, name = name, next
+
+
+def create_feed(root, posts, config):
+    """
+    Build Atom feed.
+
+    """
+    env = Environment(
+        loader=FileSystemLoader(root/'templates'))
+    template = env.get_template('atom.xml')
+
+    show = config.get('posts-to-show', 10)
+    xml = template.render(
+        config=config, 
+        posts=posts,
+        show=show)
+    with open(root/'build/atom.xml', 'w') as fp:
+        fp.write(xml.encode('utf-8'))
