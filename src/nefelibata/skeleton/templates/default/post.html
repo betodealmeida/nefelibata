@@ -34,7 +34,7 @@
 
         {% if 'twitter-id' in post.post and 'facebook-id' in post.post %}
         <p><em>Comment on
-            <a href="https://twitter.com/{{ config.twitter.username }}/status/{{ post.post['twitter-id'] }}">Twitter</a> or </em></p>
+            <a href="https://twitter.com/{{ config.twitter.username }}/status/{{ post.post['twitter-id'] }}">Twitter</a> or 
             <a href="https://facebook.com/{{ config.facebook.username }}/posts/{{ post.post['facebook-id'].split('_')[1] }}">Facebook</a>.</em></p>
         <!--
         This is the raw Markdown post:
