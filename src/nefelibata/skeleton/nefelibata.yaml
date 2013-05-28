@@ -1,0 +1,62 @@
+title: Roberto De Almeida
+subtitle: since 1978
+author: Roberto De Almeida <roberto@dealmeida.net>
+url: http://blog.dealmeida.net.s3-website-us-east-1.amazonaws.com/
+posts-to-show: 5
+theme: default
+
+# These are social icons displayed on the footer.
+social:
+    - title: Twitter
+      url: "https://twitter.com/dealmeida"
+      icon: icon-twitter
+    - title: Code
+      url: "https://github.com/robertodealmeida"
+      icon: icon-github
+    - title: Google+
+      url: "https://plus.google.com/117162105820600956580"
+      icon: icon-google-plus
+    - title: Facebook
+      url: "https://www.facebook.com/robdealmeida"
+      icon: icon-facebook
+    - title: Flickr
+      url: "http://flickr.com/roberto"
+      icon: icon-camera-retro
+    - title: Scholar
+      url: "http://scholar.google.com/citations?user=vIaZii8AAAAJ"
+      icon: icon-book
+
+publish-to: S3
+announce-on: [twitter, facebook]
+
+# Apply for S3 here: http://aws.amazon.com/s3/
+S3:
+    # These will be read from the environment if not set.
+    AWS_ACCESS_KEY_ID:
+    AWS_SECRET_ACCESS_KEY:
+    bucket: blog.dealmeida.net
+
+    # Nefelibata will configure the bucket as website and also set your DNS
+    # if you're using Route 53
+    configure_website: true
+    configure_route53: blog.dealmeida.net
+
+# Visit the Twitter developer page and create a new application:
+# 
+#     https://dev.twitter.com/apps/new
+# 
+# This will get you a CONSUMER_KEY and CONSUMER_SECRET. After creating your
+# application you can request the oauth_token and oauth_secret at the same
+# page.
+twitter:
+    username: dealmeida
+    consumer_key:
+    consumer_secret:
+    oauth_token:
+    oauth_secret:
+    
+# Grab an access token here: https://developers.facebook.com/tools/explorer/
+# Be sure to check "publish_stream" in "Extended Permissions".
+facebook:
+    username: robdealmeida
+    access_token:

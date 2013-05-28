@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        {% block meta %}{% endblock %}
+        <title>{% block title %}{% endblock %}</title>
+
+        <link href="{{ config.url }}css/master.css" media="screen" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/3.1.1/css/font-awesome.css" rel="stylesheet">
+
+        <!-- any extra CSS -->
+        {% block css %}{% endblock %}
+
+        <!--[if lt IE 9]>
+        <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <div id="container">
+            <header role="banner">
+            <hgroup>
+            <h1>{{ config.title }}</h1>
+            <h2>{{ config.subtitle }}</h2>
+            </hgroup>
+            </header>
+            <nav class="breadcrumb">
+            <ul>
+                {% for name, target in breadcrumbs %}
+                <li>
+                {% if target %}
+                <a href="{{ target }}">{{ name }}</a>
+                {% else %}
+                {{ name }}
+                {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            </nav>
+            <div id="content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+        <footer class="branding">
+        <div id="container">
+            <div id="social">
+                {% for link in config.social %}
+                <a href="{{ link.url }}" title="{{ link.title }}">
+                    <i class="{{ link.icon}}"></i></a>
+                {% endfor %}
+            </div>
+            <p>
+            Powered by <a href="https://pypi.python.org/pypi/nefelibata">Nefelibata</a>.
+            </p>
+        </div>
+        </footer>
+
+        <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+        {% block javascript %}{% endblock %}
+    </body>
+</html>
