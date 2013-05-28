@@ -115,7 +115,7 @@ class Facebook(object):
         if 'facebook-id' not in self.post.post:
             response = self.graph.post(
                 path='me/feed',
-                message="%s\n\n-- %s%s" % (
+                message="%s\n\n%s%s" % (
                     self.post.summary, self.config['url'], self.post.url))
             self.post.post['facebook-id'] = response['id']
             self.post.save()
