@@ -5,6 +5,8 @@
         {% block meta %}{% endblock %}
         <title>{% block title %}{% endblock %}</title>
 
+        <link rel="alternate" type="application/atom+xml" title="Atom feed: {{ config.title }} ({{ config.subtitle }})" href="{{ config.url }}atom.xml">
+
         <link href="{{ config.url }}css/master.css" media="screen" rel="stylesheet">
         <link href="//netdna.bootstrapcdn.com/font-awesome/3.1.1/css/font-awesome.css" rel="stylesheet">
 

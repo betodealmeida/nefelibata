@@ -1,7 +1,9 @@
 title: Roberto De Almeida
 subtitle: since 1978
-author: Roberto De Almeida <roberto@dealmeida.net>
-url: http://blog.dealmeida.net.s3-website-us-east-1.amazonaws.com/
+author: 
+    name: Roberto De Almeida 
+    email: roberto@dealmeida.net
+url: http://blog.dealmeida.net/  # slashing trail is important
 posts-to-show: 5
 theme: default
 
