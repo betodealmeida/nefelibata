@@ -144,24 +144,14 @@ class Post(object):
         if not target.exists():
             target.mkdir()
 
-        # symlink all files from origin to target
-        for dir in origin.walkdirs():
-            new = target/origin.relpathto(dir)
-            if not new.exists():
-                new.mkdir()
-        for file in origin.walkfiles():
-            link = target/origin.relpathto(file)
-            link.remove_p()
-            file.link(link)
-
         # find javascript and css
-        scripts = [origin.relpathto(file) for file in origin.walk('*.js')]
+        scripts = [target.relpathto(file) for file in target.walk('*.js')]
         scripts.sort()
-        stylesheets = [origin.relpathto(file) for file in origin.walk('*.css')]
+        stylesheets = [target.relpathto(file) for file in target.walk('*.css')]
 
         # load json files into the scope
         json = {}
-        for file in origin.walk('*.json'):
+        for file in target.walk('*.json'):
             with open(file) as fp:
                 json[file.namebase] = load(fp)
 
@@ -180,6 +170,16 @@ class Post(object):
 
         # make local copies of external images
         html = mirror_images(html, origin/'img')
+
+        # symlink all files from origin to target
+        for dir in origin.walkdirs():
+            new = target/origin.relpathto(dir)
+            if not new.exists():
+                new.mkdir()
+        for file in origin.walkfiles():
+            link = target/origin.relpathto(file)
+            link.remove_p()
+            file.link(link)
 
         filename = self.file_path.namebase + '.html'
         with open(target/filename, 'w') as fp:
