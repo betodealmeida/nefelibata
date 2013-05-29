@@ -151,7 +151,7 @@ class Post(object):
 
         # load json files into the scope
         json = {}
-        for file in target.walk('*.json'):
+        for file in origin.walk('*.json'):
             with open(file) as fp:
                 json[file.namebase] = load(fp)
 
