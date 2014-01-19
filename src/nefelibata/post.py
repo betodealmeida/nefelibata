@@ -6,7 +6,8 @@ from email.parser import Parser
 from email.utils import formatdate, parsedate
 import time
 from datetime import datetime
-from xml.etree import cElementTree
+from lxml import etree
+from cStringIO import StringIO
 
 import markdown
 from jinja2 import Environment, FileSystemLoader
@@ -44,7 +45,8 @@ class Post(object):
             modified = True
         if 'subject' not in self.post:
             # try to find an H1 tag or use the filename
-            tree = cElementTree.fromstring('<html>%s</html>' % self.html)
+            fp = StringIO("<html>%s</html>" % self.html)
+            tree = etree.parse(fp, etree.HTMLParser())
             h1 = tree.find('h1')
             if h1 is not None:
                 self.post['subject'] = h1.text
@@ -100,7 +102,8 @@ class Post(object):
             return self.post['summary']
 
         # try to find an H1 tag or use the filename
-        tree = cElementTree.fromstring('<html>%s</html>' % self.html)
+        fp = StringIO("<html>%s</html>" % self.html)
+        tree = etree.parse(fp, etree.HTMLParser())
         p = tree.find('p')
         if p is not None:
             summary = ''.join(tree.find('p').itertext())
@@ -163,7 +166,7 @@ class Post(object):
         # compile template
         env = Environment(
                 loader=FileSystemLoader(root/'templates'/config['theme']))
-        env.filters['formatdate'] = formatdate
+        env.filters['formatdate'] = formatdate_
         template = env.get_template('post.html')
         html = template.render(
             config=config, 
@@ -178,7 +181,7 @@ class Post(object):
             fp.write(html.encode('utf-8'))
 
 
-def formatdate(obj, fmt):
+def formatdate_(obj, fmt):
     """
     Jinja filter for formatting dates.
 
