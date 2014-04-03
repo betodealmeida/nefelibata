@@ -54,7 +54,6 @@ class Post(object):
             h1 = tree.xpath('//h1')
             if h1:
                 self.post['subject'] = h1[0].text
-            else:
                 self.post['subject'] = file_path.namebase
             modified = True
 
