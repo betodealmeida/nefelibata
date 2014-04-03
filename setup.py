@@ -25,6 +25,7 @@ install_requires = [
     'python-dateutil>=2.1',
     'beautifulsoup4>=4.2.0',
     'requests>=1.2.3',
+    'consoleLog>=0.2.4',
 ]
 
 
