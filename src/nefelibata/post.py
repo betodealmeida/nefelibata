@@ -8,7 +8,7 @@ from email.parser import Parser
 from email.utils import formatdate, parsedate
 import time
 from datetime import datetime
-from xml.etree import cElementTree
+from lxml import etree
 import md5
 
 import markdown
@@ -49,10 +49,11 @@ class Post(object):
             modified = True
         if 'subject' not in self.post:
             # try to find an H1 tag or use the filename
-            tree = cElementTree.fromstring('<html>%s</html>' % self.html)
-            h1 = tree.find('h1')
-            if h1 is not None:
-                self.post['subject'] = h1.text
+            parser = etree.HTMLParser()
+            tree = etree.fromstring(self.html, parser)
+            h1 = tree.xpath('//h1')
+            if h1:
+                self.post['subject'] = h1[0].text
             else:
                 self.post['subject'] = file_path.namebase
             modified = True
@@ -105,10 +106,11 @@ class Post(object):
             return self.post['summary']
 
         # try to find an H1 tag or use the filename
-        tree = cElementTree.fromstring('<html>%s</html>' % self.html)
-        p = tree.find('p')
-        if p is not None:
-            summary = ''.join(tree.find('p').itertext())
+        parser = etree.HTMLParser()
+        tree = etree.fromstring(self.html, parser)
+        p = tree.xpath("//p")
+        if p:
+            summary = ''.join(p[0].itertext())
             if len(summary) > 140:
                 summary = summary[:140] + '&#8230;'
             return summary

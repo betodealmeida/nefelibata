@@ -159,3 +159,14 @@ class Facebook(object):
         # touch post for rebuild
         if count < len(replies):
             self.post.save()
+
+
+class GooglePlus(object):
+    def __init__(self, post):
+        pass
+
+    def announce(self):
+        pass
+
+    def collect(self):
+        pass

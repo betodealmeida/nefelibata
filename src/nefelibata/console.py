@@ -35,6 +35,8 @@ import webbrowser
 
 import yaml
 from path import path
+from consoleLog.consoleLog import ConsoleLogger
+from consoleLog.progressBar import withProgress
 
 from nefelibata import find_directory
 from nefelibata.post import iter_posts, create_index, create_feed
@@ -71,6 +73,9 @@ def build(root):
     Build all static pages from posts.
 
     """
+    log = ConsoleLogger()
+    log.start("Building blog")
+
     # load configuration
     with open(root/'nefelibata.yaml') as fp:
         config = yaml.load(fp)
@@ -78,12 +83,14 @@ def build(root):
     # create build directory if necessary and copy css/js
     build = root/'build'
     if not build.exists():
+        log.log("Creating build/ directory")
         build.mkdir()
         (build/'css').mkdir()
         (build/'js').mkdir()
         (build/'img').mkdir()
 
     # sync stylesheets and scripts
+    log.log("Syncing stylesheets, script and images")
     css = root/'templates'/config['theme']/'css'
     for stylesheet in css.files():
         (css/stylesheet).copy(build/'css')
@@ -105,7 +112,8 @@ def build(root):
     # check all files that need to be processed
     posts = list(iter_posts(root/'posts'))
     posts.sort(key=lambda x: x.date, reverse=True)
-    for post in posts:
+    log.log("Processing posts ", newLine=False)
+    for post in withProgress(posts):
         for name in names:
             section = config[name]
             announcer = announcers[name](post, config, **section)
@@ -116,10 +124,12 @@ def build(root):
             post.create(config)
 
     # build the index
+    log.log("Creating index")
     create_index(root, posts, config)
+    log.log("Creating Atom feed")
     create_feed(root, posts, config)
 
-    print 'Blog built!'
+    log.finish('Blog built!')
 
 
 def preview(root, port=8000):
