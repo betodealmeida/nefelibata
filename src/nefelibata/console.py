@@ -8,7 +8,7 @@ Usage:
   nb build [DIRECTORY]
   nb preview [-p PORT] [DIRECTORY]
   nb publish [DIRECTORY]
-  nb facebook <short_access_token> <app_key> <app_secret>
+  nb facebook <short_access_token> <app_id> <app_secret>
 
 Actions:
   init          Create a new blog skeleton.
@@ -213,7 +213,7 @@ def main():
         import facepy
         print facepy.utils.get_extended_access_token(
             access_token=arguments['<short_access_token>'],
-            application_id=arguments['<app_key>'],
+            application_id=arguments['<app_id>'],
             application_secret_key=arguments['<app_secret>'])[0]
 
 
