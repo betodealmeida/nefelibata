@@ -206,7 +206,7 @@ def mirror_images(html, mirror):
         local = m.hexdigest()
 
         # download and store locally
-        existing = glob.glob(mirror/"%s.*" % hash)
+        existing = glob.glob(mirror/"%s.*" % local)
         if not existing:
             r = requests.get(url)
             suffix = r.headers['content-type'].split('/')[1]
@@ -214,7 +214,7 @@ def mirror_images(html, mirror):
             with open(mirror/filename, 'w') as fp:
                 fp.write(r.content)
         else:
-            filename = existing[0]
+            filename = path(existing[0]).name
 
         el.attrs['src'] = 'img/%s' % filename
 
