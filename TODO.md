@@ -1,1 +1,3 @@
 - move to github
+- facebook cli
+- rename post.post to post.content
