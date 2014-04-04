@@ -68,4 +68,4 @@ class S3(object):
                         changes.commit()
 
         log = ConsoleLogger()
-        log.finish('Published!')
+        log.log('Published!')

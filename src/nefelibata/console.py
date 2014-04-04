@@ -66,7 +66,7 @@ def init(root):
             origin.copy(target)
 
     log = ConsoleLogger()
-    log.finish('Blog created!')
+    log.log('Blog created!')
 
 
 def build(root):
@@ -214,10 +214,11 @@ def main():
         publish(root)
     elif arguments['facebook']:
         import facepy
-        print facepy.utils.get_extended_access_token(
+        log = ConsoleLogger()
+        log.log(facepy.utils.get_extended_access_token(
             access_token=arguments['<short_access_token>'],
             application_id=arguments['<app_id>'],
-            application_secret_key=arguments['<app_secret>'])[0]
+            application_secret_key=arguments['<app_secret>'])[0])
 
 
 if __name__ == '__main__':
