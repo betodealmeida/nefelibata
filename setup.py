@@ -53,7 +53,7 @@ setup(name='nefelibata',
         S3 = nefelibata.publisher:S3
 
         [nefelibata.announcer]
-        twitter = nefelibata.announcer:Twitter
-        facebook = nefelibata.announcer:Facebook
+        twitter = nefelibata.announcers.twitter:Twitter
+        facebook = nefelibata.announcers.facebook:Facebook
     """
 )
