@@ -1,3 +1,8 @@
+"""Module for working with posts.
+
+This module defines a post class and helper functions for working with posts.
+
+"""
 # -*- coding: utf-8 -*-
 
 from __future__ import division
@@ -22,13 +27,16 @@ from nefelibata import find_directory
 
 
 class Post(object):
+
     """
     Class representing a post.
 
-    This class wraps the post, which is simply an ASCII file in email format. 
-    
+    This class wraps the post, which is simply an ASCII file in email format.
+
     """
+
     def __init__(self, file_path):
+        """Post representation."""
         self.file_path = path(file_path)
 
         # process post
@@ -61,45 +69,30 @@ class Post(object):
             self.save()
 
     def save(self):
-        """
-        Save back a post, after modifying it.
-
-        """
+        """Save back a post, after modifying it."""
         with open(self.file_path, 'w') as fp:
             fp.write(str(self.post))
 
     @property
     def url(self):
-        """
-        Relative URL for the post.
-
-        """
+        """Relative URL for the post."""
         root = find_directory(self.file_path.dirname())
         return (root/'posts').relpathto(self.file_path).stripext() + '.html'
 
     @property
     def date(self):
-        """
-        Date when the post was written, as datetime object.
-
-        """
+        """Date when the post was written, as datetime object."""
         return datetime.fromtimestamp(
-                time.mktime(parsedate(self.post['date'])))
+            time.mktime(parsedate(self.post['date'])))
 
     @property
     def title(self):
-        """
-        Title of the post.
-
-        """
+        """Title of the post."""
         return self.post['subject']
 
     @property
     def summary(self):
-        """
-        A short summary of the post.
-
-        """
+        """A short summary of the post."""
         if self.post['summary'] is not None:
             return self.post['summary']
 
@@ -117,10 +110,7 @@ class Post(object):
 
     @property
     def updated(self):
-        """
-        Is the post up-to-date?
-
-        """
+        """Return true if the post up-to-date."""
         # check if the HTML version exists
         root = find_directory(self.file_path.dirname())
         relative = (root/'posts').relpathto(self.file_path)
@@ -132,10 +122,7 @@ class Post(object):
         return html.stat().st_mtime >= self.file_path.stat().st_mtime
 
     def create(self, config):
-        """
-        Create HTML file.
-
-        """
+        """Create HTML file."""
         # find the build directory
         origin = self.file_path.dirname()
         root = find_directory(origin)
@@ -157,14 +144,14 @@ class Post(object):
 
         # compile template
         env = Environment(
-                loader=FileSystemLoader(root/'templates'/config['theme']))
+            loader=FileSystemLoader(root/'templates'/config['theme']))
         env.filters['formatdate'] = jinja2_formatdate
         template = env.get_template('post.html')
         html = template.render(
-            config=config, 
-            post=self, 
+            config=config,
+            post=self,
             breadcrumbs=[('Home', '..'), (self.title, None)],
-            stylesheets=stylesheets, 
+            stylesheets=stylesheets,
             scripts=scripts,
             json=json)
 
@@ -187,10 +174,7 @@ class Post(object):
 
 
 def mirror_images(html, mirror):
-    """
-    Mirror remote images locally.
-
-    """
+    """Mirror remote images locally."""
     # create post image directory if necessary
     if not mirror.exists():
         mirror.mkdir()
@@ -217,29 +201,20 @@ def mirror_images(html, mirror):
 
 
 def jinja2_formatdate(obj, fmt):
-    """
-    Jinja filter for formatting dates.
-
-    """
+    """Jinja filter for formatting dates."""
     if isinstance(obj, basestring):
         obj = dateutil.parser.parse(obj)
     return obj.strftime(fmt)
 
 
 def iter_posts(root):
-    """
-    Return all posts from a given directory.
-
-    """
+    """Return all posts from a given directory."""
     for file_path in root.walk('*.md'):
         yield Post(file_path)
 
 
 def create_index(root, posts, config):
-    """
-    Build the index.html page and archives.
-
-    """
+    """Build the index.html page and archives."""
     env = Environment(
         loader=FileSystemLoader(root/'templates'/config['theme']))
     template = env.get_template('index.html')
@@ -253,10 +228,10 @@ def create_index(root, posts, config):
         else:
             next = None
         html = template.render(
-            config=config, 
+            config=config,
             posts=posts[page*show:(page+1)*show],
             breadcrumbs=[('Home', None)],
-            previous=previous, 
+            previous=previous,
             next=next)
         with open(root/'build'/name, 'w') as fp:
             fp.write(html.encode('utf-8'))
@@ -264,17 +239,14 @@ def create_index(root, posts, config):
 
 
 def create_feed(root, posts, config):
-    """
-    Build Atom feed.
-
-    """
+    """Build Atom feed."""
     env = Environment(
         loader=FileSystemLoader(root/'templates'))
     template = env.get_template('atom.xml')
 
     show = config.get('posts-to-show', 10)
     xml = template.render(
-        config=config, 
+        config=config,
         posts=posts,
         show=show)
     with open(root/'build/atom.xml', 'w') as fp:

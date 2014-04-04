@@ -1,10 +1,17 @@
-import operator 
+"""Facebook announcer.
+
+This module implements a Facebook announcer, for publishing a  post summary to
+Facebook and aggregating replies.
+
+"""
+import operator
 
 from facepy import GraphAPI
 from simplejson import load, dump
 
 
 class Facebook(object):
+
     """
     Publish post to facebook.
 
@@ -16,12 +23,15 @@ class Facebook(object):
     Request an access_token at https://developers.facebook.com/tools/explorer/.
 
     """
+
     def __init__(self, post, config, username, access_token):
+        """Facebook interaction for a given post."""
         self.post = post
         self.config = config
         self.graph = GraphAPI(access_token)
 
     def announce(self):
+        """Publish the summary of a post to Facebook."""
         if 'facebook-id' not in self.post.post:
             response = self.graph.post(
                 path='me/feed',
@@ -31,6 +41,7 @@ class Facebook(object):
             self.post.save()
 
     def collect(self):
+        """Collect responses to a given post."""
         if 'facebook-id' not in self.post.post:
             return
 
@@ -53,10 +64,10 @@ class Facebook(object):
         for comment in result['comments']['data']:
             # add user info and picture
             comment['from']['info'] = self.graph.get(
-                    path='/%s' % comment['from']['id'])
+                path='/%s' % comment['from']['id'])
             comment['from']['picture'] = \
-                    "http://graph.facebook.com/%s/picture" % (
-                            comment['from']['info']['username'])
+                "http://graph.facebook.com/%s/picture" % (
+                    comment['from']['info']['username'])
 
             if comment['id'] not in ids:
                 replies.append(comment)

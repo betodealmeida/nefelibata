@@ -28,7 +28,8 @@ Released under the MIT license.
 """
 
 import os
-from pkg_resources import resource_listdir, resource_filename, iter_entry_points
+from pkg_resources import (
+    resource_listdir, resource_filename, iter_entry_points)
 import SimpleHTTPServer
 import SocketServer
 import webbrowser
@@ -54,8 +55,9 @@ def init(root):
 
     # and extract them to our target
     for resource in resources:
-        origin = path(resource_filename('nefelibata',
-            os.path.join('skeleton', resource)))
+        origin = path(
+            resource_filename(
+                'nefelibata', os.path.join('skeleton', resource)))
         target = root/resource
         # good guy Greg does not overwrite existing files
         if target.exists():
@@ -70,10 +72,7 @@ def init(root):
 
 
 def build(root):
-    """
-    Build all static pages from posts.
-
-    """
+    """Build all static pages from posts."""
     log = ConsoleLogger()
     log.start("Building blog")
 
@@ -120,7 +119,7 @@ def build(root):
             announcer = announcers[name](post, config, **section)
             announcer.collect()
 
-        # create HTML 
+        # create HTML
         if not post.updated:
             post.create(config)
 
@@ -134,6 +133,7 @@ def build(root):
 
 
 def preview(root, port=8000):
+    """Run a local HTTP server and load browser."""
     build = root/'build'
     os.chdir(build)
 
@@ -151,10 +151,7 @@ def preview(root, port=8000):
 
 
 def publish(root):
-    """
-    Publish the blog to the defined storages.
-
-    """
+    """Publish the blog to the defined storages."""
     # load configuration
     with open(root/'nefelibata.yaml') as fp:
         config = yaml.load(fp)
@@ -192,11 +189,12 @@ def publish(root):
 
 
 def main():
+    """CLI argument parser."""
     from docopt import docopt
 
     arguments = docopt(__doc__)
 
-    # Get the directory from our blog. If not defined we assume we're 
+    # Get the directory from our blog. If not defined we assume we're
     # inside the blog, so we may need to go up the filesystem in order to find
     # the root.
     if arguments['DIRECTORY'] is None:
