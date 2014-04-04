@@ -1,19 +1,30 @@
+"""S3 publisher.
+
+The S3 publisher will upload the static blog to S3, configuring the bucket
+as a website with index.html at the root. If Route 53 is enabled it can also
+configure DNS to point to the bucket.
+
+"""
 from boto.s3.connection import S3Connection
 from boto.route53.connection import Route53Connection
 from boto.route53.record import ResourceRecordSets
 from boto.s3.key import Key
-from consoleLog.consoleLog import ConsoleLogger                                 
+from consoleLog.consoleLog import ConsoleLogger
 
 
 class S3(object):
+
     """
     Publish blog to an S3 bucket.
 
     TODO: specify region (https://gist.github.com/garnaat/833135)
 
     """
-    def __init__(self, bucket, configure_website, configure_route53,
+
+    def __init__(
+            self, bucket, configure_website, configure_route53,
             AWS_ACCESS_KEY_ID=None, AWS_SECRET_ACCESS_KEY=None):
+        """S3 publisher for the blog posts."""
         self.bucket = bucket
         self.configure_website = configure_website
         self.configure_route53 = configure_route53
@@ -21,9 +32,10 @@ class S3(object):
         self.AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
 
     def publish(self, build):
+        """Publish files to S3 bucket and configure DNS in Route 53."""
         # publish files
         conn = S3Connection(
-                self.AWS_ACCESS_KEY_ID, self.AWS_SECRET_ACCESS_KEY)
+            self.AWS_ACCESS_KEY_ID, self.AWS_SECRET_ACCESS_KEY)
         bucket = conn.create_bucket(self.bucket, policy='public-read')
         for filepath in build.walkfiles():
             k = Key(bucket)
@@ -40,7 +52,7 @@ class S3(object):
             name = self.configure_route53 + '.'
             value = bucket.get_website_endpoint()
             route53 = Route53Connection(
-                    self.AWS_ACCESS_KEY_ID, self.AWS_SECRET_ACCESS_KEY)
+                self.AWS_ACCESS_KEY_ID, self.AWS_SECRET_ACCESS_KEY)
             zones = route53.get_all_hosted_zones()
             for zone in zones['ListHostedZonesResponse']['HostedZones']:
                 if name.endswith(zone['Name']):
@@ -59,7 +71,7 @@ class S3(object):
                         # delete old records
                         for record in records:
                             change = changes.add_change(
-                                    "DELETE", name, "CNAME", ttl=ttl)
+                                "DELETE", name, "CNAME", ttl=ttl)
                             change.add_value(record)
 
                         # add new

@@ -1,12 +1,19 @@
+"""Twitter announcer.
+
+This module implements a Twitter announcer, for publishing a post summary to
+Twitter and aggregating replies.
+
+"""
 from __future__ import absolute_import
 
-import operator 
+import operator
 
 import twitter
 from simplejson import load, dump
 
 
 class Twitter(object):
+
     """
     Update Twitter status.
 
@@ -23,21 +30,21 @@ class Twitter(object):
     can also request oauth_token and oauth_secret.
 
     """
-    def __init__(self, post, config, username,
+
+    def __init__(
+            self, post, config, username,
             consumer_key, consumer_secret, oauth_token, oauth_secret):
+        """Twitter interaction for a given post."""
         self.post = post
         self.config = config
 
         # create twitter communicator
         auth = twitter.OAuth(
-                oauth_token, oauth_secret, consumer_key, consumer_secret)
+            oauth_token, oauth_secret, consumer_key, consumer_secret)
         self.twitter = twitter.Twitter(auth=auth)
 
     def announce(self):
-        """
-        Publish the summary of a post to Twitter.
-
-        """
+        """Publish the summary of a post to Twitter."""
         if 'twitter-id' not in self.post.post:
             link = "%s%s" % (self.config['url'], self.post.url)
             # shorten url? XXX
@@ -71,11 +78,11 @@ class Twitter(object):
         tweet = self.post.post['twitter-id']
         try:
             mentions = self.twitter.statuses.mentions_timeline(
-                    count=200,
-                    since_id=tweet,
-                    trim_user=False,
-                    contributor_details=True,
-                    include_entities=True)
+                count=200,
+                since_id=tweet,
+                trim_user=False,
+                contributor_details=True,
+                include_entities=True)
         except twitter.api.TwitterHTTPError:
             return
 
