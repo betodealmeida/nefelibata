@@ -2,6 +2,7 @@ from boto.s3.connection import S3Connection
 from boto.route53.connection import Route53Connection
 from boto.route53.record import ResourceRecordSets
 from boto.s3.key import Key
+from consoleLog.consoleLog import ConsoleLogger                                 
 
 
 class S3(object):
@@ -66,4 +67,5 @@ class S3(object):
                         change.add_value(value)
                         changes.commit()
 
-        print 'Published!'
+        log = ConsoleLogger()
+        log.finish('Published!')

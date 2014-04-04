@@ -65,7 +65,8 @@ def init(root):
         else:
             origin.copy(target)
 
-    print 'Blog created!'
+    log = ConsoleLogger()
+    log.finish('Blog created!')
 
 
 def build(root):
@@ -136,14 +137,16 @@ def preview(root, port=8000):
     build = root/'build'
     os.chdir(build)
 
+    log = ConsoleLogger()
+
     Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
     httpd = SocketServer.TCPServer(("", port), Handler)
-    print "serving at port %s" % port
+    log.start("serving at port %s" % port)
     webbrowser.open("http://localhost:%d/" % port)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
-        print "exiting..."
+        log.finish("exiting...")
         httpd.shutdown()
 
 

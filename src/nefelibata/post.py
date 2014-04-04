@@ -2,7 +2,6 @@
 
 from __future__ import division
 import re
-import glob
 import math
 from email.parser import Parser
 from email.utils import formatdate, parsedate
@@ -201,22 +200,18 @@ def mirror_images(html, mirror):
     for el in soup.find_all('img', src=re.compile("http")):
         # local name is a hash of the url
         url = el.attrs['src']
+        extension = path(url).ext
         m = md5.new()
         m.update(url)
-        local = m.hexdigest()
+        local = mirror/'%s%s' % (m.hexdigest(), extension)
 
         # download and store locally
-        existing = glob.glob(mirror/"%s.*" % local)
-        if not existing:
+        if not local.exists():
             r = requests.get(url)
-            suffix = r.headers['content-type'].split('/')[1]
-            filename = "%s.%s" % (local, suffix)
-            with open(mirror/filename, 'w') as fp:
+            with open(local, 'w') as fp:
                 fp.write(r.content)
-        else:
-            filename = path(existing[0]).name
 
-        el.attrs['src'] = 'img/%s' % filename
+        el.attrs['src'] = 'img/%s' % local.name
 
     return unicode(soup)
 
