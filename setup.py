@@ -50,7 +50,7 @@ setup(name='nefelibata',
         nb = nefelibata.console:main
 
         [nefelibata.publisher]
-        S3 = nefelibata.publisher:S3
+        S3 = nefelibata.publishers.s3:S3
 
         [nefelibata.announcer]
         twitter = nefelibata.announcers.twitter:Twitter
