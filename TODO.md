@@ -1,3 +1,5 @@
 - move to github
 - facebook cli
 - rename post.post to post.content
+- rewrite post.html as property
+- pagination
