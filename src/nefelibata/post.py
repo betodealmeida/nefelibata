@@ -42,7 +42,7 @@ class Post(object):
         # process post
         with open(file_path) as fp:
             self.post = Parser().parse(fp)
-        self.raw = self.post.get_payload(decode=True)
+        self.raw = self.post.get_payload(decode=True).decode('utf-8')
         self.html = markdown.markdown(
             self.raw,
             extensions=['codehilite'],
@@ -51,7 +51,7 @@ class Post(object):
         # add metadata
         modified = False
         if 'date' not in self.post:
-            date = file_path.stat().st_mtime
+            date = self.file_path.stat().st_mtime
             self.post['date'] = formatdate(date, localtime=True)
             modified = True
         if 'subject' not in self.post:
@@ -61,7 +61,8 @@ class Post(object):
             h1 = tree.xpath('//h1')
             if h1:
                 self.post['subject'] = h1[0].text
-                self.post['subject'] = file_path.namebase
+            else:
+                self.post['subject'] = self.file_path.namebase
             modified = True
 
         # rewrite
@@ -72,6 +73,12 @@ class Post(object):
         """Save back a post, after modifying it."""
         with open(self.file_path, 'w') as fp:
             fp.write(str(self.post))
+
+    @property
+    def parsed(self):
+        """Parsed representation of the post."""
+        parser = etree.HTMLParser()
+        return etree.fromstring(self.html, parser)
 
     @property
     def url(self):
@@ -187,7 +194,7 @@ def mirror_images(html, mirror):
         extension = path(url).ext
         m = md5.new()
         m.update(url)
-        local = mirror/'%s%s' % (m.hexdigest(), extension)
+        local = mirror/('%s%s' % (m.hexdigest(), extension))
 
         # download and store locally
         if not local.exists():
@@ -209,7 +216,7 @@ def jinja2_formatdate(obj, fmt):
 
 def iter_posts(root):
     """Return all posts from a given directory."""
-    for file_path in root.walk('*.md'):
+    for file_path in root.walk('*.mkd'):
         yield Post(file_path)
 
 

@@ -22,6 +22,10 @@ class Facebook(object):
 
     Request an access_token at https://developers.facebook.com/tools/explorer/.
 
+    More info on the API here:
+
+        https://developers.facebook.com/docs/graph-api/reference/user/feed
+
     """
 
     def __init__(self, post, config, username, access_token):
@@ -33,10 +37,20 @@ class Facebook(object):
     def announce(self):
         """Publish the summary of a post to Facebook."""
         if 'facebook-id' not in self.post.post:
+            # grab post img
+            img = self.post.parsed.xpath('//img')
+            if img:
+                picture = img[0].attrib['src']
+            else:
+                picture = None
+
             response = self.graph.post(
                 path='me/feed',
-                message="%s\n\n%s%s" % (
-                    self.post.summary, self.config['url'], self.post.url))
+                message=self.post.summary,
+                link="%s/%s" % (self.config['url'], self.post.url),
+                name=self.post.title,
+                picture=picture,
+            )
             self.post.post['facebook-id'] = response['id']
             self.post.save()
 
