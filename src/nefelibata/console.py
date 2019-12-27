@@ -36,16 +36,16 @@ from pathlib import Path
 from docopt import docopt
 from pkg_resources import iter_entry_points, resource_filename, resource_listdir
 
-from nefelibata import __version__
+from nefelibata import __version__, config_filename
+from nefelibata.index import create_index
+from nefelibata.post import Post
+from nefelibata.utils import get_config, get_posts
 
 __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
 
 _logger = logging.getLogger(__name__)
-
-
-config = "nefelibata.yaml"
 
 
 def setup_logging(loglevel: str) -> None:
@@ -72,7 +72,7 @@ def find_directory(cwd: Path) -> Path:
     Args:
       cwd (str): starting directory
     """
-    while not (cwd / config).exists():
+    while not (cwd / config_filename).exists():
         if cwd == cwd.parent:
             raise SystemExit("No configuration found!")
         cwd = cwd.parent
@@ -104,6 +104,50 @@ def init(root: Path) -> None:
     _logger.info("Weblog created!")
 
 
+def build(root: Path) -> None:
+    """Build weblog from Markdown posts and social media interactions.
+
+    Args:
+      root (str): directory where the weblog lives
+    """
+    _logger.info("Building weblog")
+
+    config = get_config(root)
+    _logger.debug(config)
+
+    resources = ["css", "js", "img"]
+
+    build = root / "build"
+    if not build.exists():
+        _logger.info("Creating build/ directory")
+        build.mkdir()
+        for resource in resources:
+            (build / resource).mkdir()
+
+    _logger.info("Syncing resources")
+    for resource in resources:
+        path = root / "templates" / config["theme"] / resource
+        target = build / resource
+        for origin in path.glob("*"):
+            shutil.copy(origin, target)
+
+    _logger.info("Processing posts")
+    posts = get_posts(root)
+    for post in posts:
+        if not post.up_to_date:
+            post.create()
+
+        # symlink build -> posts
+        post_directory = post.file_path.parent
+        relative_directory = post_directory.relative_to(root / "posts")
+        target = root / "build" / relative_directory
+        if not target.exists():
+            target.symlink_to(post_directory, target_is_directory=True)
+
+    _logger.info("Creating index")
+    create_index(root)
+
+
 def main() -> None:
     """Main entry point allowing external calls
     """
@@ -128,4 +172,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    run()
+    main()
