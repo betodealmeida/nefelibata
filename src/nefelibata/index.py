@@ -20,6 +20,7 @@ def create_index(root: Path) -> None:
     template = env.get_template("index.html")
 
     posts = get_posts(root)
+    posts.sort(key=lambda x: x.date, reverse=True)
     show = config.get("posts-to-show", 10)
     pages = int(math.ceil(len(posts) / show))
     previous, name = None, "index.html"

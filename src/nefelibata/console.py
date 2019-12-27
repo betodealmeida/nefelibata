@@ -4,6 +4,7 @@ Nefelibata weblog engine.
 
 Usage:
   nb init [DIRECTORY] [--loglevel=INFO]
+  nb new POST [DIRECTORY] [--loglevel=INFO]
   nb build [DIRECTORY] [-f] [--loglevel=INFO]
   nb preview [-p PORT] [DIRECTORY] [--loglevel=INFO]
   nb publish [DIRECTORY] [--loglevel=INFO]
@@ -11,6 +12,7 @@ Usage:
 
 Actions:
   init              Create a new weblog skeleton.
+  new               Create a new post.
   build             Build weblog from Markdown and social media interactions.
   preview           Run SimpleHTTPServer and open browser.
   publish           Publish weblog to configured locations and announce new posts.
@@ -33,13 +35,14 @@ import logging
 import os
 import shutil
 import socketserver
+from subprocess import call
 import sys
 from pathlib import Path
 
 from docopt import docopt
 from pkg_resources import iter_entry_points, resource_filename, resource_listdir
 
-from nefelibata import __version__, config_filename
+from nefelibata import __version__, config_filename, new_post
 from nefelibata.index import create_index
 from nefelibata.post import Post
 from nefelibata.utils import get_config, get_posts
@@ -107,6 +110,35 @@ def init(root: Path) -> None:
     _logger.info("Weblog created!")
 
 
+def new(root: Path, directory: str) -> None:
+    """Create a new post and open editor.
+
+    Args:
+      root (str): directory where the weblog lives
+      directory (str): name of directory for the post
+    """
+    _logger.info("Creating new directory")
+    target = root / "posts" / directory
+    if target.exists():
+        raise IOError("Directory already exists!")
+    target.mkdir()
+
+    _logger.info("Adding resource files")
+    resources = ["css", "js", "img"]
+    for resource in resources:
+        (target / resource).mkdir()
+
+    editor = os.environ.get("EDITOR")
+    if not editor:
+        _logger.info("No EDITOR found, exiting")
+
+    filepath = target / "index.mkd"
+    with open(filepath, "w") as fp:
+        fp.write(new_post)
+
+    call([editor, filepath])
+
+
 def build(root: Path, force: bool = False) -> None:
     """Build weblog from Markdown posts and social media interactions.
 
@@ -141,7 +173,7 @@ def build(root: Path, force: bool = False) -> None:
         post_directory = post.file_path.parent
         relative_directory = post_directory.relative_to(root / "posts")
         target = root / "build" / relative_directory
-        if not target.exists():
+        if post_directory.exists() and not target.exists():
             target.symlink_to(post_directory, target_is_directory=True)
 
     _logger.info("Creating index")
@@ -154,6 +186,8 @@ def preview(root: Path, port: int = 8000) -> None:
     Args:
       root (str): directory where the weblog lives
     """
+    _logger.info("Previewing weblog")
+
     build = root / "build"
     os.chdir(build)
 
@@ -164,6 +198,29 @@ def preview(root: Path, port: int = 8000) -> None:
         except KeyboardInterrupt:
             _logger.info("Exiting")
             httpd.shutdown()
+
+
+def publish(root: Path) -> None:
+    """Publish weblog.
+
+    Args:
+      root (str): directory where the weblog lives
+    """
+    _logger.info("Publishing weblog")
+
+    config = get_config(root)
+    _logger.debug(config)
+
+    build = root / "build"
+    publishers = {p.name: p.load() for p in iter_entry_points("nefelibata.publisher")}
+
+    names = config["publish-to"] or []
+    if isinstance(names, str):
+        names = [names]
+    for name in names:
+        section = config[name]
+        publisher = publishers[name](**section)
+        publisher.publish(root)
 
 
 def main() -> None:
@@ -183,10 +240,14 @@ def main() -> None:
 
     if arguments["init"]:
         init(root)
+    elif arguments["new"]:
+        new(root, arguments["POST"])
     elif arguments["build"]:
         build(root, arguments["--force"])
     elif arguments["preview"]:
         preview(root, int(arguments["-p"]))
+    elif arguments["publish"]:
+        publish(root)
 
 
 if __name__ == "__main__":
