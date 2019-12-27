@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block meta %}
+    <meta name="description" content="{{ post.summary }}">
+
+    {% if post.post['keywords'] %}
+    <meta name="keywords" content="{{ post.post.keywords }}">
+    {% endif %}
+
+    {% if post.post['authors'] %}
+    <meta name="author" content="{{ post.post['authors'] }}">
+    {% endif %}
+{% endblock %}
+
+{% block title %}{{ config.title }}: {{ post.title }}{% endblock %}
+
+{% block css %}
+    {% for stylesheet in stylesheets %}
+    <link href="{{ stylesheet }}" rel="stylesheet">
+    {% endfor %}
+{% endblock %}
+
+{% block javascript %}
+    {% for script in scripts %}
+    <script src="{{ script }}"></script>
+    {% endfor %}
+{% endblock %}
+
+{% block content %}
+    <article role="main">
+        <h1>{{ post.title }}</h1>
+
+        {{ post.html }}
+
+        {% if 'twitter-id' in post.post and 'facebook-id' in post.post %}
+        <p><em>Comment on
+            <a href="https://twitter.com/{{ config.twitter.username }}/status/{{ post.post['twitter-id'] }}">Twitter</a> or 
+            <a href="https://facebook.com/{{ config.facebook.username }}/posts/{{ post.post['facebook-id'].split('_')[1] }}">Facebook</a>.</em></p>
+        <!--
+        This is the raw Markdown post:
+
+        {{ post.raw|e }}
+        -->
+
+        <footer>
+        <p class="meta">Published on <time datetime="{{ post.date.isoformat() }}" pubdate> {{ post.date.strftime('%Y-%m-%d') }}</time></p>
+        </footer>
+
+        <h2><i class="icon-comments"></i> Comments</h2>
+
+        {% for reply in json.twitter %}
+        <div class="comment">
+            <div class="comment-avatar">
+                    <img src="{{ reply.user.profile_image_url_https }}" height="50" width="50">
+            </div>
+            <div class="comment-data">
+                <div class="comment-header">
+                    <a rel="nofollow" title="{{ reply.user.description }}" href="https://twitter.com/{{ reply.user.screen_name }}">{{ reply.user.name }}</a> said on <a rel="nofollow" href="https://twitter.com/{{ reply.user.screen_name }}/status/{{ reply.id_str }}">{{ reply.created_at|formatdate("%Y-%m-%d") }}</a>&#8230;
+                </div>
+                <div class="comment-content">
+                    <p>{{ reply.text }}</p>
+                </div>
+            </div>
+        <div class="clr"></div>
+        </div>
+        {% endfor %}
+
+        {% for reply in json.facebook %}
+        <div class="comment">
+            <div class="comment-avatar">
+                    <img src="{{ reply.from.picture }}" height="50" width="50">
+            </div>
+            <div class="comment-data">
+                <div class="comment-header">
+                    <a rel="nofollow" title="{{ reply.from.info.bio }}" href="{{ reply.from.info.link }}">{{ reply.from.name }}</a> said on <a rel="nofollow" href="https://www.facebook.com/{{ config.facebook.username }}/posts/{{ reply.id }}">{{ reply.created_time|formatdate("%Y-%m-%d") }}</a>&#8230;
+                </div>
+                <div class="comment-content">
+                    <p>{{ reply.message }}</p>
+                </div>
+            </div>
+        <div class="clr"></div>
+        </div>
+        {% endfor %}
+
+        {% endif %}
+
+    </article>
+{% endblock %}
