@@ -39,12 +39,14 @@ from http.server import SimpleHTTPRequestHandler
 from pathlib import Path
 from subprocess import call
 
-from pkg_resources import iter_entry_points, resource_filename, resource_listdir
-
 from docopt import docopt
+from pkg_resources import resource_filename, resource_listdir
+
 from nefelibata import __version__, config_filename, new_post
+from nefelibata.announcers import get_announcers
 from nefelibata.index import create_feed, create_categories, create_index
 from nefelibata.post import Post, get_posts
+from nefelibata.publishers import get_publishers
 from nefelibata.utils import get_config
 
 __author__ = "Beto Dealmeida"
@@ -167,8 +169,10 @@ def build(root: Path, force: bool = False) -> None:
             target.symlink_to(resource_directory, target_is_directory=True)
 
     _logger.info("Processing posts")
-    posts = get_posts(root)
-    for post in posts:
+    for post in get_posts(root):
+        for announcer in get_announcers(post, config):
+            announcer.collect()
+
         if force or not post.up_to_date:
             post.create()
 
@@ -220,16 +224,13 @@ def publish(root: Path) -> None:
     config = get_config(root)
     _logger.debug(config)
 
-    build = root / "build"
-    publishers = {p.name: p.load() for p in iter_entry_points("nefelibata.publisher")}
+    # for publisher in get_publishers(config):
+    #    publisher.publish(root)
 
-    names = config["publish-to"] or []
-    if isinstance(names, str):
-        names = [names]
-    for name in names:
-        section = config[name]
-        publisher = publishers[name](**section)
-        publisher.publish(root)
+    # announce posts
+    for post in get_posts(root):
+        for announcer in get_announcers(post, config):
+            announcer.announce()
 
 
 def main() -> None:

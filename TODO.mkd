@@ -3,11 +3,12 @@
 [x] category pages
 [x] mirror images
 [x] atom feed
+[ ] upload to S3 only when changed
+[x] Twitter announcer
 [ ] FB announcer
 [ ] FAWM announcer
 [ ] update requirements.txt
 [ ] improve build linking
-[ ] upload to S3 only when changed
 [ ] announcer class should have name attribute (for linking)
 [ ] announcer should store URL to announced post
 [ ] make theme a class?
