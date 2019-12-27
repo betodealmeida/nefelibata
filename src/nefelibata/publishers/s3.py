@@ -1,4 +1,5 @@
 import logging
+import mimetypes
 from pathlib import Path
 from typing import Any, Dict
 
@@ -16,20 +17,17 @@ class S3Publisher(Publisher):
         AWS_SECRET_ACCESS_KEY: str,
         configure_website: bool = False,
         configure_route53: str = None,
-        region: str = None,
+        region: str = "us-east-1",
     ):
         self.bucket = bucket
-        self.s3_client = boto3.client(
-            "s3",
-            aws_access_key_id=AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-            region_name=region,
-        )
+        self.aws_access_key_id = AWS_ACCESS_KEY_ID
+        self.aws_secret_access_key = AWS_SECRET_ACCESS_KEY
         self.configure_website = configure_website
         self.configure_route53 = configure_route53
         self.region = region
 
     def publish(self, root: Path) -> None:
+        """
         self._create_bucket()
 
         build = root / "build"
@@ -45,37 +43,29 @@ class S3Publisher(Publisher):
                     self._upload_file(path, key)
 
         if self.configure_website:
-            website_configuration = {
-                'IndexDocument': {'Suffix': 'index.html'},
-            }
-            self.s3_client.put_bucket_website(
-                Bucket=self.bucket,
-                WebsiteConfiguration=website_configuration
-            )
+            self._configure_website()
 
+        """
         if self.configure_route53:
-            pass
+            self._configure_route53()
 
-
-    def _upload_file(self, path: Path, key: str) -> bool:
-        logging.info(f"Uploading {path}")
-        try:
-            self.s3_client.upload_file(str(path), self.bucket, key, ExtraArgs={'ACL': 'public-read'})
-        except ClientError as e:
-            logging.error(e)
-            return False
-        return True
+    def _get_client(self, service: str):
+        return boto3.client(
+            service,
+            aws_access_key_id=self.aws_access_key_id,
+            aws_secret_access_key=self.aws_secret_access_key,
+            region_name=self.region,
+        )
 
     def _create_bucket(self) -> bool:
+        client = self._get_client("s3")
         logging.info(f"Creating bucket {self.bucket}")
         try:
             if self.region is None:
-                self.s3_client.create_bucket(
-                    Bucket=self.bucket, ACL="public-read"
-                )
+                client.create_bucket(Bucket=self.bucket, ACL="public-read")
             else:
                 location = {"LocationConstraint": region}
-                self.s3_client.create_bucket(
+                client.create_bucket(
                     Bucket=self.bucket,
                     CreateBucketConfiguration=location,
                     ACL="public-read",
@@ -84,3 +74,61 @@ class S3Publisher(Publisher):
             logging.error(e)
             return False
         return True
+
+    def _upload_file(self, path: Path, key: str) -> bool:
+        client = self._get_client("s3")
+        logging.info(f"Uploading {path}")
+        extra_args = {"ACL": "public-read"}
+        mimetype = mimetypes.guess_type(str(path))[0]
+        if mimetype:
+            extra_args["ContentType"] = mimetype
+        try:
+            client.upload_file(str(path), self.bucket, key, ExtraArgs=extra_args)
+        except ClientError as e:
+            logging.error(e)
+            return False
+        return True
+
+    def _configure_website(self) -> None:
+        client = self._get_client("s3")
+        logging.info("Configuring website")
+        website_configuration = {
+            "IndexDocument": {"Suffix": "index.html"},
+        }
+        client.put_bucket_website(
+            Bucket=self.bucket, WebsiteConfiguration=website_configuration
+        )
+
+    def _configure_route53(self) -> None:
+        client = self._get_client("route53")
+        logging.info("Configuring route53")
+
+        # CNAME value
+        value = f"{self.bucket}.s3-website-{self.region}.amazonaws.com"
+
+        for zone in client.list_hosted_zones()["HostedZones"]:
+            if self.configure_route53.endswith(zone["Name"]):
+                zone_id = zone["Id"]
+                break
+        else:
+            logging.error("No zone found!")
+            return
+
+        payload = {
+            "Changes": [
+                {
+                    "Action": "UPSERT",
+                    "ResourceRecordSet": {
+                        "Name": self.configure_route53.rstrip("."),
+                        "Type": "CNAME",
+                        "SetIdentifier": "nefelibata",
+                        "Region": self.region,
+                        "TTL": 600,
+                        "ResourceRecords": [{"Value": value}],
+                    },
+                },
+            ]
+        }
+        response = client.change_resource_record_sets(
+            HostedZoneId=zone_id, ChangeBatch=payload
+        )
