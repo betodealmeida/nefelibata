@@ -1,10 +1,9 @@
 from pathlib import Path
 from typing import Any, Dict, Iterator
-import yaml
 
+import yaml
 from bs4 import BeautifulSoup
 from libgravatar import Gravatar
-
 from nefelibata import config_filename
 
 
@@ -19,7 +18,9 @@ def get_config(root: Path) -> Dict[str, Any]:
 
     # add gravatar as the default profile picture
     if "profile_picture" not in config["author"]:
-        config["author"]["profile_picture"] = Gravatar(config["author"]["email"]).get_image()
+        config["author"]["profile_picture"] = Gravatar(
+            config["author"]["email"]
+        ).get_image()
 
     return config
 

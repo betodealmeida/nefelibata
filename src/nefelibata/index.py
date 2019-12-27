@@ -3,9 +3,8 @@ import math
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
-
-from nefelibata.post import hash_n, get_posts
-from nefelibata.utils import get_config, find_external_resources
+from nefelibata.post import get_posts, hash_n
+from nefelibata.utils import find_external_resources, get_config
 
 _logger = logging.getLogger("nefelibata")
 

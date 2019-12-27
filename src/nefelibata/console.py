@@ -30,18 +30,18 @@ Released under the MIT license.
 
 """
 
-from http.server import SimpleHTTPRequestHandler
 import logging
 import os
 import shutil
 import socketserver
-from subprocess import call
 import sys
+from http.server import SimpleHTTPRequestHandler
 from pathlib import Path
+from subprocess import call
 
-from docopt import docopt
 from pkg_resources import iter_entry_points, resource_filename, resource_listdir
 
+from docopt import docopt
 from nefelibata import __version__, config_filename, new_post
 from nefelibata.index import create_index
 from nefelibata.post import Post, get_posts

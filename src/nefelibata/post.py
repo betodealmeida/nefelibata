@@ -11,8 +11,7 @@ import dateutil.parser
 import markdown
 from bs4 import BeautifulSoup
 from jinja2 import Environment, FileSystemLoader
-
-from nefelibata.utils import get_config, find_external_resources
+from nefelibata.utils import find_external_resources, get_config
 
 _logger = logging.getLogger("nefelibata")
 
@@ -98,10 +97,12 @@ class Post:
             path.relative_to(post_directory)
             for path in (post_directory / "css").glob("**/*.css")
         ]
-        scripts = sorted([
-            path.relative_to(post_directory)
-            for path in (post_directory / "js").glob("**/*.js")
-        ])
+        scripts = sorted(
+            [
+                path.relative_to(post_directory)
+                for path in (post_directory / "js").glob("**/*.js")
+            ]
+        )
 
         env = Environment(
             loader=FileSystemLoader(str(self.root / "templates" / self.config["theme"]))
@@ -113,7 +114,7 @@ class Post:
             post=self,
             scripts=scripts,
             stylesheets=stylesheets,
-            breadcrumbs=[('Home', '..'), (self.title, None)],
+            breadcrumbs=[("Home", ".."), (self.title, None)],
             hash_n=hash_n,
         )
         filename = self.file_path.with_suffix(".html")
