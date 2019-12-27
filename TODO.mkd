@@ -2,12 +2,13 @@
 [x] add warning on external resources
 [x] category pages
 [x] mirror images
-[ ] atom feed
+[x] atom feed
+[ ] FB announcer
+[ ] FAWM announcer
 [ ] update requirements.txt
 [ ] improve build linking
 [ ] upload to S3 only when changed
-[ ] FB announcer
-[ ] FAWM announcer
 [ ] announcer class should have name attribute (for linking)
 [ ] announcer should store URL to announced post
 [ ] make theme a class?
+[ ] microformats

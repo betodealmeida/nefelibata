@@ -91,6 +91,8 @@ class Post:
 
     def create(self) -> None:
         """Convert post from Markdown to HTML.
+
+        TODO: move to utils.py
         """
         post_directory = self.file_path.parent
         stylesheets = [

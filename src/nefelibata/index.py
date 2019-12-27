@@ -101,3 +101,21 @@ def create_categories(root: Path) -> None:
 
             for resource in find_external_resources(html):
                 _logger.warning(f"External resource found: {resource}")
+
+
+def create_feed(root: Path) -> None:
+    """Generate Atom feed.
+
+    Args:
+      root (str): directory where the weblog lives
+    """
+    config = get_config(root)
+    env = Environment(loader=FileSystemLoader(str(root / "templates")))
+    template = env.get_template("atom.xml")
+
+    posts = get_posts(root)
+    posts.sort(key=lambda x: x.date, reverse=True)
+    show = config.get("posts-to-show", 10)
+    xml = template.render(config=config, posts=posts[:show])
+    with open(root / "build" / "atom.xml", "w") as fp:
+        fp.write(xml)
