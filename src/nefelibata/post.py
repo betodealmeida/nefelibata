@@ -87,6 +87,16 @@ class Post:
     def create(self) -> None:
         """Convert post from Markdown to HTML.
         """
+        post_directory = self.file_path.parent
+        stylesheets = [
+            path.relative_to(post_directory)
+            for path in (post_directory / "css").glob("**/*.css")
+        ]
+        scripts = sorted([
+            path.relative_to(post_directory)
+            for path in (post_directory / "js").glob("**/*.js")
+        ])
+
         env = Environment(
             loader=FileSystemLoader(str(self.root / "templates" / self.config["theme"]))
         )
@@ -95,6 +105,8 @@ class Post:
         html = template.render(
             config=self.config,
             post=self,
+            scripts=scripts,
+            stylesheets=stylesheets,
             breadcrumbs=[('Home', '..'), (self.title, None)],
             hash_n=hash_n,
         )

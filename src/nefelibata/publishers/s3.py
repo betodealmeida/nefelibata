@@ -10,6 +10,50 @@ from nefelibata.publishers import Publisher
 
 
 class S3Publisher(Publisher):
+
+    """A publisher that uploads the weblog to S3.
+
+    You need a user with this policy:
+
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "VisualEditor0",
+                    "Effect": "Allow",
+                    "Action": [
+                        "s3:GetBucketWebsite",
+                        "s3:PutBucketWebsite",
+                        "route53:ChangeResourceRecordSets",
+                        "s3:PutBucketAcl",
+                        "s3:CreateBucket"
+                    ],
+                    "Resource": [
+                        "arn:aws:route53:::hostedzone/taoetc.org",
+                        "arn:aws:s3:::blog.taoetc.org"
+                    ]
+                },
+                {
+                    "Sid": "VisualEditor1",
+                    "Effect": "Allow",
+                    "Action": [
+                        "s3:PutObject",
+                        "s3:GetObject",
+                        "s3:PutObjectAcl"
+                    ],
+                    "Resource": "arn:aws:s3:::blog.taoetc.org/*"
+                },
+                {
+                    "Sid": "VisualEditor2",
+                    "Effect": "Allow",
+                    "Action": "route53:ListHostedZones",
+                    "Resource": "*"
+                }
+            ]
+        }
+
+    """
+
     def __init__(
         self,
         bucket: str,
@@ -27,7 +71,6 @@ class S3Publisher(Publisher):
         self.region = region
 
     def publish(self, root: Path) -> None:
-        """
         self._create_bucket()
 
         build = root / "build"
@@ -45,7 +88,6 @@ class S3Publisher(Publisher):
         if self.configure_website:
             self._configure_website()
 
-        """
         if self.configure_route53:
             self._configure_route53()
 
@@ -64,7 +106,7 @@ class S3Publisher(Publisher):
             if self.region is None:
                 client.create_bucket(Bucket=self.bucket, ACL="public-read")
             else:
-                location = {"LocationConstraint": region}
+                location = {"LocationConstraint": self.region}
                 client.create_bucket(
                     Bucket=self.bucket,
                     CreateBucketConfiguration=location,

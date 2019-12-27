@@ -122,6 +122,7 @@ def new(root: Path, directory: str) -> None:
     if target.exists():
         raise IOError("Directory already exists!")
     target.mkdir()
+    os.chdir(target)
 
     _logger.info("Adding resource files")
     resources = ["css", "js", "img"]
