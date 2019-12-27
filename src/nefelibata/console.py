@@ -4,7 +4,7 @@ Nefelibata weblog engine.
 
 Usage:
   nb init [DIRECTORY] [--loglevel=INFO]
-  nb build [DIRECTORY] [--loglevel=INFO]
+  nb build [DIRECTORY] [-f] [--loglevel=INFO]
   nb preview [-p PORT] [DIRECTORY] [--loglevel=INFO]
   nb publish [DIRECTORY] [--loglevel=INFO]
   nb facebook <short_access_token> <app_id> <app_secret> [--loglevel=INFO]
@@ -20,6 +20,7 @@ Options:
   -h --help         Show this screen.
   --version         Show version.
   -p PORT           Port to run the web server for preview. [default: 8000]
+  -f --force        Force rebuild of HTML.
   --loglevel=LEVEL  Level for logging. [default: INFO]
 
 Released under the MIT license.
@@ -104,7 +105,7 @@ def init(root: Path) -> None:
     _logger.info("Weblog created!")
 
 
-def build(root: Path) -> None:
+def build(root: Path, force: bool = False) -> None:
     """Build weblog from Markdown posts and social media interactions.
 
     Args:
@@ -134,7 +135,7 @@ def build(root: Path) -> None:
     _logger.info("Processing posts")
     posts = get_posts(root)
     for post in posts:
-        if not post.up_to_date:
+        if force or not post.up_to_date:
             post.create()
 
         # symlink build -> posts
@@ -146,6 +147,18 @@ def build(root: Path) -> None:
 
     _logger.info("Creating index")
     create_index(root)
+
+
+def preview(root: Path, port: int = 8000) -> None:
+    """Run a local HTTP server and open browser.
+
+    Args:
+      root (str): directory where the weblog lives
+    """
+    build = root / "build"
+    os.chdir(build)
+
+
 
 
 def main() -> None:
@@ -166,7 +179,7 @@ def main() -> None:
     if arguments["init"]:
         init(root)
     elif arguments["build"]:
-        build(root)
+        build(root, arguments["--force"])
     elif arguments["preview"]:
         preview(root, int(arguments["-p"]))
 
