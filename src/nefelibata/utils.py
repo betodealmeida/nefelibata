@@ -1,11 +1,11 @@
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterator
 import yaml
 
+from bs4 import BeautifulSoup
 from libgravatar import Gravatar
 
 from nefelibata import config_filename
-from nefelibata.post import Post
 
 
 def get_config(root: Path) -> Dict[str, Any]:
@@ -24,11 +24,17 @@ def get_config(root: Path) -> Dict[str, Any]:
     return config
 
 
-def get_posts(root: Path) -> List[Post]:
-    """Return list of posts for a given root directory.
-    
-    Args:
-      root (str): directory where the weblog lives
+def find_external_resources(html: str) -> Iterator[str]:
+    """Find any external resources in an HTML document.
     """
-    config = get_config(root)
-    return [Post(source, root, config) for source in (root / "posts").glob("**/*.mkd")]
+    tag_attributes = [
+        ("img", "src"),
+        ("link", "href"),
+        ("script", "src"),
+    ]
+    soup = BeautifulSoup(html, "html.parser")
+    for tag, attr in tag_attributes:
+        for el in soup.find_all(tag):
+            resource = el.attrs.get(attr)
+            if resource and "://" in resource:
+                yield resource

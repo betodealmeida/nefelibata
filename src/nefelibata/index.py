@@ -1,10 +1,13 @@
+import logging
 import math
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
-from nefelibata.post import hash_n
-from nefelibata.utils import get_config, get_posts
+from nefelibata.post import hash_n, get_posts
+from nefelibata.utils import get_config, find_external_resources
+
+_logger = logging.getLogger("nefelibata")
 
 
 def create_index(root: Path) -> None:
@@ -40,3 +43,6 @@ def create_index(root: Path) -> None:
         with open(root / "build" / name, "w") as fp:
             fp.write(html)
         previous, name = name, next
+
+        for resource in find_external_resources(html):
+            _logger.warning(f"External resource found: {resource}")

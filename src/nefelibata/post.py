@@ -5,12 +5,14 @@ from datetime import datetime
 from email.parser import Parser
 from email.utils import formatdate, parsedate
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import dateutil.parser
 import markdown
 from bs4 import BeautifulSoup
 from jinja2 import Environment, FileSystemLoader
+
+from nefelibata.utils import get_config, find_external_resources
 
 _logger = logging.getLogger("nefelibata")
 
@@ -118,22 +120,8 @@ class Post:
         with open(filename, "w") as fp:
             fp.write(html)
 
-        self._check_external_resources(html)
-
-    def _check_external_resources(self, html: str) -> None:
-        """Check that the generated output has no external resources.
-        """
-        tag_attributes = [
-            ("img", "src"),
-            ("link", "href"),
-            ("script", "src"),
-        ]
-        soup = BeautifulSoup(html, "html.parser")
-        for tag, attr in tag_attributes:
-            for el in soup.find_all(tag):
-                resource = el.attrs.get(attr)
-                if resource and "://" in resource:
-                    _logger.warning(f"External resource found: {resource}")
+        for resource in find_external_resources(html):
+            _logger.warning(f"External resource found: {resource}")
 
 
 def jinja2_formatdate(obj, fmt: str) -> str:
@@ -151,3 +139,13 @@ def hash_n(text: bytes, numbers: int = 10) -> int:
       numbers (int): hash string to a number between 0 and `numbers-1`
     """
     return int(hashlib.md5(text).hexdigest(), 16) % numbers
+
+
+def get_posts(root: Path) -> List[Post]:
+    """Return list of posts for a given root directory.
+
+    Args:
+      root (str): directory where the weblog lives
+    """
+    config = get_config(root)
+    return [Post(source, root, config) for source in (root / "posts").glob("**/*.mkd")]

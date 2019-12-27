@@ -44,8 +44,8 @@ from pkg_resources import iter_entry_points, resource_filename, resource_listdir
 
 from nefelibata import __version__, config_filename, new_post
 from nefelibata.index import create_index
-from nefelibata.post import Post
-from nefelibata.utils import get_config, get_posts
+from nefelibata.post import Post, get_posts
+from nefelibata.utils import get_config
 
 __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
