@@ -118,6 +118,7 @@ def new(root: Path, directory: str) -> None:
       directory (str): name of directory for the post
     """
     _logger.info("Creating new directory")
+    directory = directory.replace(" ", "_").lower()
     target = root / "posts" / directory
     if target.exists():
         raise IOError("Directory already exists!")
@@ -132,6 +133,7 @@ def new(root: Path, directory: str) -> None:
     editor = os.environ.get("EDITOR")
     if not editor:
         _logger.info("No EDITOR found, exiting")
+        return
 
     filepath = target / "index.mkd"
     with open(filepath, "w") as fp:
