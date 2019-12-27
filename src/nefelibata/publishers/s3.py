@@ -8,6 +8,8 @@ from botocore.exceptions import ClientError
 
 from nefelibata.publishers import Publisher
 
+_logger = logging.getLogger("nefelibata")
+
 
 class S3Publisher(Publisher):
 
@@ -101,7 +103,7 @@ class S3Publisher(Publisher):
 
     def _create_bucket(self) -> bool:
         client = self._get_client("s3")
-        logging.info(f"Creating bucket {self.bucket}")
+        _logger.info(f"Creating bucket {self.bucket}")
         try:
             if self.region is None:
                 client.create_bucket(Bucket=self.bucket, ACL="public-read")
@@ -113,13 +115,13 @@ class S3Publisher(Publisher):
                     ACL="public-read",
                 )
         except ClientError as e:
-            logging.error(e)
+            _logger.error(e)
             return False
         return True
 
     def _upload_file(self, path: Path, key: str) -> bool:
         client = self._get_client("s3")
-        logging.info(f"Uploading {path}")
+        _logger.info(f"Uploading {path}")
         extra_args = {"ACL": "public-read"}
         mimetype = mimetypes.guess_type(str(path))[0]
         if mimetype:
@@ -127,13 +129,13 @@ class S3Publisher(Publisher):
         try:
             client.upload_file(str(path), self.bucket, key, ExtraArgs=extra_args)
         except ClientError as e:
-            logging.error(e)
+            _logger.error(e)
             return False
         return True
 
     def _configure_website(self) -> None:
         client = self._get_client("s3")
-        logging.info("Configuring website")
+        _logger.info("Configuring website")
         website_configuration = {
             "IndexDocument": {"Suffix": "index.html"},
         }
@@ -143,7 +145,7 @@ class S3Publisher(Publisher):
 
     def _configure_route53(self) -> None:
         client = self._get_client("route53")
-        logging.info("Configuring route53")
+        _logger.info("Configuring route53")
 
         # CNAME value
         value = f"{self.bucket}.s3-website-{self.region}.amazonaws.com"
@@ -153,7 +155,7 @@ class S3Publisher(Publisher):
                 zone_id = zone["Id"]
                 break
         else:
-            logging.error("No zone found!")
+            _logger.error("No zone found!")
             return
 
         payload = {

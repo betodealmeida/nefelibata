@@ -1,0 +1,12 @@
+[x] archive pages
+[x] add warning on external resources
+[ ] mirror images
+[ ] update requirements.txt
+[ ] category pages
+[ ] improve build linking
+[ ] upload to S3 only when changed
+[ ] FB announcer
+[ ] FAWM announcer
+[ ] announcer class should have name attribute (for linking)
+[ ] announcer should store URL to announced post
+[ ] make theme a class?

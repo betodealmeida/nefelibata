@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import time
 from datetime import datetime
 from email.parser import Parser
@@ -6,9 +7,12 @@ from email.utils import formatdate, parsedate
 from pathlib import Path
 from typing import Any, Dict
 
+import dateutil.parser
 import markdown
 from bs4 import BeautifulSoup
 from jinja2 import Environment, FileSystemLoader
+
+_logger = logging.getLogger("nefelibata")
 
 
 class Post:
@@ -50,7 +54,7 @@ class Post:
 
     @property
     def url(self) -> str:
-        return self.file_path.relative_to(self.root / "posts").with_suffix(".html")
+        return str(self.file_path.relative_to(self.root / "posts").with_suffix(".html"))
 
     @property
     def up_to_date(self) -> bool:
@@ -114,15 +118,32 @@ class Post:
         with open(filename, "w") as fp:
             fp.write(html)
 
+        self._check_external_resources(html)
 
-def jinja2_formatdate(obj, fmt):
+    def _check_external_resources(self, html: str) -> None:
+        """Check that the generated output has no external resources.
+        """
+        tag_attributes = [
+            ("img", "src"),
+            ("link", "href"),
+            ("script", "src"),
+        ]
+        soup = BeautifulSoup(html, "html.parser")
+        for tag, attr in tag_attributes:
+            for el in soup.find_all(tag):
+                resource = el.attrs.get(attr)
+                if resource and "://" in resource:
+                    _logger.warning(f"External resource found: {resource}")
+
+
+def jinja2_formatdate(obj, fmt: str) -> str:
     """Jinja filter for formatting dates."""
-    if isinstance(obj, basestring):
+    if isinstance(obj, str):
         obj = dateutil.parser.parse(obj)
     return obj.strftime(fmt)
 
 
-def hash_n(text: str, numbers: int = 10) -> int:
+def hash_n(text: bytes, numbers: int = 10) -> int:
     """Hash a string into a number between 0 and `numbers-1`.
 
     Args:

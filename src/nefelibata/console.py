@@ -51,7 +51,7 @@ __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
 
-_logger = logging.getLogger(__name__)
+_logger = logging.getLogger("nefelibata")
 
 
 def setup_logging(loglevel: str) -> None:
