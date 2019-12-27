@@ -1,7 +1,8 @@
 [x] archive pages
 [x] add warning on external resources
-[ ] category pages
-[ ] mirror images
+[x] category pages
+[x] mirror images
+[ ] atom feed
 [ ] update requirements.txt
 [ ] improve build linking
 [ ] upload to S3 only when changed

@@ -5,7 +5,7 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 from nefelibata.post import get_posts, hash_n
-from nefelibata.utils import find_external_resources, get_config
+from nefelibata.utils import find_external_resources, get_config, mirror_images
 
 _logger = logging.getLogger("nefelibata")
 
@@ -40,6 +40,10 @@ def create_index(root: Path) -> None:
             next=next,
             hash_n=hash_n,
         )
+
+        # mirror images locally
+        html = mirror_images(html, root / "build" / "img")
+
         with open(root / "build" / name, "w") as fp:
             fp.write(html)
         previous, name = name, next
@@ -87,6 +91,10 @@ def create_categories(root: Path) -> None:
                 next=next,
                 hash_n=hash_n,
             )
+
+            # mirror images locally
+            html = mirror_images(html, root / "build" / "img")
+
             with open(root / "build" / name, "w") as fp:
                 fp.write(html)
             previous, name = name, next

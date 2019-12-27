@@ -11,7 +11,7 @@ import dateutil.parser
 import markdown
 from bs4 import BeautifulSoup
 from jinja2 import Environment, FileSystemLoader
-from nefelibata.utils import find_external_resources, get_config
+from nefelibata.utils import find_external_resources, get_config, mirror_images
 
 _logger = logging.getLogger("nefelibata")
 
@@ -117,6 +117,10 @@ class Post:
             breadcrumbs=[("Home", "/index.html"), (self.title, None)],
             hash_n=hash_n,
         )
+
+        # mirror images locally
+        html = mirror_images(html, post_directory / "img")
+
         filename = self.file_path.with_suffix(".html")
         with open(filename, "w") as fp:
             fp.write(html)
