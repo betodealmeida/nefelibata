@@ -28,9 +28,11 @@ Released under the MIT license.
 
 """
 
+from http.server import SimpleHTTPRequestHandler
 import logging
 import os
 import shutil
+import socketserver
 import sys
 from pathlib import Path
 
@@ -116,21 +118,18 @@ def build(root: Path, force: bool = False) -> None:
     config = get_config(root)
     _logger.debug(config)
 
-    resources = ["css", "js", "img"]
-
     build = root / "build"
     if not build.exists():
         _logger.info("Creating build/ directory")
         build.mkdir()
-        for resource in resources:
-            (build / resource).mkdir()
 
     _logger.info("Syncing resources")
+    resources = ["css", "js", "img"]
     for resource in resources:
-        path = root / "templates" / config["theme"] / resource
+        resource_directory = root / "templates" / config["theme"] / resource
         target = build / resource
-        for origin in path.glob("*"):
-            shutil.copy(origin, target)
+        if resource_directory.exists() and not target.exists():
+            target.symlink_to(resource_directory, target_is_directory=True)
 
     _logger.info("Processing posts")
     posts = get_posts(root)
@@ -158,7 +157,13 @@ def preview(root: Path, port: int = 8000) -> None:
     build = root / "build"
     os.chdir(build)
 
-
+    with socketserver.TCPServer(("", port), SimpleHTTPRequestHandler) as httpd:
+        _logger.info(f"Running HTTP server on port {port}")
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            _logger.info("Exiting")
+            httpd.shutdown()
 
 
 def main() -> None:
