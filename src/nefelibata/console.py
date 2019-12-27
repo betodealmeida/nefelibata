@@ -43,7 +43,7 @@ from pkg_resources import iter_entry_points, resource_filename, resource_listdir
 
 from docopt import docopt
 from nefelibata import __version__, config_filename, new_post
-from nefelibata.index import create_index
+from nefelibata.index import create_categories, create_index
 from nefelibata.post import Post, get_posts
 from nefelibata.utils import get_config
 
@@ -181,6 +181,9 @@ def build(root: Path, force: bool = False) -> None:
 
     _logger.info("Creating index")
     create_index(root)
+
+    _logger.info("Creating category pages")
+    create_categories(root)
 
 
 def preview(root: Path, port: int = 8000) -> None:

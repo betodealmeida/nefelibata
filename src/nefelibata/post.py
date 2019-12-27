@@ -114,7 +114,7 @@ class Post:
             post=self,
             scripts=scripts,
             stylesheets=stylesheets,
-            breadcrumbs=[("Home", ".."), (self.title, None)],
+            breadcrumbs=[("Home", "/index.html"), (self.title, None)],
             hash_n=hash_n,
         )
         filename = self.file_path.with_suffix(".html")

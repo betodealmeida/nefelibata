@@ -1,8 +1,8 @@
 [x] archive pages
 [x] add warning on external resources
+[ ] category pages
 [ ] mirror images
 [ ] update requirements.txt
-[ ] category pages
 [ ] improve build linking
 [ ] upload to S3 only when changed
 [ ] FB announcer

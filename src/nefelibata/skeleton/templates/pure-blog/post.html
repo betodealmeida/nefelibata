@@ -51,7 +51,7 @@
                             on <time datetime="{{ post.date.isoformat() }}" pubdate>{{ post.date.strftime('%Y-%m-%d') }}</time>
                             under
                             {% for keyword in post.parsed.keywords.split(",") %}
-                            <span class="post-category post-category-{{ hash_n(keyword.strip().encode('utf-8'), 4) }}">{{ keyword.strip() }}</span>
+                            <a class="post-category post-category-{{ hash_n(keyword.strip().encode('utf-8'), 4) }}" href="/{{ keyword.strip() }}.html">{{ keyword.strip() }}</a>
                             {% endfor %}
                         </p>
                     </header>
