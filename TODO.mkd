@@ -7,8 +7,8 @@
 [x] Twitter announcer
 [~] FAWM announcer
 [x] display comments
-[ ] show link to comment
-[ ] update requirements.txt
+[x] show link to comment
+[x] update requirements.txt
 [ ] microformats
 
 [ ] improve build linking

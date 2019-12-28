@@ -1,5 +1,5 @@
-from typing import Any, Dict, List
 from pathlib import Path
+from typing import Any, Dict, List
 
 from pkg_resources import iter_entry_points
 

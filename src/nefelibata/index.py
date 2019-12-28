@@ -1,9 +1,10 @@
-from collections import defaultdict
 import logging
 import math
+from collections import defaultdict
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
+
 from nefelibata.post import get_posts, hash_n
 from nefelibata.utils import find_external_resources, get_config, mirror_images
 

@@ -5,6 +5,7 @@ from typing import Any, Dict
 
 import boto3
 from botocore.exceptions import ClientError
+
 from nefelibata.publishers import Publisher
 
 _logger = logging.getLogger("nefelibata")

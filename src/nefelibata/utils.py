@@ -7,6 +7,7 @@ import requests
 import yaml
 from bs4 import BeautifulSoup
 from libgravatar import Gravatar
+
 from nefelibata import config_filename
 
 

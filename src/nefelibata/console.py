@@ -42,7 +42,7 @@ from pkg_resources import resource_filename, resource_listdir
 
 from nefelibata import __version__, config_filename, new_post
 from nefelibata.announcers import get_announcers
-from nefelibata.index import create_feed, create_categories, create_index
+from nefelibata.index import create_categories, create_feed, create_index
 from nefelibata.post import Post, get_posts
 from nefelibata.publishers import get_publishers
 from nefelibata.utils import get_config

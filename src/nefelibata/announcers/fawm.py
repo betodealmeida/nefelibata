@@ -1,11 +1,11 @@
-from datetime import datetime, timedelta
 import logging
 import re
+from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
-from bs4 import BeautifulSoup, NavigableString
 import dateutil.parser
 import requests
+from bs4 import BeautifulSoup, NavigableString
 
 from nefelibata.announcers import Announcer
 from nefelibata.post import Post
