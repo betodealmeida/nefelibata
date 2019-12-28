@@ -17,17 +17,18 @@ class Announcer:
 
             [{
                 source
+                [color]
                 id
                 timestamp
-                user:
-                    image
-                    url
-                    description
-                    username
-                comment:
+                user
+                    name
+                    [image]
+                    [url]
+                    [description]
+                comment
                     text
-                    url
-
+                    [url]
+            }]
 
         """
         raise NotImplementedError("Subclasses must implement collect")
