@@ -20,10 +20,15 @@ class Announcer:
             links = {}
 
         if self.name not in links:
-            links[self.name] = self.publish()
+            link = self.announce()
 
+            # store URL in links.json for template
+            links[self.name] = link
             with open(storage, "w") as fp:
                 json.dump(links, fp)
+
+            # also store in post header
+            self.post.parsed[self.url_header] = link
             self.post.save()
 
     def announce(self) -> str:

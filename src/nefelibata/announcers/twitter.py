@@ -65,6 +65,7 @@ class TwitterAnnouncer(Announcer):
     """
 
     name = "Twitter"
+    url_header = "twitter-url"
 
     def __init__(
         self,
@@ -103,12 +104,12 @@ class TwitterAnnouncer(Announcer):
         tweet id, so we need to fetch all mentions and see which of them are
         a reply.
         """
-        if "twitter-url" not in self.post.parsed:
+        if self.url_header not in self.post.parsed:
             return []
 
         _logger.info("Collecting replies from Twitter")
 
-        tweet_url = self.post.parsed["twitter-url"]
+        tweet_url = self.post.parsed[self.url_header]
         tweet_id = tweet_url.rstrip("/").rsplit("/", 1)[1]
         try:
             mentions = self.client.statuses.mentions_timeline(

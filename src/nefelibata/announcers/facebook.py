@@ -13,6 +13,7 @@ _logger = logging.getLogger("nefelibata")
 class FacebookAnnouncer(Announcer):
 
     name = "Facebook"
+    url_header = "facebook-url"
 
     def __init__(
         self, post: Post, config: Dict[str, Any], access_token: str, page_id: int

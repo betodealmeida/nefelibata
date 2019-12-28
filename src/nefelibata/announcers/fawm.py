@@ -1,7 +1,7 @@
 import logging
 import re
 from datetime import datetime, timedelta
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import dateutil.parser
 import requests
@@ -60,6 +60,8 @@ def reply_from_li(song_id: int, url: str, el: Any) -> Dict[str, Any]:
 
 
 def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
+    """Extract params from a standard FAWM post.
+    """
     soup = BeautifulSoup(post.html, "html.parser")
 
     # liner notes are between <h1>s
@@ -107,6 +109,25 @@ def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def get_replies_from_fawm_page(
+    url: str, username: str, password: str
+) -> List[Dict[str, Any]]:
+    """Extract replies from a given FAWM page.
+    """
+    response = requests.get(url, auth=(username, password))
+    response.encoding = "UTF-8"
+    html = response.text
+    soup = BeautifulSoup(html, "html.parser")
+
+    replies = []
+    song_id = int(url.rstrip("/").rsplit("/", 1)[1])
+    # there are non-comments with the class "comment-item", so we need to narrow down
+    for el in soup.find_all("li", {"class": "comment-item", "id": re.compile("c\d+")}):
+        replies.append(reply_from_li(song_id, url, el))
+
+    return replies
+
+
 class FAWMAnnouncer(Announcer):
 
     """FAWM Announcer
@@ -139,6 +160,7 @@ class FAWMAnnouncer(Announcer):
     """
 
     name = "FAWM"
+    url_header = "fawm-url"
 
     def __init__(
         self, post: Post, config: Dict[str, Any], username: str, password: str,
@@ -168,20 +190,10 @@ class FAWMAnnouncer(Announcer):
         """
 
     def collect(self) -> None:
-        if "fawm-url" not in self.post.parsed:
+        if self.url_header not in self.post.parsed:
             return []
 
         _logger.info("Collecting replies from FAWM")
 
-        url = self.post.parsed["fawm-url"]
-        song_id = int(url.rstrip("/").rsplit("/", 1)[1])
-
-        response = requests.get(url, auth=(self.username, self.password))
-        html = response.text
-        soup = BeautifulSoup(html, "html.parser")
-
-        replies = []
-        for el in soup.find_all("li", {"class": "comment-item", "id": re.compile("c")}):
-            replies.append(reply_from_li(song_id, url, el))
-
-        return replies
+        url = self.post.parsed[self.url_header]
+        return get_replies_from_fawm_page(url, self.username, self.password)
