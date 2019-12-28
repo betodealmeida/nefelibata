@@ -1,7 +1,5 @@
-import json
 import logging
-import operator
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import dateutil.parser
 import twitter
@@ -97,26 +95,17 @@ class TwitterAnnouncer(Announcer):
             self.post.save()
             _logger.info("Success!")
 
-    def collect(self) -> None:
+    def collect(self) -> List[Dict[str, Any]]:
         """Collect responses to a given tweet.
 
         Amazingly there's no support in the API to fetch all replies to a given
         tweet id, so we need to fetch all mentions and see which of them are
         a reply.
         """
-        _logger.info("Collecting replies from Twitter")
-
         if "twitter-url" not in self.post.parsed:
-            return
+            return []
 
-        post_directory = self.post.file_path.parent
-        storage = post_directory / "replies.json"
-        if storage.exists():
-            with open(storage) as fp:
-                replies = json.load(fp)
-        else:
-            replies = []
-        count = len(replies)
+        _logger.info("Collecting replies from Twitter")
 
         tweet_url = self.post.parsed["twitter-url"]
         tweet_id = tweet_url.rstrip("/").rsplit("/", 1)[1]
@@ -129,18 +118,13 @@ class TwitterAnnouncer(Announcer):
                 include_entities=True,
             )
         except twitter.api.TwitterHTTPError:
-            return
+            return []
 
-        ids = {reply["id"] for reply in replies}
+        replies = []
         for mention in mentions:
-            if (
-                mention["in_reply_to_status_id_str"] == tweet_id
-                and mention["id"] not in ids
-            ):
+            if mention["in_reply_to_status_id_str"] == tweet_id:
                 replies.append(reply_from_tweet(mention))
 
-        if len(replies) > count:
-            replies.sort(key=operator.itemgetter("timestamp"))
-            with open(storage, "w") as fp:
-                json.dump(replies, fp)
-            self.post.save()
+        _logger.info("Success!")
+
+        return replies

@@ -1,3 +1,5 @@
+import json
+import operator
 from typing import Any, Dict, List
 
 from pkg_resources import iter_entry_points
@@ -9,7 +11,28 @@ class Announcer:
     def announce(self) -> None:
         raise NotImplementedError("Subclasses must implement announce")
 
-    def collect(self) -> None:
+    def update_replies(self) -> None:
+        """Update replies.json with new replies, if any.
+        """
+        post_directory = self.post.file_path.parent
+        storage = post_directory / "replies.json"
+        if storage.exists():
+            with open(storage) as fp:
+                replies = json.load(fp)
+        else:
+            replies = []
+        count = len(replies)
+
+        ids = {reply["id"] for reply in replies}
+        replies.extend(reply for reply in self.collect() if reply["id"] not in ids)
+
+        if len(replies) > count:
+            replies.sort(key=operator.itemgetter("timestamp"))
+            with open(storage, "w") as fp:
+                json.dump(replies, fp)
+            self.post.save()
+
+    def collect(self) -> List[Dict[str, Any]]:
         """Collect responses.
 
         The responses should be stored as JSON in the post directory, with the

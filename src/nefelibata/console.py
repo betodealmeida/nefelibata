@@ -171,7 +171,7 @@ def build(root: Path, force: bool = False) -> None:
     _logger.info("Processing posts")
     for post in get_posts(root):
         for announcer in get_announcers(post, config):
-            announcer.collect()
+            announcer.update_replies()
 
         if force or not post.up_to_date:
             post.create()
