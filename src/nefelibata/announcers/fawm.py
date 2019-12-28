@@ -130,7 +130,7 @@ class FAWMAnnouncer(Announcer):
         url = self.post.parsed["fawm-url"]
         song_id = int(url.rstrip("/").rsplit("/", 1)[1])
 
-        response = requests.get(url)
+        response = requests.get(url, auth=(self.username, self.password))
         html = response.text
         soup = BeautifulSoup(html, "html.parser")
 
