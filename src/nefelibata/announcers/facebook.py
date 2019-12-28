@@ -22,11 +22,6 @@ class FacebookAnnouncer(Announcer):
 
     def announce(self) -> None:
         """Publish the summary of a post to Facebook.
-
-        Facebook doesn't have a publish API, so we need to open the browser
-        with a link for the user. Once the user has posted, we have the post
-        id so we can store if for later, when collecting replies.
-
         """
         if "facebook-url" not in self.post.parsed:
             _logger.info("Announcing post on Facebook")

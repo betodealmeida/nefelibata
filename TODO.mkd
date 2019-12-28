@@ -9,7 +9,6 @@
 [ ] display comments
 [ ] update requirements.txt
 [ ] improve build linking
-[ ] announcer class should have name attribute (for linking)
 [ ] make theme a class?
 [ ] microformats
 [ ] FB announcer

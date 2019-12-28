@@ -64,8 +64,6 @@ class TwitterAnnouncer(Announcer):
 
     """
 
-    name = "Twitter"
-
     def __init__(
         self,
         post: Post,
