@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from nefelibata.skeleton import fib
+from dateutil.parser import ParserError
+from nefelibata.post import jinja2_formatdate
 
 __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
 
 
-def test_fib():
-    assert fib(1) == 1
-    assert fib(2) == 1
-    assert fib(7) == 13
-    with pytest.raises(AssertionError):
-        fib(-10)
+def test_jinja2_formatdate():
+    assert jinja2_formatdate(0, "%Y-%m-%d") == "1969-12-31"
+    with pytest.raises(ParserError):
+        jinja2_formatdate("invalid", "%Y-%m-%d")
