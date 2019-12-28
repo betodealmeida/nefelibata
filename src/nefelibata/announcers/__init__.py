@@ -40,6 +40,7 @@ class Announcer:
 
             [{
                 source
+                url
                 [color]
                 id
                 timestamp

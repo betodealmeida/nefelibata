@@ -6,9 +6,11 @@
 [x] upload to S3 only when changed
 [x] Twitter announcer
 [~] FAWM announcer
-[ ] display comments
+[x] display comments
+[ ] show link to comment
 [ ] update requirements.txt
-[ ] improve build linking
-[ ] make theme a class?
 [ ] microformats
+
+[ ] improve build linking
 [ ] FB announcer
+[ ] make theme a class?
