@@ -3,9 +3,9 @@
 [x] category pages
 [x] mirror images
 [x] atom feed
-[ ] upload to S3 only when changed
+[x] upload to S3 only when changed
 [x] Twitter announcer
-[x] FAWM announcer
+[~] FAWM announcer
 [ ] display comments
 [ ] update requirements.txt
 [ ] improve build linking

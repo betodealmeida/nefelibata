@@ -74,6 +74,13 @@ class S3Publisher(Publisher):
     def publish(self, root: Path) -> None:
         self._create_bucket()
 
+        # store file with the last time weblog was published
+        last_published_file = root / "last_published"
+        if last_published_file.exists():
+            last_published = last_published_file.stat().st_mtime
+        else:
+            last_published = 0
+
         build = root / "build"
         queue = [build]
         # manually walk, since `glob("**/*")` doesn't follow symlinks
@@ -82,7 +89,7 @@ class S3Publisher(Publisher):
             for path in current.glob("*"):
                 if path.is_dir():
                     queue.append(path)
-                else:
+                elif path.stat().st_mtime > last_published:
                     key = str(path.relative_to(build))
                     self._upload_file(path, key)
 
@@ -91,6 +98,10 @@ class S3Publisher(Publisher):
 
         if self.configure_route53:
             self._configure_route53()
+
+        # update last published
+        with open(last_published_file, "w") as fp:
+            pass
 
     def _get_client(self, service: str):
         return boto3.client(
