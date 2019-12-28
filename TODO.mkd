@@ -5,11 +5,11 @@
 [x] atom feed
 [ ] upload to S3 only when changed
 [x] Twitter announcer
-[ ] FAWM announcer
+[x] FAWM announcer
+[ ] display comments
 [ ] update requirements.txt
 [ ] improve build linking
 [ ] announcer class should have name attribute (for linking)
-[ ] announcer should store URL to announced post
 [ ] make theme a class?
 [ ] microformats
 [ ] FB announcer
