@@ -1,223 +1,262 @@
 # -*- coding: utf-8 -*-
-
 """
-Nefelibata blog engine.
+Nefelibata weblog engine.
 
 Usage:
-  nb init [DIRECTORY]
-  nb build [DIRECTORY]
-  nb preview [-p PORT] [DIRECTORY]
-  nb publish [DIRECTORY]
-  nb facebook <short_access_token> <app_id> <app_secret>
+  nb init [DIRECTORY] [--loglevel=INFO]
+  nb new POST [DIRECTORY] [--loglevel=INFO]
+  nb build [DIRECTORY] [-f] [--loglevel=INFO]
+  nb preview [-p PORT] [DIRECTORY] [--loglevel=INFO]
+  nb publish [DIRECTORY] [--loglevel=INFO]
 
 Actions:
-  init          Create a new blog skeleton.
-  build         Build blog HTML files.
-  preview       Runs SimpleHTTPServer and opens the browser.
-  publish       Publish blog to configured locations and announce new posts.
-  facebook      Create a long term token for Facebook Graph API.
+  init              Create a new weblog skeleton.
+  new               Create a new post.
+  build             Build weblog from Markdown and social media interactions.
+  preview           Run SimpleHTTPServer and open browser.
+  publish           Publish weblog to configured locations and announce new posts.
 
 Options:
-  -h --help     Show this screen.
-  --version     Show version.
-  -p PORT       Port to run the web server for preview. [default: 8000]
+  -h --help         Show this screen.
+  --version         Show version.
+  -p PORT           Port to run the web server for preview. [default: 8000]
+  -f --force        Force rebuild of HTML.
+  --loglevel=LEVEL  Level for logging. [default: INFO]
 
 Released under the MIT license.
-(c) 2013 Roberto De Almeida <roberto@dealmeida.net>
+(c) 2013-2019 Beto Dealmeida <roberto@dealmeida.net>
 
 """
 
+import logging
 import os
-from pkg_resources import (
-    resource_listdir, resource_filename, iter_entry_points)
-import SimpleHTTPServer
-import SocketServer
-import webbrowser
+import shutil
+import socketserver
+import sys
+from http.server import SimpleHTTPRequestHandler
+from pathlib import Path
+from subprocess import call
 
-import yaml
-from path import path
-from consoleLog.consoleLog import ConsoleLogger
-from consoleLog.progressBar import withProgress
+from docopt import docopt
+from pkg_resources import resource_filename, resource_listdir
 
-from nefelibata import find_directory
-from nefelibata.post import iter_posts, create_index, create_feed
+from nefelibata import __version__, config_filename, new_post
+from nefelibata.announcers import get_announcers
+from nefelibata.index import create_categories, create_feed, create_index
+from nefelibata.post import Post, get_posts
+from nefelibata.publishers import get_publishers
+from nefelibata.utils import get_config
+
+__author__ = "Beto Dealmeida"
+__copyright__ = "Beto Dealmeida"
+__license__ = "mit"
+
+_logger = logging.getLogger("nefelibata")
 
 
-def init(root):
+def setup_logging(loglevel: str) -> None:
+    """Setup basic logging
+
+    Args:
+      loglevel (str): minimum loglevel for emitting messages
     """
-    Create the basic structure copying from skeleton.
+    level = getattr(logging, loglevel.upper(), None)
+    if not isinstance(level, int):
+        raise ValueError("Invalid log level: %s" % loglevel)
 
-    By default, we create the blog in the current directory.
+    logformat = "[%(asctime)s] %(levelname)s: %(name)s: %(message)s"
+    logging.basicConfig(
+        level=level, stream=sys.stdout, format=logformat, datefmt="%Y-%m-%d %H:%M:%S"
+    )
 
+
+def find_directory(cwd: Path) -> Path:
+    """Find root of blog, starting from `cwd`.
+
+    The function will traverse up trying to find a configuration file.
+
+    Args:
+      cwd (str): starting directory
     """
-    # list all resources in the skeleton directory
-    resources = resource_listdir('nefelibata', 'skeleton')
+    while not (cwd / config_filename).exists():
+        if cwd == cwd.parent:
+            raise SystemExit("No configuration found!")
+        cwd = cwd.parent
 
-    # and extract them to our target
+    return cwd
+
+
+def init(root: Path) -> None:
+    """Create initial structure for weblog.
+
+    Args:
+      root (str): directory where the weblog should be initialized
+    """
+    resources = resource_listdir("nefelibata", "skeleton")
+
     for resource in resources:
-        origin = path(
-            resource_filename(
-                'nefelibata', os.path.join('skeleton', resource)))
-        target = root/resource
+        origin = Path(
+            resource_filename("nefelibata", os.path.join("skeleton", resource))
+        )
+        target = root / resource
         # good guy Greg does not overwrite existing files
         if target.exists():
-            raise IOError('File already exists!')
-        if origin.isdir():
-            origin.copytree(target)
+            raise IOError("File already exists!")
+        if origin.is_dir():
+            shutil.copytree(origin, target)
         else:
-            origin.copy(target)
+            shutil.copy(origin, target)
 
-    log = ConsoleLogger()
-    log.log('Blog created!')
+    _logger.info("Weblog created!")
 
 
-def build(root):
-    """Build all static pages from posts."""
-    log = ConsoleLogger()
-    log.start("Building blog")
+def new(root: Path, directory: str) -> None:
+    """Create a new post and open editor.
 
-    # load configuration
-    with open(root/'nefelibata.yaml') as fp:
-        config = yaml.load(fp)
+    Args:
+      root (str): directory where the weblog lives
+      directory (str): name of directory for the post
+    """
+    _logger.info("Creating new directory")
+    directory = directory.replace(" ", "_").lower()
+    target = root / "posts" / directory
+    if target.exists():
+        raise IOError("Directory already exists!")
+    target.mkdir()
+    os.chdir(target)
 
-    # create build directory if necessary and copy css/js
-    build = root/'build'
+    _logger.info("Adding resource files")
+    resources = ["css", "js", "img"]
+    for resource in resources:
+        (target / resource).mkdir()
+
+    editor = os.environ.get("EDITOR")
+    if not editor:
+        _logger.info("No EDITOR found, exiting")
+        return
+
+    filepath = target / "index.mkd"
+    with open(filepath, "w") as fp:
+        fp.write(new_post)
+
+    call([editor, filepath])
+
+
+def build(root: Path, force: bool = False) -> None:
+    """Build weblog from Markdown posts and social media interactions.
+
+    Args:
+      root (str): directory where the weblog lives
+    """
+    _logger.info("Building weblog")
+
+    config = get_config(root)
+    _logger.debug(config)
+
+    build = root / "build"
     if not build.exists():
-        log.log("Creating build/ directory")
+        _logger.info("Creating build/ directory")
         build.mkdir()
-        (build/'css').mkdir()
-        (build/'js').mkdir()
-        (build/'img').mkdir()
 
-    # sync stylesheets and scripts
-    log.log("Syncing stylesheets, script and images")
-    css = root/'templates'/config['theme']/'css'
-    for stylesheet in css.files():
-        (css/stylesheet).copy(build/'css')
-    js = root/'templates'/config['theme']/'js'
-    for script in js.files():
-        (js/script).copy(build/'js')
-    imgs = root/'templates'/config['theme']/'img'
-    for img in imgs.files():
-        (imgs/img).copy(build/'img')
+    _logger.info("Syncing resources")
+    resources = ["css", "js", "img"]
+    for resource in resources:
+        resource_directory = root / "templates" / config["theme"] / resource
+        target = build / resource
+        if resource_directory.exists() and not target.exists():
+            target.symlink_to(resource_directory, target_is_directory=True)
 
-    # load announcers to collect interactions
-    announcers = {
-        a.name: a.load() for a in iter_entry_points('nefelibata.announcer')
-    }
-    names = config['announce-on'] or []
-    if isinstance(names, basestring):
-        names = [names]
+    _logger.info("Processing posts")
+    for post in get_posts(root):
+        for announcer in get_announcers(post, config):
+            announcer.update_replies()
 
-    # check all files that need to be processed
-    posts = list(iter_posts(root/'posts'))
-    posts.sort(key=lambda x: x.date, reverse=True)
-    log.log("Processing posts ", newLine=False)
-    for post in withProgress(posts):
-        for name in names:
-            section = config[name]
-            announcer = announcers[name](post, config, **section)
-            announcer.collect()
+        if force or not post.up_to_date:
+            post.create()
 
-        # create HTML
-        if not post.updated:
-            post.create(config)
+        # symlink build -> posts
+        post_directory = post.file_path.parent
+        relative_directory = post_directory.relative_to(root / "posts")
+        target = root / "build" / relative_directory
+        if post_directory.exists() and not target.exists():
+            target.symlink_to(post_directory, target_is_directory=True)
 
-    # build the index
-    log.log("Creating index")
-    create_index(root, posts, config)
-    log.log("Creating Atom feed")
-    create_feed(root, posts, config)
+    _logger.info("Creating index")
+    create_index(root)
 
-    log.finish('Blog built!')
+    _logger.info("Creating category pages")
+    create_categories(root)
+
+    _logger.info("Creating Atom feed")
+    create_feed(root)
 
 
-def preview(root, port=8000):
-    """Run a local HTTP server and load browser."""
-    build = root/'build'
+def preview(root: Path, port: int = 8000) -> None:
+    """Run a local HTTP server and open browser.
+
+    Args:
+      root (str): directory where the weblog lives
+    """
+    _logger.info("Previewing weblog")
+
+    build = root / "build"
     os.chdir(build)
 
-    log = ConsoleLogger()
-
-    Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-    httpd = SocketServer.TCPServer(("", port), Handler)
-    log.start("serving at port %s" % port)
-    webbrowser.open("http://localhost:%d/" % port)
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        log.finish("exiting...")
-        httpd.shutdown()
+    with socketserver.TCPServer(("", port), SimpleHTTPRequestHandler) as httpd:
+        _logger.info(f"Running HTTP server on port {port}")
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            _logger.info("Exiting")
+            httpd.shutdown()
 
 
-def publish(root):
-    """Publish the blog to the defined storages."""
-    # load configuration
-    with open(root/'nefelibata.yaml') as fp:
-        config = yaml.load(fp)
+def publish(root: Path) -> None:
+    """Publish weblog.
 
-    # load publishers
-    publishers = {
-        p.name: p.load() for p in iter_entry_points('nefelibata.publisher')
-    }
+    Args:
+      root (str): directory where the weblog lives
+    """
+    _logger.info("Publishing weblog")
 
-    # publish site
-    names = config['publish-to'] or []
-    if isinstance(names, basestring):
-        names = [names]
-    for name in names:
-        section = config[name]
-        publisher = publishers[name](**section)
-        publisher.publish(root/'build')
+    config = get_config(root)
+    _logger.debug(config)
 
-    # load announcers
-    announcers = {
-        a.name: a.load() for a in iter_entry_points('nefelibata.announcer')
-    }
+    for publisher in get_publishers(config):
+        publisher.publish(root)
 
-    # announce them
-    posts = list(iter_posts(root/'posts'))
-    posts.sort(key=lambda x: x.date, reverse=True)
-    for post in posts:
-        names = post.post.get('announce-on') or config['announce-on'] or []
-        if isinstance(names, basestring):
-            names = [names]
-        for name in names:
-            section = config[name]
-            announcer = announcers[name](post, config, **section)
+    # announce posts
+    for post in get_posts(root):
+        for announcer in get_announcers(post, config):
             announcer.announce()
 
 
-def main():
-    """CLI argument parser."""
-    from docopt import docopt
+def main() -> None:
+    """Main entry point allowing external calls
+    """
+    arguments = docopt(__doc__, version=__version__)
 
-    arguments = docopt(__doc__)
+    setup_logging(arguments["--loglevel"])
 
-    # Get the directory from our blog. If not defined we assume we're
-    # inside the blog, so we may need to go up the filesystem in order to find
-    # the root.
-    if arguments['DIRECTORY'] is None:
-        root = find_directory(os.getcwd())
+    if arguments["DIRECTORY"] is None:
+        if arguments["init"]:
+            root = Path(".")
+        else:
+            root = find_directory(Path(os.getcwd()))
     else:
-        root = path(arguments['DIRECTORY'])
+        root = Path(arguments["DIRECTORY"])
 
-    if arguments['init']:
+    if arguments["init"]:
         init(root)
-    elif arguments['build']:
-        build(root)
-    elif arguments['preview']:
-        preview(root, int(arguments['-p']))
-    elif arguments['publish']:
+    elif arguments["new"]:
+        new(root, arguments["POST"])
+    elif arguments["build"]:
+        build(root, arguments["--force"])
+    elif arguments["preview"]:
+        preview(root, int(arguments["-p"]))
+    elif arguments["publish"]:
         publish(root)
-    elif arguments['facebook']:
-        import facepy
-        log = ConsoleLogger()
-        log.log(facepy.utils.get_extended_access_token(
-            access_token=arguments['<short_access_token>'],
-            application_id=arguments['<app_id>'],
-            application_secret_key=arguments['<app_secret>'])[0])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

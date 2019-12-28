@@ -1,19 +1,16 @@
-from path import path
+# -*- coding: utf-8 -*-
+from pkg_resources import DistributionNotFound, get_distribution
+
+try:
+    # Change here if project is renamed and does not equal the package name
+    dist_name = __name__
+    __version__ = get_distribution(dist_name).version
+except DistributionNotFound:
+    __version__ = "unknown"
+finally:
+    del get_distribution, DistributionNotFound
 
 
-def find_directory(cwd):
-    """
-    Find root directory of the blog.
+config_filename = "nefelibata.yaml"
 
-    Given a path we go up the filesystem until we find the configuration file.
-
-    """
-    cwd = path(cwd)
-
-    while not (cwd/'nefelibata.yaml').exists():
-        parent = cwd/'..'
-        if cwd == parent.abspath():
-            raise SystemExit('No configuration found!')
-        cwd = parent
-
-    return cwd.abspath()
+new_post = "subject: \nsummary: \nkeywords: \n\n\n"

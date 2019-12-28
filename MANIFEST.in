@@ -1,3 +1,0 @@
-include README.rst
-include NEWS.txt
-recursive-include src/nefelibata/skeleton *

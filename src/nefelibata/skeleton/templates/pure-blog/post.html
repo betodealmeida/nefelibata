@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block meta %}
+    <meta name="description" content="{{ post.summary }}">
+
+    {% if post.parsed['keywords'] %}
+    <meta name="keywords" content="{{ post.parsed.keywords }}">
+    {% endif %}
+
+    {% if post.parsed['authors'] %}
+    <meta name="author" content="{{ post.parsed['authors'] }}">
+    {% endif %}
+{% endblock %}
+
+{% block title %}{{ config.title }}: {{ post.title }}{% endblock %}
+
+{% block css %}
+    {% for stylesheet in stylesheets %}
+    <link href="{{ stylesheet }}" rel="stylesheet">
+    {% endfor %}
+{% endblock %}
+
+{% block javascript %}
+    {% for script in scripts %}
+    <script src="{{ script }}"></script>
+    {% endfor %}
+{% endblock %}
+
+{% block content %}
+            <div class="posts">
+                <h1 class="content-subhead">
+                    {% for name, target in breadcrumbs %}
+                        {{ "&raquo;" if not loop.first }}
+                        {% if target %}
+                            <a href="{{ target }}">{{ name }}</a>
+                        {% else %}
+                            {{ name }}
+                        {% endif %}
+                    {% endfor %}
+                </h1>
+
+                <!-- A single blog post -->
+                <section class="post">
+                    <header class="post-header">
+                        <img width="48" height="48" alt="{{ config.author.name }}&#x27;s avatar" class="post-avatar" src="{{ config.author.profile_picture }}">
+
+                        <h2 class="post-title">{{ post.title }}</h2>
+
+                        <p class="post-meta">
+                            By <a class="post-author" href="mailto:{{ config.author.email }}">{{ config.author.name }}</a>
+                            on <time datetime="{{ post.date.isoformat() }}" pubdate>{{ post.date.strftime('%Y-%m-%d') }}</time>
+                            under
+                            {% for keyword in post.parsed.keywords.split(",") %}
+                            <a class="post-category post-category-{{ hash_n(keyword.strip().encode('utf-8'), 4) }}" href="/{{ keyword.strip() }}.html">{{ keyword.strip() }}</a>
+                            {% endfor %}
+                        </p>
+                    </header>
+
+                    <div class="post-description">
+                        {{ post.html }}
+
+                        <!--
+                        This is the raw Markdown post:
+
+                        {{ post.markdown|e }}
+                        -->
+                    </div>
+                </section>
+
+                <h1 class="content-subhead">Comments</h1>
+
+                {% if json.links %}
+                <p>You can comment on
+                {% for site, url in json.links.items() %}
+                {%- if loop.first -%}
+                {% elif loop.last %}
+                or
+                {%- else -%}
+                ,
+                {%- endif %}
+                <a href="{{ url }}">{{ site }}</a>
+                {%- endfor -%}.
+                {% endif %}
+
+                {% for reply in json.replies %}
+                <div class="comment" style="border-left-color: {{ reply.color }}">
+                        <div>
+                            <img width="48" height="48" alt="{{ reply.user.name }}&#x27;s avatar" class="comment-avatar" src="{{ reply.user.image }}">
+                        </div>
+                        <div>
+                            <div class="comment-meta">
+                                <a class="comment-author" rel="nofollow" title="{{ reply.user.description }}" href="{{ reply.user.url }}">{{ reply.user.name }}</a>
+                                replied on
+                                <a href="{{ reply.url }}">{{ reply.source }}</a>
+                                on
+                                <a rel="nofollow" title="{{ reply.timestamp|formatdate("%c") }}" href="{{ reply.comment.url }}">{{ reply.timestamp|formatdate("%Y-%m-%d") }}</a>:
+                            </div>
+                            <div class="comment-description">
+                                <p>{{ reply.comment.text }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+{% endblock %}

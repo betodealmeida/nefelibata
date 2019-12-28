@@ -1,59 +1,23 @@
-from setuptools import setup, find_packages
-import sys, os
+# -*- coding: utf-8 -*-
+"""
+    Setup file for nefelibata.
+    Use setup.cfg to configure your project.
 
-here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.rst')).read()
-NEWS = open(os.path.join(here, 'NEWS.txt')).read()
+    This file was generated with PyScaffold 3.2.3.
+    PyScaffold helps you to put up the scaffold of your new Python project.
+    Learn more under: https://pyscaffold.org/
+"""
+import sys
 
+from pkg_resources import VersionConflict, require
+from setuptools import setup
 
-version = '0.1'
-
-install_requires = [
-    # List your project dependencies here.
-    # For more details, see:
-    # http://packages.python.org/distribute/setuptools.html#declaring-dependencies
-    'path.py>=3.0.1',
-    'docopt>=0.6.1',
-    'PyYAML>=3.08',
-    'Markdown>=2.2.1',
-    'jinja2>=2.6',
-    'boto>=2.8.0',
-    'twitter>=1.9.1',
-    'facepy>=0.8.4',
-    'Pygments>=1.6',
-    'simplejson>=3.3.0',
-    'python-dateutil>=2.1',
-    'beautifulsoup4>=4.2.0',
-    'requests>=1.2.3',
-    'consoleLog>=0.2.4',
-]
+try:
+    require('setuptools>=38.3')
+except VersionConflict:
+    print("Error: version of setuptools is too old (<38.3)!")
+    sys.exit(1)
 
 
-setup(name='nefelibata',
-    version=version,
-    description="A blog engine based on data ownership and persistence",
-    long_description=README + '\n\n' + NEWS,
-    classifiers=[
-      # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
-    ],
-    keywords='blog S3 static',
-    author='Roberto De Almeida',
-    author_email='roberto@dealmeida.net',
-    url='http://dealmeida.net/',
-    license='MIT',
-    packages=find_packages('src'),
-    package_dir = {'': 'src'},include_package_data=True,
-    zip_safe=False,
-    install_requires=install_requires,
-    entry_points="""
-        [console_scripts]
-        nb = nefelibata.console:main
-
-        [nefelibata.publisher]
-        S3 = nefelibata.publishers.s3:S3
-
-        [nefelibata.announcer]
-        twitter = nefelibata.announcers.twitter:Twitter
-        facebook = nefelibata.announcers.facebook:Facebook
-    """
-)
+if __name__ == "__main__":
+    setup(use_pyscaffold=True)

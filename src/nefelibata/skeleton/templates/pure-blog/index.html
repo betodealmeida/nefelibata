@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block meta %}
+    <meta name="description" content="{{ config.title }}: {{ config.subtitle }}">
+    <meta name="author" content="{{ config.author.name }}">
+{% endblock %}
+
+{% block title %}{{ config.title }}{% endblock %}
+
+{% block navigation %}
+            <nav class="nav">
+                <ul class="nav-list">
+                    {% if previous %}
+                    <li class="nav-item">
+                        <a class="pure-button" href="{{ previous }}">Previous</a>
+                    </li>
+                    {% endif %} 
+                    {% if next %}
+                    <li class="nav-item">
+                        <a class="pure-button" href="{{ next }}">Next</a>
+                    </li>
+                    {% endif %} 
+                </ul>
+            </nav>
+{% endblock %}
+
+{% block content %}
+            <div class="posts">
+                <h1 class="content-subhead">
+                    {% for name, target in breadcrumbs %}
+                        {{ "&raquo;" if not loop.first }}
+                        {% if target %}
+                            <a href="{{ target }}">{{ name }}</a>
+                        {% else %}
+                            {{ name }}
+                        {% endif %}
+                    {% endfor %}
+                </h1>
+
+                {% for post in posts %}
+                <section class="post">
+                    <header class="post-header">
+                        <img width="48" height="48" alt="{{ config.author.name }}&#x27;s avatar" class="post-avatar" src="{{ config.author.profile_picture }}">
+
+                        <h2 class="post-title"><a href="{{ post.url }}">{{ post.title }}</a></h2>
+
+                        <p class="post-meta">
+                            By <a class="post-author" href="mailto:{{ config.author.email }}">{{ config.author.name }}</a>
+                            on <time datetime="{{ post.date.isoformat() }}" pubdate>{{ post.date.strftime('%Y-%m-%d') }}</time>
+                            under
+                            {% for keyword in post.parsed.keywords.split(",") %}
+                            <a class="post-category post-category-{{ hash_n(keyword.strip().encode('utf-8'), 4) }}" href="/{{ keyword.strip() }}.html">{{ keyword.strip() }}</a>
+                            {% endfor %}
+                        </p>
+                    </header>
+
+                    <div class="post-description">
+                        {{ post.summary }}
+                    </div>
+                </section>
+                {% endfor %}
+            </div>
+{% endblock %}                                                                  

@@ -1,21 +1,44 @@
-"""Twitter announcer.
+import logging
+from typing import Any, Dict, List, Optional
 
-This module implements a Twitter announcer, for publishing a post summary to
-Twitter and aggregating replies.
-
-"""
-from __future__ import absolute_import
-
-import operator
-
+import dateutil.parser
 import twitter
-from simplejson import load, dump
+
+from nefelibata.announcers import Announcer
+from nefelibata.post import Post
+
+_logger = logging.getLogger("nefelibata")
+
+max_length = 280
 
 
-class Twitter(object):
+def reply_from_mention(tweet: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate a standard reply from a Tweet.
 
+    Args:
+      tweet (Dict[str, any]): The tweet response from the Twitter API
     """
-    Update Twitter status.
+    return {
+        "source": "Twitter",
+        "color": "#00acee",
+        "id": f'twitter:{tweet["id_str"]}',
+        "timestamp": dateutil.parser(tweet["created_at"]).timestamp(),
+        "user": {
+            "name": tweet["user"]["name"],
+            "image": tweet["user"]["profile_image_url_https"],
+            "url": tweet["user"]["url"],
+            "description": tweet["user"]["description"],
+        },
+        "comment": {
+            "text": tweet["text"],
+            "url": f'https://twitter.com/{tweet["user"]["screen_name"]}/status/{tweet["id_str"]}',
+        },
+    }
+
+
+class TwitterAnnouncer(Announcer):
+
+    """A Twitter announcer/collector.
 
     The configuration in nefelibata.yaml should look like this:
 
@@ -26,77 +49,86 @@ class Twitter(object):
             oauth_secret: XXX
 
     In order to create consumer_key and consumer_secret you must visit
-    https://dev.twitter.com/apps/new and register a new application. There you
-    can also request oauth_token and oauth_secret.
+    https://dev.twitter.com/apps/new and register a new application. Then
+    you should run the following script to get oauth_token and oauth_secret:
+
+        import os
+        from twitter import *
+
+        CONSUMER_KEY = "XXX"
+        CONSUMER_SECRET = "XXX"
+        oauth_dance("My App Name", CONSUMER_KEY, CONSUMER_SECRET, "secret.txt")
+
+    After running the script and following the instructions oauth_token and
+    oauth_secret will be stored in `secret.txt`.
 
     """
 
+    name = "Twitter"
+
     def __init__(
-            self, post, config, username,
-            consumer_key, consumer_secret, oauth_token, oauth_secret):
-        """Twitter interaction for a given post."""
+        self,
+        post: Post,
+        config: Dict[str, Any],
+        consumer_key: str,
+        consumer_secret: str,
+        oauth_token: str,
+        oauth_secret: str,
+    ):
         self.post = post
         self.config = config
 
-        # create twitter communicator
-        auth = twitter.OAuth(
-            oauth_token, oauth_secret, consumer_key, consumer_secret)
-        self.twitter = twitter.Twitter(auth=auth)
+        auth = twitter.OAuth(oauth_token, oauth_secret, consumer_key, consumer_secret)
+        self.client = twitter.Twitter(auth=auth)
 
-    def announce(self):
-        """Publish the summary of a post to Twitter."""
-        if 'twitter-id' not in self.post.post:
-            link = "%s%s" % (self.config['url'], self.post.url)
-            # shorten url? XXX
-            status = "%s %s" % (self.post.summary[:140-1-len(link)], link)
-            response = self.twitter.statuses.update(status=status)
-            self.post.post['twitter-id'] = response['id_str']
-            self.post.save()
-
-    def collect(self):
+    def publish(self, links: Dict[str, str]) -> Optional[str]:
+        """Publish the summary of a post to Twitter.
         """
-        Collect responses to a given tweet.
+        if self.name in links:
+            return
+
+        _logger.info("Posting to Twitter")
+
+        post_url = "%s%s" % (self.config["url"], self.post.url)
+        status = "%s %s" % (
+            self.post.summary[: max_length - 1 - len(post_url)],
+            post_url,
+        )
+        response = self.client.statuses.update(status=status)
+        _logger.info("Success!")
+
+        return f'https://twitter.com/{response["user"]["screen_name"]}/status/{response["id_str"]}'
+
+    def collect(self) -> List[Dict[str, Any]]:
+        """Collect responses to a given tweet.
 
         Amazingly there's no support in the API to fetch all replies to a given
         tweet id, so we need to fetch all mentions and see which of them are
         a reply.
-
         """
-        if 'twitter-id' not in self.post.post:
-            return
+        if "twitter-url" not in self.post.parsed:
+            return []
 
-        # load replies
-        directory = self.post.file_path.dirname()
-        storage = directory/'twitter.json'
-        if storage.exists():
-            with open(storage) as fp:
-                replies = load(fp)
-        else:
-            replies = []
-        count = len(replies)
+        _logger.info("Collecting replies from Twitter")
 
-        tweet = self.post.post['twitter-id']
+        tweet_url = self.post.parsed["twitter-url"]
+        tweet_id = tweet_url.rstrip("/").rsplit("/", 1)[1]
         try:
-            mentions = self.twitter.statuses.mentions_timeline(
+            mentions = self.client.statuses.mentions_timeline(
                 count=200,
-                since_id=tweet,
+                since_id=tweet_id,
                 trim_user=False,
                 contributor_details=True,
-                include_entities=True)
+                include_entities=True,
+            )
         except twitter.api.TwitterHTTPError:
-            return
+            return []
 
-        ids = [reply['id'] for reply in replies]
+        replies = []
         for mention in mentions:
-            if mention['in_reply_to_status_id_str'] == tweet:
-                if mention['id'] not in ids:
-                    replies.append(mention)
+            if mention["in_reply_to_status_id_str"] == tweet_id:
+                replies.append(reply_from_tweet(mention))
 
-        # save replies
-        replies.sort(key=operator.itemgetter('id_str'))
-        with open(storage, 'w') as fp:
-            dump(replies, fp)
+        _logger.info("Success!")
 
-        # touch post for rebuild
-        if count < len(replies):
-            self.post.save()
+        return replies

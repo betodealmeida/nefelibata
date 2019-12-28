@@ -1,96 +1,54 @@
-"""Facebook announcer.
+import logging
+from typing import Any, Dict, List, Optional
 
-This module implements a Facebook announcer, for publishing a  post summary to
-Facebook and aggregating replies.
+from bs4 import BeautifulSoup
+import facebook
 
-"""
-import operator
+from nefelibata.announcers import Announcer
+from nefelibata.post import Post
 
-from facepy import GraphAPI
-from simplejson import load, dump
+_logger = logging.getLogger("nefelibata")
 
 
-class Facebook(object):
+class FacebookAnnouncer(Announcer):
 
-    """
-    Publish post to facebook.
+    name = "Facebook"
 
-    The configuration in nefelibata.yaml should look like this:
-
-        facebook:
-            access_token: XXX
-
-    Request an access_token at https://developers.facebook.com/tools/explorer/.
-
-    More info on the API here:
-
-        https://developers.facebook.com/docs/graph-api/reference/user/feed
-
-    """
-
-    def __init__(self, post, config, username, access_token):
-        """Facebook interaction for a given post."""
+    def __init__(
+        self, post: Post, config: Dict[str, Any], access_token: str, page_id: int
+    ):
         self.post = post
         self.config = config
-        self.graph = GraphAPI(access_token)
+        self.page_id = page_id
 
-    def announce(self):
-        """Publish the summary of a post to Facebook."""
-        if 'facebook-id' not in self.post.post:
-            # grab post img
-            img = self.post.parsed.xpath('//img')
-            if img:
-                picture = img[0].attrib['src']
-            else:
-                picture = None
+        self.client = facebook.GraphAPI(access_token=access_token)
 
-            response = self.graph.post(
-                path='me/feed',
-                message=self.post.summary,
-                link="%s/%s" % (self.config['url'], self.post.url),
-                name=self.post.title,
-                picture=picture,
-            )
-            self.post.post['facebook-id'] = response['id']
-            self.post.save()
-
-    def collect(self):
-        """Collect responses to a given post."""
-        if 'facebook-id' not in self.post.post:
+    def publish(self, links: Dict[str, str]) -> Optional[str]:
+        """Publish the summary of a post to Facebook.
+        """
+        if self.name in links:
             return
 
-        # load replies
-        directory = self.post.file_path.dirname()
-        storage = directory/'facebook.json'
-        if storage.exists():
-            with open(storage) as fp:
-                replies = load(fp)
+        _logger.info("Announcing post on Facebook")
+
+        soup = BeautifulSoup(self.post.html, "html.parser")
+        if soup.img:
+            picture = soup.img.attrs.get("src")
         else:
-            replies = []
-        count = len(replies)
-        ids = [reply['id'] for reply in replies]
+            picture = None
 
-        post = self.post.post['facebook-id']
-        result = self.graph.get(path='/%s' % post)
-        if "comments" not in result:
-            return
+        response = self.client.put_object(
+            parent_object=self.page_id,
+            connection_name="feed",
+            message=self.post.summary,
+            link="%s/%s" % (self.config["url"], self.post.url),
+            name=self.post.title,
+            picture=picture,
+        )
+        print(response)
+        _logger.info("Success!")
 
-        for comment in result['comments']['data']:
-            # add user info and picture
-            comment['from']['info'] = self.graph.get(
-                path='/%s' % comment['from']['id'])
-            comment['from']['picture'] = \
-                "http://graph.facebook.com/%s/picture" % (
-                    comment['from']['info']['username'])
+        return response["id"]  # XXX
 
-            if comment['id'] not in ids:
-                replies.append(comment)
-
-        # save replies
-        replies.sort(key=operator.itemgetter('id'))
-        with open(storage, 'w') as fp:
-            dump(replies, fp)
-
-        # touch post for rebuild
-        if count < len(replies):
-            self.post.save()
+    def collect(self) -> List[Dict[str, Any]]:
+        pass

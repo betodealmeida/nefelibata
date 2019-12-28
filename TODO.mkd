@@ -1,0 +1,16 @@
+[x] archive pages
+[x] add warning on external resources
+[x] category pages
+[x] mirror images
+[x] atom feed
+[x] upload to S3 only when changed
+[x] Twitter announcer
+[~] FAWM announcer
+[x] display comments
+[x] show link to comment
+[x] update requirements.txt
+[ ] microformats
+
+[ ] improve build linking
+[ ] FB announcer
+[ ] make theme a class?
