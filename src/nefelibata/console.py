@@ -228,7 +228,7 @@ def publish(root: Path) -> None:
     # announce posts
     for post in get_posts(root):
         for announcer in get_announcers(post, config):
-            announcer.announce()
+            announcer.update_links()
 
 
 def main() -> None:

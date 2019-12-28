@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import dateutil.parser
 import twitter
@@ -81,12 +81,9 @@ class TwitterAnnouncer(Announcer):
         auth = twitter.OAuth(oauth_token, oauth_secret, consumer_key, consumer_secret)
         self.client = twitter.Twitter(auth=auth)
 
-    def publish(self, links: Dict[str, str]) -> Optional[str]:
+    def announce(self) -> str:
         """Publish the summary of a post to Twitter.
         """
-        if self.name in links:
-            return
-
         _logger.info("Posting to Twitter")
 
         post_url = "%s%s" % (self.config["url"], self.post.url)

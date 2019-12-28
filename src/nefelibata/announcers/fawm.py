@@ -1,7 +1,7 @@
 import logging
 import re
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import dateutil.parser
 import requests
@@ -148,12 +148,9 @@ class FAWMAnnouncer(Announcer):
         self.username = username
         self.password = password
 
-    def publish(self, links: Dict[str, str]) -> Optional[str]:
+    def announce(self) -> str:
         """Publish the song to FAWM.
         """
-        if self.name in links:
-            return
-
         _logger.info("Creating new song on FAWM")
         params = extract_params(self.post, self.config)
 

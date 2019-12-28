@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from bs4 import BeautifulSoup
 import facebook
@@ -23,12 +23,9 @@ class FacebookAnnouncer(Announcer):
 
         self.client = facebook.GraphAPI(access_token=access_token)
 
-    def publish(self, links: Dict[str, str]) -> Optional[str]:
+    def announce(self) -> str:
         """Publish the summary of a post to Facebook.
         """
-        if self.name in links:
-            return
-
         _logger.info("Announcing post on Facebook")
 
         soup = BeautifulSoup(self.post.html, "html.parser")
