@@ -2,6 +2,6 @@ subject: This is your first post
 keywords: welcome, blog
 summary: Hello, world!
 
-## Welcome ##
+# Welcome #
 
 This is your first post. It should be written using Markdown.
