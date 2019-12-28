@@ -143,6 +143,27 @@ h3 {
     text-shadow: 0 1px 1px #333;
 }
 
+.comment {
+    padding: 0 1em;
+    border-left-style: solid;
+    border-left-width: 5px;
+}
+.comment-avatar {
+    border-radius: 50px;
+    float: right;
+    margin-left: 1em;
+}
+.comment-description {
+    font-family: Georgia, "Cambria", serif;
+    color: #444;
+    line-height: 1.8em;
+}
+.comment-meta {
+    color: #999;
+    font-size: 90%;
+    margin: 0;
+}
+
 .footer {
     padding: 1em 0;
 }

@@ -1,4 +1,5 @@
 import hashlib
+import json
 import logging
 import time
 from datetime import datetime
@@ -105,6 +106,10 @@ class Post:
                 for path in (post_directory / "js").glob("**/*.js")
             ]
         )
+        json_ = {}
+        for path in post_directory.glob("**/*.json"):
+            with open(path) as fp:
+                json_[path.stem] = json.load(fp)
 
         env = Environment(
             loader=FileSystemLoader(str(self.root / "templates" / self.config["theme"]))
@@ -116,6 +121,7 @@ class Post:
             post=self,
             scripts=scripts,
             stylesheets=stylesheets,
+            json=json_,
             breadcrumbs=[("Home", "/index.html"), (self.title, None)],
             hash_n=hash_n,
         )
@@ -135,6 +141,8 @@ def jinja2_formatdate(obj, fmt: str) -> str:
     """Jinja filter for formatting dates."""
     if isinstance(obj, str):
         obj = dateutil.parser.parse(obj)
+    elif isinstance(obj, (int, float)):
+        obj = datetime.fromtimestamp(obj)
     return obj.strftime(fmt)
 
 

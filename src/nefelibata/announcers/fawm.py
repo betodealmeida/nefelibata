@@ -13,7 +13,7 @@ from nefelibata.post import Post
 _logger = logging.getLogger("nefelibata")
 
 
-def reply_from_li(song_id: int, el: Any) -> Dict[str, Any]:
+def reply_from_li(song_id: int, url: str, el: Any) -> Dict[str, Any]:
     """Generate a standard reply from a <li> element in the FAWM song page.
 
     Args:
@@ -35,7 +35,7 @@ def reply_from_li(song_id: int, el: Any) -> Dict[str, Any]:
         timestamp = (datetime.now() - delta).timestamp()
 
     user_ref = el.find("a", {"class": "user-ref"})
-    user_name = user_ref.text
+    user_name = user_ref.text.strip()
     relative_url = user_ref.attrs["href"]
     user_url = f"{base_url}{relative_url}"
 
@@ -47,6 +47,7 @@ def reply_from_li(song_id: int, el: Any) -> Dict[str, Any]:
 
     return {
         "source": "FAWM",
+        "url": url,
         "color": "#cc6600",
         "id": f"fawm:{comment_id}",
         "timestamp": timestamp,
@@ -178,6 +179,6 @@ class FAWMAnnouncer(Announcer):
 
         replies = []
         for el in soup.find_all("li", {"class": "comment-item", "id": re.compile("c")}):
-            replies.append(reply_from_li(song_id, el))
+            replies.append(reply_from_li(song_id, url, el))
 
         return replies
