@@ -69,6 +69,19 @@
 
                 <h1 class="content-subhead">Comments</h1>
 
+                {% if json.links %}
+                <p>You can comment on
+                {% for site, url in json.links.items() %}
+                {%- if loop.first -%}
+                {% elif loop.last %}
+                or
+                {%- else -%}
+                ,
+                {%- endif %}
+                <a href="{{ url }}">{{ site }}</a>
+                {%- endfor -%}.
+                {% endif %}
+
                 {% for reply in json.replies %}
                 <div class="comment" style="border-left-color: {{ reply.color }}">
                         <div>
