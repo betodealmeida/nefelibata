@@ -196,4 +196,8 @@ class FAWMAnnouncer(Announcer):
         _logger.info("Collecting replies from FAWM")
 
         url = self.post.parsed[self.url_header]
-        return get_replies_from_fawm_page(url, self.username, self.password)
+        replies = get_replies_from_fawm_page(url, self.username, self.password)
+
+        _logger.info("Success!")
+
+        return replies
