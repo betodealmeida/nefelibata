@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 from bs4 import BeautifulSoup
 import facebook
@@ -11,6 +11,9 @@ _logger = logging.getLogger("nefelibata")
 
 
 class FacebookAnnouncer(Announcer):
+
+    name = "Facebook"
+
     def __init__(
         self, post: Post, config: Dict[str, Any], access_token: str, page_id: int
     ):
@@ -20,31 +23,32 @@ class FacebookAnnouncer(Announcer):
 
         self.client = facebook.GraphAPI(access_token=access_token)
 
-    def announce(self) -> None:
+    def publish(self, links: Dict[str, str]) -> Optional[str]:
         """Publish the summary of a post to Facebook.
         """
-        if "facebook-url" not in self.post.parsed:
-            _logger.info("Announcing post on Facebook")
+        if self.name in links:
+            return
 
-            soup = BeautifulSoup(self.post.html, "html.parser")
-            if soup.img:
-                picture = soup.img.attrs.get("src")
-            else:
-                picture = None
+        _logger.info("Announcing post on Facebook")
 
-            response = self.client.put_object(
-                parent_object=self.page_id,
-                connection_name="feed",
-                message=self.post.summary,
-                link="%s/%s" % (self.config["url"], self.post.url),
-                name=self.post.title,
-                picture=picture,
-            )
+        soup = BeautifulSoup(self.post.html, "html.parser")
+        if soup.img:
+            picture = soup.img.attrs.get("src")
+        else:
+            picture = None
 
-            print(response)
-            self.post.post["facebook-url"] = response["id"]
-            self.post.save()
-            _logger.info("Success!")
+        response = self.client.put_object(
+            parent_object=self.page_id,
+            connection_name="feed",
+            message=self.post.summary,
+            link="%s/%s" % (self.config["url"], self.post.url),
+            name=self.post.title,
+            picture=picture,
+        )
+        print(response)
+        _logger.info("Success!")
 
-    def collect(self) -> None:
+        return response["id"]  # XXX
+
+    def collect(self) -> List[Dict[str, Any]]:
         pass

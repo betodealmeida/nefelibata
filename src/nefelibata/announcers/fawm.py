@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import logging
 import re
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from bs4 import BeautifulSoup, NavigableString
 import dateutil.parser
@@ -59,6 +59,54 @@ def reply_from_li(song_id: int, url: str, el: Any) -> Dict[str, Any]:
     }
 
 
+def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
+    soup = BeautifulSoup(post.html, "html.parser")
+
+    # liner notes are between <h1>s
+    notes_h1 = soup.find("h1", text="Liner Notes")
+    els = []
+    next_sibling = notes_h1.next_sibling
+    while next_sibling.name != "h1":
+        els.append(next_sibling)
+        if next_sibling.name == "p":
+            els.append(NavigableString("\n"))
+        next_sibling = next_sibling.next_sibling
+    notes = "".join(el.string for el in els).strip()
+
+    # lyrics are inside a <pre> element
+    try:
+        lyrics = soup.find("pre").text.strip()
+    except:
+        lyrics = "N/A"
+
+    # tags are separated by space, not comma
+    tags = re.sub(",\s?", " ", post.parsed["keywords"])
+
+    # search for a single MP3 in the post directory to use as demo
+    post_directory = post.file_path.parent
+    mp3s = list(post_directory.glob("*.mp3"))
+    if len(mp3s) == 1:
+        mp3_path = mp3s[0].relative_to(post.root / "posts")
+        demo = f'{config["url"]}{mp3_path}'
+    elif len(mp3s) > 1:
+        _logger.error("Multiple MP3s found, aborting!")
+        return
+    else:
+        demo = ""
+
+    return {
+        "title": post.title,
+        "tags": tags,
+        "demo": demo,
+        "notes": notes,
+        "lyrics": lyrics,
+        "status": "public",
+        "collab": 0,
+        "downloadable": 1,
+        "submit": "Save+It!",  # XXX
+    }
+
+
 class FAWMAnnouncer(Announcer):
 
     """FAWM Announcer
@@ -90,6 +138,8 @@ class FAWMAnnouncer(Announcer):
 
     """
 
+    name = "FAWM"
+
     def __init__(
         self, post: Post, config: Dict[str, Any], username: str, password: str,
     ):
@@ -98,71 +148,27 @@ class FAWMAnnouncer(Announcer):
         self.username = username
         self.password = password
 
-    def announce(self) -> None:
+    def publish(self, links: Dict[str, str]) -> Optional[str]:
         """Publish the song to FAWM.
         """
-        if "fawm-url" not in self.post.parsed:
-            _logger.info("Publishing to FAWM")
+        if self.name in links:
+            return
 
-            soup = BeautifulSoup(self.post.html, "html.parser")
+        _logger.info("Creating new song on FAWM")
+        params = extract_params(self.post, self.config)
 
-            # liner notes are between <h1>s
-            notes_h1 = soup.find("h1", text="Liner Notes")
-            els = []
-            next_sibling = notes_h1.next_sibling
-            while next_sibling.name != "h1":
-                els.append(next_sibling)
-                if next_sibling.name == "p":
-                    els.append(NavigableString("\n"))
-                next_sibling = next_sibling.next_sibling
-            notes = "".join(el.string for el in els).strip()
+        """
+        # TODO: implement in February when the website allows uploads again
+        response = requests.post(
+            "http://fawm.org/songs/",
+            data=params,
+            auth=(self.username, self.password),
+        )
+        url = response???
+        _logger.info("Success!")
 
-            # lyrics are inside a <pre> element
-            try:
-                lyrics = soup.find("pre").text.strip()
-            except:
-                lyrics = "N/A"
-
-            # tags are separated by space, not comma
-            tags = re.sub(",\s?", " ", self.post.parsed["keywords"])
-
-            # search for a single MP3 in the post directory to use as demo
-            post_directory = self.post.file_path.parent
-            mp3s = list(post_directory.glob("*.mp3"))
-            if len(mp3s) == 1:
-                mp3_path = mp3s[0].relative_to(self.post.root / "posts")
-                demo = f'{self.config["url"]}{mp3_path}'
-            elif len(mp3s) > 1:
-                _logger.error("Multiple MP3s found, aborting!")
-                return
-            else:
-                demo = ""
-
-            params = {
-                "title": self.post.title,
-                "tags": tags,
-                "demo": demo,
-                "notes": notes,
-                "lyrics": lyrics,
-                "status": "public",
-                "collab": 0,
-                "downloadable": 1,
-                "submit": "Save+It!",  # XXX
-            }
-
-            """
-            # TODO: implement in February when the website allows uploads again
-            response = requests.post(
-                "http://fawm.org/songs/",
-                data=params,
-                auth=(self.username, self.password),
-            )
-            url = response???
-
-            self.post.parsed["fawm-url"] = url
-            self.post.save()
-            _logger.info("Success!")
-            """
+        return url
+        """
 
     def collect(self) -> None:
         if "fawm-url" not in self.post.parsed:

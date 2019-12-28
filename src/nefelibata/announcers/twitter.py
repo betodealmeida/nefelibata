@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import dateutil.parser
 import twitter
@@ -64,6 +64,8 @@ class TwitterAnnouncer(Announcer):
 
     """
 
+    name = "Twitter"
+
     def __init__(
         self,
         post: Post,
@@ -79,19 +81,23 @@ class TwitterAnnouncer(Announcer):
         auth = twitter.OAuth(oauth_token, oauth_secret, consumer_key, consumer_secret)
         self.client = twitter.Twitter(auth=auth)
 
-    def announce(self) -> None:
+    def publish(self, links: Dict[str, str]) -> Optional[str]:
         """Publish the summary of a post to Twitter.
         """
-        if "twitter-url" not in self.post.parsed:
-            _logger.info("Announcing post on Twitter")
-            link = "%s%s" % (self.config["url"], self.post.url)
-            status = "%s %s" % (self.post.summary[: max_length - 1 - len(link)], link)
-            response = self.client.statuses.update(status=status)
-            self.post.parsed[
-                "twitter-url"
-            ] = f'https://twitter.com/{response["user"]["screen_name"]}/status/{response["id_str"]}'
-            self.post.save()
-            _logger.info("Success!")
+        if self.name in links:
+            return
+
+        _logger.info("Posting to Twitter")
+
+        post_url = "%s%s" % (self.config["url"], self.post.url)
+        status = "%s %s" % (
+            self.post.summary[: max_length - 1 - len(post_url)],
+            post_url,
+        )
+        response = self.client.statuses.update(status=status)
+        _logger.info("Success!")
+
+        return f'https://twitter.com/{response["user"]["screen_name"]}/status/{response["id_str"]}'
 
     def collect(self) -> List[Dict[str, Any]]:
         """Collect responses to a given tweet.

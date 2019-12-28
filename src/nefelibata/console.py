@@ -8,7 +8,6 @@ Usage:
   nb build [DIRECTORY] [-f] [--loglevel=INFO]
   nb preview [-p PORT] [DIRECTORY] [--loglevel=INFO]
   nb publish [DIRECTORY] [--loglevel=INFO]
-  nb facebook <short_access_token> <app_id> <app_secret> [--loglevel=INFO]
 
 Actions:
   init              Create a new weblog skeleton.
@@ -16,7 +15,6 @@ Actions:
   build             Build weblog from Markdown and social media interactions.
   preview           Run SimpleHTTPServer and open browser.
   publish           Publish weblog to configured locations and announce new posts.
-  facebook          Create a long term token for Facebook Graph API.
 
 Options:
   -h --help         Show this screen.

@@ -1,6 +1,6 @@
 import json
 import operator
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from pkg_resources import iter_entry_points
 
@@ -9,6 +9,27 @@ from nefelibata.post import Post
 
 class Announcer:
     def announce(self) -> None:
+        post_directory = self.post.file_path.parent
+        storage = post_directory / "links.json"
+        if storage.exists():
+            with open(storage) as fp:
+                links = json.load(fp)
+        else:
+            links = {}
+        count = len(links)
+
+        link = self.publish(links)
+        if link and link not in links:
+            links[self.name] = link
+
+        if len(links) > count:
+            with open(storage, "w") as fp:
+                json.dump(links, fp)
+            self.post.save()
+
+    def publish(self, links: Dict[str, str]) -> Optional[str]:
+        """Publish a post in a service and return the URL.
+        """
         raise NotImplementedError("Subclasses must implement announce")
 
     def update_replies(self) -> None:
