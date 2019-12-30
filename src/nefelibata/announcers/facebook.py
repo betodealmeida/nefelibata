@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 from urllib.parse import urlencode
 import webbrowser
 
+import dateutil.parser
 import requests
 
 from nefelibata.announcers import Announcer
@@ -66,7 +67,6 @@ class FacebookAnnouncer(Announcer):
         url = f"https://graph.facebook.com/v5.0/{user_id}_{post_id}/comments"
         response = requests.get(url, params=params)
         payload = response.json()
-        print(payload)
 
         replies = []
         for comment in payload["data"]:
@@ -74,17 +74,17 @@ class FacebookAnnouncer(Announcer):
                 "source": "Facebook",
                 "url": post_url,
                 "color": "#3b5998",
-                "id": comment["id"],
+                "id": f'facebook:{comment["id"]}',
                 "timestamp": dateutil.parser.parse(comment["created_time"]).timestamp(),
                 "user": {
                     "name": comment["from"]["name"],
-                    # get https://graph.facebook.com/10162755483755182/picture for picture
-                    "image": None,
+                    "image": f'https://graph.facebook.com/{comment["from"]["id"]}/picture',
                     "url": None,
                     "description": None,
                 },
                 "comment": {"text": comment["message"], "url": None,},
             }
+            replies.append(reply)
 
         return replies
 
