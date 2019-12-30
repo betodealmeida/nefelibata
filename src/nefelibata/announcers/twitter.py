@@ -87,11 +87,8 @@ class TwitterAnnouncer(Announcer):
         """
         _logger.info("Posting to Twitter")
 
-        post_url = "%s%s" % (self.config["url"], self.post.url)
-        status = "%s %s" % (
-            self.post.summary[: max_length - 1 - len(post_url)],
-            post_url,
-        )
+        post_url = f'{self.config["url"]}{self.post.url}'
+        status = f"{self.post.summary[: max_length - 1 - len(post_url)]} {post_url}"
         response = self.client.statuses.update(status=status)
         _logger.info("Success!")
 
