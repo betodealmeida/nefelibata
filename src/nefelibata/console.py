@@ -7,7 +7,7 @@ Usage:
   nb new POST [DIRECTORY] [--loglevel=INFO]
   nb build [DIRECTORY] [-f] [--loglevel=INFO]
   nb preview [-p PORT] [DIRECTORY] [--loglevel=INFO]
-  nb publish [DIRECTORY] [--loglevel=INFO]
+  nb publish [DIRECTORY] [-f] [--loglevel=INFO]
 
 Actions:
   init              Create a new weblog skeleton.
@@ -211,7 +211,7 @@ def preview(root: Path, port: int = 8000) -> None:
             httpd.shutdown()
 
 
-def publish(root: Path) -> None:
+def publish(root: Path, force: bool = False) -> None:
     """Publish weblog.
 
     Args:
@@ -223,7 +223,7 @@ def publish(root: Path) -> None:
     _logger.debug(config)
 
     for publisher in get_publishers(config):
-        publisher.publish(root)
+        publisher.publish(root, force)
 
     # announce posts
     for post in get_posts(root):
@@ -255,7 +255,7 @@ def main() -> None:
     elif arguments["preview"]:
         preview(root, int(arguments["-p"]))
     elif arguments["publish"]:
-        publish(root)
+        publish(root, arguments["--force"])
 
 
 if __name__ == "__main__":

@@ -72,7 +72,7 @@ class S3Publisher(Publisher):
         self.configure_route53 = configure_route53
         self.region = region
 
-    def publish(self, root: Path) -> None:
+    def publish(self, root: Path, force: bool = False) -> None:
         self._create_bucket()
 
         # store file with the last time weblog was published
@@ -93,7 +93,7 @@ class S3Publisher(Publisher):
                     continue
                 if path.is_dir():
                     queue.append(path)
-                elif path.stat().st_mtime > last_published:
+                elif force or path.stat().st_mtime > last_published:
                     key = str(path.relative_to(build))
                     self._upload_file(path, key)
 
