@@ -73,10 +73,22 @@ def create_categories(root: Path) -> None:
 
     for category, posts in categories.items():
         posts.sort(key=lambda x: x.date, reverse=True)
+        last_modified = sorted(
+            posts, key=lambda x: x.file_path.stat().st_mtime, reverse=True
+        )[0]
         show = config.get("posts-to-show", 10)
         pages = int(math.ceil(len(posts) / show))
         previous, name = None, f"{category}.html"
         for page in range(pages):
+            filename = root / "build" / name
+
+            # only update if there are changes to files in this category
+            if (
+                filename.exists()
+                and filename.stat().st_mtime > last_modified.file_path.stat().st_mtime
+            ):
+                continue
+
             if page + 1 < pages:
                 next = f"{category}%d.html" % (page + 1)
             else:
@@ -96,7 +108,7 @@ def create_categories(root: Path) -> None:
             # mirror images locally
             html = mirror_images(html, root / "build" / "img")
 
-            with open(root / "build" / name, "w") as fp:
+            with open(filename, "w") as fp:
                 fp.write(html)
             previous, name = name, next
 
