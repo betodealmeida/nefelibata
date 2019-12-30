@@ -1,9 +1,13 @@
 import logging
+import re
+import sys
+import time
 from typing import Any, Dict, List
 from urllib.parse import urlencode
 import webbrowser
 
 import dateutil.parser
+import pyperclip
 import requests
 
 from nefelibata.announcers import Announcer
@@ -39,9 +43,19 @@ class FacebookAnnouncer(Announcer):
         url = f"{baseurl}{urlencode(params)}"
         webbrowser.open_new_tab(url)
 
-        _logger.info("Please post to Facebook manually")
-        _logger.info(self.post.summary)
-        url = input("Enter full URL of the post created: ")
+        pyperclip.copy(self.post.summary)
+        sys.stdout.write(
+            "Please post to Facebook manually. "
+            "The post summary has been copied to your clipboard. "
+            "Copy the URL of the new post when done."
+        )
+        _logger.info("Waiting for URL to be copied to clipboard...")
+        while True:
+            url = pyperclip.paste()
+            if re.match("https://www.facebook.com/\w+/posts/\d+", url):
+                _logger.info("Found URL!")
+                break
+            time.sleep(1)
 
         _logger.info("Success!")
 

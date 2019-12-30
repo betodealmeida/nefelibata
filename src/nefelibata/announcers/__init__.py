@@ -1,10 +1,13 @@
 import json
+import logging
 import operator
 from typing import Any, Dict, List
 
 from pkg_resources import iter_entry_points
 
 from nefelibata.post import Post
+
+_logger = logging.getLogger("nefelibata")
 
 
 class Announcer:
@@ -55,6 +58,9 @@ class Announcer:
         replies.extend(reply for reply in self.collect() if reply["id"] not in ids)
 
         if len(replies) > count:
+            _logger.info(
+                f'Found new replies in post {self.config["url"]}{self.post.url}'
+            )
             replies.sort(key=operator.itemgetter("timestamp"))
             with open(storage, "w") as fp:
                 json.dump(replies, fp)
