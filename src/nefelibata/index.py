@@ -73,9 +73,7 @@ def create_categories(root: Path) -> None:
 
     for category, posts in categories.items():
         posts.sort(key=lambda x: x.date, reverse=True)
-        last_modified = sorted(
-            posts, key=lambda x: x.file_path.stat().st_mtime, reverse=True
-        )[0]
+        last_modified = max(post.file_path.stat().st_mtime for post in posts)
         show = config.get("posts-to-show", 10)
         pages = int(math.ceil(len(posts) / show))
         previous, name = None, f"{category}.html"
@@ -83,10 +81,7 @@ def create_categories(root: Path) -> None:
             filename = root / "build" / name
 
             # only update if there are changes to files in this category
-            if (
-                filename.exists()
-                and filename.stat().st_mtime > last_modified.file_path.stat().st_mtime
-            ):
+            if filename.exists() and filename.stat().st_mtime > last_modified:
                 continue
 
             if page + 1 < pages:
