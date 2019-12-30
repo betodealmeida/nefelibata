@@ -191,9 +191,6 @@ class FAWMAnnouncer(Announcer):
         """
 
     def collect(self) -> None:
-        if self.url_header not in self.post.parsed:
-            return []
-
         _logger.info("Collecting replies from FAWM")
 
         url = self.post.parsed[self.url_header]

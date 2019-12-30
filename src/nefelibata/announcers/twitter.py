@@ -104,9 +104,6 @@ class TwitterAnnouncer(Announcer):
         tweet id, so we need to fetch all mentions and see which of them are
         a reply.
         """
-        if self.url_header not in self.post.parsed:
-            return []
-
         _logger.info("Collecting replies from Twitter")
 
         tweet_url = self.post.parsed[self.url_header]

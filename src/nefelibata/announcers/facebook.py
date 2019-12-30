@@ -1,8 +1,9 @@
 import logging
 from typing import Any, Dict, List
+from urllib.parse import urlencode
+import webbrowser
 
-from bs4 import BeautifulSoup
-import facebook
+import requests
 
 from nefelibata.announcers import Announcer
 from nefelibata.post import Post
@@ -16,37 +17,78 @@ class FacebookAnnouncer(Announcer):
     url_header = "facebook-url"
 
     def __init__(
-        self, post: Post, config: Dict[str, Any], access_token: str, page_id: int
+        self, post: Post, config: Dict[str, Any], app_id: int, access_token: str
     ):
         self.post = post
         self.config = config
-        self.page_id = page_id
-
-        self.client = facebook.GraphAPI(access_token=access_token)
+        self.app_id = app_id
+        self.access_token = access_token
 
     def announce(self) -> str:
         """Publish the summary of a post to Facebook.
         """
         _logger.info("Announcing post on Facebook")
 
-        soup = BeautifulSoup(self.post.html, "html.parser")
-        if soup.img:
-            picture = soup.img.attrs.get("src")
-        else:
-            picture = None
+        baseurl = "https://www.facebook.com/dialog/feed?"
+        params = {
+            "app_id": self.app_id,
+            "display": "page",
+            "link": f'{self.config["url"]}{self.post.url}',
+        }
+        url = f"{baseurl}{urlencode(params)}"
+        webbrowser.open_new_tab(url)
 
-        response = self.client.put_object(
-            parent_object=self.page_id,
-            connection_name="feed",
-            message=self.post.summary,
-            link="%s/%s" % (self.config["url"], self.post.url),
-            name=self.post.title,
-            picture=picture,
-        )
-        print(response)
+        _logger.info("Please post to Facebook manually")
+        _logger.info(self.post.summary)
+        url = input("Enter full URL of the post created: ")
+
         _logger.info("Success!")
 
-        return response["id"]  # XXX
+        return url
 
     def collect(self) -> List[Dict[str, Any]]:
-        pass
+        _logger.info("Collecting replies from Facebook")
+
+        # params for requests
+        params = {
+            "access_token": self.access_token,
+        }
+
+        # get userid
+        url = "https://graph.facebook.com/v5.0/me"
+        response = requests.get(url, params=params)
+        payload = response.json()
+        user_id = payload["id"]
+
+        # get post replies
+        post_url = self.post.parsed[self.url_header]
+        post_id = post_url.rsplit("/", 1)[1]
+        url = f"https://graph.facebook.com/v5.0/{user_id}_{post_id}/comments"
+        response = requests.get(url, params=params)
+        payload = response.json()
+        print(payload)
+
+        replies = []
+        for comment in payload["data"]:
+            reply = {
+                "source": "Facebook",
+                "url": post_url,
+                "color": "#3b5998",
+                "id": comment["id"],
+                "timestamp": dateutil.parser.parse(comment["created_time"]).timestamp(),
+                "user": {
+                    "name": comment["from"]["name"],
+                    # get https://graph.facebook.com/10162755483755182/picture for picture
+                    "image": None,
+                    "url": None,
+                    "description": None,
+                },
+                "comment": {"text": comment["message"], "url": None,},
+            }
+
+        return replies
+
+
+# https://developers.facebook.com/tools/explorer/?method=GET&path=10162755483755182_10162754684945182&version=v5.0
+# https://developers.facebook.com/tools/explorer/?method=GET&path=10162755483755182_10162766235210182%2Fcomments&version=v5.0 (works)
+# https://developers.facebook.com/tools/explorer/?method=GET&path=10162755483755182_10162754684945182%2Fcomments&version=v5.0 (does not)

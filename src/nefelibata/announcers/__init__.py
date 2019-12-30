@@ -39,6 +39,9 @@ class Announcer:
     def update_replies(self) -> None:
         """Update replies.json with new replies, if any.
         """
+        if self.url_header not in self.post.parsed:
+            return
+
         post_directory = self.post.file_path.parent
         storage = post_directory / "replies.json"
         if storage.exists():
