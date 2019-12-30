@@ -88,6 +88,9 @@ class S3Publisher(Publisher):
         while queue:
             current = queue.pop()
             for path in current.glob("*"):
+                if not path.exists():
+                    # broken symlink
+                    continue
                 if path.is_dir():
                     queue.append(path)
                 elif path.stat().st_mtime > last_published:
