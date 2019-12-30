@@ -31,6 +31,7 @@ def reply_from_li(song_id: int, url: str, el: Any) -> Dict[str, Any]:
     except dateutil.parser.ParserError:
         # parse "1 day", etc.
         value, unit = fuzzy_timestamp.split()
+        unit = unit.rstrip("s")
         delta = timedelta(**{f"{unit}s": float(value)})
         timestamp = (datetime.now() - delta).timestamp()
 

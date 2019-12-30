@@ -27,7 +27,7 @@ class Post:
         with open(file_path) as fp:
             self.parsed = Parser().parse(fp)
 
-        self.markdown = self.parsed.get_payload(decode=True).decode("utf-8")
+        self.markdown = self.parsed.get_payload(decode=False)
         self.html = markdown.markdown(
             self.markdown, extensions=["codehilite"], output_format="html5",
         )
