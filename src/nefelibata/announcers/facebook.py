@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import re
 import sys
@@ -16,13 +17,53 @@ from nefelibata.post import Post
 _logger = logging.getLogger("nefelibata")
 
 
+def generate_access_token(app_id: int, app_secret: str, short_lived_token: str) -> str:
+    """Generate a 60-day access token for the FB Graph API.
+
+    https://developers.facebook.com/docs/facebook-login/access-tokens/refreshing/
+
+    """
+    url = "https://graph.facebook.com/v5.0/oauth/access_token"
+    params = {
+        "grant_type": "fb_exchange_token",
+        "client_id": app_id,
+        "client_secret": app_secret,
+        "fb_exchange_token": short_lived_token,
+    }
+    response = requests.get(url, params=params)
+    payload = response.json()
+    print(payload)
+
+    return payload["access_token"]
+
+
+def get_token_expiration(access_token: str) -> datetime:
+    """Return the expiration token of a give token.
+    """
+    url = "https://graph.facebook.com/v5.0/debug_token"
+    params = {
+        "access_token": access_token,
+        "input_token": access_token,
+    }
+    response = requests.get(url, params=params)
+    payload = response.json()
+
+    return datetime.fromtimestamp(payload["data"]["expires_at"])
+
+
 class FacebookAnnouncer(Announcer):
 
     name = "Facebook"
     url_header = "facebook-url"
 
     def __init__(
-        self, post: Post, config: Dict[str, Any], app_id: int, access_token: str
+        self,
+        post: Post,
+        config: Dict[str, Any],
+        app_id: int,
+        app_secret: int,
+        short_lived_token: str,
+        access_token: str,
     ):
         self.post = post
         self.config = config
@@ -47,7 +88,7 @@ class FacebookAnnouncer(Announcer):
         sys.stdout.write(
             "Please post to Facebook manually. "
             "The post summary has been copied to your clipboard. "
-            "Copy the URL of the new post when done."
+            "Copy the URL of the new post when done.\n"
         )
         _logger.info("Waiting for URL to be copied to clipboard...")
         while True:
@@ -63,6 +104,16 @@ class FacebookAnnouncer(Announcer):
 
     def collect(self) -> List[Dict[str, Any]]:
         _logger.info("Collecting replies from Facebook")
+
+        expiration = get_token_expiration(self.access_token)
+        days_to_expiration = (expiration - datetime.now()).days
+        if days_to_expiration > 7:
+            _logger.info(f"Token expires on {expiration}")
+        elif days_to_expiration > 0:
+            _logger.warning(f"Token expires on {expiration}")
+        else:
+            _logger.error("Token expired!")
+            return []
 
         # params for requests
         params = {
