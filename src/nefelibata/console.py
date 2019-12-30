@@ -5,7 +5,7 @@ Nefelibata weblog engine.
 Usage:
   nb init [DIRECTORY] [--loglevel=INFO]
   nb new POST [DIRECTORY] [--loglevel=INFO]
-  nb build [DIRECTORY] [-f] [--loglevel=INFO]
+  nb build [DIRECTORY] [-f] [--no-collect] [--loglevel=INFO]
   nb preview [-p PORT] [DIRECTORY] [--loglevel=INFO]
   nb publish [DIRECTORY] [-f] [--loglevel=INFO]
   nb facebook [DIRECTORY] [--loglevel=INFO]
@@ -23,6 +23,7 @@ Options:
   --version         Show version.
   -p PORT           Port to run the web server for preview. [default: 8000]
   -f --force        Force rebuild of HTML.
+  --no-collect      Do not collect replies when building.
   --loglevel=LEVEL  Level for logging. [default: INFO]
 
 Released under the MIT license.
@@ -145,7 +146,7 @@ def new(root: Path, directory: str) -> None:
     call([editor, filepath])
 
 
-def build(root: Path, force: bool = False) -> None:
+def build(root: Path, force: bool = False, collect_replies: bool = True) -> None:
     """Build weblog from Markdown posts and social media interactions.
 
     Args:
@@ -171,8 +172,9 @@ def build(root: Path, force: bool = False) -> None:
 
     _logger.info("Processing posts")
     for post in get_posts(root):
-        for announcer in get_announcers(post, config):
-            announcer.update_replies()
+        if collect_replies:
+            for announcer in get_announcers(post, config):
+                announcer.update_replies()
 
         if force or not post.up_to_date:
             post.create()
@@ -274,7 +276,7 @@ def main() -> None:
     elif arguments["new"]:
         new(root, arguments["POST"])
     elif arguments["build"]:
-        build(root, arguments["--force"])
+        build(root, arguments["--force"], not arguments["--no-collect"])
     elif arguments["preview"]:
         preview(root, int(arguments["-p"]))
     elif arguments["publish"]:
