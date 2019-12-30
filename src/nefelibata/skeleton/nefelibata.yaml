@@ -52,7 +52,16 @@ fawm:
     username:
     password:
 
-# This is currently not working, but we should be able to publish to pages.
+# Posting to Facebook is not allowed by the API, and must be done manually.
+#
+#   1. Create FB app: https://developers.facebook.com/apps
+#      - Write down the `app_id` and `app_secret`.
+#   2. Grab `short_lived_token` from https://developers.facebook.com/tools/explorer/
+#      - Make sure you have the `user_posts` and `public_profile` permissions.
+#   3. Run the commmand `nb facebook`. This will print out your `access_token`.
+#   4. Add `access_token` to this file.
 facebook:
+    app_id:
+    app_secret:
+    short_lived_token:
     access_token:
-    page_id:
