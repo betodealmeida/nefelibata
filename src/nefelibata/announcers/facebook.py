@@ -93,7 +93,7 @@ class FacebookAnnouncer(Announcer):
         _logger.info("Waiting for URL to be copied to clipboard...")
         while True:
             url = pyperclip.paste()
-            if re.match("https://www.facebook.com/\w+/posts/\d+", url):
+            if re.match("https://www.facebook.com/.+/posts/\d+", url):
                 _logger.info("Found URL!")
                 break
             time.sleep(1)
