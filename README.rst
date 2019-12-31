@@ -34,6 +34,17 @@ I recommend installing nefelibata using a virtual environment:
 
 This will add a program called ``nb`` to your path.
 
+If you're impatient, you can run:
+
+.. code-block:: bash
+
+    $ nb init blog
+    $ cd blog
+    $ nb build
+    $ nb preview
+
+And open http://localhost:8000/ to see your weblog. Read below for details.
+
 Creating the weblog directory
 -----------------------------
 

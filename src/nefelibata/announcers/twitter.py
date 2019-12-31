@@ -78,18 +78,24 @@ class TwitterAnnouncer(Announcer):
     ):
         self.post = post
         self.config = config
-
-        auth = twitter.OAuth(oauth_token, oauth_secret, consumer_key, consumer_secret)
-        self.client = twitter.Twitter(auth=auth)
+        self.oauth_token = oauth_token
+        self.oauth_secret = oauth_secret
+        self.consumer_key = consumer_key
+        self.consumer_secret = consumer_secret
 
     def announce(self) -> str:
         """Publish the summary of a post to Twitter.
         """
         _logger.info("Posting to Twitter")
 
+        auth = twitter.OAuth(
+            self.oauth_token, self.oauth_secret, self.consumer_key, self.consumer_secret
+        )
+        client = twitter.Twitter(auth=auth)
+
         post_url = f'{self.config["url"]}{self.post.url}'
         status = f"{self.post.summary[: max_length - 1 - len(post_url)]} {post_url}"
-        response = self.client.statuses.update(status=status)
+        response = client.statuses.update(status=status)
         _logger.info("Success!")
 
         return f'https://twitter.com/{response["user"]["screen_name"]}/status/{response["id_str"]}'
@@ -103,10 +109,15 @@ class TwitterAnnouncer(Announcer):
         """
         _logger.info("Collecting replies from Twitter")
 
+        auth = twitter.OAuth(
+            self.oauth_token, self.oauth_secret, self.consumer_key, self.consumer_secret
+        )
+        client = twitter.Twitter(auth=auth)
+
         tweet_url = self.post.parsed[self.url_header]
         tweet_id = tweet_url.rstrip("/").rsplit("/", 1)[1]
         try:
-            mentions = self.client.statuses.mentions_timeline(
+            mentions = client.statuses.mentions_timeline(
                 count=200,
                 since_id=tweet_id,
                 trim_user=False,
