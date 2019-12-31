@@ -33,6 +33,7 @@ Released under the MIT license.
 
 import logging
 import os
+import re
 import shutil
 import socketserver
 import sys
@@ -90,6 +91,18 @@ def find_directory(cwd: Path) -> Path:
     return cwd
 
 
+def sanitize(directory: str) -> str:
+    """Sanitize a psot title into a directory name.
+
+    Args:
+      directory (str): a string representing the post title
+    """
+    directory = directory.lower().replace(" ", "_")
+    directory = re.sub("[^\w]", "", directory)
+
+    return directory
+
+
 def init(root: Path) -> None:
     """Create initial structure for weblog.
 
@@ -122,7 +135,8 @@ def new(root: Path, directory: str) -> None:
       directory (str): name of directory for the post
     """
     _logger.info("Creating new directory")
-    directory = directory.replace(" ", "_").lower()
+    title = directory
+    directory = sanitize(directory)
     target = root / "posts" / directory
     if target.exists():
         raise IOError("Directory already exists!")
@@ -134,14 +148,14 @@ def new(root: Path, directory: str) -> None:
     for resource in resources:
         (target / resource).mkdir()
 
+    filepath = target / "index.mkd"
+    with open(filepath, "w") as fp:
+        fp.write(new_post.format(title=title))
+
     editor = os.environ.get("EDITOR")
     if not editor:
         _logger.info("No EDITOR found, exiting")
         return
-
-    filepath = target / "index.mkd"
-    with open(filepath, "w") as fp:
-        fp.write(new_post)
 
     call([editor, filepath])
 

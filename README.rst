@@ -101,3 +101,108 @@ The S3 section looks like this:
         configure_website: true
         configure_route53: blog.taoetc.org.
 
+You need to `create an S3 account <http://aws.amazon.com/s3/>`_ in order to get the AWS credentials. If you want the S3 publisher to create the bucket, configure it as a website, upload the website and configure Route 53 to point the domain name to it you need the following policy in your IAM account (replace ``blog.taoetc.org`` with your domain):
+
+.. code-block:: json
+
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "VisualEditor0",
+                "Effect": "Allow",
+                "Action": [
+                    "s3:GetBucketWebsite",
+                    "s3:PutBucketWebsite",
+                    "route53:ChangeResourceRecordSets",
+                    "s3:PutBucketAcl",
+                    "s3:CreateBucket"
+                ],
+                "Resource": [
+                    "arn:aws:route53:::hostedzone/taoetc.org",
+                    "arn:aws:s3:::blog.taoetc.org"
+                ]
+            },
+            {
+                "Sid": "VisualEditor1",
+                "Effect": "Allow",
+                "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject",
+                    "s3:PutObjectAcl"
+                ],
+                "Resource": "arn:aws:s3:::blog.taoetc.org/*"
+            },
+            {
+                "Sid": "VisualEditor2",
+                "Effect": "Allow",
+                "Action": "route53:ListHostedZones",
+                "Resource": "*"
+            }
+        ]
+    }
+
+This will upload your weblog to an S3 bucket and run the website from it over HTTP. If you want to serve the website over HTTPS (as I do), you need to disable Route 53 (``configure_route53`` should be empty) and `configure CloudFront <https://www.freecodecamp.org/news/simple-site-hosting-with-amazon-s3-and-https-5e78017f482a/>`_.
+
+Finally, if you want to announce your posts on Twitter or Facebook you need to create custom applications on the respeective developer websites, and add the access tokens to the file `nefelibata.yaml`. The skeleton file has instructions on how to do this for each announcer. (There's also an announcer for `FAWM <https://fawm.org/>`_, but it's currently work in progress).
+
+Creating a new post
+-------------------
+
+Your skeleton blog already has a post called ``first``. You can edit that post, or create a new one with the command:
+
+.. code-block:: bash
+
+    $ nb new "Hello, World!"
+
+(Note that you always need to run the ``nb`` command from inside your weblog directory.)
+
+This will create a new directory called `hello_world`, with the following structure:
+
+.. code-block:: bash
+
+    posts/hello_world/
+    posts/hello_world/index.mkd
+    posts/hello_world/img/
+    posts/hello_world/css/
+    posts/hello_world/js/
+
+If you have the ``EDITOR`` environment set, nefelibata will automatically open your editor to edit ``index.mkd``. You can place any custom CSS, Javascript or images in the corresponding directories, or any other extra files in the ``hello_world/`` directory.
+
+Building the weblog
+-------------------
+
+To build your webblog, simply run:
+
+.. code-block:: bash
+
+    $ nb build
+
+This will convert the Markdown files to HTML and build the weblog, with pages for archives and categories as well. Later, once posts have been announced to social networks, this command will also collect replies and store them locally.
+
+Previewing the weblog
+---------------------
+
+To preview your weblog, simply run:
+
+.. code-block:: bash
+
+    $ nb preview
+
+This will run an HTTP server on port 8000. Open http://localhost:8000/ on your browser so you can preview your changes.
+
+Publishing the weblog
+---------------------
+
+Finally, you can publish your weblog with the command:
+
+.. code-block:: bash
+
+    $ nb publish
+
+This will upload the weblog using any configured publisherd (like S3), and announce new posts to social networks.
+
+What's next?
+============
+
+If you want to customize your weblog, take a look at the ``templates/`` directory inside your weblog. The templates are written in `Jinja2 <https://palletsprojects.com/p/jinja/>`_.
