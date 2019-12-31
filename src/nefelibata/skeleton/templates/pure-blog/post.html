@@ -89,19 +89,11 @@
                         </div>
                         <div>
                             <div class="comment-meta">
-                                {% if reply.user.url %}
                                 <a class="comment-author" rel="nofollow" title="{{ reply.user.description }}" href="{{ reply.user.url }}">{{ reply.user.name }}</a>
-                                {% else %}
-                                <strong>{{ reply.user.name }}</strong>
-                                {% endif %}
                                 replied on
                                 <a href="{{ reply.url }}">{{ reply.source }}</a>
                                 on
-                                {% if reply.comment.url %}
                                 <a rel="nofollow" title="{{ reply.timestamp|formatdate("%c") }}" href="{{ reply.comment.url }}">{{ reply.timestamp|formatdate("%Y-%m-%d") }}</a>:
-                                {% else %}
-                                <span title="{{ reply.timestamp|formatdate("%c") }}">{{ reply.timestamp|formatdate("%Y-%m-%d") }}</span>
-                                {% endif %}
                             </div>
                             <div class="comment-description">
                                 <p>{{ reply.comment.text }}</p>
