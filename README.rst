@@ -186,14 +186,14 @@ You'll notice that the ``index.mkd`` file has headers and a body. The file itsel
 - ``summary``: this is a one-line summary of your post.
 - ``keywords``: a comma-separated list of keywords/tags/categories.
 
-Additionally, once the post is published a ``date`` header will be added. If the psot is announced to Twitter/Facebook/etc. a corresponding header (eg, ``facebook-url``) will also be added.
+Additionally, once the post is published a ``date`` header will be added. If the post is announced to Twitter/Facebook/etc. a corresponding header (eg, ``facebook-url``) will also be added.
 
 If you want to announce your post to a custom social network you can either override the default announcers by using the ``announce-on`` header, or add an extra announcer by using the ``announce-on-extra`` header.
 
 Building the weblog
 -------------------
 
-To build your webblog, simply run:
+To build your weblog, simply run:
 
 .. code-block:: bash
 
