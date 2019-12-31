@@ -9,14 +9,14 @@ How is it different?
 
 Nefelibata (Portuguese for "one who walks on clouds") focus on preserving your content. In order to achieve that goal, it works similarly to common static website generators, with the following design decisions:
 
-- Each post is a separate directory. The acutal post is written in `Markdown <https://www.markdownguide.org/>`_, and each post can have its own images, CSS, Javascript and other files.
-- Posts are converted into HTML, and the resulting weblog is composed of **only static files**.
-- External images are downloaded when the weblog is built, and the link is altered to point to the local resource. The engine will also warn you if the generated HTML has any external resources (CSS, for example).
+- Each post is a separate directory. The actual post is written in `Markdown <https://www.markdownguide.org/>`_, and each post can have its own images, CSS, Javascript and other files. This way each post is relatively self-contained.
+- Posts are converted into HTML, and the resulting weblog is composed of **only static files**. There are no databases, and all extra data is stored as JSON.
+- External images are downloaded when the weblog is built, and the link is altered to point to the local resource. The engine **will warn you** if the generated HTML has any external resources (CSS, for example).
 - The files are then **published** to a location using a plugin architecture (currently only S3 is supported).
 
 All this is done with a command line utility called ``nb``.
 
-Additionally, nefelibata recognizes that most interactions occur in social networks, like Twitter or Facebook. The engine can be configured with global or per-post **announcers** that post the content to social networks, so that people can comment and discuss it. When the weblog is built, the announcers will collect any replies, and store them locally, so that the comments are displayed in the weblog with your post. A post can be announced to multiple social networks, and the comments will be aggregated with it.
+Additionally, nefelibata recognizes that most interactions occur in social networks, like Twitter or Facebook. The engine can be configured with global or per-post **announcers**, that will post the content to social networks, so that people can comment and discuss it. When the weblog is rebuilt, the announcers will collect any replies and store them locally, so that the comments are displayed in the weblog with your post. A post can be announced to multiple social networks, and the comments will be aggregated with it.
 
 Getting started
 ===============
@@ -168,6 +168,16 @@ This will create a new directory called `hello_world`, with the following struct
     posts/hello_world/js/
 
 If you have the ``EDITOR`` environment set, nefelibata will automatically open your editor to edit ``index.mkd``. You can place any custom CSS, Javascript or images in the corresponding directories, or any other extra files in the ``hello_world/`` directory.
+
+You'll notice that the ``index.mkd`` file has headers and a body. The file itself is actually stored as an email, using the `RFC 5322 format <https://tools.ietf.org/html/rfc5322.html>`_. The most important headers are:
+
+- ``subject``: this is the title of your post.
+- ``summary``: this is a one-line summary of your post.
+- ``keywords``: a comma-separated list of keywords/tags/categories.
+
+Additionally, once the post is published a ``date`` header will be added. If the psot is announced to Twitter/Facebook/etc. a corresponding header (eg, ``facebook-url``) will also be added.
+
+If you want to announce your post to a custom social network you can either override the default announcers by using the ``announce-on`` header, or add an extra announcer by using the ``announce-on-extra`` header.
 
 Building the weblog
 -------------------
