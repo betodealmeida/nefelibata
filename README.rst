@@ -24,4 +24,80 @@ Getting started
 Installation
 ------------
 
-WIP
+I recommend installing nefelibata using a virtual environment:
+
+.. code-block:: bash
+
+    $ virtualenv -p python3 venv
+    $ source venv/bin/activate
+    $ pip install nefelibata
+
+This will add a program called ``nb`` to your path.
+
+Creating the weblog directory
+-----------------------------
+
+Once you have installed nefelibata you should initialize a directory that will hold your content:
+
+.. code-block:: bash
+
+    $ nb init blog
+    $ ls blog
+    nefelibata.yaml  posts/  templates/
+
+Here, the file ``nefelibata.yaml`` stores the configuration for your weblog. The ```posts`` directory will contain your posts, and should have a directory called ``first``. The ``templates`` directory has the templates for generating your blog and its Atom feed. Multiple themes are supported, but there's currently only one called "pure-blog", based on `Pure.css <https://purecss.io/>`_.
+
+Configuring your weblog
+-----------------------
+
+Open the file `nefelibata.yaml`. The first part is self-explanatory:
+
+.. code-block:: yaml
+
+    title: Tao etc.
+    subtitle: Musings about the path and other things
+    author:
+        name: Beto Dealmeida
+        email: roberto@dealmeida.net
+    url: https://blog.taoetc.org/  # slashing trail is important
+    posts-to-show: 5
+    theme: pure-blog
+    language: en
+
+    # These are social icons displayed on the footer
+    social:
+        - title: Code
+          url: "https://github.com/betodealmeida"
+          icon: icon-github
+        - title: Facebook
+          url: "https://www.facebook.com/beto"
+          icon: icon-facebook
+        - title: Twitter
+          url: "https://twitter.com/dealmeida"
+          icon: icon-twitter
+
+This is copied from `my weblog <https://blog.taoetc.org/>`_.
+
+The second part defines where your weblog will be published to, and where new posts are announced:
+
+.. code-block:: yaml
+
+    publish-to: S3
+    announce-on: twitter, facebook
+
+In this example, the static files from the weblog will be published to an S3 bucket, and new posts will be published to both Twitter and Facebook.
+
+The S3 section looks like this:
+
+.. code-block:: yaml
+
+    S3:
+        AWS_ACCESS_KEY_ID:
+        AWS_SECRET_ACCESS_KEY:
+        bucket: blog.taoetc.org
+
+        # Nefelibata will configure the bucket as website and also set your DNS
+        # if you're using Route 53
+        configure_website: true
+        configure_route53: blog.taoetc.org.
+

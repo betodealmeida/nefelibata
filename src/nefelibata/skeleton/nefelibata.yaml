@@ -21,7 +21,7 @@ social:
       icon: icon-twitter
 
 publish-to: S3
-announce-on: twitter
+announce-on: twitter, facebook
 
 # Apply for S3 here: http://aws.amazon.com/s3/
 S3:
