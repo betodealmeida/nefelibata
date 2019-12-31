@@ -221,7 +221,7 @@ Finally, you can publish your weblog with the command:
 
     $ nb publish
 
-This will upload the weblog using any configured publisherd (like S3), and announce new posts to social networks.
+This will upload the weblog using any configured publishers (like S3), and announce new posts to social networks.
 
 What's next?
 ============
