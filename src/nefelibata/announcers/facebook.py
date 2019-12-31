@@ -32,7 +32,6 @@ def generate_access_token(app_id: int, app_secret: str, short_lived_token: str) 
     }
     response = requests.get(url, params=params)
     payload = response.json()
-    print(payload)
 
     return payload["access_token"]
 
