@@ -14,7 +14,7 @@ Nefelibata (Portuguese for "one who walks on clouds") focus on preserving your c
 - External images are downloaded when the weblog is built, and the link is altered to point to the local resource. The engine will also warn you if the generated HTML has any external resources (CSS, for example).
 - The files are then **published** to a location using a plugin architecture (currently only S3 is supported).
 
-All this is done with a command line utility called `nb`.
+All this is done with a command line utility called ``nb``.
 
 Additionally, nefelibata recognizes that most interactions occur in social networks, like Twitter or Facebook. The engine can be configured with global or per-post **announcers** that post the content to social networks, so that people can comment and discuss it. When the weblog is built, the announcers will collect any replies, and store them locally, so that the comments are displayed in the weblog with your post. A post can be announced to multiple social networks, and the comments will be aggregated with it.
 
