@@ -5,12 +5,10 @@
 - [x] atom feed
 - [x] upload to S3 only when changed
 - [x] Twitter announcer
-- [~] FAWM announcer
+- [] FAWM announcer
 - [x] display comments
 - [x] show link to comment
 - [x] update requirements.txt
+- [x] improve build linking
+- [x] FB announcer
 - [ ] microformats
-
-- [ ] improve build linking
-- [ ] FB announcer
-- [ ] make theme a class?
