@@ -2,8 +2,8 @@ import logging
 from typing import Any, Dict, List
 
 import dateutil.parser
-import twitter
 
+import twitter
 from nefelibata.announcers import Announcer
 from nefelibata.post import Post
 
@@ -130,7 +130,9 @@ class TwitterAnnouncer(Announcer):
         replies = []
         for mention in mentions:
             if mention["in_reply_to_status_id_str"] == tweet_id:
-                replies.append(reply_from_tweet(mention))
+                reply = reply_from_mention(mention)
+                reply["url"] = tweet_url
+                replies.append(reply)
 
         _logger.info("Success!")
 

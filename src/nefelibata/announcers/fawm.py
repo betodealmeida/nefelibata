@@ -5,8 +5,8 @@ from typing import Any, Dict, List
 
 import dateutil.parser
 import requests
-from bs4 import BeautifulSoup, NavigableString
 
+from bs4 import BeautifulSoup, NavigableString
 from nefelibata.announcers import Announcer
 from nefelibata.post import Post
 
@@ -164,7 +164,7 @@ class FAWMAnnouncer(Announcer):
     url_header = "fawm-url"
 
     def __init__(
-        self, post: Post, config: Dict[str, Any], username: str, password: str,
+        self, post: Post, config: Dict[str, Any], username: str, password: str
     ):
         self.post = post
         self.config = config

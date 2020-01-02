@@ -17,8 +17,8 @@ def get_user_image(username: str) -> Optional[str]:
     """
     url = f"https://wt.social/u/{username}"
     response = requests.get(url)
-    match = re.search("(https.*?--profile_pic.png)", response.text)
-    return match.group(1) if match else None
+    match = re.search("(https.*?--profile_pic\.\w+)", response.text)
+    return match.group(1).replace("\\", "") if match else None
 
 
 def get_reply_from_comment(comment: Dict[str, Any]) -> Dict[str, Any]:
@@ -107,7 +107,7 @@ class WTSocialAnnouncer(Announcer):
         headers = {"X-CSRF-TOKEN": csrf_token}
         response = session.post(url, params=params, headers=headers)
         payload = response.json()
-        url = f'https://wt.social{payload[0]["URI"]}'
+        url = f'https://wt.social{payload["0"]["URI"]}'
 
         _logger.info("Success!")
 
@@ -130,7 +130,9 @@ class WTSocialAnnouncer(Announcer):
 
         replies = []
         for comment in payload["comment_list"]:
-            replies.append(get_reply_from_comment(comment))
+            reply = get_reply_from_comment(comment)
+            reply["url"] = post_url
+            replies.append(reply)
 
         _logger.info("Success!")
 

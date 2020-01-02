@@ -5,7 +5,7 @@ from pkg_resources import iter_entry_points
 
 
 class Publisher:
-    def publish(root: Path, force: bool = False) -> None:
+    def publish(self, root: Path, force: bool = False) -> None:
         raise NotImplementedError("Subclasses must implement publish")
 
 
