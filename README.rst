@@ -2,7 +2,7 @@
 nefelibata
 ==========
 
-A weblog engine focusing on data ownership and persistence.
+A weblog engine focusing on **data ownership** and **persistence**.
 
 How is it different?
 ====================
@@ -11,12 +11,12 @@ Nefelibata (Portuguese for "one who walks on clouds") focus on preserving your c
 
 - Each post is a separate directory. The actual post is written in `Markdown <https://www.markdownguide.org/>`_, and each post can have its own images, CSS, Javascript and other files. This way each post is relatively self-contained.
 - Posts are converted into HTML, and the resulting weblog is composed of **only static files**. There are no databases, and all extra data is stored as JSON.
-- External images are downloaded when the weblog is built, and the link is altered to point to the local resource. The engine **will warn you** if the generated HTML has any external resources (CSS, for example).
+- External images are locally mirrored when the weblog is built, and the link is altered to point to the local resource. The engine **will warn you** if the generated HTML has any external resources (CSS, for example).
 - The files are then **published** to a location using a plugin architecture (currently only S3 is supported).
 
 All this is done with a command line utility called ``nb``.
 
-Additionally, nefelibata recognizes that most interactions occur in social networks, like Twitter or Facebook. The engine can be configured with global or per-post **announcers**, that will post the content to social networks, so that people can comment and discuss it. When the weblog is rebuilt, the announcers will collect any replies and store them locally, so that the comments are displayed in the weblog with your post. A post can be announced to multiple social networks, and the comments will be aggregated with it.
+Additionally, nefelibata acknowledges that most interactions occur in social networks, like Twitter or Facebook. The engine can be configured with global or per-post **announcers** that will post to social networks linking back to the content, so that people can comment and discuss posts. When the weblog is rebuilt, the announcers will collect any replies and store them locally, so that the comments are displayed in the weblog with your post. A post can be announced to multiple social networks, and the comments will be aggregated and preserved.
 
 Getting started
 ===============
@@ -56,7 +56,7 @@ Once you have installed nefelibata you should initialize a directory that will h
     $ ls blog
     nefelibata.yaml  posts/  templates/
 
-Here, the file ``nefelibata.yaml`` stores the configuration for your weblog. The ```posts`` directory will contain your posts, and should have a directory called ``first``. The ``templates`` directory has the templates for generating your blog and its Atom feed. Multiple themes are supported, but there's currently only one called "pure-blog", based on `Pure.css <https://purecss.io/>`_.
+Here, the file ``nefelibata.yaml`` stores the configuration for your weblog. The ``posts/`` directory will contain your posts, and should already have a directory called ``first/`` with an initial post. The ``templates/`` directory has the templates for generating your blog and its Atom feed. Multiple themes are supported, but there's currently only one called "pure-blog", based on `Pure.css <https://purecss.io/>`_.
 
 Configuring your weblog
 -----------------------
@@ -160,7 +160,7 @@ Finally, if you want to announce your posts on Twitter or Facebook you need to c
 Creating a new post
 -------------------
 
-Your skeleton blog already has a post called ``first``. You can edit that post, or create a new one with the command:
+Your skeleton blog already has a post called ``first/``. You can edit that post, or create a new one with the command:
 
 .. code-block:: bash
 
@@ -168,7 +168,7 @@ Your skeleton blog already has a post called ``first``. You can edit that post, 
 
 (Note that you always need to run the ``nb`` command from inside your weblog directory.)
 
-This will create a new directory called `hello_world`, with the following structure:
+This will create a new directory called ``hello_world/``, with the following structure:
 
 .. code-block:: bash
 
