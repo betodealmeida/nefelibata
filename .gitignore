@@ -49,3 +49,5 @@ MANIFEST
 # Per-project virtualenvs
 .venv*/
 venv*/
+
+.mypy_cache/
