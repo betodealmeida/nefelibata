@@ -12,3 +12,5 @@
 - [x] improve build linking
 - [x] FB announcer
 - [ ] microformats
+- [ ] WT.Social announcer
+- [ ] linkbacks
