@@ -12,7 +12,7 @@ _logger = logging.getLogger("nefelibata")
 max_length = 280
 
 
-def reply_from_mention(tweet: Dict[str, Any]) -> Dict[str, Any]:
+def get_reply_from_mention(tweet: Dict[str, Any]) -> Dict[str, Any]:
     """Generate a standard reply from a Tweet.
 
     Args:
@@ -130,7 +130,7 @@ class TwitterAnnouncer(Announcer):
         replies = []
         for mention in mentions:
             if mention["in_reply_to_status_id_str"] == tweet_id:
-                reply = reply_from_mention(mention)
+                reply = get_reply_from_mention(mention)
                 reply["url"] = tweet_url
                 replies.append(reply)
 
