@@ -11,6 +11,10 @@
 - [x] update requirements.txt
 - [x] improve build linking
 - [x] FB announcer
+- [x] WT.Social announcer
+- [ ] Mastodon announcer
+- [ ] Instagram announcer
+- [ ] Medium announcer
 - [ ] microformats
-- [ ] WT.Social announcer
 - [ ] linkbacks
+- [ ] multiple announcers of the same type? (eg, 2 mastodon)

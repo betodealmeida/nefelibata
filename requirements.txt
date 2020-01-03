@@ -12,3 +12,4 @@ pytest==5.3.2
 python_dateutil==2.8.1
 PyYAML==5.2
 pyperclip==1.7.0
+mastodon.py==1.5.0
