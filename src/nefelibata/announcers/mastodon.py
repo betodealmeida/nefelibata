@@ -70,6 +70,3 @@ class MastodonAnnouncer(Announcer):
         _logger.info("Success!")
 
         return replies
-
-
-client = mastodon.Masto
