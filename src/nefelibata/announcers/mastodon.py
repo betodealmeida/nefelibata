@@ -44,9 +44,10 @@ class MastodonAnnouncer(Announcer):
         _logger.info(f"Posting to Mastodon ({self.base_url})")
 
         language = self.post.parsed.get("language") or self.config["language"]
+        post_url = f'{self.config["url"]}{self.post.url}'
 
         toot = self.client.status_post(
-            status=self.post.summary,
+            status=f"{self.post.summary}\n\n{post_url}",
             visibility="public",
             language=language,
             idempotency_key=str(self.post.file_path),
@@ -65,6 +66,7 @@ class MastodonAnnouncer(Announcer):
         replies = []
         for toot in context["descendants"]:
             reply = get_reply_from_toot(toot)
+            reply["url"] = toot_url
             replies.append(reply)
 
         _logger.info("Success!")
