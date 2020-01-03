@@ -12,7 +12,7 @@
 - [x] improve build linking
 - [x] FB announcer
 - [x] WT.Social announcer
-- [ ] Mastodon announcer
+- [x] Mastodon announcer
 - [ ] Instagram announcer
 - [ ] Medium announcer
 - [ ] microformats
