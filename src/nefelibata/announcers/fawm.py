@@ -13,7 +13,7 @@ from nefelibata.post import Post
 _logger = logging.getLogger("nefelibata")
 
 
-def reply_from_li(song_id: int, url: str, el: Any) -> Dict[str, Any]:
+def get_reply_from_li(song_id: int, url: str, el: Any) -> Dict[str, Any]:
     """Generate a standard reply from a <li> element in the FAWM song page.
 
     Args:
@@ -124,7 +124,7 @@ def get_replies_from_fawm_page(
     song_id = int(url.rstrip("/").rsplit("/", 1)[1])
     # there are non-comments with the class "comment-item", so we need to narrow down
     for el in soup.find_all("li", {"class": "comment-item", "id": re.compile("c\d+")}):
-        replies.append(reply_from_li(song_id, url, el))
+        replies.append(get_reply_from_li(song_id, url, el))
 
     return replies
 
