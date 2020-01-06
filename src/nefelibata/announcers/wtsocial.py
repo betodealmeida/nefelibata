@@ -95,12 +95,13 @@ class WTSocialAnnouncer(Announcer):
         session = requests.Session()
         html = do_login(session, self.email, self.password)
         csrf_token = get_csrf_token(html)
+        post_url = f'{self.config["url"]}{self.post.url}'
 
         url = "https://wt.social/api/new-article"
         params = {
             "collaborative": False,
             "article_title": self.post.title,
-            "article_body": self.post.summary,
+            "article_body": f"{self.post.summary}\n\n{post_url}",
             "edit-summary": "",
             # "to-user": "beto-dealmeida",
         }
