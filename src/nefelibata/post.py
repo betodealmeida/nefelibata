@@ -118,6 +118,7 @@ class Post:
         env.filters["formatdate"] = jinja2_formatdate
         template = env.get_template("post.html")
         html = template.render(
+            __version__=__version__,
             config=self.config,
             post=self,
             scripts=scripts,

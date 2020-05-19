@@ -5,6 +5,7 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
+from nefelibata import __version__
 from nefelibata.post import get_posts, hash_n
 from nefelibata.utils import find_external_resources, get_config, mirror_images
 
@@ -34,6 +35,7 @@ def create_index(root: Path) -> None:
         else:
             next = None
         html = template.render(
+            __version__=__version__,
             config=config,
             posts=posts[page * show : (page + 1) * show],
             breadcrumbs=[("Recent Posts", None)],
@@ -89,6 +91,7 @@ def create_categories(root: Path) -> None:
             else:
                 next = None
             html = template.render(
+                __version__=__version__,
                 config=config,
                 posts=posts[page * show : (page + 1) * show],
                 breadcrumbs=[
