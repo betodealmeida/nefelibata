@@ -243,6 +243,12 @@ def publish(root: Path, force: bool = False) -> None:
 
     # announce posts
     for post in get_posts(root):
+        # freeze currently configured announcers, so that if a new announcer is
+        # added in the future old posts are not announced
+        if "announce-on" not in post.parsed:
+            post.parsed["announce-on"] = config["announce-on"]
+            post.save()
+
         for announcer in get_announcers(post, config):
             announcer.update_links()
 
