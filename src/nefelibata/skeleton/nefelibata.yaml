@@ -21,7 +21,7 @@ social:
       icon: icon-twitter
 
 publish-to: S3
-announce-on: twitter, facebook
+announce-on: twitter, mastodon
 
 # Apply for S3 here: http://aws.amazon.com/s3/
 S3:
@@ -52,16 +52,13 @@ fawm:
     username:
     password:
 
-# Posting to Facebook is not allowed by the API, and must be done manually.
-#
-#   1. Create FB app: https://developers.facebook.com/apps
-#      - Write down the `app_id` and `app_secret`.
-#   2. Grab `short_lived_token` from https://developers.facebook.com/tools/explorer/
-#      - Make sure you have the `user_posts` and `public_profile` permissions.
-#   3. Run the commmand `nb facebook`. This will print out your `access_token`.
-#   4. Add `access_token` to this file.
-facebook:
-    app_id:
-    app_secret:
-    short_lived_token:
+# Sign up to WT.Social and put your email and password here.
+wtsocial:
+    email:
+    password:
+
+# Create an application at https://{instance}/settings/applications/ with access
+# to the scopes `read:statuses` and write:statuses`.
+mastodon:
     access_token:
+    base_url:

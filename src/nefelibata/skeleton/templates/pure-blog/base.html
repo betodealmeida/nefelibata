@@ -3,9 +3,6 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    {% if config.facebook.app_id %}
-    <meta property="fb:app_id" content="{{ config.facebook.app_id }}" />
-    {% endif %}
     {% block meta %}{% endblock %}
     <title>{% block title %}{% endblock %}</title>
 
