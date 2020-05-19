@@ -82,8 +82,8 @@ class WTSocialAnnouncer(Announcer):
     url_header = "wtsocial-url"
 
     def __init__(self, post: Post, config: Dict[str, Any], email: str, password: str):
-        self.post = post
-        self.config = config
+        super().__init__(post, config)
+
         self.email = email
         self.password = password
 

@@ -166,8 +166,8 @@ class FAWMAnnouncer(Announcer):
     def __init__(
         self, post: Post, config: Dict[str, Any], username: str, password: str
     ):
-        self.post = post
-        self.config = config
+        super().__init__(post, config)
+
         self.username = username
         self.password = password
 

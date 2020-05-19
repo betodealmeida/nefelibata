@@ -76,8 +76,8 @@ class TwitterAnnouncer(Announcer):
         oauth_token: str,
         oauth_secret: str,
     ):
-        self.post = post
-        self.config = config
+        super().__init__(post, config)
+
         self.oauth_token = oauth_token
         self.oauth_secret = oauth_secret
         self.consumer_key = consumer_key

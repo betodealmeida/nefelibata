@@ -11,6 +11,10 @@ _logger = logging.getLogger("nefelibata")
 
 
 class Announcer:
+    def __init__(self, post: Post, config: Dict[str, Any]):
+        self.post = post
+        self.config = config
+
     def update_links(self) -> None:
         """Update links.json with link to where the post is announced.
         """

@@ -32,8 +32,8 @@ class MastodonAnnouncer(Announcer):
     def __init__(
         self, post: Post, config: Dict[str, Any], access_token: str, base_url: str
     ):
-        self.post = post
-        self.config = config
+        super().__init__(post, config)
+
         self.base_url = base_url
 
         self.client = mastodon.Mastodon(
