@@ -13,6 +13,7 @@ import markdown
 from bs4 import BeautifulSoup
 from jinja2 import Environment, FileSystemLoader
 
+from nefelibata import __version__
 from nefelibata.utils import find_external_resources, get_config, mirror_images
 
 _logger = logging.getLogger("nefelibata")

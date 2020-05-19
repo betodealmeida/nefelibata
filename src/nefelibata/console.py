@@ -13,7 +13,7 @@ Actions:
   init              Create a new weblog skeleton.
   new               Create a new post.
   build             Build weblog from Markdown and social media interactions.
-  preview           Run SimpleHTTPServer and open browser.
+  preview           Run SimpleHTTPServer.
   publish           Publish weblog to configured locations and announce new posts.
 
 Options:
@@ -208,7 +208,7 @@ def build(root: Path, force: bool = False, collect_replies: bool = True) -> None
 
 
 def preview(root: Path, port: int = 8000) -> None:
-    """Run a local HTTP server and open browser.
+    """Run a local HTTP server.
 
     Args:
       root (str): directory where the weblog lives
