@@ -62,3 +62,8 @@ wtsocial:
 mastodon:
     access_token:
     base_url:
+
+# For webmention you can use AWS lambda or webmention.io (leave bucket empty).
+webmention:
+    endpoint:
+    bucket:

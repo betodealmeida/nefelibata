@@ -4,6 +4,9 @@
     <meta charset="utf-8" />
     <meta name=generator content="Nefelibata {{ __version__ }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% if config.webmention.endpoint %}
+    <link href="{{ config.webmention.endpoint }}" rel="webmention" />
+    {% endif %}
     {% block meta %}{% endblock %}
     <title>{% block title %}{% endblock %}</title>
 
