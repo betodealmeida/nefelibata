@@ -1,12 +1,13 @@
 import logging
 import re
+import urllib.parse
 from typing import Any, Dict, List, Optional
 
 import dateutil.parser
 import requests
-
 from bs4 import BeautifulSoup
-from nefelibata.announcers import Announcer
+
+from nefelibata.announcers import Announcer, Response
 from nefelibata.post import Post
 
 _logger = logging.getLogger("nefelibata")
@@ -21,7 +22,7 @@ def get_user_image(username: str) -> Optional[str]:
     return match.group(1).replace("\\", "") if match else None
 
 
-def get_reply_from_comment(comment: Dict[str, Any]) -> Dict[str, Any]:
+def get_reply_from_comment(comment: Dict[str, Any]) -> Response:
     """Generate a standar reply from a comment.
 
     Args:
@@ -95,7 +96,7 @@ class WTSocialAnnouncer(Announcer):
         session = requests.Session()
         html = do_login(session, self.email, self.password)
         csrf_token = get_csrf_token(html)
-        post_url = f'{self.config["url"]}{self.post.url}'
+        post_url = urllib.parse.urljoin(self.config["url"], self.post.url)
 
         url = "https://wt.social/api/new-article"
         params = {
@@ -114,7 +115,7 @@ class WTSocialAnnouncer(Announcer):
 
         return url
 
-    def collect(self) -> List[Dict[str, Any]]:
+    def collect(self) -> List[Response]:
         """Collect responses to a given post.
         """
         _logger.info("Collecting replies from WT.Social")

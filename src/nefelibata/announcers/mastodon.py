@@ -1,14 +1,15 @@
 import logging
+import urllib.parse
 from typing import Any, Dict, List
 
 import mastodon
-from nefelibata.announcers import Announcer
+from nefelibata.announcers import Announcer, Response
 from nefelibata.post import Post
 
 _logger = logging.getLogger("nefelibata")
 
 
-def get_reply_from_toot(toot: mastodon.AttribAccessDict) -> Dict[str, Any]:
+def get_reply_from_toot(toot: mastodon.AttribAccessDict) -> Response:
     return {
         "source": "Mastodon",
         "color": "#2b90d9",
@@ -44,7 +45,7 @@ class MastodonAnnouncer(Announcer):
         _logger.info(f"Posting to Mastodon ({self.base_url})")
 
         language = self.post.parsed.get("language") or self.config["language"]
-        post_url = f'{self.config["url"]}{self.post.url}'
+        post_url = urllib.parse.urljoin(self.config["url"], self.post.url)
 
         toot = self.client.status_post(
             status=f"{self.post.summary}\n\n{post_url}",
@@ -56,7 +57,7 @@ class MastodonAnnouncer(Announcer):
 
         return toot["url"]
 
-    def collect(self) -> List[Dict[str, Any]]:
+    def collect(self) -> List[Response]:
         _logger.info(f"Collecting replies from Mastodon ({self.base_url})")
 
         toot_url = self.post.parsed[self.url_header]

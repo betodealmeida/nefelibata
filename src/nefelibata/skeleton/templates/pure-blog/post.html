@@ -45,15 +45,21 @@
                 </h1>
 
                 <!-- A single blog post -->
-                <section class="post">
+                <section class="post h-entry">
                     <header class="post-header">
                         <img width="48" height="48" alt="{{ config.author.name }}&#x27;s avatar" class="post-avatar" src="{{ config.author.profile_picture }}">
 
-                        <h2 class="post-title">{{ post.title }}</h2>
+                        <h2 class="post-title p-name">{{ post.title }}</h2>
+
+                        <h3 class="post-subtitle p-summary">{{ post.summary }}</h3>
 
                         <p class="post-meta">
-                            By <a class="post-author" href="mailto:{{ config.author.email }}">{{ config.author.name }}</a>
-                            on <time datetime="{{ post.date.isoformat() }}" pubdate>{{ post.date.strftime('%Y-%m-%d') }}</time>
+                            By <span class="h-card p-author">
+                                <a class="p-name u-url" rel="author me" href="{{ config.url }}">{{ config.author.name }}</a>
+                                (<a class="u-email" href="mailto:{{ config.author.email }}">{{ config.author.email }}</a>)
+                                <a class="u-photo hidden" href="{{ config.author.profile_picture }}"></a>
+                            </span>
+                            on <time class="dt-published" datetime="{{ post.date.isoformat() }}" pubdate>{{ post.date.strftime('%Y-%m-%d') }}</time>
                             under
                             {% for keyword in post.parsed.keywords.split(",") %}
                             <a class="post-category post-category-{{ hash_n(keyword.strip().encode('utf-8'), 4) }}" href="/{{ keyword.strip() }}.html">{{ keyword.strip() }}</a>
@@ -61,7 +67,7 @@
                         </p>
                     </header>
 
-                    <div class="post-description">
+                    <div class="post-description e-content">
                         {{ post.html }}
 
                         <!--

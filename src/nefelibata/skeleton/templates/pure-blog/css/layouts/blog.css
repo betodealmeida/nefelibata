@@ -197,3 +197,7 @@ h3 {
         text-align: center;
     }
 }
+
+.hidden {
+    display: hidden;
+}

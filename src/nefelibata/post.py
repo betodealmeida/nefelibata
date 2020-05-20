@@ -92,10 +92,8 @@ class Post:
         with open(self.file_path, "w") as fp:
             fp.write(str(self.parsed))
 
-    def create(self) -> None:
-        """Convert post from Markdown to HTML.
-
-        TODO: move to utils.py
+    def render(self) -> str:
+        """Render post from Markdown to HTML.
         """
         post_directory = self.file_path.parent
         stylesheets = [
@@ -118,7 +116,7 @@ class Post:
         )
         env.filters["formatdate"] = jinja2_formatdate
         template = env.get_template("post.html")
-        html = template.render(
+        return template.render(
             __version__=__version__,
             config=self.config,
             post=self,
@@ -129,8 +127,13 @@ class Post:
             hash_n=hash_n,
         )
 
+    def create(self) -> None:
+        """Save file to disk.
+        """
+        html = self.render()
+
         # mirror images locally
-        html = mirror_images(html, post_directory / "img")
+        html = mirror_images(html, self.file_path.parent / "img")
 
         filename = self.file_path.with_suffix(".html")
         with open(filename, "w") as fp:
@@ -143,7 +146,10 @@ class Post:
 def jinja2_formatdate(obj, fmt: str) -> str:
     """Jinja filter for formatting dates."""
     if isinstance(obj, str):
-        obj = dateutil.parser.parse(obj)
+        try:
+            obj = dateutil.parser.parse(obj)
+        except dateutil.parser.ParserError:
+            return "Unknown timestamp"
     elif isinstance(obj, (int, float)):
         obj = datetime.fromtimestamp(obj)
     return obj.strftime(fmt)

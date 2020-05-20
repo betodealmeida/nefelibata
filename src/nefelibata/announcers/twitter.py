@@ -1,10 +1,11 @@
 import logging
+import urllib.parse
 from typing import Any, Dict, List
 
 import dateutil.parser
-
 import twitter
-from nefelibata.announcers import Announcer
+
+from nefelibata.announcers import Announcer, Response
 from nefelibata.post import Post
 
 _logger = logging.getLogger("nefelibata")
@@ -12,7 +13,7 @@ _logger = logging.getLogger("nefelibata")
 max_length = 280
 
 
-def get_reply_from_mention(tweet: Dict[str, Any]) -> Dict[str, Any]:
+def get_reply_from_mention(tweet: Dict[str, Any]) -> Response:
     """Generate a standard reply from a Tweet.
 
     Args:
@@ -22,7 +23,7 @@ def get_reply_from_mention(tweet: Dict[str, Any]) -> Dict[str, Any]:
         "source": "Twitter",
         "color": "#00acee",
         "id": f'twitter:{tweet["id_str"]}',
-        "timestamp": dateutil.parser(tweet["created_at"]).timestamp(),
+        "timestamp": dateutil.parser.parse(tweet["created_at"]).timestamp(),
         "user": {
             "name": tweet["user"]["name"],
             "image": tweet["user"]["profile_image_url_https"],
@@ -93,14 +94,14 @@ class TwitterAnnouncer(Announcer):
         )
         client = twitter.Twitter(auth=auth)
 
-        post_url = f'{self.config["url"]}{self.post.url}'
+        post_url = urllib.parse.urljoin(self.config["url"], self.post.url)
         status = f"{self.post.summary[: max_length - 1 - len(post_url)]} {post_url}"
         response = client.statuses.update(status=status)
         _logger.info("Success!")
 
         return f'https://twitter.com/{response["user"]["screen_name"]}/status/{response["id_str"]}'
 
-    def collect(self) -> List[Dict[str, Any]]:
+    def collect(self) -> List[Response]:
         """Collect responses to a given tweet.
 
         Amazingly there's no support in the API to fetch all replies to a given
