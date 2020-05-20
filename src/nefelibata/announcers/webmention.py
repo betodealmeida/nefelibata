@@ -22,7 +22,7 @@ def get_webmention_endpoint(url) -> Optional[str]:
         links = requests.utils.parse_header_links(header)
         for link in links:
             if link["rel"] == "webmention":
-                return link["url"]
+                return urllib.parse.urljoin(url, link["url"])
 
     r = requests.get(url)
     html = r.content
@@ -58,11 +58,14 @@ class WebmentionAnnouncer(Announcer):
         return "https://webmention.net/implementations/"
 
     def collect(self) -> List[Response]:
+        _logger.info("Collecting webmentions")
+
         target = urllib.parse.urljoin(self.config["url"], self.post.url)
         url = "https://webmention.io/api/mentions.jf2"
         payload = {"target": target}
         r = requests.get(url, params=payload)
         feed = json.loads(r.content)
+
         return [
             {
                 "source": child.get("name", child["url"]),

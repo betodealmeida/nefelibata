@@ -61,7 +61,7 @@ Here, the file ``nefelibata.yaml`` stores the configuration for your weblog. The
 Configuring your weblog
 -----------------------
 
-Open the file `nefelibata.yaml`. The first part is self-explanatory:
+Open the file ``nefelibata.yaml``. The first part is self-explanatory:
 
 .. code-block:: yaml
 
