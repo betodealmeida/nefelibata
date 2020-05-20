@@ -67,4 +67,3 @@ mastodon:
 # be supported.
 webmention:
     endpoint:
-    bucket:

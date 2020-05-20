@@ -35,7 +35,7 @@ Response = TypedDict("Response", {
 
 
 class Announcer:
-    def __init__(self, post: Post, config: Dict[str, Any]):
+    def __init__(self, post: Post, config: Dict[str, Any], *args: Any, **kwargs: Any):
         self.post = post
         self.config = config
 

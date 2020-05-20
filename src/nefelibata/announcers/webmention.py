@@ -37,12 +37,6 @@ class WebmentionAnnouncer(Announcer):
     name = "Webmention"
     url_header = "webmention-url"
 
-    def __init__(self, post: Post, config: Dict[str, Any], endpoint: str, api_key: str):
-        super().__init__(post, config)
-
-        self.endpoint = endpoint
-        self.api_key = api_key
-
     def announce(self) -> str:
         _logger.info("Discovering links supporting webmention...")
 
