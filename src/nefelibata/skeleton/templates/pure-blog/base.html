@@ -2,9 +2,10 @@
 <html lang="{{ config.language }}">
 <head>
     <meta charset="utf-8" />
+    <meta name=generator content="Nefelibata {{ __version__ }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    {% if config.facebook.app_id %}
-    <meta property="fb:app_id" content="{{ config.facebook.app_id }}" />
+    {% if config.webmention.endpoint %}
+    <link href="{{ config.webmention.endpoint }}" rel="webmention" />
     {% endif %}
     {% block meta %}{% endblock %}
     <title>{% block title %}{% endblock %}</title>
@@ -50,7 +51,7 @@
                     <ul>
                         {% for link in config.social %}
                         <li class="pure-menu-item">
-                            <a href="{{ link.url }}" title="{{ link.title }}" class="pure-menu-link">{{ link.title }}</a>
+                            <a href="{{ link.url }}" rel="me" title="{{ link.title }}" class="pure-menu-link">{{ link.title }}</a>
                         </li>
                         {% endfor %}
                     </ul>

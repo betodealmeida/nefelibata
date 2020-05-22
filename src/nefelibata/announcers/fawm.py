@@ -7,13 +7,13 @@ import dateutil.parser
 import requests
 
 from bs4 import BeautifulSoup, NavigableString
-from nefelibata.announcers import Announcer
+from nefelibata.announcers import Announcer, Response
 from nefelibata.post import Post
 
 _logger = logging.getLogger("nefelibata")
 
 
-def get_reply_from_li(song_id: int, url: str, el: Any) -> Dict[str, Any]:
+def get_reply_from_li(song_id: int, url: str, el: Any) -> Response:
     """Generate a standard reply from a <li> element in the FAWM song page.
 
     Args:
@@ -166,8 +166,8 @@ class FAWMAnnouncer(Announcer):
     def __init__(
         self, post: Post, config: Dict[str, Any], username: str, password: str
     ):
-        self.post = post
-        self.config = config
+        super().__init__(post, config)
+
         self.username = username
         self.password = password
 
@@ -190,7 +190,7 @@ class FAWMAnnouncer(Announcer):
         return url
         """
 
-    def collect(self) -> None:
+    def collect(self) -> List[Response]:
         _logger.info("Collecting replies from FAWM")
 
         url = self.post.parsed[self.url_header]

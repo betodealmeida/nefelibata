@@ -16,7 +16,7 @@ Nefelibata (Portuguese for "one who walks on clouds") focus on preserving your c
 
 All this is done with a command line utility called ``nb``.
 
-Additionally, nefelibata acknowledges that most interactions occur in social networks, like Twitter or Facebook. The engine can be configured with global or per-post **announcers** that will post to social networks linking back to the content, so that people can comment and discuss posts. When the weblog is rebuilt, the announcers will collect any replies and store them locally, so that the comments are displayed in the weblog with your post. A post can be announced to multiple social networks, and the comments will be aggregated and preserved.
+Additionally, nefelibata acknowledges that most interactions occur in social networks, like Twitter or Mastodon. The engine can be configured with global or per-post **announcers** that will post to social networks linking back to the content, so that people can comment and discuss posts. When the weblog is rebuilt, the announcers will collect any replies and store them locally, so that the comments are displayed in the weblog with your post. A post can be announced to multiple social networks, and the comments will be aggregated and preserved.
 
 Getting started
 ===============
@@ -61,7 +61,7 @@ Here, the file ``nefelibata.yaml`` stores the configuration for your weblog. The
 Configuring your weblog
 -----------------------
 
-Open the file `nefelibata.yaml`. The first part is self-explanatory:
+Open the file ``nefelibata.yaml``. The first part is self-explanatory:
 
 .. code-block:: yaml
 
@@ -94,9 +94,9 @@ The second part defines where your weblog will be published to, and where new po
 .. code-block:: yaml
 
     publish-to: S3
-    announce-on: twitter, facebook
+    announce-on: twitter, mastodon
 
-In this example, the static files from the weblog will be published to an S3 bucket, and new posts will be published to both Twitter and Facebook.
+In this example, the static files from the weblog will be published to an S3 bucket, and new posts will be published to both Twitter and Mastodon.
 
 The S3 section looks like this:
 
@@ -155,7 +155,7 @@ You need to `create an S3 account <http://aws.amazon.com/s3/>`_ in order to get 
 
 This will upload your weblog to an S3 bucket and run the website from it over HTTP. If you want to serve the website over HTTPS (as I do), you need to disable Route 53 (``configure_route53`` should be empty) and `configure CloudFront <https://www.freecodecamp.org/news/simple-site-hosting-with-amazon-s3-and-https-5e78017f482a/>`_.
 
-Finally, if you want to announce your posts on Twitter or Facebook you need to create custom applications on the respeective developer websites, and add the access tokens to the file `nefelibata.yaml`. The skeleton file has instructions on how to do this for each announcer. (There's also an announcer for `FAWM <https://fawm.org/>`_, but it's currently work in progress).
+Finally, if you want to announce your posts on Twitter or Mastodon you need to create custom applications on the respective developer websites, and add the access tokens to the file ``nefelibata.yaml``. The skeleton file has instructions on how to do this for each announcer. (There's also an announcer for `FAWM <https://fawm.org/>`_, but it's currently work in progress).
 
 Creating a new post
 -------------------
@@ -186,7 +186,7 @@ You'll notice that the ``index.mkd`` file has headers and a body. The file itsel
 - ``summary``: this is a one-line summary of your post.
 - ``keywords``: a comma-separated list of keywords/tags/categories.
 
-Additionally, once the post is published a ``date`` header will be added. If the post is announced to Twitter/Facebook/etc. a corresponding header (eg, ``facebook-url``) will also be added.
+Additionally, once the post is published a ``date`` header will be added. If the post is announced to Twitter/Mastodon/etc. a corresponding header (eg, ``mastodon-url``) will also be added.
 
 If you want to announce your post to a custom social network you can either override the default announcers by using the ``announce-on`` header, or add an extra announcer by using the ``announce-on-extra`` header.
 

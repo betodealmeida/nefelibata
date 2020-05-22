@@ -4,13 +4,41 @@ import operator
 from typing import Any, Dict, List
 
 from pkg_resources import iter_entry_points
+from typing_extensions import TypedDict
 
 from nefelibata.post import Post
 
 _logger = logging.getLogger("nefelibata")
 
 
+User = TypedDict("User", {
+    "name": str,
+    "image": str,
+    "url": str,
+    "description": str,
+}, total=False)
+
+Comment = TypedDict("Comment", {
+    "text": str,
+    "url": str,
+}, total=False)
+
+Response = TypedDict("Response", {
+    "source": str,
+    "url": str,
+    "color": str,
+    "id": str,
+    "timestamp": str,
+    "user": User,
+    "comment": Comment,
+}, total=False)
+
+
 class Announcer:
+    def __init__(self, post: Post, config: Dict[str, Any], *args: Any, **kwargs: Any):
+        self.post = post
+        self.config = config
+
     def update_links(self) -> None:
         """Update links.json with link to where the post is announced.
         """
@@ -24,6 +52,8 @@ class Announcer:
 
         if self.name not in links:
             link = self.announce()
+            if not link:
+                return
 
             # store URL in links.json for template
             links[self.name] = link
@@ -66,28 +96,8 @@ class Announcer:
                 json.dump(replies, fp)
             self.post.save()
 
-    def collect(self) -> List[Dict[str, Any]]:
+    def collect(self) -> List[Response]:
         """Collect responses.
-
-        The responses should be stored as JSON in the post directory, with the
-        following structure:
-
-            [{
-                source
-                url
-                [color]
-                id
-                timestamp
-                user
-                    name
-                    [image]
-                    [url]
-                    [description]
-                comment
-                    text
-                    [url]
-            }]
-
         """
         raise NotImplementedError("Subclasses must implement collect")
 

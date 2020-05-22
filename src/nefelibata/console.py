@@ -8,15 +8,13 @@ Usage:
   nb build [DIRECTORY] [-f] [--no-collect] [--loglevel=INFO]
   nb preview [-p PORT] [DIRECTORY] [--loglevel=INFO]
   nb publish [DIRECTORY] [-f] [--loglevel=INFO]
-  nb facebook [DIRECTORY] [--loglevel=INFO]
 
 Actions:
   init              Create a new weblog skeleton.
   new               Create a new post.
   build             Build weblog from Markdown and social media interactions.
-  preview           Run SimpleHTTPServer and open browser.
+  preview           Run SimpleHTTPServer.
   publish           Publish weblog to configured locations and announce new posts.
-  facebook          Get a 60-day access token for Facebook announcer.
 
 Options:
   -h --help         Show this screen.
@@ -46,7 +44,6 @@ from pkg_resources import resource_filename, resource_listdir
 
 from nefelibata import __version__, config_filename, new_post
 from nefelibata.announcers import get_announcers
-from nefelibata.announcers.facebook import generate_access_token
 from nefelibata.index import create_categories, create_feed, create_index
 from nefelibata.post import Post, get_posts
 from nefelibata.publishers import get_publishers
@@ -211,7 +208,7 @@ def build(root: Path, force: bool = False, collect_replies: bool = True) -> None
 
 
 def preview(root: Path, port: int = 8000) -> None:
-    """Run a local HTTP server and open browser.
+    """Run a local HTTP server.
 
     Args:
       root (str): directory where the weblog lives
@@ -246,28 +243,14 @@ def publish(root: Path, force: bool = False) -> None:
 
     # announce posts
     for post in get_posts(root):
+        # freeze currently configured announcers, so that if a new announcer is
+        # added in the future old posts are not announced
+        if "announce-on" not in post.parsed:
+            post.parsed["announce-on"] = config["announce-on"]
+            post.save()
+
         for announcer in get_announcers(post, config):
             announcer.update_links()
-
-
-def facebook(root: Path) -> None:
-    """Get 60-day FB access token for announcer.
-
-    Args:
-      root (str): directory where the weblog lives
-    """
-    _logger.info("Getting long-lived FB token.")
-
-    config = get_config(root)
-    _logger.debug(config)
-
-    section = config["facebook"]
-    token = generate_access_token(
-        section["app_id"], section["app_secret"], section["short_lived_token"]
-    )
-
-    sys.stdout.write(f"Long-lived FB access token: {token}\n")
-    _logger.info("Success!")
 
 
 def main() -> None:
@@ -295,8 +278,6 @@ def main() -> None:
         preview(root, int(arguments["-p"]))
     elif arguments["publish"]:
         publish(root, arguments["--force"])
-    elif arguments["facebook"]:
-        facebook(root)
 
 
 if __name__ == "__main__":
