@@ -2,6 +2,7 @@ import hashlib
 import re
 from pathlib import Path
 from typing import Any, Dict, Iterator
+import urllib.parse
 
 import requests
 import yaml
@@ -26,15 +27,20 @@ def get_config(root: Path) -> Dict[str, Any]:
             config["author"]["email"]
         ).get_image()
 
+    config["root"] = root
+
     return config
 
 
-def find_external_resources(html: str) -> Iterator[str]:
+def find_external_resources(config: Dict[str, Any], filename: Path) -> Iterator[str]:
     """Find any external resources in an HTML document.
     
     Args:
       html (str): HTML document
     """
+    with open(filename, "w") as fp:
+        html = fp.read()
+
     tag_attributes = [
         ("img", "src"),
         ("link", "href"),
@@ -44,8 +50,39 @@ def find_external_resources(html: str) -> Iterator[str]:
     for tag, attr in tag_attributes:
         for el in soup.find_all(tag):
             resource = el.attrs.get(attr)
-            if resource and "://" in resource:
+            if (
+                resource
+                and "://" in resource
+                and not resource.startswith(config["url"])
+            ):
                 yield resource
+            elif resource and resource.endswith(".css"):
+                yield from check_css(config, filename, resource)
+
+
+def check_css(config: Dict[str, Any], filename: Path, url: str) -> Iterator[str]:
+    """Find any external resources in a CSS document.
+
+    Args:
+      config: the blog configuration from nefelibata.yaml
+      filename: path object to the HTML file
+      url (str): URL to CSS (relative or absolute)
+    """
+    csspath = url_to_path(url)
+    with open(csspath) as fp:
+        css = fp.read()
+
+    stylesheet = tinycss2.parse_stylesheet(
+        css, skip_comments=True, skip_whitespace=True
+    )
+    for rule in stylesheet:
+        for token in rule.contents:
+            if (
+                isinstance(token, tinycss2.ast.URLToken)
+                and "://" in token.value
+                and not token.value.startswith(config["url"])
+            ):
+                yield token.value
 
 
 def mirror_images(html: str, mirror: Path) -> str:

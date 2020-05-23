@@ -134,7 +134,7 @@ class Post:
         with open(filename, "w") as fp:
             fp.write(html)
 
-        for resource in find_external_resources(html):
+        for resource in find_external_resources(self.config, filename):
             _logger.warning(f"External resource found: {resource}")
 
 

@@ -45,11 +45,12 @@ def create_index(root: Path) -> None:
         # mirror images locally
         html = mirror_images(html, root / "build" / "img")
 
-        with open(root / "build" / name, "w") as fp:
+        filename = root / "build" / name
+        with open(filename, "w") as fp:
             fp.write(html)
         previous, name = name, next
 
-        for resource in find_external_resources(html):
+        for resource in find_external_resources(config, filename):
             _logger.warning(f"External resource found: {resource}")
 
 
@@ -107,7 +108,7 @@ def create_categories(root: Path) -> None:
                 fp.write(html)
             previous, name = name, next
 
-            for resource in find_external_resources(html):
+            for resource in find_external_resources(config, filename):
                 _logger.warning(f"External resource found: {resource}")
 
 
