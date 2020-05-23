@@ -60,6 +60,25 @@ def get_reply_from_li(song_id: int, url: str, el: Any) -> Response:
     }
 
 
+def get_replies_from_fawm_page(
+    url: str, username: str, password: str
+) -> List[Dict[str, Any]]:
+    """Extract replies from a given FAWM page.
+    """
+    response = requests.get(url, auth=(username, password))
+    response.encoding = "UTF-8"
+    html = response.text
+    soup = BeautifulSoup(html, "html.parser")
+
+    replies = []
+    song_id = int(url.rstrip("/").rsplit("/", 1)[1])
+    # there are non-comments with the class "comment-item", so we need to narrow down
+    for el in soup.find_all("li", {"class": "comment-item", "id": re.compile("c\d+")}):
+        replies.append(get_reply_from_li(song_id, url, el))
+
+    return replies
+
+
 def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
     """Extract params from a standard FAWM post.
     """
@@ -98,6 +117,7 @@ def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
         demo = ""
 
     return {
+        "id": "",
         "title": post.title,
         "tags": tags,
         "demo": demo,
@@ -106,27 +126,8 @@ def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
         "status": "public",
         "collab": 0,
         "downloadable": 1,
-        "submit": "Save+It!",  # XXX
+        "submit": "Save+It!",
     }
-
-
-def get_replies_from_fawm_page(
-    url: str, username: str, password: str
-) -> List[Dict[str, Any]]:
-    """Extract replies from a given FAWM page.
-    """
-    response = requests.get(url, auth=(username, password))
-    response.encoding = "UTF-8"
-    html = response.text
-    soup = BeautifulSoup(html, "html.parser")
-
-    replies = []
-    song_id = int(url.rstrip("/").rsplit("/", 1)[1])
-    # there are non-comments with the class "comment-item", so we need to narrow down
-    for el in soup.find_all("li", {"class": "comment-item", "id": re.compile("c\d+")}):
-        replies.append(get_reply_from_li(song_id, url, el))
-
-    return replies
 
 
 class FAWMAnnouncer(Announcer):
@@ -175,20 +176,18 @@ class FAWMAnnouncer(Announcer):
         """Publish the song to FAWM.
         """
         _logger.info("Creating new song on FAWM")
-        params = extract_params(self.post, self.config)
 
-        """
-        # TODO: implement in February when the website allows uploads again
+        params = extract_params(self.post, self.config)
         response = requests.post(
-            "http://fawm.org/songs/",
+            "http://fawm.org/songs/add",
             data=params,
             auth=(self.username, self.password),
         )
-        url = response???
+        url = response.headers["Location"]
+
         _logger.info("Success!")
 
         return url
-        """
 
     def collect(self) -> List[Response]:
         _logger.info("Collecting replies from FAWM")
