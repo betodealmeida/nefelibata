@@ -1,5 +1,6 @@
 import json
 import logging
+import mf2py
 import operator
 from typing import Any, Dict, List
 
@@ -11,27 +12,36 @@ from nefelibata.post import Post
 _logger = logging.getLogger("nefelibata")
 
 
-User = TypedDict("User", {
-    "name": str,
-    "image": str,
-    "url": str,
-    "description": str,
-}, total=False)
+User = TypedDict(
+    "User", {"name": str, "image": str, "url": str, "description": str,}, total=False
+)
 
-Comment = TypedDict("Comment", {
-    "text": str,
-    "url": str,
-}, total=False)
+Comment = TypedDict("Comment", {"text": str, "url": str,}, total=False)
 
-Response = TypedDict("Response", {
-    "source": str,
-    "url": str,
-    "color": str,
-    "id": str,
-    "timestamp": str,
-    "user": User,
-    "comment": Comment,
-}, total=False)
+Response = TypedDict(
+    "Response",
+    {
+        "source": str,
+        "url": str,
+        "color": str,
+        "id": str,
+        "timestamp": str,
+        "user": User,
+        "comment": Comment,
+    },
+    total=False,
+)
+
+
+def fetch_hcard(user: User) -> User:
+    obj = mf2py.parse(url=user["url"])
+    for item in obj["items"]:
+        if "h-card" in item["type"]:
+            user["name"] = item["properties"]["name"][0]
+            user["image"] = item["properties"]["photo"][0]
+            break
+
+    return user
 
 
 class Announcer:
@@ -86,6 +96,15 @@ class Announcer:
 
         ids = {reply["id"] for reply in replies}
         replies.extend(reply for reply in self.collect() if reply["id"] not in ids)
+
+        for reply in replies:
+            user = reply["user"]
+
+            # if the user has an URL, but no name or image, try to read their h-card
+            # from the URL
+            if user["url"] and (not user["name"] or not user["url"]):
+                print("FETCHING USER INFO")
+                user = fetch_hcard(user)
 
         if len(replies) > count:
             _logger.info(
