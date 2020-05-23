@@ -66,4 +66,4 @@ mastodon:
 # Currently webmention works with webmention.io; in the future AWS lambdas will
 # be supported.
 webmention:
-    endpoint:
+    endpoint: https://webmention.io/{your-blog-url}/webmention
