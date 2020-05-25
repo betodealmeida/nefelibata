@@ -67,3 +67,7 @@ mastodon:
 # be supported.
 webmention:
     endpoint: https://webmention.io/{your-blog-url}/webmention
+
+medium:
+    # generate an integration token at https://medium.com/me/settings
+    access_token:
