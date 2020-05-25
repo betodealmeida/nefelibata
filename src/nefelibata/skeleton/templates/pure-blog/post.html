@@ -76,6 +76,10 @@
                         {{ post.markdown|e }}
                         -->
                     </div>
+
+                    {% if config.webmention.post_to_indienews %}
+                    (<a href="https://news.indieweb.org/{{ config.language }}" class="u-syndication">Also posted on IndieNews</a>.)
+                    {% endif %}
                 </section>
 
                 <h1 class="content-subhead">Comments</h1>

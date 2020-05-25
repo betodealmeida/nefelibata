@@ -49,7 +49,7 @@ class MediumAnnouncer(Announcer):
                 tag.strip() for tag in self.post.parsed.get("keywords", "").split(",")
             ],
             "canonicalUrl": urllib.parse.urljoin(self.config["url"], self.post.url),
-            "publishStatus": "draft",
+            "publishStatus": self.config["medium"]["publish_status"] or "draft",
         }
         response = requests.post(url, data=payload, headers=headers)
         return response.json()["data"]["url"]

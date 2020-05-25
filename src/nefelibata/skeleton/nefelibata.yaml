@@ -67,7 +67,11 @@ mastodon:
 # be supported.
 webmention:
     endpoint: https://webmention.io/{your-blog-url}/webmention
+    # automatically post to https://news.indieweb.org/{language}
+    post_to_indienews: false
 
 medium:
     # generate an integration token at https://medium.com/me/settings
     access_token:
+    # public, draft or unlisted
+    publish_status: unlisted

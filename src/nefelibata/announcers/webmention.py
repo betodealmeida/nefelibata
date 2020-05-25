@@ -37,6 +37,14 @@ class WebmentionAnnouncer(Announcer):
     name = "Webmention"
     url_header = "webmention-url"
 
+    def __init__(
+        self, post: Post, config: Dict[str, Any], endpoint: str, post_to_indienews: bool
+    ):
+        super().__init__(post, config)
+
+        self.endpoint = endpoint  # used only in template
+        self.post_to_indienews = post_to_indienews
+
     def announce(self) -> str:
         _logger.info("Discovering links supporting webmention...")
 
@@ -44,18 +52,25 @@ class WebmentionAnnouncer(Announcer):
         for el in soup.find_all("a", href=re.compile("http")):
             target = el.attrs.get("href")
             _logger.info(f"Checking {target}")
-            endpoint = get_webmention_endpoint(target)
-            if endpoint:
-                _logger.info(f"Sending mention to {endpoint}")
-                payload = {
-                    "source": urllib.parse.urljoin(self.config["url"], self.post.url),
-                    "target": target,
-                }
-                r = requests.post(endpoint, data=payload)
+            self._send_mention(target)
+
+        if self.post_to_indienews:
+            _logger.info(f"Sending mention to {endpoint}")
+            self._send_mention(f'https://news.indieweb.org/{self.config["language"]}')
 
         _logger.info("Success!")
 
         return "https://webmention.net/implementations/"
+
+    def _send_mention(self, target: url) -> None:
+        endpoint = get_webmention_endpoint(target)
+        if endpoint:
+            _logger.info(f"Sending mention to {endpoint}")
+            payload = {
+                "source": urllib.parse.urljoin(self.config["url"], self.post.url),
+                "target": target,
+            }
+            requests.post(endpoint, data=payload)
 
     def collect(self) -> List[Response]:
         _logger.info("Collecting webmentions")
@@ -73,16 +88,15 @@ class WebmentionAnnouncer(Announcer):
                 "id": f'webmention:{child["wm-id"]}',
                 "timestamp": (
                     dateutil.parser.parse(child["published"]).timestamp()
-                    if child.get("published") else ""
+                    if child.get("published")
+                    else ""
                 ),
                 "user": {
                     "name": child["author"]["name"],
                     "image": child["author"]["photo"],
                     "url": child["author"]["url"],
                 },
-                "comment": {
-                    "text": child.get("content", {}).get("text", ""),
-                },
+                "comment": {"text": child.get("content", {}).get("text", ""),},
             }
             for child in feed["children"]
         ]
