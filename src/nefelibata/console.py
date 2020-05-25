@@ -44,6 +44,7 @@ from pkg_resources import resource_filename, resource_listdir
 
 from nefelibata import __version__, config_filename, new_post
 from nefelibata.announcers import get_announcers
+from nefelibata.assistants import get_assistants, Scope
 from nefelibata.index import create_categories, create_feed, create_index
 from nefelibata.post import Post, get_posts
 from nefelibata.publishers import get_publishers
@@ -182,6 +183,7 @@ def build(root: Path, force: bool = False, collect_replies: bool = True) -> None
             target.symlink_to(resource_directory, target_is_directory=True)
 
     _logger.info("Processing posts")
+    post_assistants = get_assistants(config, Scope.POST)
     for post in get_posts(root):
         if collect_replies:
             for announcer in get_announcers(post, config):
@@ -189,6 +191,9 @@ def build(root: Path, force: bool = False, collect_replies: bool = True) -> None
 
         if force or not post.up_to_date:
             post.create()
+
+        for assistant in post_assistants:
+            assistant.process_post(post)
 
         # symlink build -> posts
         post_directory = post.file_path.parent
@@ -246,7 +251,7 @@ def publish(root: Path, force: bool = False) -> None:
         # freeze currently configured announcers, so that if a new announcer is
         # added in the future old posts are not announced
         if "announce-on" not in post.parsed:
-            post.parsed["announce-on"] = ', '.join(config["announce-on"])
+            post.parsed["announce-on"] = ", ".join(config["announce-on"])
             post.save()
 
         for announcer in get_announcers(post, config):

@@ -62,7 +62,7 @@ class WebmentionAnnouncer(Announcer):
 
         return "https://webmention.net/implementations/"
 
-    def _send_mention(self, target: url) -> None:
+    def _send_mention(self, target: str) -> None:
         endpoint = get_webmention_endpoint(target)
         if endpoint:
             _logger.info(f"Sending mention to {endpoint}")

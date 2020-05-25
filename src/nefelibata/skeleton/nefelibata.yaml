@@ -20,8 +20,18 @@ social:
       url: "https://twitter.com/dealmeida"
       icon: icon-twitter
 
-publish-to: S3
-announce-on: twitter, mastodon
+publish-to:
+  - S3
+
+announce-on:
+  - webmention
+  - mastodon
+  - twitter
+  - medium
+  - wtsocial
+
+assistants:
+  - playlist
 
 # Apply for S3 here: http://aws.amazon.com/s3/
 S3:

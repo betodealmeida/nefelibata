@@ -7,6 +7,7 @@ import requests
 import yaml
 from bs4 import BeautifulSoup
 from libgravatar import Gravatar
+from mutagen.mp3 import MP3
 
 from nefelibata import config_filename
 
@@ -27,6 +28,12 @@ def get_config(root: Path) -> Dict[str, Any]:
         ).get_image()
 
     return config
+
+
+# TODO: make transform all the functions below into extensions
+# that run on contexts (post, site) and that are loaded via
+# entry points and enabled in the config file
+# XXX: should the Atom render be an extension too?
 
 
 def find_external_resources(html: str) -> Iterator[str]:
@@ -78,3 +85,33 @@ def mirror_images(html: str, mirror: Path) -> str:
         el.attrs["src"] = "img/%s" % local.name
 
     return str(soup)
+
+
+def make_playlist(post: "Post") -> None:
+    post_directory = post.file_path.parent
+
+    mp3s: Dict[str, Any] = {}
+    for path in post_directory.glob("**/*.mp3"):
+        print(path)
+        audio = MP3(path)
+        print(audio.info.length)
+        print(audio["TIT2"])  # title
+        print(audio["TPE1"])  # artist
+        print(audio["TDRC"])  # year
+        print(audio["TALB"])  # album
+        print(audio.keys())
+
+
+if __name__ == "__main__":
+    from nefelibata.post import Post
+
+    root = Path("/home/beto/github.com/betodealmeida/blog/")
+    config = get_config(root)
+    post = Post(
+        Path(
+            "/home/beto/github.com/betodealmeida/blog/posts/100_songs_in_2019/index.mkd"
+        ),
+        root,
+        config,
+    )
+    make_playlist(post)

@@ -17,10 +17,13 @@ class MediumAnnouncer(Announcer):
     name = "Medium"
     url_header = "medium-url"
 
-    def __init__(self, post: Post, config: Dict[str, Any], access_token: str):
+    def __init__(
+        self, post: Post, config: Dict[str, Any], access_token: str, publish_status: str
+    ):
         super().__init__(post, config)
 
         self.access_token = access_token
+        self.publish_status = publish_status
 
     def announce(self) -> str:
         _logger.info("Posting to Medium")
@@ -49,7 +52,7 @@ class MediumAnnouncer(Announcer):
                 tag.strip() for tag in self.post.parsed.get("keywords", "").split(",")
             ],
             "canonicalUrl": urllib.parse.urljoin(self.config["url"], self.post.url),
-            "publishStatus": self.config["medium"]["publish_status"] or "draft",
+            "publishStatus": self.publish_status or "draft",
         }
         response = requests.post(url, data=payload, headers=headers)
         return response.json()["data"]["url"]
