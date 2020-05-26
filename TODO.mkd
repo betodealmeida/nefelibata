@@ -5,7 +5,7 @@
 - [x] atom feed
 - [x] upload to S3 only when changed
 - [x] Twitter announcer
-- [ ] FAWM announcer
+- [x] FAWM announcer
 - [x] display comments
 - [x] show link to comment
 - [x] update requirements.txt
@@ -13,8 +13,12 @@
 - [x] FB announcer
 - [x] WT.Social announcer
 - [x] Mastodon announcer
-- [ ] Instagram announcer
-- [ ] Medium announcer
-- [ ] microformats
-- [ ] linkbacks
+- [x] Medium announcer
+- [x] microformats
+- [x] linkbacks
+- [ ] move mirror images to assistant
+- [ ] check CSS for external resources
+- [ ] unit test coverage
+- [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
+- [ ] Instagram announcer
