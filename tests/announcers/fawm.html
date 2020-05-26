@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>FAWM.ORG | Slow day</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Les styles -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+            <link href="/css/fawm.css?ts=1767243" rel="stylesheet">
+        <link href="/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="/css/fawm-player/fawm-player.css" rel="stylesheet">
+    
+    <link href="http://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <meta name="keywords" content="february national album writing month songwriting songs independent artists musicians music recording musical collaboration"/>
+    <meta name="description" content="14 songs in 28 days. What are you waiting for... inspiration?"/>
+    <meta name="ROBOTS" content="ALL"/>
+    <meta name="Rating" content="14 years"/>
+
+    <!-- for facebook sharing -->
+    <meta property="og:image" content="http://fawm.org/img/fbshare.png"/>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+   <script src='https://www.google.com/recaptcha/api.js'></script>
+  </head>
+
+  <body id="top" data-spy="scroll" data-target=".scroll-sidebar" data-offset="70"   onLoad="">
+
+            <!-- navbar -->
+      <nav class="navbar navbar-fixed-top navbar-inverse">
+        <div class="container">
+          <!-- Brand and toggle get grouped for better mobile display -->
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+              <a class="navbar-brand " href="/">
+                                <i class="fa fa-play-circle"></i>
+                                FAWM.ORG</a>
+          </div>
+
+          <!-- Collect the nav links, forms, and other content for toggling -->
+          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                            <li class="active" ><a href="/songs/"><i class="fa fa-music"></i> <span class="hidden-sm">Songs</span></a></li>
+                            <li  ><a href="/fawmers/"><i class="fa fa-users"></i> <span class="hidden-sm">Fawmers</span></a></li>
+              <li  ><a href="/forums/"><i class="fa fa-comments"></i> <span class="hidden-sm">Forums</span></a></li>
+              <!-- <li  ><a href="/donate/">Donate</a></li> -->
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true">
+                  Login <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" role="menu">
+                  <form action="/login/" method="post" accept-charset="UTF-8" style="padding: 10px; padding-bottom: 0px;">
+                      <input id="login" class="form-control input-sm" style="margin-bottom: 10px;" type="text" name="login" size="30" placeholder="Username or Email"/>
+                      <input id="user_password" class="form-control input-sm" style="margin-bottom: 10px;" type="password" name="password" size="30" placeholder="Password"/>
+                      <input class="btn btn-primary btn-block" type="submit" name="commit" value="Log in" />
+                    <li class="divider"></li>
+                    <li><a href="/signup/">Sign Up</a></li>
+                    <li><a href="/lostpassword/">Lost Password</a></li>
+                </form>
+                </ul>
+              </li>
+                            </ul>
+
+
+          
+
+            <form action="/search/" method="get" class="navbar-form navbar-right" role="search">
+                            <div class="form-group">
+              <div class="input-group">
+                                <input name="q" id="q" type="text" class="form-control" placeholder="Search Songs">
+              <span class="input-group-btn">
+                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+              </span>
+              </div>
+            </div>
+            </form>
+
+
+          </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+      </nav>
+      <!-- /navbar -->
+      <!-- container -->
+      <div class="container real-content">
+
+<div class="row">
+
+<!-- nav-sidebar -->
+<div class="col-sm-4 scroll-sidebar hidden-xs">
+    <div class="affixed-scroll"  data-spy="affix">
+    <div class="panel panel-default" >
+
+    <ul class="nav nav-pills nav-stacked">
+        <li class="active"><a class="page-scroll" href="#top"><i class="fa fa-music"></i> Summary <span class="pull-right"><i class="fa fa-chevron-right"></i></span></a></li>
+                <li><a class="page-scroll" href="#notes"><i class="fa fa-book"></i> Liner Notes <span class="pull-right"><i class="fa fa-chevron-right"></i></span></a></li>
+                        <li><a class="page-scroll" href="#lyrics"><i class="fa fa-file-o"></i> Lyrics <span class="pull-right"><i class="fa fa-chevron-right"></i></span></a></li>
+                <li><a class="page-scroll" href="#comments"><i class="fa fa-comments"></i> Comments <span class="pull-right"><i class="fa fa-chevron-right"></i></span></a></li>
+    </ul>
+
+    </div>
+
+<!-- footnote -->
+<div class="panel panel-default footnote">
+<div class="panel-body text-muted">
+     &copy; 2020 FAWM.ORG
+     <div style="display: inline-block">
+    <a href="https://twitter.com/fawm" target="_blank"><i class="fa fa-twitter"></i></a>
+    <a href="https://www.facebook.com/theFAWM" target="_blank"><i class="fa fa-facebook-square"></i></a>
+    <a href="/contact/"><i class="fa fa-envelope"></i></a>
+    <a href="http://fawmorg.bigcartel.com/" target="_blank"><i class="fa fa-shopping-cart"></i></a>
+  </div>
+   <p class="text-muted small">
+       But lyrics and song content belong to the fawmers who wrote them!
+       <a href="/donate/">Donate</a> &middot;
+       <a href="/credits/">Credits</a> &middot;
+       <a href="/help/">Help/FAQ</a> &middot;
+       <a href="/terms/">Terms</a> &middot;
+       <a href="/privacy/">Privacy</a>
+   </p>
+</div>
+</div>
+<!-- /footnote -->    </div>
+</div>
+<!-- /nav-sideabr -->
+
+
+<!-- main content -->
+<div id="sidebar" class="col-sm-8">
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        <div class="pull-right clearfix">
+                </div>
+        <h2>Slow day</h2>
+        <div>
+                    by @<a class='user-ref' href='/fawmers/elesimo/'><strong>elesimo</strong>&nbsp;<i class="icon-donated"></i></a>
+        </div>
+    </div>
+
+
+    <div class="panel-body">
+
+            <p>
+            <i class="fa fa-clock-o"></i> Feb&nbsp;29                        &nbsp;
+            <i class="fa fa-tags"></i> <a href='/songs/tags/jam/'>jam</a> <a href='/songs/tags/op-z/'>op-z</a> <a href='/songs/tags/instrumental/'>instrumental</a> <a href='/songs/tags/electronic/'>electronic</a>                         </p>
+
+            <div class="clearfix"><div id="player" class="jp-jplayer" data-mp3-url="http://s3-us-west-1.amazonaws.com/thefishermenandthepriestess.com/FAWM/2020/Elesimo_Slow_day.mp3"></div>
+<div id="jp_container_1" class="jp-audio">
+    <div class="jp-type-single">
+        <div class="jp-gui jp-interface">
+            <ul class="jp-controls">
+                <!-- <li><a href="javascript:;" class="jp-previous" tabindex="1">previous</a></li> -->
+                <li><a href="javascript:;" class="jp-play" tabindex="1"><i class="fa fa-play"></i></a></li>
+                <li><a href="javascript:;" class="jp-pause" tabindex="1"><i class="fa fa-pause"></i></a></li>
+                <!-- <li><a href="javascript:;" class="jp-next" tabindex="1">next</a></li> -->
+                <!-- <li><a href="javascript:;" class="jp-stop" tabindex="1">stop</a></li> -->
+                <!-- <li><a href="javascript:;" class="jp-mute" tabindex="1" title="mute">mute</a></li> -->
+                <!-- <li><a href="javascript:;" class="jp-unmute" tabindex="1" title="unmute">unmute</a></li> -->
+                <!-- <li><a href="javascript:;" class="jp-volume-max" tabindex="1" title="max volume">max volume</a></li> -->
+            </ul>
+            <div class="jp-progress">
+                <div class="jp-seek-bar">
+                    <div class="jp-play-bar"></div>
+                </div>
+            </div>
+                <!-- <div class="jp-volume-bar"> -->
+                <!-- <div class="jp-volume-bar-value"></div> -->
+                <!-- </div> -->
+                <div class="jp-time-holder">
+                    <div class="jp-current-time"></div>
+                    <!--<div class="jp-duration"></div>-->
+                </div>
+                <!-- <ul class="jp-toggles">
+                    <li><a href="javascript:;" class="jp-shuffle" tabindex="1" title="shuffle">shuffle</a></li>
+                    <li><a href="javascript:;" class="jp-shuffle-off" tabindex="1" title="shuffle off">shuffle off</a></li>
+                    <li><a href="javascript:;" class="jp-repeat" tabindex="1" title="repeat">repeat</a></li>
+                    <li><a href="javascript:;" class="jp-repeat-off" tabindex="1" title="repeat off">repeat off</a></li>
+                </ul> -->
+        </div>
+        <div class="jp-no-solution">
+            <span>Update Required</span>
+            To play the media you will need to either update your browser to a recent version or update your <a href="http://get.adobe.com/flashplayer/" target="_blank">Flash plugin</a>.
+        </div>
+    </div>
+</div>
+<!-- .jp-audio --></div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" class="autoplay"> Auto-play songs
+                </label>
+                <label>
+                    <input type="checkbox" class="autoadvance"> Auto-advance to next song
+                </label>
+            </div>
+
+        <div>
+                                                </div>
+</div>
+</div>
+
+        <!-- notes -->
+    <div class="jump panel panel-default" id="notes">
+        <div class="panel-heading">
+            <h4 class="jump" id="notes">Liner Notes</h4>
+        </div>
+        <div class="panel-body">
+            <p>Another jam with my OP-Z and the Korg Mini Kaoss Pad 2S, for my last FAWM song of 2020.<br />
+<br />
+I'm a great fan of the OP-Z and its workflow, and even though I've written a few dozens songs on it I'm still only knowledgeable of less than 50% of what it can do. The Kaoss Pad is a nice addition, I got it as a birthday gift in 2018 and I finally found a nice workflow for it, adding small effects to the OP-Z master track.</p>
+        </div>
+    </div>
+    <!-- /notes -->
+    
+        <!-- lyrics -->
+    <div class="jump panel panel-default" id="lyrics">
+        <div class="panel-heading">
+            <h4>Lyrics</h4>
+        </div>
+        <div class="panel-body">
+            <p>N/A</p>
+        </div>
+    </div>
+    <!-- /lyrics -->
+    
+    <!-- comments -->
+    <div class="jump panel panel-default" id="comments">
+        <div class="panel-heading">
+            <h4>Comments</h4>
+        </div>
+        <div class="panel-body">
+
+                
+                <ul id="comment-list" class="media-list">
+                    <!-- tell them to log in? -->
+                                        <div class="alert alert-warning"><strong>Leave a Comment.</strong>
+                        <a href="/login/">Log in to FAWM</a> or
+                        <a href="/signup/">sign up</a> first...
+                    </div>
+                                        <!-- any existing comments? -->
+                                                                        <li id="c565501" class="comment-item media">
+    <div class="media-left">
+      <a href="/fawmers/phylo/">
+        <img class="media-object img-rounded comment-avatar" style="background-color: #cc9600;" src="/img/avatars/723.big.jpg" alt="">
+      </a>
+    </div>
+    <div class="media-body">
+      <h5 class="media-heading">@<a class='user-ref' href='/fawmers/phylo/'><strong>phylo</strong>&nbsp;<i class="icon-donated"></i></a>        <small class="text-muted">Mar&nbsp;3</small>
+        <small class="media-meta pull-right hidden-xs">
+                        <!-- <a href="#"><i class="fa fa-flag"></i>report abuse</a>
+            <a href="#"><i class="fa fa-pencil"></i>edit</a>
+            <a href="#"><i class="fa fa-trash"></i>delete</a>  -->
+        </small></h5>
+                    <p id="q565501">This tune is so sweet!  The melody is very catchy.  There are lots of little surprises in there.  Nice work.</p>
+                
+    </div>
+</li>
+
+                                                    <li id="c564029" class="comment-item media">
+    <div class="media-left">
+      <a href="/fawmers/kahlo2013/">
+        <img class="media-object img-rounded comment-avatar" style="background-color: #6691ff;" src="/img/avatars/7832.big.jpg" alt="">
+      </a>
+    </div>
+    <div class="media-body">
+      <h5 class="media-heading">@<a class='user-ref' href='/fawmers/kahlo2013/'><strong>kahlo2013</strong>&nbsp;<i class="icon-donated"></i></a>        <small class="text-muted">Mar&nbsp;1</small>
+        <small class="media-meta pull-right hidden-xs">
+                        <!-- <a href="#"><i class="fa fa-flag"></i>report abuse</a>
+            <a href="#"><i class="fa fa-pencil"></i>edit</a>
+            <a href="#"><i class="fa fa-trash"></i>delete</a>  -->
+        </small></h5>
+                    <p id="q564029">This is really lovely feel-good kind of music that has a wonderful groove. The different instrumental layers - piano, bells, etc really play off each other quite well. Lovely composition and a pleasure to listen to!</p>
+                
+    </div>
+</li>
+
+                                                    <li id="c562750" class="comment-item media">
+    <div class="media-left">
+      <a href="/fawmers/sadloaf/">
+        <img class="media-object img-rounded comment-avatar" style="background-color: #66ffd4;" src="/img/avatars/17162.big.jpg" alt="">
+      </a>
+    </div>
+    <div class="media-body">
+      <h5 class="media-heading">@<a class='user-ref' href='/fawmers/sadloaf/'>sadloaf</a>        <small class="text-muted">Mar&nbsp;1</small>
+        <small class="media-meta pull-right hidden-xs">
+                        <!-- <a href="#"><i class="fa fa-flag"></i>report abuse</a>
+            <a href="#"><i class="fa fa-pencil"></i>edit</a>
+            <a href="#"><i class="fa fa-trash"></i>delete</a>  -->
+        </small></h5>
+                    <p id="q562750">Fun song. The major tonality and the sort of post-chiptuney tones gave me a sort of I Am Robot And Proud feeling. Very jealous of anyone that owns an OP-Z lol.</p>
+                
+    </div>
+</li>
+
+                                                    <li id="c562632" class="comment-item media">
+    <div class="media-left">
+      <a href="/fawmers/standup/">
+        <img class="media-object img-rounded comment-avatar" style="background-color: #ff8766;" src="/img/avatars/479.big.jpg" alt="">
+      </a>
+    </div>
+    <div class="media-body">
+      <h5 class="media-heading">@<a class='user-ref' href='/fawmers/standup/'><strong>standup</strong>&nbsp;<i class="icon-donated"></i></a>        <small class="text-muted">Mar&nbsp;1</small>
+        <small class="media-meta pull-right hidden-xs">
+                        <!-- <a href="#"><i class="fa fa-flag"></i>report abuse</a>
+            <a href="#"><i class="fa fa-pencil"></i>edit</a>
+            <a href="#"><i class="fa fa-trash"></i>delete</a>  -->
+        </small></h5>
+                    <p id="q562632">Cool sounds, I like the flowing melody that drops in early. Great tones. Bell sounds and echoey bits! The echo might be the Kaoss ? but sounds like it's only on a certain part. I like the floating piano parts too. There's a lot here to like. Those delays throughout are adding a lot. <br />
+<br />
+I was briefly tempted by the OP-Z, but my synths are modular and softsynths, they do the job, and it would be another thing to learn!</p>
+                
+    </div>
+</li>
+
+                                                            </ul>
+
+        </div>
+    </div>
+
+
+</div>
+</div>
+<!-- /main content -->
+
+</div>
+<!-- /row-fluid -->
+
+
+       </div>
+       <!-- /container -->
+
+    <div class="modal fade" id="editModal" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="editModalLabel">Edit comment</h4>
+          </div>
+          <div class="modal-body">
+            <ul class="media-list">
+                <li id="post" class="comment-item media">
+                    <div class="media-left">
+                        <img class="media-object img-rounded comment-avatar" style="background-color: #ff8766;" src="/img/avatars/default.svg" alt="">
+                    </div>
+                    <div class="media-body">
+
+            <textarea class="form-control" data-limit-input="2000" rows="4"></textarea>
+            <span id="contentHelpBlock" class="help-block text-muted"><span class="count">2000</span> characters left. FAWM is a friendly place... keep it constructive!</span>
+
+                </li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary">Speak!</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/javascript" src="/js/jquery.js"></script>
+    <script type="text/javascript" src="/js/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.textcomplete.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.overlay.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.jplayer.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/fawm.js?ts=1767243"></script>
+        <script type="text/javascript">
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    });
+    </script>
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-497513-1']);
+      _gaq.push(['_setDomainName', 'fawm.org']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </body>
+</html>

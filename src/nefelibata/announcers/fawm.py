@@ -1,5 +1,6 @@
 import logging
 import re
+import textwrap
 from datetime import datetime
 from datetime import timedelta
 from typing import Any
@@ -10,6 +11,7 @@ import dateutil.parser
 import requests
 from bs4 import BeautifulSoup
 from bs4 import NavigableString
+from bs4.element import Tag
 from dateutil.parser._parser import ParserError
 from nefelibata.announcers import Announcer
 from nefelibata.announcers import Response
@@ -18,7 +20,59 @@ from nefelibata.post import Post
 _logger = logging.getLogger("nefelibata")
 
 
-def get_reply_from_li(song_id: int, url: str, el: Any) -> Response:
+def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
+    """Extract params from a standard FAWM post.
+    """
+    soup = BeautifulSoup(post.html, "html.parser")
+
+    # liner notes are between <h1>s
+    notes_h1 = soup.find("h1", text="Liner Notes")
+    els = []
+    next_sibling = notes_h1.next_sibling
+    while next_sibling and next_sibling.name != "h1":
+        els.append(next_sibling)
+        if next_sibling.name == "p":
+            els.append(NavigableString("\n"))
+        next_sibling = next_sibling.next_sibling
+    notes = "".join(el.string for el in els).strip()
+
+    # lyrics are inside a <pre> element
+    try:
+        pre = soup.find("pre")
+        lyrics = textwrap.dedent(pre.text).strip()
+    except Exception:
+        lyrics = "N/A"
+
+    # tags are separated by space, not comma
+    tags = re.sub(r",\s?", " ", post.parsed["keywords"])
+
+    # search for a single MP3 in the post directory to use as demo
+    post_directory = post.file_path.parent
+    mp3s = list(post_directory.glob("*.mp3"))
+    if len(mp3s) == 1:
+        mp3_path = mp3s[0].relative_to(post.root / "posts")
+        demo = f'{config["url"]}{mp3_path}'
+    elif len(mp3s) > 1:
+        _logger.error("Multiple MP3s found, aborting!")
+        raise Exception("Only posts with a single MP3 can be announced on FAWM")
+    else:
+        demo = ""
+
+    return {
+        "id": "",
+        "title": post.title,
+        "tags": tags,
+        "demo": demo,
+        "notes": notes,
+        "lyrics": lyrics,
+        "status": "public",
+        "collab": 0,
+        "downloadable": 1,
+        "submit": "Save+It!",
+    }
+
+
+def get_response_from_li(song_id: int, url: str, el: Tag) -> Response:
     """Generate a standard reply from a <li> element in the FAWM song page.
 
     Args:
@@ -65,7 +119,7 @@ def get_reply_from_li(song_id: int, url: str, el: Any) -> Response:
     }
 
 
-def get_replies_from_fawm_page(
+def get_comments_from_fawm_page(
     url: str, username: str, password: str,
 ) -> List[Response]:
     """Extract replies from a given FAWM page.
@@ -79,60 +133,9 @@ def get_replies_from_fawm_page(
     song_id = int(url.rstrip("/").rsplit("/", 1)[1])
     # there are non-comments with the class "comment-item", so we need to narrow down
     for el in soup.find_all("li", {"class": "comment-item", "id": re.compile(r"c\d+")}):
-        replies.append(get_reply_from_li(song_id, url, el))
+        replies.append(get_response_from_li(song_id, url, el))
 
     return replies
-
-
-def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
-    """Extract params from a standard FAWM post.
-    """
-    soup = BeautifulSoup(post.html, "html.parser")
-
-    # liner notes are between <h1>s
-    notes_h1 = soup.find("h1", text="Liner Notes")
-    els = []
-    next_sibling = notes_h1.next_sibling
-    while next_sibling.name != "h1":
-        els.append(next_sibling)
-        if next_sibling.name == "p":
-            els.append(NavigableString("\n"))
-        next_sibling = next_sibling.next_sibling
-    notes = "".join(el.string for el in els).strip()
-
-    # lyrics are inside a <pre> element
-    try:
-        lyrics = soup.find("pre").text.strip()
-    except Exception:
-        lyrics = "N/A"
-
-    # tags are separated by space, not comma
-    tags = re.sub(r",\s?", " ", post.parsed["keywords"])
-
-    # search for a single MP3 in the post directory to use as demo
-    post_directory = post.file_path.parent
-    mp3s = list(post_directory.glob("*.mp3"))
-    if len(mp3s) == 1:
-        mp3_path = mp3s[0].relative_to(post.root / "posts")
-        demo = f'{config["url"]}{mp3_path}'
-    elif len(mp3s) > 1:
-        _logger.error("Multiple MP3s found, aborting!")
-        raise Exception("Only posts with a single MP3 can be announced on FAWM")
-    else:
-        demo = ""
-
-    return {
-        "id": "",
-        "title": post.title,
-        "tags": tags,
-        "demo": demo,
-        "notes": notes,
-        "lyrics": lyrics,
-        "status": "public",
-        "collab": 0,
-        "downloadable": 1,
-        "submit": "Save+It!",
-    }
 
 
 class FAWMAnnouncer(Announcer):
@@ -198,7 +201,7 @@ class FAWMAnnouncer(Announcer):
         _logger.info("Collecting replies from FAWM")
 
         url = self.post.parsed[self.url_header]
-        replies = get_replies_from_fawm_page(url, self.username, self.password)
+        replies = get_comments_from_fawm_page(url, self.username, self.password)
 
         _logger.info("Success!")
 

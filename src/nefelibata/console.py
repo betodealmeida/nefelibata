@@ -95,7 +95,7 @@ def find_directory(cwd: Path) -> Path:
 
 
 def sanitize(directory: str) -> str:
-    """Sanitize a psot title into a directory name.
+    """Sanitize a post title into a directory name.
 
     Args:
       directory (str): a string representing the post title
