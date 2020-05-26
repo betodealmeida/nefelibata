@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import os.path
 import textwrap
+from unittest.mock import MagicMock
 
 import pytest
 from bs4 import BeautifulSoup
 from freezegun import freeze_time
 from nefelibata.announcers.fawm import extract_params
+from nefelibata.announcers.fawm import FAWMAnnouncer
 from nefelibata.announcers.fawm import get_comments_from_fawm_page
 from nefelibata.announcers.fawm import get_response_from_li
 from nefelibata.post import Post
@@ -151,12 +153,11 @@ def test_get_comments_from_fawm_page(requests_mock):
     current_dir = os.path.dirname(__file__)
     with open(os.path.join(current_dir, "fawm.html")) as fp:
         html = fp.read()
-
     requests_mock.get(url, text=html)
 
-    replies = get_comments_from_fawm_page(url, "username", "password")
+    comments = get_comments_from_fawm_page(url, "username", "password")
 
-    assert replies == [
+    assert comments == [
         {
             "source": "FAWM",
             "url": "https://fawm.org/songs/110082/",
@@ -319,3 +320,67 @@ def test_get_response_from_li_relative_timestamp():
             "url": "https://fawm.org/songs/110082/#c562632",
         },
     }
+
+
+def test_announcer(mock_post, mocker, requests_mock):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Dance tag
+        keywords: pop, nerd
+        summary: A song about HTML
+        announce-on: fawm
+
+        # Liner Notes
+
+        This is a song about HTML.
+
+        # Lyrics
+
+        <pre>
+            Oh, HTML.
+            Will you dance with me?
+        </pre>
+        """,
+        )
+
+    config = {"url": "http://blog.example.com/"}
+    announcer = FAWMAnnouncer(post, config, "username", "password")
+
+    requests_mock.post(
+        "https://fawm.org/songs/add",
+        headers={"Location": "https://fawm.org/songs/110082/"},
+    )
+    url = announcer.announce()
+    assert url == "https://fawm.org/songs/110082/"
+
+    # store URL in post
+    post.parsed["fawm-url"] = url
+
+    mock_get_comments_from_fawm_page = MagicMock()
+    mock_get_comments_from_fawm_page.return_value = [
+        {
+            "source": "FAWM",
+            "url": "https://fawm.org/songs/110082/",
+            "color": "#cc6600",
+            "id": "fawm:565501",
+            "timestamp": "1583222400.0",
+            "user": {
+                "name": "phylo",
+                "image": "https://fawm.org/img/avatars/723.big.jpg",
+                "url": "https://fawm.org/fawmers/phylo/",
+            },
+            "comment": {
+                "text": "This tune is so sweet!  The melody is very catchy.  There are lots of little surprises in there.  Nice work.",
+                "url": "https://fawm.org/songs/110082/#c565501",
+            },
+        },
+    ]
+    mocker.patch(
+        "nefelibata.announcers.fawm.get_comments_from_fawm_page",
+        mock_get_comments_from_fawm_page,
+    )
+    announcer.collect()
+    mock_get_comments_from_fawm_page.assert_called_with(
+        "https://fawm.org/songs/110082/", "username", "password",
+    )

@@ -187,7 +187,7 @@ class FAWMAnnouncer(Announcer):
 
         params = extract_params(self.post, self.config)
         response = requests.post(
-            "http://fawm.org/songs/add",
+            "https://fawm.org/songs/add",
             data=params,
             auth=(self.username, self.password),
         )
@@ -201,6 +201,7 @@ class FAWMAnnouncer(Announcer):
         _logger.info("Collecting replies from FAWM")
 
         url = self.post.parsed[self.url_header]
+        print("BETO", url)
         replies = get_comments_from_fawm_page(url, self.username, self.password)
 
         _logger.info("Success!")
