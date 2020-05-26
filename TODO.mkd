@@ -16,9 +16,10 @@
 - [x] Medium announcer
 - [x] microformats
 - [x] linkbacks
+- [ ] unit test coverage
 - [ ] move mirror images to assistant
 - [ ] check CSS for external resources
-- [ ] unit test coverage
+- [ ] use track number to sort playlist
 - [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
 - [ ] Instagram announcer
