@@ -48,14 +48,14 @@ class Post:
 
     @property
     def summary(self) -> str:
-        if self.parsed["summary"] is not None:
+        if self.parsed["summary"]:
             return cast(str, self.parsed["summary"])
 
         soup = BeautifulSoup(self.html, "html.parser")
         if soup.p:
-            summary: str = soup.p.text
+            summary: str = soup.p.text.replace("\n", " ")
             if len(summary) > 140:
-                summary = summary[:140] + "&#8230;"
+                summary = summary[:139] + "\u2026"
             return summary
 
         return "No summary."
@@ -64,7 +64,7 @@ class Post:
     def date(self) -> datetime:
         parsed = parsedate(self.parsed["date"])
         if parsed is None:
-            raise Exception(f'Invalid date {self.parsed["date"]}')
+            raise Exception(f"Missing date on file {self.file_path}")
 
         return datetime.fromtimestamp(time.mktime(parsed))
 
@@ -82,18 +82,20 @@ class Post:
         """
         modified = False
 
-        if "date" not in self.parsed:
+        if not self.parsed.get("date"):
             date = self.file_path.stat().st_mtime
             self.parsed["date"] = formatdate(date, localtime=True)
             modified = True
 
-        if "subject" not in self.parsed:
+        if not self.parsed.get("subject"):
             # try to find an H1 tag or use the filename
             soup = BeautifulSoup(self.html, "html.parser")
+            del self.parsed["subject"]  # needed to overwrite
             if soup.h1:
                 self.parsed["subject"] = soup.h1.text
             else:
-                self.parsed["subject"] = self.file_path.name
+                # use directory name
+                self.parsed["subject"] = str(self.file_path.parent.name)
             modified = True
 
         if modified:
