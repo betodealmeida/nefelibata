@@ -1,10 +1,11 @@
 import urllib.parse
 from pathlib import Path
+from typing import List
 from typing import TypedDict
 
 from mutagen.mp3 import MP3
-
-from nefelibata.assistants import Assistant, Scope
+from nefelibata.assistants import Assistant
+from nefelibata.assistants import Scope
 from nefelibata.post import Post
 from nefelibata.utils import get_config
 
@@ -37,13 +38,19 @@ class PlaylistAssistant(Assistant):
                     "album": mp3.get("TALB", "Unknown album"),
                     "year": mp3.get("TDRC", "Unknown year"),
                     "duration": int(mp3.info.length),
-                }
+                },
             )
 
         if not mp3s:
             return
 
-        lines = ["[playlist]", "", f"NumberOfEntries={len(mp3s)}", "Version=2", ""]
+        lines = [
+            "[playlist]",
+            "",
+            f"NumberOfEntries={len(mp3s)}",
+            "Version=2",
+            "",
+        ]
         for i, mp3 in enumerate(mp3s):
             relative_url = mp3["path"].relative_to(post.root / "posts")
             url = urllib.parse.urljoin(post.config["url"], str(relative_url))

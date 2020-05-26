@@ -2,12 +2,16 @@ import logging
 import math
 from collections import defaultdict
 from pathlib import Path
+from typing import Optional
 
-from jinja2 import Environment, FileSystemLoader
-
+from jinja2 import Environment
+from jinja2 import FileSystemLoader
 from nefelibata import __version__
-from nefelibata.post import get_posts, hash_n
-from nefelibata.utils import find_external_resources, get_config, mirror_images
+from nefelibata.post import get_posts
+from nefelibata.post import hash_n
+from nefelibata.utils import find_external_resources
+from nefelibata.utils import get_config
+from nefelibata.utils import mirror_images
 
 _logger = logging.getLogger("nefelibata")
 
@@ -20,24 +24,29 @@ def create_index(root: Path) -> None:
     """
     config = get_config(root)
     env = Environment(
-        loader=FileSystemLoader(str(root / "templates" / config["theme"]))
+        loader=FileSystemLoader(str(root / "templates" / config["theme"])),
     )
     template = env.get_template("index.html")
 
     posts = get_posts(root)
     posts.sort(key=lambda x: x.date, reverse=True)
     show = config.get("posts-to-show", 10)
-    pages = int(math.ceil(len(posts) / show))
-    previous, name = None, "index.html"
-    for page in range(pages):
-        if page + 1 < pages:
-            next = "archive%d.html" % (page + 1)
-        else:
-            next = None
+
+    # first page; these will be updated
+    page = 1
+    name: Optional[str] = "index.html"
+    previous: Optional[str] = None
+
+    while name:
+        page_posts, posts = posts[:show], posts[show:]
+
+        # link to next page
+        next = f"archive{page}.html" if posts else None
+
         html = template.render(
             __version__=__version__,
             config=config,
-            posts=posts[page * show : (page + 1) * show],
+            posts=page_posts,
             breadcrumbs=[("Recent Posts", None)],
             previous=previous,
             next=next,
@@ -49,10 +58,12 @@ def create_index(root: Path) -> None:
 
         with open(root / "build" / name, "w") as fp:
             fp.write(html)
-        previous, name = name, next
 
         for resource in find_external_resources(html):
             _logger.warning(f"External resource found: {resource}")
+
+        page += 1
+        previous, name = name, next
 
 
 def create_categories(root: Path) -> None:
@@ -63,7 +74,7 @@ def create_categories(root: Path) -> None:
     """
     config = get_config(root)
     env = Environment(
-        loader=FileSystemLoader(str(root / "templates" / config["theme"]))
+        loader=FileSystemLoader(str(root / "templates" / config["theme"])),
     )
     template = env.get_template("index.html")
 
@@ -77,23 +88,28 @@ def create_categories(root: Path) -> None:
         posts.sort(key=lambda x: x.date, reverse=True)
         last_modified = max(post.file_path.stat().st_mtime for post in posts)
         show = config.get("posts-to-show", 10)
-        pages = int(math.ceil(len(posts) / show))
-        previous, name = None, f"{category}.html"
-        for page in range(pages):
+
+        # first page; these will be updated
+        page = 1
+        name: Optional[str] = f"{category}.html"
+        previous: Optional[str] = None
+
+        while name:
+            page_posts, posts = posts[:show], posts[show:]
+
             filename = root / "build" / name
 
             # only update if there are changes to files in this category
             if filename.exists() and filename.stat().st_mtime > last_modified:
                 continue
 
-            if page + 1 < pages:
-                next = f"{category}%d.html" % (page + 1)
-            else:
-                next = None
+            # link to next page
+            next = f"{category}{page}.html" if posts else None
+
             html = template.render(
                 __version__=__version__,
                 config=config,
-                posts=posts[page * show : (page + 1) * show],
+                posts=page_posts,
                 breadcrumbs=[
                     ("Home", "/index.html"),
                     (f'Posts about "{category}"', None),
@@ -108,10 +124,12 @@ def create_categories(root: Path) -> None:
 
             with open(filename, "w") as fp:
                 fp.write(html)
-            previous, name = name, next
 
             for resource in find_external_resources(html):
                 _logger.warning(f"External resource found: {resource}")
+
+            page += 1
+            previous, name = name, next
 
 
 def create_feed(root: Path) -> None:

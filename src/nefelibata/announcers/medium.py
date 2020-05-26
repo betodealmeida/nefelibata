@@ -1,12 +1,14 @@
-import logging
-import requests
 import json
+import logging
 import urllib.parse
-from typing import Any, Dict, List
+from typing import Any
+from typing import cast
+from typing import Dict
+from typing import List
 
 import requests
-
-from nefelibata.announcers import Announcer, Response
+from nefelibata.announcers import Announcer
+from nefelibata.announcers import Response
 from nefelibata.post import Post
 
 _logger = logging.getLogger("nefelibata")
@@ -18,7 +20,11 @@ class MediumAnnouncer(Announcer):
     url_header = "medium-url"
 
     def __init__(
-        self, post: Post, config: Dict[str, Any], access_token: str, publish_status: str
+        self,
+        post: Post,
+        config: Dict[str, Any],
+        access_token: str,
+        publish_status: str,
     ):
         super().__init__(post, config)
 
@@ -55,7 +61,7 @@ class MediumAnnouncer(Announcer):
             "publishStatus": self.publish_status or "draft",
         }
         response = requests.post(url, data=payload, headers=headers)
-        return response.json()["data"]["url"]
+        return cast(str, response.json()["data"]["url"])
 
     def collect(self) -> List[Response]:
         _logger.info("Skipping Medium, since there are not replies")

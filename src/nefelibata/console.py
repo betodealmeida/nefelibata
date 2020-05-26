@@ -28,7 +28,6 @@ Released under the MIT license.
 (c) 2013-2019 Beto Dealmeida <roberto@dealmeida.net>
 
 """
-
 import logging
 import os
 import re
@@ -40,15 +39,21 @@ from pathlib import Path
 from subprocess import call
 
 from docopt import docopt
-from pkg_resources import resource_filename, resource_listdir
-
-from nefelibata import __version__, config_filename, new_post
+from nefelibata import __version__
+from nefelibata import config_filename
+from nefelibata import new_post
 from nefelibata.announcers import get_announcers
-from nefelibata.assistants import get_assistants, Scope
-from nefelibata.index import create_categories, create_feed, create_index
-from nefelibata.post import Post, get_posts
+from nefelibata.assistants import get_assistants
+from nefelibata.assistants import Scope
+from nefelibata.index import create_categories
+from nefelibata.index import create_feed
+from nefelibata.index import create_index
+from nefelibata.post import get_posts
+from nefelibata.post import Post
 from nefelibata.publishers import get_publishers
 from nefelibata.utils import get_config
+from pkg_resources import resource_filename
+from pkg_resources import resource_listdir
 
 __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
@@ -69,7 +74,7 @@ def setup_logging(loglevel: str) -> None:
 
     logformat = "[%(asctime)s] %(levelname)s: %(name)s: %(message)s"
     logging.basicConfig(
-        level=level, stream=sys.stdout, format=logformat, datefmt="%Y-%m-%d %H:%M:%S"
+        level=level, stream=sys.stdout, format=logformat, datefmt="%Y-%m-%d %H:%M:%S",
     )
 
 
@@ -96,7 +101,7 @@ def sanitize(directory: str) -> str:
       directory (str): a string representing the post title
     """
     directory = directory.lower().replace(" ", "_")
-    directory = re.sub("[^\w]", "", directory)
+    directory = re.sub(r"[^\w]", "", directory)
 
     return directory
 
@@ -111,7 +116,7 @@ def init(root: Path) -> None:
 
     for resource in resources:
         origin = Path(
-            resource_filename("nefelibata", os.path.join("skeleton", resource))
+            resource_filename("nefelibata", os.path.join("skeleton", resource)),
         )
         target = root / resource
         # good guy Greg does not overwrite existing files

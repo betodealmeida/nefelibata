@@ -1,13 +1,17 @@
 import logging
 import re
 import urllib.parse
-from typing import Any, Dict, List, Optional
+from typing import Any
+from typing import cast
+from typing import Dict
+from typing import List
+from typing import Optional
 
 import dateutil.parser
 import requests
 from bs4 import BeautifulSoup
-
-from nefelibata.announcers import Announcer, Response
+from nefelibata.announcers import Announcer
+from nefelibata.announcers import Response
 from nefelibata.post import Post
 
 _logger = logging.getLogger("nefelibata")
@@ -18,7 +22,7 @@ def get_user_image(username: str) -> Optional[str]:
     """
     url = f"https://wt.social/u/{username}"
     response = requests.get(url)
-    match = re.search("(https.*?--profile_pic\.\w+)", response.text)
+    match = re.search(r"(https.*?--profile_pic\.\w+)", response.text)
     return match.group(1).replace("\\", "") if match else None
 
 
@@ -35,12 +39,12 @@ def get_reply_from_comment(comment: Dict[str, Any]) -> Response:
         "source": "WT.Social",
         "color": "#1e1e1e",
         "id": f'wtsocial:{comment["comment_id"]}',
-        "timestamp": dateutil.parser.parse(
-            comment["formatted"]["created_at"]
-        ).timestamp(),
+        "timestamp": str(
+            dateutil.parser.parse(comment["formatted"]["created_at"]).timestamp(),
+        ),
         "user": {
             "name": comment["users_name"],
-            "image": get_user_image(comment["user_uri"]),
+            "image": get_user_image(comment["user_uri"]) or "",
             "url": f'https://wt.social{comment["UURI"]}',
             "description": "",
         },
@@ -58,7 +62,7 @@ def get_csrf_token(html: str) -> str:
     """
     soup = BeautifulSoup(html, "html.parser")
     tag = soup.find("meta", attrs={"name": "csrf-token"})
-    return tag.attrs["content"]
+    return cast(str, tag.attrs["content"])
 
 
 def do_login(session: requests.Session, email: str, password: str) -> str:
@@ -71,7 +75,12 @@ def do_login(session: requests.Session, email: str, password: str) -> str:
     tag = soup.find("input", attrs={"name": "_token"})
     token = tag.attrs["value"]
 
-    params = {"email": email, "password": password, "_token": token, "remember": 1}
+    params = {
+        "email": email,
+        "password": password,
+        "_token": token,
+        "remember": 1,
+    }
     response = session.post(url, params=params)
 
     return response.text
@@ -127,7 +136,8 @@ class WTSocialAnnouncer(Announcer):
         post_url = self.post.parsed[self.url_header]
         post_id = post_url.rsplit("/", 1)[1]
         url = f"https://wt.social/api/post/{post_id}"
-        response = session.get(url)
+        headers = {"X-CSRF-TOKEN": csrf_token}
+        response = session.get(url, headers=headers)
         payload = response.json()
 
         replies = []

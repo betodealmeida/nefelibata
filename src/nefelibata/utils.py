@@ -1,30 +1,30 @@
 import hashlib
 import re
 from pathlib import Path
-from typing import Any, Dict, Iterator
+from typing import Any
+from typing import Dict
+from typing import Iterator
 
 import requests
 import yaml
 from bs4 import BeautifulSoup
 from libgravatar import Gravatar
-from mutagen.mp3 import MP3
-
 from nefelibata import config_filename
 
 
 def get_config(root: Path) -> Dict[str, Any]:
     """Return the configuration file for a weblog.
-    
+
     Args:
       root (str): directory where the weblog lives
     """
     with open(root / config_filename) as fp:
-        config = yaml.full_load(fp)
+        config: Dict[str, Any] = yaml.full_load(fp)
 
     # add gravatar as the default profile picture
     if "profile_picture" not in config["author"]:
         config["author"]["profile_picture"] = Gravatar(
-            config["author"]["email"]
+            config["author"]["email"],
         ).get_image()
 
     return config
@@ -38,7 +38,7 @@ def get_config(root: Path) -> Dict[str, Any]:
 
 def find_external_resources(html: str) -> Iterator[str]:
     """Find any external resources in an HTML document.
-    
+
     Args:
       html (str): HTML document
     """
@@ -57,7 +57,7 @@ def find_external_resources(html: str) -> Iterator[str]:
 
 def mirror_images(html: str, mirror: Path) -> str:
     """Mirror remote images locally.
-    
+
     Args:
       html (str): HTML document
       mirror (Path): directory where the images will be stored
@@ -85,33 +85,3 @@ def mirror_images(html: str, mirror: Path) -> str:
         el.attrs["src"] = "img/%s" % local.name
 
     return str(soup)
-
-
-def make_playlist(post: "Post") -> None:
-    post_directory = post.file_path.parent
-
-    mp3s: Dict[str, Any] = {}
-    for path in post_directory.glob("**/*.mp3"):
-        print(path)
-        audio = MP3(path)
-        print(audio.info.length)
-        print(audio["TIT2"])  # title
-        print(audio["TPE1"])  # artist
-        print(audio["TDRC"])  # year
-        print(audio["TALB"])  # album
-        print(audio.keys())
-
-
-if __name__ == "__main__":
-    from nefelibata.post import Post
-
-    root = Path("/home/beto/github.com/betodealmeida/blog/")
-    config = get_config(root)
-    post = Post(
-        Path(
-            "/home/beto/github.com/betodealmeida/blog/posts/100_songs_in_2019/index.mkd"
-        ),
-        root,
-        config,
-    )
-    make_playlist(post)

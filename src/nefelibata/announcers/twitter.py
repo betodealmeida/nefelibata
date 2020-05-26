@@ -1,11 +1,13 @@
 import logging
 import urllib.parse
-from typing import Any, Dict, List
+from typing import Any
+from typing import Dict
+from typing import List
 
 import dateutil.parser
 import twitter
-
-from nefelibata.announcers import Announcer, Response
+from nefelibata.announcers import Announcer
+from nefelibata.announcers import Response
 from nefelibata.post import Post
 
 _logger = logging.getLogger("nefelibata")
@@ -23,7 +25,7 @@ def get_reply_from_mention(tweet: Dict[str, Any]) -> Response:
         "source": "Twitter",
         "color": "#00acee",
         "id": f'twitter:{tweet["id_str"]}',
-        "timestamp": dateutil.parser.parse(tweet["created_at"]).timestamp(),
+        "timestamp": str(dateutil.parser.parse(tweet["created_at"]).timestamp()),
         "user": {
             "name": tweet["user"]["name"],
             "image": tweet["user"]["profile_image_url_https"],
@@ -90,7 +92,10 @@ class TwitterAnnouncer(Announcer):
         _logger.info("Posting to Twitter")
 
         auth = twitter.OAuth(
-            self.oauth_token, self.oauth_secret, self.consumer_key, self.consumer_secret
+            self.oauth_token,
+            self.oauth_secret,
+            self.consumer_key,
+            self.consumer_secret,
         )
         client = twitter.Twitter(auth=auth)
 
@@ -111,7 +116,10 @@ class TwitterAnnouncer(Announcer):
         _logger.info("Collecting replies from Twitter")
 
         auth = twitter.OAuth(
-            self.oauth_token, self.oauth_secret, self.consumer_key, self.consumer_secret
+            self.oauth_token,
+            self.oauth_secret,
+            self.consumer_key,
+            self.consumer_secret,
         )
         client = twitter.Twitter(auth=auth)
 

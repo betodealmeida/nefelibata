@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-
 import pytest
-from dateutil.parser import ParserError
+from dateutil.parser._parser import ParserError
 from nefelibata.post import jinja2_formatdate
 
 __author__ = "Beto Dealmeida"

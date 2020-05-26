@@ -1,10 +1,12 @@
 from enum import Enum
-from typing import Any, Dict, List, Optional
 from pathlib import Path
-
-from pkg_resources import iter_entry_points
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 
 from nefelibata.post import Post
+from pkg_resources import iter_entry_points
 
 
 class Scope(Enum):
@@ -30,7 +32,7 @@ class Assistant:
 
 
 def get_assistants(
-    config: Dict[str, Any], scope: Optional[Scope] = None
+    config: Dict[str, Any], scope: Optional[Scope] = None,
 ) -> List[Assistant]:
     names = config["assistants"] or []
 

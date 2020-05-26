@@ -1,9 +1,13 @@
 import logging
 import urllib.parse
-from typing import Any, Dict, List
+from typing import Any
+from typing import cast
+from typing import Dict
+from typing import List
 
 import mastodon
-from nefelibata.announcers import Announcer, Response
+from nefelibata.announcers import Announcer
+from nefelibata.announcers import Response
 from nefelibata.post import Post
 
 _logger = logging.getLogger("nefelibata")
@@ -31,14 +35,14 @@ class MastodonAnnouncer(Announcer):
     url_header = "mastodon-url"
 
     def __init__(
-        self, post: Post, config: Dict[str, Any], access_token: str, base_url: str
+        self, post: Post, config: Dict[str, Any], access_token: str, base_url: str,
     ):
         super().__init__(post, config)
 
         self.base_url = base_url
 
         self.client = mastodon.Mastodon(
-            access_token=access_token, api_base_url=base_url
+            access_token=access_token, api_base_url=base_url,
         )
 
     def announce(self) -> str:
@@ -55,7 +59,7 @@ class MastodonAnnouncer(Announcer):
         )
         _logger.info("Success!")
 
-        return toot["url"]
+        return cast(str, toot["url"])
 
     def collect(self) -> List[Response]:
         _logger.info(f"Collecting replies from Mastodon ({self.base_url})")

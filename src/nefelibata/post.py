@@ -4,17 +4,25 @@ import logging
 import time
 from datetime import datetime
 from email.parser import Parser
-from email.utils import formatdate, parsedate
+from email.utils import formatdate
+from email.utils import parsedate
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
+from typing import cast
+from typing import Dict
+from typing import List
+from typing import Union
 
 import dateutil.parser
 import markdown
 from bs4 import BeautifulSoup
-from jinja2 import Environment, FileSystemLoader
-
+from dateutil.parser._parser import ParserError
+from jinja2 import Environment
+from jinja2 import FileSystemLoader
 from nefelibata import __version__
-from nefelibata.utils import find_external_resources, get_config, mirror_images
+from nefelibata.utils import find_external_resources
+from nefelibata.utils import get_config
+from nefelibata.utils import mirror_images
 
 _logger = logging.getLogger("nefelibata")
 
@@ -36,16 +44,16 @@ class Post:
 
     @property
     def title(self) -> str:
-        return self.parsed["subject"]
+        return cast(str, self.parsed["subject"])
 
     @property
     def summary(self) -> str:
         if self.parsed["summary"] is not None:
-            return self.parsed["summary"]
+            return cast(str, self.parsed["summary"])
 
         soup = BeautifulSoup(self.html, "html.parser")
         if soup.p:
-            summary = soup.p.text
+            summary: str = soup.p.text
             if len(summary) > 140:
                 summary = summary[:140] + "&#8230;"
             return summary
@@ -54,7 +62,11 @@ class Post:
 
     @property
     def date(self) -> datetime:
-        return datetime.fromtimestamp(time.mktime(parsedate(self.parsed["date"])))
+        parsed = parsedate(self.parsed["date"])
+        if parsed is None:
+            raise Exception(f'Invalid date {self.parsed["date"]}')
+
+        return datetime.fromtimestamp(time.mktime(parsed))
 
     @property
     def url(self) -> str:
@@ -104,7 +116,7 @@ class Post:
             [
                 path.relative_to(post_directory)
                 for path in (post_directory / "js").glob("**/*.js")
-            ]
+            ],
         )
         json_ = {}
         for path in post_directory.glob("**/*.json"):
@@ -112,7 +124,9 @@ class Post:
                 json_[path.stem] = json.load(fp)
 
         env = Environment(
-            loader=FileSystemLoader(str(self.root / "templates" / self.config["theme"]))
+            loader=FileSystemLoader(
+                str(self.root / "templates" / self.config["theme"]),
+            ),
         )
         env.filters["formatdate"] = jinja2_formatdate
         template = env.get_template("post.html")
@@ -143,12 +157,12 @@ class Post:
             _logger.warning(f"External resource found: {resource}")
 
 
-def jinja2_formatdate(obj, fmt: str) -> str:
+def jinja2_formatdate(obj: Union[str, int, float, datetime], fmt: str) -> str:
     """Jinja filter for formatting dates."""
     if isinstance(obj, str):
         try:
             obj = dateutil.parser.parse(obj)
-        except dateutil.parser.ParserError:
+        except ParserError:
             return "Unknown timestamp"
     elif isinstance(obj, (int, float)):
         obj = datetime.fromtimestamp(obj)

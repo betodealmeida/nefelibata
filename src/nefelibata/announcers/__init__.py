@@ -1,22 +1,23 @@
 import json
 import logging
-import mf2py
 import operator
-from typing import Any, Dict, List
+from typing import Any
+from typing import Dict
+from typing import List
 
+import mf2py
+from nefelibata.post import Post
 from pkg_resources import iter_entry_points
 from typing_extensions import TypedDict
-
-from nefelibata.post import Post
 
 _logger = logging.getLogger("nefelibata")
 
 
 User = TypedDict(
-    "User", {"name": str, "image": str, "url": str, "description": str,}, total=False
+    "User", {"name": str, "image": str, "url": str, "description": str}, total=False,
 )
 
-Comment = TypedDict("Comment", {"text": str, "url": str,}, total=False)
+Comment = TypedDict("Comment", {"text": str, "url": str}, total=False)
 
 Response = TypedDict(
     "Response",
@@ -45,6 +46,10 @@ def fetch_hcard(user: User) -> User:
 
 
 class Announcer:
+
+    name = "base"
+    url_header = "base-url"
+
     def __init__(self, post: Post, config: Dict[str, Any], *args: Any, **kwargs: Any):
         self.post = post
         self.config = config
@@ -108,7 +113,7 @@ class Announcer:
 
         if len(replies) > count:
             _logger.info(
-                f'Found new replies in post {self.config["url"]}{self.post.url}'
+                f'Found new replies in post {self.config["url"]}{self.post.url}',
             )
             replies.sort(key=operator.itemgetter("timestamp"))
             with open(storage, "w") as fp:

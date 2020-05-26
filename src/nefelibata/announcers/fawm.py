@@ -1,13 +1,18 @@
 import logging
 import re
-from datetime import datetime, timedelta
-from typing import Any, Dict, List
+from datetime import datetime
+from datetime import timedelta
+from typing import Any
+from typing import Dict
+from typing import List
 
 import dateutil.parser
 import requests
-
-from bs4 import BeautifulSoup, NavigableString
-from nefelibata.announcers import Announcer, Response
+from bs4 import BeautifulSoup
+from bs4 import NavigableString
+from dateutil.parser._parser import ParserError
+from nefelibata.announcers import Announcer
+from nefelibata.announcers import Response
 from nefelibata.post import Post
 
 _logger = logging.getLogger("nefelibata")
@@ -27,13 +32,13 @@ def get_reply_from_li(song_id: int, url: str, el: Any) -> Response:
     # the timestamp is a fuzzy date :(
     fuzzy_timestamp = el.find("small", {"class": "text-muted"}).text
     try:
-        timestamp = dateutil.parser.parse(fuzzy_timestamp).timestamp()
-    except dateutil.parser.ParserError:
+        timestamp = str(dateutil.parser.parse(fuzzy_timestamp).timestamp())
+    except ParserError:
         # parse "1 day", etc.
         value, unit = fuzzy_timestamp.split()
         unit = unit.rstrip("s")
-        delta = timedelta(**{f"{unit}s": float(value)})
-        timestamp = (datetime.now() - delta).timestamp()
+        delta = timedelta(**{f"{unit}s": int(value)})
+        timestamp = str((datetime.now() - delta).timestamp())
 
     user_ref = el.find("a", {"class": "user-ref"})
     user_name = user_ref.text.strip()
@@ -61,8 +66,8 @@ def get_reply_from_li(song_id: int, url: str, el: Any) -> Response:
 
 
 def get_replies_from_fawm_page(
-    url: str, username: str, password: str
-) -> List[Dict[str, Any]]:
+    url: str, username: str, password: str,
+) -> List[Response]:
     """Extract replies from a given FAWM page.
     """
     response = requests.get(url, auth=(username, password))
@@ -73,7 +78,7 @@ def get_replies_from_fawm_page(
     replies = []
     song_id = int(url.rstrip("/").rsplit("/", 1)[1])
     # there are non-comments with the class "comment-item", so we need to narrow down
-    for el in soup.find_all("li", {"class": "comment-item", "id": re.compile("c\d+")}):
+    for el in soup.find_all("li", {"class": "comment-item", "id": re.compile(r"c\d+")}):
         replies.append(get_reply_from_li(song_id, url, el))
 
     return replies
@@ -98,11 +103,11 @@ def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
     # lyrics are inside a <pre> element
     try:
         lyrics = soup.find("pre").text.strip()
-    except:
+    except Exception:
         lyrics = "N/A"
 
     # tags are separated by space, not comma
-    tags = re.sub(",\s?", " ", post.parsed["keywords"])
+    tags = re.sub(r",\s?", " ", post.parsed["keywords"])
 
     # search for a single MP3 in the post directory to use as demo
     post_directory = post.file_path.parent
@@ -112,7 +117,7 @@ def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
         demo = f'{config["url"]}{mp3_path}'
     elif len(mp3s) > 1:
         _logger.error("Multiple MP3s found, aborting!")
-        return
+        raise Exception("Only posts with a single MP3 can be announced on FAWM")
     else:
         demo = ""
 
@@ -165,7 +170,7 @@ class FAWMAnnouncer(Announcer):
     url_header = "fawm-url"
 
     def __init__(
-        self, post: Post, config: Dict[str, Any], username: str, password: str
+        self, post: Post, config: Dict[str, Any], username: str, password: str,
     ):
         super().__init__(post, config)
 

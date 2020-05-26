@@ -2,13 +2,17 @@ import json
 import logging
 import re
 import urllib.parse
-from typing import Any, Dict, List, Optional
+from typing import Any
+from typing import cast
+from typing import Dict
+from typing import List
+from typing import Optional
 
 import dateutil.parser
 import requests
 from bs4 import BeautifulSoup
-
-from nefelibata.announcers import Announcer, Response
+from nefelibata.announcers import Announcer
+from nefelibata.announcers import Response
 from nefelibata.post import Post
 
 _logger = logging.getLogger("nefelibata")
@@ -22,14 +26,16 @@ def get_webmention_endpoint(url) -> Optional[str]:
         links = requests.utils.parse_header_links(header)
         for link in links:
             if link["rel"] == "webmention":
-                return urllib.parse.urljoin(url, link["url"])
+                return cast(str, urllib.parse.urljoin(url, link["url"]))
 
     r = requests.get(url)
     html = r.content
     soup = BeautifulSoup(html, "html.parser")
     link = soup.find(rel="webmention")
     if link:
-        return urllib.parse.urljoin(url, link["href"])
+        return cast(str, urllib.parse.urljoin(url, link["href"]))
+
+    return None
 
 
 class WebmentionAnnouncer(Announcer):
@@ -38,7 +44,11 @@ class WebmentionAnnouncer(Announcer):
     url_header = "webmention-url"
 
     def __init__(
-        self, post: Post, config: Dict[str, Any], endpoint: str, post_to_indienews: bool
+        self,
+        post: Post,
+        config: Dict[str, Any],
+        endpoint: str,
+        post_to_indienews: bool,
     ):
         super().__init__(post, config)
 
@@ -55,8 +65,9 @@ class WebmentionAnnouncer(Announcer):
             self._send_mention(target)
 
         if self.post_to_indienews:
-            _logger.info(f"Sending mention to {endpoint}")
-            self._send_mention(f'https://news.indieweb.org/{self.config["language"]}')
+            target = f'https://news.indieweb.org/{self.config["language"]}'
+            _logger.info(f"Checking {target}")
+            self._send_mention(target)
 
         _logger.info("Success!")
 
@@ -87,7 +98,7 @@ class WebmentionAnnouncer(Announcer):
                 "url": child["url"],
                 "id": f'webmention:{child["wm-id"]}',
                 "timestamp": (
-                    dateutil.parser.parse(child["published"]).timestamp()
+                    str(dateutil.parser.parse(child["published"]).timestamp())
                     if child.get("published")
                     else ""
                 ),
@@ -96,7 +107,7 @@ class WebmentionAnnouncer(Announcer):
                     "image": child["author"]["photo"],
                     "url": child["author"]["url"],
                 },
-                "comment": {"text": child.get("content", {}).get("text", ""),},
+                "comment": {"text": child.get("content", {}).get("text", "")},
             }
             for child in feed["children"]
         ]

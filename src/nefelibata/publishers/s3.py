@@ -1,11 +1,12 @@
 import logging
 import mimetypes
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
+from typing import Dict
+from typing import Optional
 
 import boto3
 from botocore.exceptions import ClientError
-
 from nefelibata.publishers import Publisher
 
 _logger = logging.getLogger("nefelibata")
@@ -62,7 +63,7 @@ class S3Publisher(Publisher):
         AWS_ACCESS_KEY_ID: str,
         AWS_SECRET_ACCESS_KEY: str,
         configure_website: bool = False,
-        configure_route53: str = None,
+        configure_route53: Optional[str] = None,
         region: str = "us-east-1",
     ):
         self.bucket = bucket
@@ -101,11 +102,10 @@ class S3Publisher(Publisher):
             self._configure_website()
 
         if self.configure_route53:
-            self._configure_route53()
+            self._configure_route53(self.configure_route53)
 
         # update last published
-        with open(last_published_file, "w") as fp:
-            pass
+        last_published_file.touch()
 
     def _get_client(self, service: str):
         return boto3.client(
@@ -154,10 +154,10 @@ class S3Publisher(Publisher):
             "IndexDocument": {"Suffix": "index.html"},
         }
         client.put_bucket_website(
-            Bucket=self.bucket, WebsiteConfiguration=website_configuration
+            Bucket=self.bucket, WebsiteConfiguration=website_configuration,
         )
 
-    def _configure_route53(self) -> None:
+    def _configure_route53(self, fqdn: str) -> None:
         client = self._get_client("route53")
         _logger.info("Configuring route53")
 
@@ -165,7 +165,7 @@ class S3Publisher(Publisher):
         value = f"{self.bucket}.s3-website-{self.region}.amazonaws.com"
 
         for zone in client.list_hosted_zones()["HostedZones"]:
-            if self.configure_route53.endswith(zone["Name"]):
+            if fqdn.endswith(zone["Name"]):
                 zone_id = zone["Id"]
                 break
         else:
@@ -177,7 +177,7 @@ class S3Publisher(Publisher):
                 {
                     "Action": "UPSERT",
                     "ResourceRecordSet": {
-                        "Name": self.configure_route53.rstrip("."),
+                        "Name": fqdn.rstrip("."),
                         "Type": "CNAME",
                         "SetIdentifier": "nefelibata",
                         "Region": self.region,
@@ -185,8 +185,6 @@ class S3Publisher(Publisher):
                         "ResourceRecords": [{"Value": value}],
                     },
                 },
-            ]
+            ],
         }
-        response = client.change_resource_record_sets(
-            HostedZoneId=zone_id, ChangeBatch=payload
-        )
+        client.change_resource_record_sets(HostedZoneId=zone_id, ChangeBatch=payload)
