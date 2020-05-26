@@ -251,6 +251,7 @@ def test_get_response_from_li():
             </li>
         """,
         ),
+        features="html5lib",
     )
     el = soup.html.body.li
     response = get_response_from_li(song_id, url, el)
@@ -299,6 +300,7 @@ def test_get_response_from_li_relative_timestamp():
             </li>
         """,
         ),
+        features="html5lib",
     )
     el = soup.html.body.li
     with freeze_time("2020-01-01T00:00:00Z"):
