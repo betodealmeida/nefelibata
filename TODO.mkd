@@ -19,6 +19,7 @@
 - [ ] unit test coverage
 - [ ] move mirror images to assistant
 - [ ] check CSS for external resources
+- [ ] make timestamp an ISO string instead of float
 - [ ] use track number to sort playlist
 - [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)

@@ -13,7 +13,7 @@ from nefelibata.post import Post
 _logger = logging.getLogger("nefelibata")
 
 
-def get_reply_from_toot(toot: mastodon.AttribAccessDict) -> Response:
+def get_response_from_toot(toot: mastodon.AttribAccessDict) -> Response:
     return {
         "source": "Mastodon",
         "color": "#2b90d9",
@@ -68,12 +68,12 @@ class MastodonAnnouncer(Announcer):
         toot_id = toot_url.rstrip("/").rsplit("/", 1)[1]
         context = self.client.status_context(toot_id)
 
-        replies = []
+        responses = []
         for toot in context["descendants"]:
-            reply = get_reply_from_toot(toot)
-            reply["url"] = toot_url
-            replies.append(reply)
+            response = get_response_from_toot(toot)
+            response["url"] = toot_url
+            responses.append(response)
 
         _logger.info("Success!")
 
-        return replies
+        return responses

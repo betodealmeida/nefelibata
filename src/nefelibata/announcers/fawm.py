@@ -73,7 +73,7 @@ def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def get_response_from_li(song_id: int, url: str, el: Tag) -> Response:
-    """Generate a standard reply from a <li> element in the FAWM song page.
+    """Generate a standard response from a <li> element in the FAWM song page.
 
     Args:
       el (BeautifulSoup element): <li> with a comment
@@ -122,20 +122,20 @@ def get_response_from_li(song_id: int, url: str, el: Tag) -> Response:
 def get_comments_from_fawm_page(
     url: str, username: str, password: str,
 ) -> List[Response]:
-    """Extract replies from a given FAWM page.
+    """Extract comments from a given FAWM page.
     """
     response = requests.get(url, auth=(username, password))
     response.encoding = "UTF-8"
     html = response.text
     soup = BeautifulSoup(html, "html.parser")
 
-    replies = []
+    responses = []
     song_id = int(url.rstrip("/").rsplit("/", 1)[1])
     # there are non-comments with the class "comment-item", so we need to narrow down
     for el in soup.find_all("li", {"class": "comment-item", "id": re.compile(r"c\d+")}):
-        replies.append(get_response_from_li(song_id, url, el))
+        responses.append(get_response_from_li(song_id, url, el))
 
-    return replies
+    return responses
 
 
 class FAWMAnnouncer(Announcer):
@@ -198,12 +198,12 @@ class FAWMAnnouncer(Announcer):
         return url
 
     def collect(self) -> List[Response]:
-        _logger.info("Collecting replies from FAWM")
+        _logger.info("Collecting comments from FAWM")
 
         url = self.post.parsed[self.url_header]
         print("BETO", url)
-        replies = get_comments_from_fawm_page(url, self.username, self.password)
+        responses = get_comments_from_fawm_page(url, self.username, self.password)
 
         _logger.info("Success!")
 
-        return replies
+        return responses
