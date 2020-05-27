@@ -39,7 +39,7 @@ def test_extract_params(mock_post, fs):
         """,
         )
 
-    config = {"url": "http://blog.example.com/"}
+    config = {"url": "https://blog.example.com/"}
     fs.create_file(post.file_path.parent / "demo.mp3")
 
     params = extract_params(post, config)
@@ -47,7 +47,7 @@ def test_extract_params(mock_post, fs):
         "id": "",
         "title": "Dance tag",
         "tags": "pop nerd",
-        "demo": "http://blog.example.com/first/demo.mp3",
+        "demo": "https://blog.example.com/first/demo.mp3",
         "notes": "This is a song about HTML.",
         "lyrics": "Oh, HTML.\nWill you dance with me?",
         "status": "public",
@@ -72,7 +72,7 @@ def test_extract_params_no_lyrics(mock_post, fs):
         """,
         )
 
-    config = {"url": "http://blog.example.com/"}
+    config = {"url": "https://blog.example.com/"}
     fs.create_file(post.file_path.parent / "demo.mp3")
 
     params = extract_params(post, config)
@@ -80,7 +80,7 @@ def test_extract_params_no_lyrics(mock_post, fs):
         "id": "",
         "title": "Dance tag",
         "tags": "pop nerd",
-        "demo": "http://blog.example.com/first/demo.mp3",
+        "demo": "https://blog.example.com/first/demo.mp3",
         "notes": "This is a song about HTML.",
         "lyrics": "N/A",
         "status": "public",
@@ -105,7 +105,7 @@ def test_extract_params_multiple_mp3s(mock_post, fs):
         """,
         )
 
-    config = {"url": "http://blog.example.com/"}
+    config = {"url": "https://blog.example.com/"}
     fs.create_file(post.file_path.parent / "demo1.mp3")
     fs.create_file(post.file_path.parent / "demo2.mp3")
 
@@ -130,7 +130,7 @@ def test_extract_params_no_demo(mock_post, fs):
         """,
         )
 
-    config = {"url": "http://blog.example.com/"}
+    config = {"url": "https://blog.example.com/"}
 
     params = extract_params(post, config)
     assert params == {
@@ -346,7 +346,7 @@ def test_announcer(mock_post, mocker, requests_mock):
         """,
         )
 
-    config = {"url": "http://blog.example.com/"}
+    config = {"url": "https://blog.example.com/"}
     announcer = FAWMAnnouncer(post, config, "username", "password")
 
     requests_mock.post(

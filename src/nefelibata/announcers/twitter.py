@@ -15,7 +15,7 @@ _logger = logging.getLogger("nefelibata")
 max_length = 280
 
 
-def get_reply_from_mention(tweet: Dict[str, Any]) -> Response:
+def get_response_from_mention(tweet: Dict[str, Any]) -> Response:
     """Generate a standard reply from a Tweet.
 
     Args:
@@ -133,16 +133,16 @@ class TwitterAnnouncer(Announcer):
                 contributor_details=True,
                 include_entities=True,
             )
-        except twitter.api.TwitterHTTPError:
+        except Exception:
             return []
 
-        replies = []
+        responses = []
         for mention in mentions:
             if mention["in_reply_to_status_id_str"] == tweet_id:
-                reply = get_reply_from_mention(mention)
-                reply["url"] = tweet_url
-                replies.append(reply)
+                response = get_response_from_mention(mention)
+                response["url"] = tweet_url
+                responses.append(response)
 
         _logger.info("Success!")
 
-        return replies
+        return responses

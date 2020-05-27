@@ -64,5 +64,5 @@ class MediumAnnouncer(Announcer):
         return cast(str, response.json()["data"]["url"])
 
     def collect(self) -> List[Response]:
-        _logger.info("Skipping Medium, since there are not replies")
+        _logger.info("Skipping Medium, since there's no API for replies")
         return []
