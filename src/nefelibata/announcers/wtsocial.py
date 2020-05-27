@@ -26,8 +26,8 @@ def get_user_image(username: str) -> Optional[str]:
     return match.group(1).replace("\\", "") if match else None
 
 
-def get_reply_from_comment(comment: Dict[str, Any]) -> Response:
-    """Generate a standar reply from a comment.
+def get_response_from_comment(comment: Dict[str, Any]) -> Response:
+    """Generate a standard reply from a comment.
 
     Args:
       comment (Dict[str, Any]): The comment response from the WT.Social API.
@@ -140,12 +140,12 @@ class WTSocialAnnouncer(Announcer):
         response = session.get(url, headers=headers)
         payload = response.json()
 
-        replies = []
+        responses = []
         for comment in payload["comment_list"]:
-            reply = get_reply_from_comment(comment)
-            reply["url"] = post_url
-            replies.append(reply)
+            replies = get_response_from_comment(comment)
+            replies["url"] = post_url
+            responses.append(replies)
 
         _logger.info("Success!")
 
-        return replies
+        return responses
