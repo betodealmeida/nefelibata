@@ -101,7 +101,7 @@ def create_categories(root: Path) -> None:
 
             # only update if there are changes to files in this category
             if filename.exists() and filename.stat().st_mtime > last_modified:
-                continue
+                break
 
             # link to next page
             next = f"{category}{page}.html" if posts else None

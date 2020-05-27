@@ -18,7 +18,11 @@ from nefelibata.post import Post
 _logger = logging.getLogger("nefelibata")
 
 
+# languages supported by IndieNews
 SUPPORTED_LANGUAGES = ["en", "sv", "de", "fr", "nl", "ru"]
+
+# URL to send users to comment on posts via webmention
+COMMENT_URL = "https://commentpara.de/"
 
 
 def get_webmention_endpoint(url) -> Optional[str]:
@@ -79,7 +83,7 @@ class WebmentionAnnouncer(Announcer):
 
         _logger.info("Success!")
 
-        return "https://webmention.net/implementations/"
+        return COMMENT_URL
 
     def _send_mention(self, target: str) -> None:
         endpoint = get_webmention_endpoint(target)
@@ -100,12 +104,18 @@ class WebmentionAnnouncer(Announcer):
         r = requests.get(url, params=payload)
         feed = json.loads(r.content)
 
+        _logger.info("Success!")
+
         return [
             {
                 "source": child.get("name", child["url"]),
                 "url": child["url"],
                 "id": f'webmention:{child["wm-id"]}',
-                "timestamp": str(dateutil.parser.parse(child["published"]).timestamp()),
+                "timestamp": str(
+                    dateutil.parser.parse(
+                        child["published"] or child["wm-received"],
+                    ).timestamp(),
+                ),
                 "user": {
                     "name": child["author"]["name"],
                     "image": child["author"]["photo"],
