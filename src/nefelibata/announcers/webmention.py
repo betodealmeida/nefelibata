@@ -18,6 +18,9 @@ from nefelibata.post import Post
 _logger = logging.getLogger("nefelibata")
 
 
+SUPPORTED_LANGUAGES = ["en", "sv", "de", "fr", "nl", "ru"]
+
+
 def get_webmention_endpoint(url) -> Optional[str]:
     # start with a HEAD request
     r = requests.head(url)
@@ -58,7 +61,7 @@ class WebmentionAnnouncer(Announcer):
     def announce(self) -> str:
         _logger.info("Discovering links supporting webmention...")
 
-        soup = BeautifulSoup(self.post.render(), "html.parser")
+        soup = BeautifulSoup(self.post.html, "html.parser")
         for el in soup.find_all("a", href=re.compile("http")):
             target = el.attrs.get("href")
             _logger.info(f"Checking {target}")
@@ -97,11 +100,7 @@ class WebmentionAnnouncer(Announcer):
                 "source": child.get("name", child["url"]),
                 "url": child["url"],
                 "id": f'webmention:{child["wm-id"]}',
-                "timestamp": (
-                    str(dateutil.parser.parse(child["published"]).timestamp())
-                    if child.get("published")
-                    else ""
-                ),
+                "timestamp": str(dateutil.parser.parse(child["published"]).timestamp()),
                 "user": {
                     "name": child["author"]["name"],
                     "image": child["author"]["photo"],

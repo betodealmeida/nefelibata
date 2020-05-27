@@ -5,6 +5,10 @@ from unittest.mock import MagicMock
 from freezegun import freeze_time
 from nefelibata.announcers.medium import MediumAnnouncer
 
+__author__ = "Beto Dealmeida"
+__copyright__ = "Beto Dealmeida"
+__license__ = "mit"
+
 
 def test_announcer(mock_post, requests_mock):
     with freeze_time("2020-01-01T00:00:00Z"):

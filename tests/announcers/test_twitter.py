@@ -5,6 +5,10 @@ import twitter
 from freezegun import freeze_time
 from nefelibata.announcers.twitter import TwitterAnnouncer
 
+__author__ = "Beto Dealmeida"
+__copyright__ = "Beto Dealmeida"
+__license__ = "mit"
+
 
 def test_announcer(mock_post, mocker):
     mock_client = MagicMock()
