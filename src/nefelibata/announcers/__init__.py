@@ -108,7 +108,6 @@ class Announcer:
             # if the user has an URL, but no name or image, try to read their h-card
             # from the URL
             if user["url"] and (not user["name"] or not user["url"]):
-                print("FETCHING USER INFO")
                 user = fetch_hcard(user)
 
         if len(replies) > count:

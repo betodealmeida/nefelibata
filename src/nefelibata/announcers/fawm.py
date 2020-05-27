@@ -201,7 +201,6 @@ class FAWMAnnouncer(Announcer):
         _logger.info("Collecting comments from FAWM")
 
         url = self.post.parsed[self.url_header]
-        print("BETO", url)
         responses = get_comments_from_fawm_page(url, self.username, self.password)
 
         _logger.info("Success!")
