@@ -123,6 +123,7 @@ def create_categories(root: Path) -> None:
                 fp.write(html)
 
             for assistant in site_assistants:
+                print(assistant)
                 assistant.process_site(file_path)
 
             page += 1

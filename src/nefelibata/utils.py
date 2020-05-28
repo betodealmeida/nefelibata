@@ -1,10 +1,8 @@
 from pathlib import Path
 from typing import Any
 from typing import Dict
-from typing import Iterator
 
 import yaml
-from bs4 import BeautifulSoup
 from libgravatar import Gravatar
 from nefelibata import config_filename
 
@@ -25,28 +23,3 @@ def get_config(root: Path) -> Dict[str, Any]:
         ).get_image()
 
     return config
-
-
-# TODO: make transform all the functions below into extensions
-# that run on contexts (post, site) and that are loaded via
-# entry points and enabled in the config file
-# XXX: should the Atom render be an extension too?
-
-
-def find_external_resources(html: str) -> Iterator[str]:
-    """Find any external resources in an HTML document.
-
-    Args:
-      html (str): HTML document
-    """
-    tag_attributes = [
-        ("img", "src"),
-        ("link", "href"),
-        ("script", "src"),
-    ]
-    soup = BeautifulSoup(html, "html.parser")
-    for tag, attr in tag_attributes:
-        for el in soup.find_all(tag):
-            resource = el.attrs.get(attr)
-            if resource and "://" in resource:
-                yield resource

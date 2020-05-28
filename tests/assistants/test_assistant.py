@@ -40,14 +40,14 @@ def test_get_assistants(mock_post, mocker):
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
-        "assistants": ["test2"],
+        "assistants": ["test1", "test2"],
         "test1": {},
         "test2": {},
     }
 
     assistants = get_assistants(config, Scope.POST)
     assert len(assistants) == 1
-    assert assistants[0].scope == Scope.SITE
+    assert assistants[0].scope == Scope.POST
 
 
 def test_wrong_scope(mock_post):
