@@ -105,7 +105,7 @@ def test_announcer(mock_post, requests_mock):
     announcer._send_mention = mock_send_mention
 
     url = announcer.announce()
-    assert url == "https://webmention.net/implementations/"
+    assert url == "https://commentpara.de/"
     mock_send_mention.assert_has_calls(
         [call("https://blog.example.com/"), call("https://news.indieweb.org/en")],
     )
@@ -144,7 +144,7 @@ def test_announcer(mock_post, requests_mock):
             "source": "http://tantek.com/2013/112/t2/milestone-show-indieweb-comments-h-entry-pingback",
             "url": "http://tantek.com/2013/112/t2/milestone-show-indieweb-comments-h-entry-pingback",
             "id": "webmention:900",
-            "timestamp": "1366668180.0",
+            "timestamp": "2013-04-22T15:03:00-07:00",
             "user": {
                 "name": "Tantek Çelik",
                 "image": "http://tantek.com/logo.jpg",
@@ -179,7 +179,7 @@ def test_announcer_no_indienews(mock_post):
     announcer._send_mention = mock_send_mention
 
     url = announcer.announce()
-    assert url == "https://webmention.net/implementations/"
+    assert url == "https://commentpara.de/"
     mock_send_mention.assert_has_calls([call("https://blog.example.com/")])
 
 
@@ -205,7 +205,7 @@ def test_announcer_indienews_no_language(mock_post):
     announcer._send_mention = mock_send_mention
 
     url = announcer.announce()
-    assert url == "https://webmention.net/implementations/"
+    assert url == "https://commentpara.de/"
     mock_send_mention.assert_has_calls([call("https://blog.example.com/")])
 
 

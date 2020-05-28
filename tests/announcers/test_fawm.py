@@ -163,7 +163,7 @@ def test_get_comments_from_fawm_page(requests_mock):
             "url": "https://fawm.org/songs/110082/",
             "color": "#cc6600",
             "id": "fawm:565501",
-            "timestamp": "1583222400.0",
+            "timestamp": "2020-03-03T08:00:00+00:00",
             "user": {
                 "name": "phylo",
                 "image": "https://fawm.org/img/avatars/723.big.jpg",
@@ -179,7 +179,7 @@ def test_get_comments_from_fawm_page(requests_mock):
             "url": "https://fawm.org/songs/110082/",
             "color": "#cc6600",
             "id": "fawm:564029",
-            "timestamp": "1583049600.0",
+            "timestamp": "2020-03-01T08:00:00+00:00",
             "user": {
                 "name": "kahlo2013",
                 "image": "https://fawm.org/img/avatars/7832.big.jpg",
@@ -195,7 +195,7 @@ def test_get_comments_from_fawm_page(requests_mock):
             "url": "https://fawm.org/songs/110082/",
             "color": "#cc6600",
             "id": "fawm:562750",
-            "timestamp": "1583049600.0",
+            "timestamp": "2020-03-01T08:00:00+00:00",
             "user": {
                 "name": "sadloaf",
                 "image": "https://fawm.org/img/avatars/17162.big.jpg",
@@ -211,7 +211,7 @@ def test_get_comments_from_fawm_page(requests_mock):
             "url": "https://fawm.org/songs/110082/",
             "color": "#cc6600",
             "id": "fawm:562632",
-            "timestamp": "1583049600.0",
+            "timestamp": "2020-03-01T08:00:00+00:00",
             "user": {
                 "name": "standup",
                 "image": "https://fawm.org/img/avatars/479.big.jpg",
@@ -261,7 +261,7 @@ def test_get_response_from_li():
         "url": "https://fawm.org/songs/110082/",
         "color": "#cc6600",
         "id": "fawm:562632",
-        "timestamp": "1583049600.0",
+        "timestamp": "2020-03-01T08:00:00+00:00",
         "user": {
             "name": "standup",
             "image": "https://fawm.org/img/avatars/479.big.jpg",
@@ -311,7 +311,7 @@ def test_get_response_from_li_relative_timestamp():
         "url": "https://fawm.org/songs/110082/",
         "color": "#cc6600",
         "id": "fawm:562632",
-        "timestamp": "1577664000.0",  # 2 days ago
+        "timestamp": "2019-12-30T08:00:00+00:00",
         "user": {
             "name": "standup",
             "image": "https://fawm.org/img/avatars/479.big.jpg",

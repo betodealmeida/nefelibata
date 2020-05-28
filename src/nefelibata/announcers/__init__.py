@@ -4,6 +4,7 @@ import operator
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import Optional
 
 import mf2py
 from nefelibata.post import Post
@@ -35,6 +36,7 @@ Response = TypedDict(
 
 
 def fetch_hcard(user: User) -> User:
+    user = user.copy()
     obj = mf2py.parse(url=user["url"])
     for item in obj["items"]:
         if "h-card" in item["type"]:
@@ -47,7 +49,7 @@ def fetch_hcard(user: User) -> User:
 
 class Announcer:
 
-    name = "base"
+    name = "Base"
     url_header = "base-url"
 
     def __init__(self, post: Post, config: Dict[str, Any], *args: Any, **kwargs: Any):
@@ -79,7 +81,7 @@ class Announcer:
             self.post.parsed[self.url_header] = link
             self.post.save()
 
-    def announce(self) -> str:
+    def announce(self) -> Optional[str]:
         """Publish a post in a service and return the URL.
         """
         raise NotImplementedError("Subclasses must implement announce")
@@ -97,23 +99,22 @@ class Announcer:
                 replies = json.load(fp)
         else:
             replies = []
-        count = len(replies)
 
         ids = {reply["id"] for reply in replies}
-        replies.extend(reply for reply in self.collect() if reply["id"] not in ids)
-
-        for reply in replies:
+        new_replies = [reply for reply in self.collect() if reply["id"] not in ids]
+        for reply in new_replies:
             user = reply["user"]
 
             # if the user has an URL, but no name or image, try to read their h-card
             # from the URL
             if user["url"] and (not user["name"] or not user["url"]):
-                user = fetch_hcard(user)
+                reply["user"] = fetch_hcard(user)
 
-        if len(replies) > count:
+        if new_replies:
             _logger.info(
                 f'Found new replies in post {self.config["url"]}{self.post.url}',
             )
+            replies.extend(new_replies)
             replies.sort(key=operator.itemgetter("timestamp"))
             with open(storage, "w") as fp:
                 json.dump(replies, fp)

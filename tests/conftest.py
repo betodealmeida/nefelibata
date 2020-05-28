@@ -30,7 +30,7 @@ def mock_post(fs, mocker):
         content = textwrap.dedent(markdown).strip()
         mock_open = mocker.mock_open(read_data=content)
 
-        config: Dict[str, Any] = {}
+        config: Dict[str, Any] = {"url": "https://example.com/"}
 
         mocker.patch("nefelibata.post.open", mock_open)
         return Post(file_path, root, config)

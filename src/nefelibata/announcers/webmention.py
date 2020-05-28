@@ -12,7 +12,9 @@ import dateutil.parser
 import requests
 from bs4 import BeautifulSoup
 from nefelibata.announcers import Announcer
+from nefelibata.announcers import Comment
 from nefelibata.announcers import Response
+from nefelibata.announcers import User
 from nefelibata.post import Post
 
 _logger = logging.getLogger("nefelibata")
@@ -43,6 +45,36 @@ def get_webmention_endpoint(url) -> Optional[str]:
         return cast(str, urllib.parse.urljoin(url, link["href"]))
 
     return None
+
+
+def get_response_from_child(child: Dict[str, Any]) -> Response:
+    # for the source, let's try to find a name, else fall back to URL
+    source = child.get("name") or child.get("url") or "Unknown"
+
+    url = child.get("url") or "#"
+    id_ = f'webmention:{child["wm-id"]}'
+
+    # for timestamp we fall back to when the response was received
+    timestamp = child.get("published") or child["wm-received"]
+    timestamp = dateutil.parser.parse(timestamp).isoformat()
+
+    user: User = {
+        "name": child["author"]["name"],
+        "image": child["author"]["photo"],
+        "url": child["author"]["url"],
+    }
+
+    text = child["content"].get("text", "") if "content" in child else ""
+    comment: Comment = {"text": text}
+
+    return {
+        "source": source,
+        "url": url,
+        "id": id_,
+        "timestamp": timestamp,
+        "user": user,
+        "comment": comment,
+    }
 
 
 class WebmentionAnnouncer(Announcer):
@@ -106,22 +138,4 @@ class WebmentionAnnouncer(Announcer):
 
         _logger.info("Success!")
 
-        return [
-            {
-                "source": child.get("name", child["url"]),
-                "url": child["url"],
-                "id": f'webmention:{child["wm-id"]}',
-                "timestamp": str(
-                    dateutil.parser.parse(
-                        child["published"] or child["wm-received"],
-                    ).timestamp(),
-                ),
-                "user": {
-                    "name": child["author"]["name"],
-                    "image": child["author"]["photo"],
-                    "url": child["author"]["url"],
-                },
-                "comment": {"text": child.get("content", {}).get("text", "")},
-            }
-            for child in feed["children"]
-        ]
+        return [get_response_from_child(child) for child in feed["children"]]

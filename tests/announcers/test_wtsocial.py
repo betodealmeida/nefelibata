@@ -72,13 +72,12 @@ def test_announcer(mock_post, requests_mock):
     requests_mock.get("https://wt.social/u/user", text=profile)
 
     responses = announcer.collect()
-    print(responses)
     assert responses == [
         {
             "source": "WT.Social",
             "color": "#1e1e1e",
             "id": "wtsocial:hash2",
-            "timestamp": "1577836800.0",
+            "timestamp": "2020-01-01T00:00:00+00:00",
             "user": {
                 "name": "User",
                 "image": "https://wtsocial-uploads.s3.amazonaws.com/uploads/2019-11/fileName1574188367--profile_pic.jpg",

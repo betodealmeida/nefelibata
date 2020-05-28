@@ -75,7 +75,7 @@ def test_announcer(mock_post, mocker):
             "source": "Twitter",
             "color": "#00acee",
             "id": "twitter:2",
-            "timestamp": "1577836800.0",
+            "timestamp": "2020-01-01T00:00:00+00:00",
             "user": {
                 "name": "User",
                 "image": "https://user.example.com/photo.jpg",

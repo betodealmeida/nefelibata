@@ -3,6 +3,7 @@ import re
 import textwrap
 from datetime import datetime
 from datetime import timedelta
+from datetime import timezone
 from typing import Any
 from typing import Dict
 from typing import List
@@ -86,13 +87,15 @@ def get_response_from_li(song_id: int, url: str, el: Tag) -> Response:
     # the timestamp is a fuzzy date :(
     fuzzy_timestamp = el.find("small", {"class": "text-muted"}).text
     try:
-        timestamp = str(dateutil.parser.parse(fuzzy_timestamp).timestamp())
+        timestamp = (
+            dateutil.parser.parse(fuzzy_timestamp).astimezone(timezone.utc).isoformat()
+        )
     except ParserError:
         # parse "1 day", etc.
         value, unit = fuzzy_timestamp.split()
         unit = unit.rstrip("s")
         delta = timedelta(**{f"{unit}s": int(value)})
-        timestamp = str((datetime.now() - delta).timestamp())
+        timestamp = (datetime.now() - delta).astimezone(timezone.utc).isoformat()
 
     user_ref = el.find("a", {"class": "user-ref"})
     user_name = user_ref.text.strip()

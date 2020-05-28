@@ -1,5 +1,6 @@
 import logging
 import urllib.parse
+from datetime import timezone
 from typing import Any
 from typing import cast
 from typing import Dict
@@ -18,7 +19,7 @@ def get_response_from_toot(toot: mastodon.AttribAccessDict) -> Response:
         "source": "Mastodon",
         "color": "#2b90d9",
         "id": f'mastodon:{toot["uri"]}',
-        "timestamp": toot.created_at.timestamp(),
+        "timestamp": toot.created_at.astimezone(timezone.utc).isoformat(),
         "user": {
             "name": toot.account.display_name,
             "image": toot.account.avatar,

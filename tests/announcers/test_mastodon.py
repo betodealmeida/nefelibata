@@ -71,7 +71,7 @@ def test_announcer(mock_post, mocker):
             "source": "Mastodon",
             "color": "#2b90d9",
             "id": "mastodon:tag:example.com,2020-01-01:objectId=1:objectType=Status",
-            "timestamp": 1577865600.0,
+            "timestamp": "2020-01-01T08:00:00+00:00",
             "user": {
                 "name": "user",
                 "image": "https://user.example.com/photo.gif",

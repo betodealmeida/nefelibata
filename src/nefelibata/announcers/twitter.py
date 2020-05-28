@@ -1,5 +1,6 @@
 import logging
 import urllib.parse
+from datetime import timezone
 from typing import Any
 from typing import Dict
 from typing import List
@@ -25,7 +26,9 @@ def get_response_from_mention(tweet: Dict[str, Any]) -> Response:
         "source": "Twitter",
         "color": "#00acee",
         "id": f'twitter:{tweet["id_str"]}',
-        "timestamp": str(dateutil.parser.parse(tweet["created_at"]).timestamp()),
+        "timestamp": dateutil.parser.parse(tweet["created_at"])
+        .astimezone(timezone.utc)
+        .isoformat(),
         "user": {
             "name": tweet["user"]["name"],
             "image": tweet["user"]["profile_image_url_https"],

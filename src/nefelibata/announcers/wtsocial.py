@@ -1,6 +1,7 @@
 import logging
 import re
 import urllib.parse
+from datetime import timezone
 from typing import Any
 from typing import cast
 from typing import Dict
@@ -39,9 +40,9 @@ def get_response_from_comment(comment: Dict[str, Any]) -> Response:
         "source": "WT.Social",
         "color": "#1e1e1e",
         "id": f'wtsocial:{comment["comment_id"]}',
-        "timestamp": str(
-            dateutil.parser.parse(comment["formatted"]["created_at"]).timestamp(),
-        ),
+        "timestamp": dateutil.parser.parse(comment["formatted"]["created_at"])
+        .astimezone(timezone.utc)
+        .isoformat(),
         "user": {
             "name": comment["users_name"],
             "image": get_user_image(comment["user_uri"]) or "",
