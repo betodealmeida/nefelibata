@@ -148,9 +148,6 @@ class Post:
         """
         html = self.render()
 
-        # mirror images locally
-        html = mirror_images(html, self.file_path.parent / "img")
-
         filename = self.file_path.with_suffix(".html")
         with open(filename, "w") as fp:
             fp.write(html)

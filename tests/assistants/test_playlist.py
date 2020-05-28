@@ -16,10 +16,9 @@ def test_playlist(mock_post, mocker, fs):
     with freeze_time("2020-01-01T00:00:00Z"):
         post = mock_post(
             """
-        subject: Hello, Medium!
+        subject: Hello, World!
         keywords: test
-        summary: My first Medium post
-        announce-on: medium
+        summary: My first post
 
         Hi, there!
         """,
@@ -84,10 +83,9 @@ def test_playlist_no_files(mock_post, mocker, fs):
     with freeze_time("2020-01-01T00:00:00Z"):
         post = mock_post(
             """
-        subject: Hello, Medium!
+        subject: Hello, World!
         keywords: test
-        summary: My first Medium post
-        announce-on: medium
+        summary: My first post
 
         Hi, there!
         """,

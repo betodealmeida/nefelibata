@@ -16,11 +16,12 @@
 - [x] Medium announcer
 - [x] microformats
 - [x] linkbacks
+- [x] make timestamp an ISO string instead of float
 - [ ] unit test coverage
-- [ ] make timestamp an ISO string instead of float
 - [ ] move mirror images to assistant
 - [ ] check CSS for external resources
 - [ ] use track number to sort playlist
+- [ ] neocities publisher
 - [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
 - [ ] Instagram announcer

@@ -197,8 +197,8 @@ def build(root: Path, force: bool = False, collect_replies: bool = True) -> None
         if force or not post.up_to_date:
             post.create()
 
-        for assistant in post_assistants:
-            assistant.process_post(post)
+            for assistant in post_assistants:
+                assistant.process_post(post)
 
         # symlink build -> posts
         post_directory = post.file_path.parent

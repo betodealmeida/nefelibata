@@ -18,21 +18,27 @@ from nefelibata.post import Post
 
 
 @pytest.fixture
-def mock_post(fs, mocker):
+def mock_post(fs):
     def build_post(markdown: str) -> Post:
 
         root = Path("/path/to/blog")
         fs.create_dir(root)
 
+        fs.create_dir(root / "templates/test")
+        with open(root / "templates/test/post.html", "w") as fp:
+            fp.write(
+                '<!DOCTYPE html><html lang="en"><head></head><body>{{ post.html }}</body></html>',
+            )
+
         file_path = Path("/path/to/blog/posts/first/index.mkd")
         fs.create_file(file_path)
 
-        content = textwrap.dedent(markdown).strip()
-        mock_open = mocker.mock_open(read_data=content)
+        contents = textwrap.dedent(markdown).strip()
+        with open(file_path, "w") as fp:
+            fp.write(contents)
 
-        config: Dict[str, Any] = {"url": "https://example.com/"}
+        config: Dict[str, Any] = {"url": "https://example.com/", "theme": "test"}
 
-        mocker.patch("nefelibata.post.open", mock_open)
         return Post(file_path, root, config)
 
     yield build_post
