@@ -24,7 +24,7 @@ class Assistant:
 
         raise NotImplementedError("Subclasses MUST implement `process_post`")
 
-    def process_site(self, root: Path) -> None:
+    def process_site(self, file_path: Path) -> None:
         if Scope.SITE not in self.scope:
             raise Exception(f'Scope "site" not supported by {self.__class__.__name__}')
 

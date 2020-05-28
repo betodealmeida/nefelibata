@@ -1,11 +1,8 @@
-import hashlib
-import re
 from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import Iterator
 
-import requests
 import yaml
 from bs4 import BeautifulSoup
 from libgravatar import Gravatar
@@ -53,35 +50,3 @@ def find_external_resources(html: str) -> Iterator[str]:
             resource = el.attrs.get(attr)
             if resource and "://" in resource:
                 yield resource
-
-
-def mirror_images(html: str, mirror: Path) -> str:
-    """Mirror remote images locally.
-
-    Args:
-      html (str): HTML document
-      mirror (Path): directory where the images will be stored
-    """
-    # create post image directory if necessary
-    if not mirror.exists():
-        mirror.mkdir()
-
-    # replace all external links
-    soup = BeautifulSoup(html, "html.parser")
-    for el in soup.find_all("img", src=re.compile("http")):
-        # local name is a hash of the url
-        url = el.attrs["src"]
-        extension = Path(url).suffix
-        m = hashlib.md5()
-        m.update(url.encode("utf-8"))
-        local = mirror / ("%s%s" % (m.hexdigest(), extension))
-
-        # download and store locally
-        if not local.exists():
-            r = requests.get(url)
-            with open(local, "wb") as fp:
-                fp.write(r.content)
-
-        el.attrs["src"] = "img/%s" % local.name
-
-    return str(soup)

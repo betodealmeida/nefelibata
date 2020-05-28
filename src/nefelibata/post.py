@@ -20,9 +20,7 @@ from dateutil.parser._parser import ParserError
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
 from nefelibata import __version__
-from nefelibata.utils import find_external_resources
 from nefelibata.utils import get_config
-from nefelibata.utils import mirror_images
 
 _logger = logging.getLogger("nefelibata")
 
@@ -151,9 +149,6 @@ class Post:
         filename = self.file_path.with_suffix(".html")
         with open(filename, "w") as fp:
             fp.write(html)
-
-        for resource in find_external_resources(html):
-            _logger.warning(f"External resource found: {resource}")
 
 
 def jinja2_formatdate(obj: Union[str, int, float, datetime], fmt: str) -> str:

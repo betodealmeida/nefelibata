@@ -7,11 +7,11 @@ from typing import Optional
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
 from nefelibata import __version__
+from nefelibata.assistants import get_assistants
+from nefelibata.assistants import Scope
 from nefelibata.post import get_posts
 from nefelibata.post import hash_n
-from nefelibata.utils import find_external_resources
 from nefelibata.utils import get_config
-from nefelibata.utils import mirror_images
 
 _logger = logging.getLogger("nefelibata")
 
@@ -23,6 +23,7 @@ def create_index(root: Path) -> None:
       root (str): directory where the weblog lives
     """
     config = get_config(root)
+    site_assistants = get_assistants(config, Scope.SITE)
     env = Environment(
         loader=FileSystemLoader(str(root / "templates" / config["theme"])),
     )
@@ -53,14 +54,12 @@ def create_index(root: Path) -> None:
             hash_n=hash_n,
         )
 
-        # mirror images locally
-        html = mirror_images(html, root / "build" / "img")
-
-        with open(root / "build" / name, "w") as fp:
+        file_path = root / "build" / name
+        with open(file_path, "w") as fp:
             fp.write(html)
 
-        for resource in find_external_resources(html):
-            _logger.warning(f"External resource found: {resource}")
+        for assistant in site_assistants:
+            assistant.process_site(file_path)
 
         page += 1
         previous, name = name, next
@@ -73,6 +72,7 @@ def create_categories(root: Path) -> None:
       root (str): directory where the weblog lives
     """
     config = get_config(root)
+    site_assistants = get_assistants(config, Scope.SITE)
     env = Environment(
         loader=FileSystemLoader(str(root / "templates" / config["theme"])),
     )
@@ -97,10 +97,10 @@ def create_categories(root: Path) -> None:
         while name:
             page_posts, posts = posts[:show], posts[show:]
 
-            filename = root / "build" / name
+            file_path = root / "build" / name
 
             # only update if there are changes to files in this category
-            if filename.exists() and filename.stat().st_mtime > last_modified:
+            if file_path.exists() and file_path.stat().st_mtime > last_modified:
                 break
 
             # link to next page
@@ -119,14 +119,11 @@ def create_categories(root: Path) -> None:
                 hash_n=hash_n,
             )
 
-            # mirror images locally
-            html = mirror_images(html, root / "build" / "img")
-
-            with open(filename, "w") as fp:
+            with open(file_path, "w") as fp:
                 fp.write(html)
 
-            for resource in find_external_resources(html):
-                _logger.warning(f"External resource found: {resource}")
+            for assistant in site_assistants:
+                assistant.process_site(file_path)
 
             page += 1
             previous, name = name, next

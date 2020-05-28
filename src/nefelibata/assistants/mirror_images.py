@@ -34,6 +34,25 @@ class MirrorImagesAssistant(Assistant):
         with open(index_html) as fp:
             html = fp.read()
 
+        html = self._process_html(html, mirror)
+
+        with open(index_html, "w") as fp:
+            fp.write(html)
+
+    def process_site(self, file_path: Path) -> None:
+        mirror = file_path.parent / "img"
+        if not mirror.exists():
+            mirror.mkdir()
+
+        with open(file_path) as fp:
+            html = fp.read()
+
+        html = self._process_html(html, mirror)
+
+        with open(file_path, "w") as fp:
+            fp.write(html)
+
+    def _process_html(self, html: str, mirror: Path) -> str:
         soup = BeautifulSoup(html, "html.parser")
         for el in soup.find_all("img", src=re.compile("http")):
             url = el.attrs["src"]
@@ -47,10 +66,9 @@ class MirrorImagesAssistant(Assistant):
             # download and store locally
             if not local.exists():
                 r = requests.get(url)
-                with open(local, "w") as fp:
-                    fp.write(r.raw)
+                with open(local, "wb") as fp:
+                    fp.write(r.content)
 
             el.attrs["src"] = "img/%s" % local.name
 
-        with open(index_html, "w") as fp:
-            fp.write(str(soup))
+        return str(soup)
