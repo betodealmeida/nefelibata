@@ -26,18 +26,7 @@ class MirrorImagesAssistant(Assistant):
     scope = [Scope.POST, Scope.SITE]
 
     def process_post(self, post: Post) -> None:
-        mirror = post.file_path.parent / "img"
-        if not mirror.exists():
-            mirror.mkdir()
-
-        index_html = post.file_path.with_suffix(".html")
-        with open(index_html) as fp:
-            html = fp.read()
-
-        html = self._process_html(html, mirror)
-
-        with open(index_html, "w") as fp:
-            fp.write(html)
+        self.process_site(post.file_path.with_suffix(".html"))
 
     def process_site(self, file_path: Path) -> None:
         mirror = file_path.parent / "img"
