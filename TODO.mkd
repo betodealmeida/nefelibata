@@ -24,6 +24,7 @@
 - [ ] https://indiewebify.me/
 - [ ] use track number to sort playlist
 - [ ] neocities publisher
+- [ ] documentation
 - [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
 - [ ] Instagram announcer
