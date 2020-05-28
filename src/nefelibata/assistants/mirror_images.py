@@ -1,17 +1,13 @@
 import hashlib
 import mimetypes
 import re
-import urllib.parse
 from pathlib import Path
-from typing import List
-from typing import TypedDict
 
 import requests
 from bs4 import BeautifulSoup
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
 from nefelibata.post import Post
-from nefelibata.utils import get_config
 
 
 def get_resource_extension(url: str) -> str:
@@ -23,7 +19,7 @@ def get_resource_extension(url: str) -> str:
 
 class MirrorImagesAssistant(Assistant):
 
-    scope = [Scope.POST, Scope.SITE]
+    scopes = [Scope.POST, Scope.SITE]
 
     def process_post(self, post: Post) -> None:
         self.process_site(post.file_path.with_suffix(".html"))

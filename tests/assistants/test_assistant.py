@@ -14,11 +14,11 @@ __license__ = "mit"
 
 class TestAssistant(Assistant):
 
-    scope = [Scope.POST]
+    scopes = [Scope.POST]
 
 
 def make_dummy_assistant(scope):
-    return type("SomeAssistant", (Assistant,), {"scope": scope})
+    return type("SomeAssistant", (Assistant,), {"scopes": [scope]})
 
 
 class TestEntryPoint:
@@ -47,11 +47,13 @@ def test_get_assistants(mock_post, mocker):
 
     assistants = get_assistants(config, Scope.POST)
     assert len(assistants) == 1
-    assert assistants[0].scope == Scope.POST
+    assert assistants[0].scopes == [Scope.POST]
 
 
 def test_wrong_scope(mock_post):
-    post_assistant = make_dummy_assistant([Scope.POST])()
+    config = {}
+
+    post_assistant = make_dummy_assistant([Scope.POST])(config)
     with pytest.raises(Exception) as excinfo:
         post_assistant.process_site(Path("/path/to/blog"))
 
@@ -68,7 +70,7 @@ def test_wrong_scope(mock_post):
         """,
         )
 
-    site_assistant = make_dummy_assistant([Scope.SITE])()
+    site_assistant = make_dummy_assistant([Scope.SITE])(config)
     with pytest.raises(Exception) as excinfo:
         site_assistant.process_post(post)
 

@@ -7,7 +7,6 @@ from mutagen.mp3 import MP3
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
 from nefelibata.post import Post
-from nefelibata.utils import get_config
 
 
 class MP3Info(TypedDict):
@@ -21,7 +20,7 @@ class MP3Info(TypedDict):
 
 class PlaylistAssistant(Assistant):
 
-    scope = [Scope.POST]
+    scopes = [Scope.POST]
 
     def process_post(self, post: Post) -> None:
         post_directory = post.file_path.parent
@@ -53,7 +52,7 @@ class PlaylistAssistant(Assistant):
         ]
         for i, mp3 in enumerate(mp3s):
             relative_url = mp3["path"].relative_to(post.root / "posts")
-            url = urllib.parse.urljoin(post.config["url"], str(relative_url))
+            url = urllib.parse.urljoin(self.config["url"], str(relative_url))
             title = "{album} ({year}) - {artist} - {title}".format(**mp3)
             lines.append(f"File{i+1}={url}")
             lines.append(f"Title{i+1}={title}")

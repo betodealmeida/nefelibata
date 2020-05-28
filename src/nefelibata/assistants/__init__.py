@@ -16,16 +16,19 @@ class Scope(Enum):
 
 class Assistant:
 
-    scope: List[Scope] = []
+    scopes: List[Scope] = []
+
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
 
     def process_post(self, post: Post) -> None:
-        if Scope.POST not in self.scope:
+        if Scope.POST not in self.scopes:
             raise Exception(f'Scope "post" not supported by {self.__class__.__name__}')
 
         raise NotImplementedError("Subclasses MUST implement `process_post`")
 
     def process_site(self, file_path: Path) -> None:
-        if Scope.SITE not in self.scope:
+        if Scope.SITE not in self.scopes:
             raise Exception(f'Scope "site" not supported by {self.__class__.__name__}')
 
         raise NotImplementedError("Subclasses MUST implement `process_site`")
@@ -39,7 +42,7 @@ def get_assistants(
     assistants = {a.name: a.load() for a in iter_entry_points("nefelibata.assistant")}
 
     return [
-        assistants[name]()
+        assistants[name](config)
         for name in names
-        if assistants[name].scope == scope or scope is None
+        if scope in assistants[name].scopes or scope is None
     ]
