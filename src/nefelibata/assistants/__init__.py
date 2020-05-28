@@ -37,4 +37,9 @@ def get_assistants(
     names = config["assistants"] or []
 
     assistants = {a.name: a.load() for a in iter_entry_points("nefelibata.assistant")}
-    return [assistants[name]() for name in names]
+
+    return [
+        assistants[name]()
+        for name in names
+        if assistants[name].scope == scope or scope is None
+    ]

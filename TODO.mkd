@@ -17,9 +17,10 @@
 - [x] microformats
 - [x] linkbacks
 - [x] make timestamp an ISO string instead of float
-- [ ] unit test coverage
-- [ ] move mirror images to assistant
+- [x] move mirror images to assistant
+- [ ] check external resources as assistant
 - [ ] check CSS for external resources
+- [ ] unit test coverage
 - [ ] use track number to sort playlist
 - [ ] neocities publisher
 - [ ] parallelize build/publish
