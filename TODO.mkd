@@ -19,13 +19,15 @@
 - [x] make timestamp an ISO string instead of float
 - [x] move mirror images to assistant
 - [x] check external resources as assistant
-- [ ] check CSS for external resources
+- [x] check CSS for external resources
 - [ ] unit test coverage
-- [ ] https://indiewebify.me/
 - [ ] use track number to sort playlist
 - [ ] Soundcloud announcer
-- [ ] neocities publisher
+- [ ] Neocities publisher
+- [ ] https://indiewebify.me/
+- [ ] Chrome performance
 - [ ] documentation
+- [ ] new release
 - [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
 - [ ] Instagram announcer
