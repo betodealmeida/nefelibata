@@ -51,6 +51,7 @@ class WarnExternalResourcesAssistant(Assistant):
                 if not resource:
                     continue
                 if "://" in resource and not self._safe(resource):
+                    print(f"External resource found: {resource}")
                     _logger.warning(f"External resource found: {resource}")
                 if resource.endswith(".css"):
                     self._check_css(resource, file_path)
@@ -66,7 +67,6 @@ class WarnExternalResourcesAssistant(Assistant):
         else:
             css_path = file_path.parent / resource
 
-        print(css_path)
         with open(css_path) as fp:
             css = fp.read()
 
@@ -80,6 +80,7 @@ class WarnExternalResourcesAssistant(Assistant):
                     and "://" in token.value
                     and not self._safe(token.value)
                 ):
+                    print(f"External resource found in {css_path}: {token.value}")
                     _logger.warning(
                         f"External resource found in {css_path}: {token.value}",
                     )

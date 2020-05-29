@@ -27,8 +27,22 @@ def mock_post(fs):
         fs.create_dir(root / "templates/test")
         with open(root / "templates/test/post.html", "w") as fp:
             fp.write(
-                '<!DOCTYPE html><html lang="en"><head></head><body>{{ post.html }}</body></html>',
+                """
+<!DOCTYPE html><html lang="en">
+<head>
+<link href="{{ config.webmention.endpoint }}" rel="webmention" />
+<link href="https://external.example.com/css/basic.css" rel="stylesheet">
+<link href="/css/style.css" rel="stylesheet">
+{% for stylesheet in stylesheets %}
+<link href="{{ stylesheet }}" rel="stylesheet">
+{% endfor %}
+</head>
+<body>
+{{ post.html }}
+</body>
+</html>""",
             )
+        fs.create_file(root / "build/css/style.css")
 
         file_path = Path("/path/to/blog/posts/first/index.mkd")
         fs.create_file(file_path)
@@ -37,7 +51,11 @@ def mock_post(fs):
         with open(file_path, "w") as fp:
             fp.write(contents)
 
-        config: Dict[str, Any] = {"url": "https://example.com/", "theme": "test"}
+        config: Dict[str, Any] = {
+            "url": "https://example.com/",
+            "theme": "test",
+            "webmention": {"endpoint": "https://webmention.io/example.com/webmention"},
+        }
 
         return Post(file_path, root, config)
 

@@ -23,6 +23,7 @@
 - [ ] unit test coverage
 - [ ] https://indiewebify.me/
 - [ ] use track number to sort playlist
+- [ ] Soundcloud announcer
 - [ ] neocities publisher
 - [ ] documentation
 - [ ] parallelize build/publish
