@@ -25,7 +25,7 @@ def test_mirror_images(mock_post, mocker, requests_mock):
     post.create()
 
     config = {}
-    assistant = MirrorImagesAssistant(config)
+    assistant = MirrorImagesAssistant(post.root, config)
 
     mocker.patch(
         "nefelibata.assistants.mirror_images.get_resource_extension",
@@ -73,7 +73,7 @@ def test_mirror_images_directory_exists(mock_post, mocker, requests_mock, fs):
     fs.create_dir(post.file_path.parent / "img")
 
     config = {}
-    assistant = MirrorImagesAssistant(config)
+    assistant = MirrorImagesAssistant(post.root, config)
 
     mocker.patch(
         "nefelibata.assistants.mirror_images.get_resource_extension",
@@ -121,7 +121,7 @@ def test_mirror_images_image_exists(mock_post, mocker, fs):
     fs.create_file(post.file_path.parent / "img/e0e9a99aaf941ecd23bf4a3d2f0d82a2.png")
 
     config = {}
-    assistant = MirrorImagesAssistant(config)
+    assistant = MirrorImagesAssistant(post.root, config)
 
     mocker.patch(
         "nefelibata.assistants.mirror_images.get_resource_extension",

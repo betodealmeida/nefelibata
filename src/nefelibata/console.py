@@ -188,7 +188,7 @@ def build(root: Path, force: bool = False, collect_replies: bool = True) -> None
             target.symlink_to(resource_directory, target_is_directory=True)
 
     _logger.info("Processing posts")
-    post_assistants = get_assistants(config, Scope.POST)
+    post_assistants = get_assistants(root, config, Scope.POST)
     for post in get_posts(root):
         if collect_replies:
             for announcer in get_announcers(post, config):

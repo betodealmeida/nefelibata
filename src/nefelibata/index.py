@@ -23,7 +23,7 @@ def create_index(root: Path) -> None:
       root (str): directory where the weblog lives
     """
     config = get_config(root)
-    site_assistants = get_assistants(config, Scope.SITE)
+    site_assistants = get_assistants(root, config, Scope.SITE)
     env = Environment(
         loader=FileSystemLoader(str(root / "templates" / config["theme"])),
     )
@@ -72,7 +72,7 @@ def create_categories(root: Path) -> None:
       root (str): directory where the weblog lives
     """
     config = get_config(root)
-    site_assistants = get_assistants(config, Scope.SITE)
+    site_assistants = get_assistants(root, config, Scope.SITE)
     env = Environment(
         loader=FileSystemLoader(str(root / "templates" / config["theme"])),
     )

@@ -18,7 +18,8 @@ class Assistant:
 
     scopes: List[Scope] = []
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, root: Path, config: Dict[str, Any]):
+        self.root = root
         self.config = config
 
     def process_post(self, post: Post) -> None:
@@ -35,14 +36,14 @@ class Assistant:
 
 
 def get_assistants(
-    config: Dict[str, Any], scope: Optional[Scope] = None,
+    root: Path, config: Dict[str, Any], scope: Optional[Scope] = None,
 ) -> List[Assistant]:
     names = config["assistants"] or []
 
     assistants = {a.name: a.load() for a in iter_entry_points("nefelibata.assistant")}
 
     return [
-        assistants[name](config)
+        assistants[name](root, config)
         for name in names
         if scope in assistants[name].scopes or scope is None
     ]

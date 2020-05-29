@@ -23,6 +23,9 @@ def test_warn_external_resources(mock_post, requests_mock):
         ![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
 
         This is a local one: ![alt text](img/test.png "Test")
+
+        This is a safe one: ![alt text](https://example.com/icon48.png)
+
         """,
         )
     post.create()
@@ -31,7 +34,7 @@ def test_warn_external_resources(mock_post, requests_mock):
         "url": "https://example.com/",
         "webmention": {"endpoint": "https://example.com/webmention"},
     }
-    assistant = WarnExternalResourcesAssistant(config)
+    assistant = WarnExternalResourcesAssistant(post.root, config)
 
     with mock.patch(
         "nefelibata.assistants.warn_external_resources._logger",

@@ -25,7 +25,7 @@ def test_playlist(mock_post, mocker, fs):
         )
 
     config = {"url": "https://example.com/"}
-    assistant = PlaylistAssistant(config)
+    assistant = PlaylistAssistant(post.root, config)
 
     # create 2 empty "MP3" files
     fs.create_file(post.file_path.parent / "demo1.mp3")
@@ -93,7 +93,7 @@ def test_playlist_no_files(mock_post, mocker, fs):
         )
 
     config = {"url": "https://example.com/"}
-    assistant = PlaylistAssistant(config)
+    assistant = PlaylistAssistant(post.root, config)
 
     assistant.process_post(post)
 

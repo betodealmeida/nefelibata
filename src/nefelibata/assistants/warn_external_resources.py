@@ -2,6 +2,7 @@ import logging
 import urllib.parse
 from pathlib import Path
 
+import tinycss2
 from bs4 import BeautifulSoup
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
@@ -15,21 +16,29 @@ class WarnExternalResourcesAssistant(Assistant):
     scopes = [Scope.POST, Scope.SITE]
 
     def process_post(self, post: Post) -> None:
-        _logger.warning("test")
         self.process_site(post.file_path.with_suffix(".html"))
 
     def process_site(self, file_path: Path) -> None:
         with open(file_path) as fp:
             html = fp.read()
 
-        self._process_html(html)
+        self._process_html(html, file_path)
 
-    def _process_html(self, html: str) -> None:
-        safelist = [
-            urllib.parse.urljoin(self.config["url"], "atom.xml"),
-            self.config["webmention"]["endpoint"],  # Use .get
-        ]
+    def _safe(self, resource: str):
+        # any URL that starts with the blog URL is safe
+        if resource.startswith(self.config["url"]):
+            return True
 
+        # if the blog uses an external endpoint for webmention that's ok
+        if (
+            "webmention" in self.config
+            and resource == self.config["webmention"]["endpoint"]
+        ):
+            return True
+
+        return False
+
+    def _process_html(self, html: str, file_path: Path) -> None:
         tag_attributes = [
             ("img", "src"),
             ("link", "href"),
@@ -39,5 +48,38 @@ class WarnExternalResourcesAssistant(Assistant):
         for tag, attr in tag_attributes:
             for el in soup.find_all(tag):
                 resource = el.attrs.get(attr)
-                if resource and "://" in resource and resource not in safelist:
+                if not resource:
+                    continue
+                if "://" in resource and not self._safe(resource):
                     _logger.warning(f"External resource found: {resource}")
+                if resource.endswith(".css"):
+                    self._check_css(resource, file_path)
+
+    def _check_css(self, resource: str, file_path: Path) -> None:
+        """Check CSS for external URLs."""
+        if "://" in resource and not resource.startswith(self.config["url"]):
+            # external CSS, should've been already flagged
+            return
+
+        if resource.startswith("/"):
+            css_path = self.root / "build" / resource[1:]
+        else:
+            css_path = file_path.parent / resource
+
+        print(css_path)
+        with open(css_path) as fp:
+            css = fp.read()
+
+        stylesheet = tinycss2.parse_stylesheet(
+            css, skip_comments=True, skip_whitespace=True,
+        )
+        for rule in stylesheet:
+            for token in rule.content:
+                if (
+                    isinstance(token, tinycss2.ast.URLToken)
+                    and "://" in token.value
+                    and not self._safe(token.value)
+                ):
+                    _logger.warning(
+                        f"External resource found in {css_path}: {token.value}",
+                    )
