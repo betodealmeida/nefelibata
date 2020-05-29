@@ -41,11 +41,22 @@ def test_mirror_images(mock_post, mocker, requests_mock):
     with open(post.file_path.with_suffix(".html")) as fp:
         contents = fp.read()
 
-    assert contents == (
-        "<!DOCTYPE html>\n"
-        '<html lang="en"><head></head><body><p>Hi, there!</p>\n'
-        "<p>This is an external image:</p>\n"
-        '<p><img alt="alt text" src="img/e0e9a99aaf941ecd23bf4a3d2f0d82a2.png" title="Logo Title Text 1"/></p></body></html>'
+    assert (
+        contents
+        == """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link href="https://webmention.io/example.com/webmention" rel="webmention"/>
+<link href="https://external.example.com/css/basic.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<p>Hi, there!</p>
+<p>This is an external image:</p>
+<p><img alt="alt text" src="img/e0e9a99aaf941ecd23bf4a3d2f0d82a2.png" title="Logo Title Text 1"/></p>
+</body>
+</html>"""
     )
 
     with open(
@@ -89,11 +100,23 @@ def test_mirror_images_directory_exists(mock_post, mocker, requests_mock, fs):
     with open(post.file_path.with_suffix(".html")) as fp:
         contents = fp.read()
 
-    assert contents == (
-        "<!DOCTYPE html>\n"
-        '<html lang="en"><head></head><body><p>Hi, there!</p>\n'
-        "<p>This is an external image:</p>\n"
-        '<p><img alt="alt text" src="img/e0e9a99aaf941ecd23bf4a3d2f0d82a2.png" title="Logo Title Text 1"/></p></body></html>'
+    print(repr(contents))
+    assert (
+        contents
+        == """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link href="https://webmention.io/example.com/webmention" rel="webmention"/>
+<link href="https://external.example.com/css/basic.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<p>Hi, there!</p>
+<p>This is an external image:</p>
+<p><img alt="alt text" src="img/e0e9a99aaf941ecd23bf4a3d2f0d82a2.png" title="Logo Title Text 1"/></p>
+</body>
+</html>"""
     )
 
     with open(
@@ -133,11 +156,22 @@ def test_mirror_images_image_exists(mock_post, mocker, fs):
     with open(post.file_path.with_suffix(".html")) as fp:
         contents = fp.read()
 
-    assert contents == (
-        "<!DOCTYPE html>\n"
-        '<html lang="en"><head></head><body><p>Hi, there!</p>\n'
-        "<p>This is an external image:</p>\n"
-        '<p><img alt="alt text" src="img/e0e9a99aaf941ecd23bf4a3d2f0d82a2.png" title="Logo Title Text 1"/></p></body></html>'
+    assert (
+        contents
+        == """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link href="https://webmention.io/example.com/webmention" rel="webmention"/>
+<link href="https://external.example.com/css/basic.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<p>Hi, there!</p>
+<p>This is an external image:</p>
+<p><img alt="alt text" src="img/e0e9a99aaf941ecd23bf4a3d2f0d82a2.png" title="Logo Title Text 1"/></p>
+</body>
+</html>"""
     )
 
 
