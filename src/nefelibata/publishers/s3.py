@@ -119,15 +119,12 @@ class S3Publisher(Publisher):
         client = self._get_client("s3")
         _logger.info(f"Creating bucket {self.bucket}")
         try:
-            if self.region is None:
-                client.create_bucket(Bucket=self.bucket, ACL="public-read")
-            else:
-                location = {"LocationConstraint": self.region}
-                client.create_bucket(
-                    Bucket=self.bucket,
-                    CreateBucketConfiguration=location,
-                    ACL="public-read",
-                )
+            location = {"LocationConstraint": self.region}
+            client.create_bucket(
+                Bucket=self.bucket,
+                CreateBucketConfiguration=location,
+                ACL="public-read",
+            )
         except ClientError as e:
             _logger.error(e)
             return False
