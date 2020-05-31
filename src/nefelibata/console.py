@@ -44,10 +44,10 @@ from nefelibata import config_filename
 from nefelibata import new_post
 from nefelibata.announcers import get_announcers
 from nefelibata.assistants import get_assistants
-from nefelibata.assistants import Scope
-from nefelibata.index import create_categories
-from nefelibata.index import create_feed
-from nefelibata.index import create_index
+from nefelibata.builders import Scope
+from nefelibata.builders.categories import CategoriesBuilder
+from nefelibata.builders.feed import FeedBuilder
+from nefelibata.builders.index import IndexBuilder
 from nefelibata.post import get_posts
 from nefelibata.post import Post
 from nefelibata.publishers import get_publishers
@@ -164,14 +164,12 @@ def build(root: Path, force: bool = False, collect_replies: bool = True) -> None
         if post_directory.exists() and not target.exists():
             target.symlink_to(post_directory, target_is_directory=True)
 
-    logging.info("Creating index")
-    create_index(root)
+    # TODO use entry points; dont pass root
+    IndexBuilder(root, config).process_site(root)
+    CategoriesBuilder(root, config).process_site(root)
+    FeedBuilder(root, config).process_site(root)
 
-    logging.info("Creating category pages")
-    create_categories(root)
-
-    logging.info("Creating Atom feed")
-    create_feed(root)
+    # TODO call assistants after
 
 
 def preview(root: Path, port: int = 8000) -> None:

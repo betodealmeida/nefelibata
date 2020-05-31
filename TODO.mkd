@@ -21,12 +21,15 @@
 - [x] check external resources as assistant
 - [x] check CSS for external resources
 - [ ] unit test coverage
+- [ ] logger names
 - [ ] use track number to sort playlist
 - [ ] Soundcloud announcer
 - [ ] Neocities publisher
 - [ ] https://indiewebify.me/
 - [ ] Chrome performance
 - [ ] documentation
+- [ ] requirements.txt
+- [ ] add footer with link to project
 - [ ] new release
 - [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
