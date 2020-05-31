@@ -24,8 +24,8 @@ def mock_post(fs):
         root = Path("/path/to/blog")
         fs.create_dir(root)
 
-        fs.create_dir(root / "templates/test")
-        with open(root / "templates/test/post.html", "w") as fp:
+        fs.create_dir(root / "templates/test-theme")
+        with open(root / "templates/test-theme/post.html", "w") as fp:
             fp.write(
                 """
 <!DOCTYPE html><html lang="en">
@@ -53,7 +53,7 @@ def mock_post(fs):
 
         config: Dict[str, Any] = {
             "url": "https://example.com/",
-            "theme": "test",
+            "theme": "test-theme",
             "webmention": {"endpoint": "https://webmention.io/example.com/webmention"},
         }
 

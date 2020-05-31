@@ -26,7 +26,7 @@ author:
     profile_picture: http://www.gravatar.com/avatar/58b573d3eac03131faee739dfc7b360a
 url: http://blog.taoetc.org/  # slashing trail is important
 posts-to-show: 5
-theme: pure-blog
+theme: test-theme
 language: en
     """
     with open(root / config_filename, "w") as fp:
@@ -43,7 +43,7 @@ language: en
         },
         "url": "http://blog.taoetc.org/",
         "posts-to-show": 5,
-        "theme": "pure-blog",
+        "theme": "test-theme",
         "language": "en",
     }
 
@@ -60,7 +60,7 @@ author:
     email: roberto@dealmeida.net
 url: http://blog.taoetc.org/  # slashing trail is important
 posts-to-show: 5
-theme: pure-blog
+theme: test-theme
 language: en
     """
     with open(root / config_filename, "w") as fp:
@@ -77,7 +77,7 @@ language: en
         },
         "url": "http://blog.taoetc.org/",
         "posts-to-show": 5,
-        "theme": "pure-blog",
+        "theme": "test-theme",
         "language": "en",
     }
 

@@ -20,6 +20,8 @@
 - [x] move mirror images to assistant
 - [x] check external resources as assistant
 - [x] check CSS for external resources
+- [ ] builders
+- [ ] rename feed to Atom
 - [ ] unit test coverage
 - [ ] logger names
 - [ ] use track number to sort playlist

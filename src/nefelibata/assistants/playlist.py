@@ -51,7 +51,7 @@ class PlaylistAssistant(Assistant):
             "",
         ]
         for i, mp3 in enumerate(mp3s):
-            relative_url = mp3["path"].relative_to(post.root / "posts")
+            relative_url = mp3["path"].relative_to(self.root / "posts")
             url = urllib.parse.urljoin(self.config["url"], str(relative_url))
             title = "{album} ({year}) - {artist} - {title}".format(**mp3)
             lines.append(f"File{i+1}={url}")
