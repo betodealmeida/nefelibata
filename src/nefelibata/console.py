@@ -51,59 +51,16 @@ from nefelibata.index import create_index
 from nefelibata.post import get_posts
 from nefelibata.post import Post
 from nefelibata.publishers import get_publishers
+from nefelibata.utils import find_directory
 from nefelibata.utils import get_config
+from nefelibata.utils import sanitize
+from nefelibata.utils import setup_logging
 from pkg_resources import resource_filename
 from pkg_resources import resource_listdir
 
 __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
-
-_logger = logging.getLogger("nefelibata")
-
-
-def setup_logging(loglevel: str) -> None:
-    """Setup basic logging
-
-    Args:
-      loglevel (str): minimum loglevel for emitting messages
-    """
-    level = getattr(logging, loglevel.upper(), None)
-    if not isinstance(level, int):
-        raise ValueError("Invalid log level: %s" % loglevel)
-
-    logformat = "[%(asctime)s] %(levelname)s: %(name)s: %(message)s"
-    logging.basicConfig(
-        level=level, stream=sys.stdout, format=logformat, datefmt="%Y-%m-%d %H:%M:%S",
-    )
-
-
-def find_directory(cwd: Path) -> Path:
-    """Find root of blog, starting from `cwd`.
-
-    The function will traverse up trying to find a configuration file.
-
-    Args:
-      cwd (str): starting directory
-    """
-    while not (cwd / config_filename).exists():
-        if cwd == cwd.parent:
-            raise SystemExit("No configuration found!")
-        cwd = cwd.parent
-
-    return cwd
-
-
-def sanitize(directory: str) -> str:
-    """Sanitize a post title into a directory name.
-
-    Args:
-      directory (str): a string representing the post title
-    """
-    directory = directory.lower().replace(" ", "_")
-    directory = re.sub(r"[^\w]", "", directory)
-
-    return directory
 
 
 def init(root: Path) -> None:
@@ -127,7 +84,7 @@ def init(root: Path) -> None:
         else:
             shutil.copy(origin, target)
 
-    _logger.info("Weblog created!")
+    logging.info("Weblog created!")
 
 
 def new(root: Path, directory: str) -> None:
@@ -137,7 +94,7 @@ def new(root: Path, directory: str) -> None:
       root (str): directory where the weblog lives
       directory (str): name of directory for the post
     """
-    _logger.info("Creating new directory")
+    logging.info("Creating new directory")
     title = directory
     directory = sanitize(directory)
     target = root / "posts" / directory
@@ -146,7 +103,7 @@ def new(root: Path, directory: str) -> None:
     target.mkdir()
     os.chdir(target)
 
-    _logger.info("Adding resource files")
+    logging.info("Adding resource files")
     resources = ["css", "js", "img"]
     for resource in resources:
         (target / resource).mkdir()
@@ -157,7 +114,7 @@ def new(root: Path, directory: str) -> None:
 
     editor = os.environ.get("EDITOR")
     if not editor:
-        _logger.info("No EDITOR found, exiting")
+        logging.info("No EDITOR found, exiting")
         return
 
     call([editor, filepath])
@@ -169,17 +126,17 @@ def build(root: Path, force: bool = False, collect_replies: bool = True) -> None
     Args:
       root (str): directory where the weblog lives
     """
-    _logger.info("Building weblog")
+    logging.info("Building weblog")
 
     config = get_config(root)
-    _logger.debug(config)
+    logging.debug(config)
 
     build = root / "build"
     if not build.exists():
-        _logger.info("Creating build/ directory")
+        logging.info("Creating build/ directory")
         build.mkdir()
 
-    _logger.info("Syncing resources")
+    logging.info("Syncing resources")
     resources = ["css", "js", "img"]
     for resource in resources:
         resource_directory = root / "templates" / config["theme"] / resource
@@ -187,7 +144,7 @@ def build(root: Path, force: bool = False, collect_replies: bool = True) -> None
         if resource_directory.exists() and not target.exists():
             target.symlink_to(resource_directory, target_is_directory=True)
 
-    _logger.info("Processing posts")
+    logging.info("Processing posts")
     post_assistants = get_assistants(root, config, Scope.POST)
     for post in get_posts(root):
         if collect_replies:
@@ -207,13 +164,13 @@ def build(root: Path, force: bool = False, collect_replies: bool = True) -> None
         if post_directory.exists() and not target.exists():
             target.symlink_to(post_directory, target_is_directory=True)
 
-    _logger.info("Creating index")
+    logging.info("Creating index")
     create_index(root)
 
-    _logger.info("Creating category pages")
+    logging.info("Creating category pages")
     create_categories(root)
 
-    _logger.info("Creating Atom feed")
+    logging.info("Creating Atom feed")
     create_feed(root)
 
 
@@ -223,17 +180,17 @@ def preview(root: Path, port: int = 8000) -> None:
     Args:
       root (str): directory where the weblog lives
     """
-    _logger.info("Previewing weblog")
+    logging.info("Previewing weblog")
 
     build = root / "build"
     os.chdir(build)
 
     with socketserver.TCPServer(("", port), SimpleHTTPRequestHandler) as httpd:
-        _logger.info(f"Running HTTP server on port {port}")
+        logging.info(f"Running HTTP server on port {port}")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
-            _logger.info("Exiting")
+            logging.info("Exiting")
             httpd.shutdown()
 
 
@@ -243,10 +200,10 @@ def publish(root: Path, force: bool = False) -> None:
     Args:
       root (str): directory where the weblog lives
     """
-    _logger.info("Publishing weblog")
+    logging.info("Publishing weblog")
 
     config = get_config(root)
-    _logger.debug(config)
+    logging.debug(config)
 
     for publisher in get_publishers(config):
         publisher.publish(root, force)

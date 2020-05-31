@@ -1,3 +1,6 @@
+import logging
+import re
+import sys
 from pathlib import Path
 from typing import Any
 from typing import Dict
@@ -9,9 +12,6 @@ from nefelibata import config_filename
 
 def get_config(root: Path) -> Dict[str, Any]:
     """Return the configuration file for a weblog.
-
-    Args:
-      root (str): directory where the weblog lives
     """
     with open(root / config_filename) as fp:
         config: Dict[str, Any] = yaml.full_load(fp)
@@ -23,3 +23,42 @@ def get_config(root: Path) -> Dict[str, Any]:
         ).get_image()
 
     return config
+
+
+def setup_logging(loglevel: str) -> None:
+    """Setup basic logging
+    """
+    level = getattr(logging, loglevel.upper(), None)
+    if not isinstance(level, int):
+        raise ValueError("Invalid log level: %s" % loglevel)
+
+    logformat = "[%(asctime)s] %(levelname)s: %(name)s: %(message)s"
+    logging.basicConfig(
+        level=level,
+        stream=sys.stdout,
+        format=logformat,
+        datefmt="%Y-%m-%d %H:%M:%S",
+        force=True,
+    )
+
+
+def find_directory(cwd: Path) -> Path:
+    """Find root of blog, starting from `cwd`.
+
+    The function will traverse up trying to find a configuration file.
+    """
+    while not (cwd / config_filename).exists():
+        if cwd == cwd.parent:
+            raise SystemExit("No configuration found!")
+        cwd = cwd.parent
+
+    return cwd
+
+
+def sanitize(directory: str) -> str:
+    """Sanitize a post title into a directory name.
+    """
+    directory = directory.lower().replace(" ", "_")
+    directory = re.sub(r"[^\w]", "", directory)
+
+    return directory

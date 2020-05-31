@@ -13,8 +13,6 @@ from nefelibata.post import get_posts
 from nefelibata.post import hash_n
 from nefelibata.utils import get_config
 
-_logger = logging.getLogger("nefelibata")
-
 
 def create_index(root: Path) -> None:
     """Generate index and archives.
