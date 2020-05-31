@@ -151,6 +151,7 @@ def build(root: Path, force: bool = False, collect_replies: bool = True) -> None
             for announcer in get_announcers(post, config):
                 announcer.update_replies()
 
+        # TODO use post_builders here
         if force or not post.up_to_date:
             post.create()
 
@@ -165,11 +166,11 @@ def build(root: Path, force: bool = False, collect_replies: bool = True) -> None
             target.symlink_to(post_directory, target_is_directory=True)
 
     # TODO use entry points; dont pass root
-    IndexBuilder(root, config).process_site(root)
-    CategoriesBuilder(root, config).process_site(root)
-    FeedBuilder(root, config).process_site(root)
+    IndexBuilder(root, config).process_site()
+    CategoriesBuilder(root, config).process_site()
+    FeedBuilder(root, config).process_site()
 
-    # TODO call assistants after
+    # TODO call site_assistants after
 
 
 def preview(root: Path, port: int = 8000) -> None:

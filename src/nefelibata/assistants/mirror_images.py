@@ -22,9 +22,13 @@ class MirrorImagesAssistant(Assistant):
     scopes = [Scope.POST, Scope.SITE]
 
     def process_post(self, post: Post) -> None:
-        self.process_site(post.file_path.with_suffix(".html"))
+        self._process_file(post.file_path.with_suffix(".html"))
 
-    def process_site(self, file_path: Path) -> None:
+    def process_site(self) -> None:
+        for path in (self.root / "build").glob("*.html"):
+            self._process_file(path)
+
+    def _process_file(self, file_path: Path) -> None:
         mirror = file_path.parent / "img"
         if not mirror.exists():
             mirror.mkdir()
@@ -32,12 +36,6 @@ class MirrorImagesAssistant(Assistant):
         with open(file_path) as fp:
             html = fp.read()
 
-        html = self._process_html(html, mirror)
-
-        with open(file_path, "w") as fp:
-            fp.write(html)
-
-    def _process_html(self, html: str, mirror: Path) -> str:
         soup = BeautifulSoup(html, "html.parser")
         for el in soup.find_all("img", src=re.compile("http")):
             url = el.attrs["src"]
@@ -56,4 +54,5 @@ class MirrorImagesAssistant(Assistant):
 
             el.attrs["src"] = "img/%s" % local.name
 
-        return str(soup)
+        with open(file_path, "w") as fp:
+            fp.write(html)
