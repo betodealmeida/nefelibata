@@ -112,7 +112,6 @@ class Post:
             path.relative_to(post_directory)
             for path in (post_directory / "css").glob("**/*.css")
         ]
-        print(stylesheets)
         scripts = sorted(
             [
                 path.relative_to(post_directory)

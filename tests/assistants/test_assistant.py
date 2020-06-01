@@ -57,7 +57,7 @@ def test_wrong_scope(mock_post):
     root = Path("/path/to/blog")
     post_assistant = make_dummy_assistant([Scope.POST])(root, config)
     with pytest.raises(Exception) as excinfo:
-        post_assistant.process_site(Path("/path/to/blog"))
+        post_assistant.process_site()
 
     assert str(excinfo.value) == 'Scope "site" not supported by SomeAssistant'
 

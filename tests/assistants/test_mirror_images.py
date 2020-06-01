@@ -100,7 +100,6 @@ def test_mirror_images_directory_exists(mock_post, mocker, requests_mock, fs):
     with open(post.file_path.with_suffix(".html")) as fp:
         contents = fp.read()
 
-    print(repr(contents))
     assert (
         contents
         == """

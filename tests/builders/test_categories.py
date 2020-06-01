@@ -1,8 +1,8 @@
 from datetime import datetime
 from datetime import timezone
-from unittest.mock import MagicMock
 from pathlib import Path
 from typing import List
+from unittest.mock import MagicMock
 
 import dateutil.parser
 import pytest
@@ -32,7 +32,7 @@ class MockPost:
 
         mock_file_path = MagicMock()
         mock_file_path.stat.return_value.st_mtime = dateutil.parser.parse(
-            date
+            date,
         ).timestamp()
         self.file_path = mock_file_path
 
@@ -100,14 +100,14 @@ def test_process_site(mocker, fs):
         builder.process_site()
 
     assert datetime.fromtimestamp((root / "build/a.html").stat().st_mtime).astimezone(
-        timezone.utc
+        timezone.utc,
     ) == datetime(2020, 1, 6, 0, 0, tzinfo=timezone.utc)
     assert datetime.fromtimestamp((root / "build/b.html").stat().st_mtime).astimezone(
-        timezone.utc
+        timezone.utc,
     ) == datetime(2020, 1, 6, 0, 0, tzinfo=timezone.utc)
     assert datetime.fromtimestamp((root / "build/c.html").stat().st_mtime).astimezone(
-        timezone.utc
+        timezone.utc,
     ) == datetime(2020, 1, 4, 0, 0, tzinfo=timezone.utc)
     assert datetime.fromtimestamp((root / "build/d.html").stat().st_mtime).astimezone(
-        timezone.utc
+        timezone.utc,
     ) == datetime(2020, 1, 6, 0, 0, tzinfo=timezone.utc)

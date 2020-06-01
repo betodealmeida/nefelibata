@@ -60,7 +60,6 @@ def test_playlist(mock_post, mocker, fs):
     with open(post.file_path.parent / "index.pls") as fp:
         contents = fp.read()
 
-    print(contents)
     assert (
         contents
         == """

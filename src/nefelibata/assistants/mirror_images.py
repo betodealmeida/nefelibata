@@ -49,10 +49,11 @@ class MirrorImagesAssistant(Assistant):
             # download and store locally
             if not local.exists():
                 r = requests.get(url)
-                with open(local, "wb") as fp:
-                    fp.write(r.content)
+                with open(local, "w") as fp:
+                    fp.write(r.content.decode("utf-8"))
 
             el.attrs["src"] = "img/%s" % local.name
+        html = str(soup)
 
         with open(file_path, "w") as fp:
             fp.write(html)

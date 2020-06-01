@@ -16,13 +16,11 @@ class WarnExternalResourcesAssistant(Assistant):
     scopes = [Scope.POST, Scope.SITE]
 
     def process_post(self, post: Post) -> None:
-        self.process_site(post.file_path.with_suffix(".html"))
+        self._process_file(post.file_path.with_suffix(".html"))
 
-    def process_site(self, file_path: Path) -> None:
-        with open(file_path) as fp:
-            html = fp.read()
-
-        self._process_html(html, file_path)
+    def process_site(self) -> None:
+        for path in (self.root / "build").glob("*.html"):
+            self._process_file(path)
 
     def _safe(self, resource: str):
         # any URL that starts with the blog URL is safe
@@ -38,7 +36,10 @@ class WarnExternalResourcesAssistant(Assistant):
 
         return False
 
-    def _process_html(self, html: str, file_path: Path) -> None:
+    def _process_file(self, file_path: Path) -> None:
+        with open(file_path) as fp:
+            html = fp.read()
+
         tag_attributes = [
             ("img", "src"),
             ("link", "href"),
@@ -51,7 +52,6 @@ class WarnExternalResourcesAssistant(Assistant):
                 if not resource:
                     continue
                 if "://" in resource and not self._safe(resource):
-                    print(f"External resource found: {resource}")
                     _logger.warning(f"External resource found: {resource}")
                 if resource.endswith(".css"):
                     self._check_css(resource, file_path)
@@ -80,7 +80,6 @@ class WarnExternalResourcesAssistant(Assistant):
                     and "://" in token.value
                     and not self._safe(token.value)
                 ):
-                    print(f"External resource found in {css_path}: {token.value}")
                     _logger.warning(
                         f"External resource found in {css_path}: {token.value}",
                     )

@@ -80,9 +80,6 @@ body {
 
     post.create()
 
-    with open(post.file_path.with_suffix(".html")) as fp:
-        print(fp.read())
-
     config = {
         "url": "https://example.com/",
         "webmention": {"endpoint": "https://example.com/webmention"},

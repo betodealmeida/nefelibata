@@ -138,7 +138,6 @@ class S3Publisher(Publisher):
         if mimetype:
             extra_args["ContentType"] = mimetype
         try:
-            print(str(path), self.bucket, key, extra_args)
             client.upload_file(str(path), self.bucket, key, ExtraArgs=extra_args)
         except ClientError as e:
             _logger.error(e)

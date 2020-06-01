@@ -21,6 +21,7 @@
 - [x] check external resources as assistant
 - [x] check CSS for external resources
 - [ ] builders
+- [ ] do not pass root/config when initializing Post
 - [ ] rename feed to Atom
 - [ ] unit test coverage
 - [ ] logger names
