@@ -26,8 +26,8 @@
 - [ ] rename feed to Atom
 - [ ] logger names
 - [ ] use track number to sort playlist
-- [ ] Soundcloud announcer
 - [ ] Neocities publisher
+- [ ] Medium collect
 - [ ] https://indiewebify.me/
 - [ ] Chrome performance
 - [ ] documentation
@@ -36,4 +36,5 @@
 - [ ] new release
 - [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
+- [ ] Soundcloud announcer
 - [ ] Instagram announcer

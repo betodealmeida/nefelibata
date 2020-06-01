@@ -25,198 +25,25 @@ Options:
   --loglevel=LEVEL  Level for logging. [default: INFO]
 
 Released under the MIT license.
-(c) 2013-2019 Beto Dealmeida <roberto@dealmeida.net>
+(c) 2013-2020 Beto Dealmeida <roberto@dealmeida.net>
 
 """
-import logging
 import os
-import re
-import shutil
-import socketserver
-import sys
-from http.server import SimpleHTTPRequestHandler
 from pathlib import Path
-from subprocess import call
 
 from docopt import docopt
 from nefelibata import __version__
-from nefelibata import config_filename
-from nefelibata import new_post
-from nefelibata.announcers import get_announcers
-from nefelibata.assistants import get_assistants
-from nefelibata.builders import Scope
-from nefelibata.builders.categories import CategoriesBuilder
-from nefelibata.builders.feed import FeedBuilder
-from nefelibata.builders.index import IndexBuilder
-from nefelibata.post import get_posts
-from nefelibata.post import Post
-from nefelibata.publishers import get_publishers
+from nefelibata.cli import build
+from nefelibata.cli import init
+from nefelibata.cli import new
+from nefelibata.cli import preview
+from nefelibata.cli import publish
 from nefelibata.utils import find_directory
-from nefelibata.utils import get_config
-from nefelibata.utils import sanitize
 from nefelibata.utils import setup_logging
-from pkg_resources import resource_filename
-from pkg_resources import resource_listdir
 
 __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
-
-
-def init(root: Path) -> None:
-    """Create initial structure for weblog.
-
-    Args:
-      root (str): directory where the weblog should be initialized
-    """
-    resources = resource_listdir("nefelibata", "skeleton")
-
-    for resource in resources:
-        origin = Path(
-            resource_filename("nefelibata", os.path.join("skeleton", resource)),
-        )
-        target = root / resource
-        # good guy Greg does not overwrite existing files
-        if target.exists():
-            raise IOError("File already exists!")
-        if origin.is_dir():
-            shutil.copytree(origin, target)
-        else:
-            shutil.copy(origin, target)
-
-    logging.info("Weblog created!")
-
-
-def new(root: Path, directory: str) -> None:
-    """Create a new post and open editor.
-
-    Args:
-      root (str): directory where the weblog lives
-      directory (str): name of directory for the post
-    """
-    logging.info("Creating new directory")
-    title = directory
-    directory = sanitize(directory)
-    target = root / "posts" / directory
-    if target.exists():
-        raise IOError("Directory already exists!")
-    target.mkdir()
-    os.chdir(target)
-
-    logging.info("Adding resource files")
-    resources = ["css", "js", "img"]
-    for resource in resources:
-        (target / resource).mkdir()
-
-    filepath = target / "index.mkd"
-    with open(filepath, "w") as fp:
-        fp.write(new_post.format(title=title))
-
-    editor = os.environ.get("EDITOR")
-    if not editor:
-        logging.info("No EDITOR found, exiting")
-        return
-
-    call([editor, filepath])
-
-
-def build(root: Path, force: bool = False, collect_replies: bool = True) -> None:
-    """Build weblog from Markdown posts and social media interactions.
-
-    Args:
-      root (str): directory where the weblog lives
-    """
-    logging.info("Building weblog")
-
-    config = get_config(root)
-    logging.debug(config)
-
-    build = root / "build"
-    if not build.exists():
-        logging.info("Creating build/ directory")
-        build.mkdir()
-
-    logging.info("Syncing resources")
-    resources = ["css", "js", "img"]
-    for resource in resources:
-        resource_directory = root / "templates" / config["theme"] / resource
-        target = build / resource
-        if resource_directory.exists() and not target.exists():
-            target.symlink_to(resource_directory, target_is_directory=True)
-
-    logging.info("Processing posts")
-    post_assistants = get_assistants(root, config, Scope.POST)
-    for post in get_posts(root):
-        if collect_replies:
-            for announcer in get_announcers(post, config):
-                announcer.update_replies()
-
-        # TODO use post_builders here
-        if force or not post.up_to_date:
-            # post.create()
-
-            for assistant in post_assistants:
-                assistant.process_post(post)
-
-        # symlink build -> posts
-        post_directory = post.file_path.parent
-        relative_directory = post_directory.relative_to(root / "posts")
-        target = root / "build" / relative_directory
-        if post_directory.exists() and not target.exists():
-            target.symlink_to(post_directory, target_is_directory=True)
-
-    # TODO use entry points; dont pass root
-    IndexBuilder(root, config).process_site()
-    CategoriesBuilder(root, config).process_site()
-    FeedBuilder(root, config).process_site()
-
-    # TODO call site_assistants after
-
-
-def preview(root: Path, port: int = 8000) -> None:
-    """Run a local HTTP server.
-
-    Args:
-      root (str): directory where the weblog lives
-    """
-    logging.info("Previewing weblog")
-
-    build = root / "build"
-    os.chdir(build)
-
-    with socketserver.TCPServer(("", port), SimpleHTTPRequestHandler) as httpd:
-        logging.info(f"Running HTTP server on port {port}")
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            logging.info("Exiting")
-            httpd.shutdown()
-
-
-def publish(root: Path, force: bool = False) -> None:
-    """Publish weblog.
-
-    Args:
-      root (str): directory where the weblog lives
-    """
-    logging.info("Publishing weblog")
-
-    config = get_config(root)
-    logging.debug(config)
-
-    for publisher in get_publishers(config):
-        publisher.publish(root, force)
-
-    # announce posts
-    for post in get_posts(root):
-        # freeze currently configured announcers, so that if a new announcer is
-        # added in the future old posts are not announced
-        if "announce-on" not in post.parsed:
-            post.parsed["announce-on"] = ", ".join(config["announce-on"])
-            post.save()
-
-        for announcer in get_announcers(post, config):
-            announcer.update_links()
 
 
 def main() -> None:
@@ -235,15 +62,15 @@ def main() -> None:
         root = Path(arguments["DIRECTORY"])
 
     if arguments["init"]:
-        init(root)
+        init.run(root)
     elif arguments["new"]:
-        new(root, arguments["POST"])
+        new.run(root, arguments["POST"])
     elif arguments["build"]:
-        build(root, arguments["--force"], not arguments["--no-collect"])
+        build.run(root, arguments["--force"], not arguments["--no-collect"])
     elif arguments["preview"]:
-        preview(root, int(arguments["-p"]))
+        preview.run(root, int(arguments["-p"]))
     elif arguments["publish"]:
-        publish(root, arguments["--force"])
+        publish.run(root, arguments["--force"])
 
 
 if __name__ == "__main__":
