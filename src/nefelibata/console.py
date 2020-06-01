@@ -20,7 +20,7 @@ Options:
   -h --help         Show this screen.
   --version         Show version.
   -p PORT           Port to run the web server for preview. [default: 8000]
-  -f --force        Force rebuild of HTML.
+  -f --force        Force build/publishing of up-to-date resources.
   --no-collect      Do not collect replies when building.
   --loglevel=LEVEL  Level for logging. [default: INFO]
 
