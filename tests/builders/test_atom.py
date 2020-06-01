@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from nefelibata.builders.feed import FeedBuilder
+from nefelibata.builders.atom import AtomBuilder
 from nefelibata.post import Post
 
 __author__ = "Beto Dealmeida"
@@ -42,9 +42,9 @@ def test_process_site(mocker, fs):
         MockPost("two", "2020-01-02"),
         MockPost("three", "2020-01-03"),
     ]
-    mocker.patch("nefelibata.builders.feed.get_posts", return_value=posts)
+    mocker.patch("nefelibata.builders.atom.get_posts", return_value=posts)
 
-    builder = FeedBuilder(root, config)
+    builder = AtomBuilder(root, config)
     builder.process_site()
 
     assert (root / "build/atom.xml").exists()

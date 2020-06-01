@@ -5,8 +5,8 @@ from pathlib import Path
 from nefelibata.announcers import get_announcers
 from nefelibata.assistants import get_assistants
 from nefelibata.builders import Scope
+from nefelibata.builders.atom import AtomBuilder
 from nefelibata.builders.categories import CategoriesBuilder
-from nefelibata.builders.feed import FeedBuilder
 from nefelibata.builders.index import IndexBuilder
 from nefelibata.post import get_posts
 from nefelibata.utils import get_config
@@ -61,6 +61,6 @@ def run(root: Path, force: bool = False, collect_replies: bool = True) -> None:
     # TODO use entry points; dont pass root
     IndexBuilder(root, config).process_site()
     CategoriesBuilder(root, config).process_site()
-    FeedBuilder(root, config).process_site()
+    AtomBuilder(root, config).process_site()
 
     # TODO call site_assistants after

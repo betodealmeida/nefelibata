@@ -10,7 +10,7 @@ from nefelibata.post import get_posts
 _logger = logging.getLogger("nefelibata")
 
 
-class FeedBuilder(Builder):
+class AtomBuilder(Builder):
 
     scopes = [Scope.SITE]
 
