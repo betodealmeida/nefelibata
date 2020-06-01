@@ -153,7 +153,7 @@ def build(root: Path, force: bool = False, collect_replies: bool = True) -> None
 
         # TODO use post_builders here
         if force or not post.up_to_date:
-            post.create()
+            # post.create()
 
             for assistant in post_assistants:
                 assistant.process_post(post)

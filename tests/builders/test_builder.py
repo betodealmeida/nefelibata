@@ -72,7 +72,7 @@ def test_wrong_scope(mock_post):
         """,
         )
 
-    site_builder = make_dummy_builder([Scope.SITE])(post.root, config)
+    site_builder = make_dummy_builder([Scope.SITE])(root, config)
     with pytest.raises(Exception) as excinfo:
         site_builder.process_post(post)
 

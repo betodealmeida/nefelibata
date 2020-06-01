@@ -20,10 +20,10 @@
 - [x] move mirror images to assistant
 - [x] check external resources as assistant
 - [x] check CSS for external resources
-- [ ] builders
-- [ ] do not pass root/config when initializing Post
-- [ ] rename feed to Atom
+- [x] builders
+- [x] do not pass root/config when initializing Post
 - [ ] unit test coverage
+- [ ] rename feed to Atom
 - [ ] logger names
 - [ ] use track number to sort playlist
 - [ ] Soundcloud announcer

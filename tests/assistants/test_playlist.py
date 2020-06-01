@@ -1,9 +1,14 @@
+from pathlib import Path
+
 from freezegun import freeze_time
 from nefelibata.assistants.playlist import PlaylistAssistant
 
 __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
+
+
+config = {"url": "https://example.com/"}
 
 
 class AttrDict(dict):
@@ -13,6 +18,8 @@ class AttrDict(dict):
 
 
 def test_playlist(mock_post, mocker, fs):
+    root = Path("/path/to/blog")
+
     with freeze_time("2020-01-01T00:00:00Z"):
         post = mock_post(
             """
@@ -24,8 +31,7 @@ def test_playlist(mock_post, mocker, fs):
         """,
         )
 
-    config = {"url": "https://example.com/"}
-    assistant = PlaylistAssistant(post.root, config)
+    assistant = PlaylistAssistant(root, config)
 
     # create 2 empty "MP3" files
     fs.create_file(post.file_path.parent / "demo1.mp3")
@@ -80,6 +86,8 @@ Length2=45
 
 
 def test_playlist_no_files(mock_post, mocker, fs):
+    root = Path("/path/to/blog")
+
     with freeze_time("2020-01-01T00:00:00Z"):
         post = mock_post(
             """
@@ -91,9 +99,7 @@ def test_playlist_no_files(mock_post, mocker, fs):
         """,
         )
 
-    config = {"url": "https://example.com/"}
-    assistant = PlaylistAssistant(post.root, config)
-
+    assistant = PlaylistAssistant(root, config)
     assistant.process_post(post)
 
     assert not (post.file_path.parent / "index.pls").exists()

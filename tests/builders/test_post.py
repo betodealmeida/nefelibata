@@ -1,6 +1,8 @@
 from datetime import datetime
 from datetime import timezone
 from pathlib import Path
+from typing import Any
+from typing import Dict
 
 import pytest
 from freezegun import freeze_time
@@ -25,8 +27,16 @@ keywords: foo, bar
 Hello!
 """.strip()
 
+config: Dict[str, Any] = {
+    "url": "https://example.com/",
+    "theme": "test-theme",
+    "webmention": {"endpoint": "https://webmention.io/example.com/webmention"},
+}
+
 
 def test_process_post(mock_post, fs):
+    root = Path("/path/to/blog")
+
     with freeze_time("2020-01-01T00:00:00Z"):
         post = mock_post(
             """
@@ -43,7 +53,7 @@ def test_process_post(mock_post, fs):
     with open(post.file_path.parent / "test.json", "w") as fp:
         fp.write("{}")
 
-    builder = PostBuilder(post.root, post.config)
+    builder = PostBuilder(root, config)
     builder.process_post(post)
 
     assert (post.file_path.with_suffix(".html")).exists()

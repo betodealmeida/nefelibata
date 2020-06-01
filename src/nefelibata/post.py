@@ -1,5 +1,3 @@
-import hashlib
-import json
 import logging
 import time
 from datetime import datetime
@@ -11,25 +9,16 @@ from typing import Any
 from typing import cast
 from typing import Dict
 from typing import List
-from typing import Union
 
-import dateutil.parser
 import markdown
 from bs4 import BeautifulSoup
-from dateutil.parser._parser import ParserError
-from jinja2 import Environment
-from jinja2 import FileSystemLoader
-from nefelibata import __version__
-from nefelibata.utils import get_config
 
 _logger = logging.getLogger("nefelibata")
 
 
 class Post:
-    def __init__(self, file_path: Path, root: Path, config: Dict[str, Any]):
+    def __init__(self, file_path: Path):
         self.file_path = file_path
-        self.root = root
-        self.config = config
 
         with open(file_path) as fp:
             self.parsed = Parser().parse(fp)
@@ -68,7 +57,10 @@ class Post:
 
     @property
     def url(self) -> str:
-        return str(self.file_path.relative_to(self.root / "posts").with_suffix(".html"))
+        post_directory = self.file_path.parent
+        return str(
+            self.file_path.relative_to(post_directory.parent).with_suffix(".html"),
+        )
 
     @property
     def up_to_date(self) -> bool:
@@ -104,80 +96,8 @@ class Post:
         with open(self.file_path, "w") as fp:
             fp.write(str(self.parsed))
 
-    def render(self) -> str:
-        """Render post from Markdown to HTML.
-        """
-        post_directory = self.file_path.parent
-        stylesheets = [
-            path.relative_to(post_directory)
-            for path in (post_directory / "css").glob("**/*.css")
-        ]
-        scripts = sorted(
-            [
-                path.relative_to(post_directory)
-                for path in (post_directory / "js").glob("**/*.js")
-            ],
-        )
-        json_ = {}
-        for path in post_directory.glob("**/*.json"):
-            with open(path) as fp:
-                json_[path.stem] = json.load(fp)
-
-        env = Environment(
-            loader=FileSystemLoader(
-                str(self.root / "templates" / self.config["theme"]),
-            ),
-        )
-        env.filters["formatdate"] = jinja2_formatdate
-        template = env.get_template("post.html")
-        return template.render(
-            __version__=__version__,
-            config=self.config,
-            post=self,
-            scripts=scripts,
-            stylesheets=stylesheets,
-            json=json_,
-            breadcrumbs=[("Home", "/index.html"), (self.title, None)],
-            hash_n=hash_n,
-        )
-
-    def create(self) -> None:
-        """Save file to disk.
-        """
-        html = self.render()
-
-        filename = self.file_path.with_suffix(".html")
-        with open(filename, "w") as fp:
-            fp.write(html)
-
-
-def jinja2_formatdate(obj: Union[str, int, float, datetime], fmt: str) -> str:
-    """Jinja filter for formatting dates."""
-    if isinstance(obj, str):
-        try:
-            obj = dateutil.parser.parse(obj)
-        except ParserError:
-            return "Unknown timestamp"
-    elif isinstance(obj, (int, float)):
-        obj = datetime.fromtimestamp(obj)
-    return obj.strftime(fmt)
-
-
-def hash_n(text: bytes, numbers: int = 10) -> int:
-    """Hash a string into a number between 0 and `numbers-1`.
-
-    Args:
-      text (str): a string to be hashed
-      numbers (int): hash string to a number between 0 and `numbers-1`
-    """
-    return int(hashlib.md5(text).hexdigest(), 16) % numbers
-
 
 def get_posts(root: Path) -> List[Post]:
     """Return list of posts for a given root directory.
-
-    Args:
-      root (str): directory where the weblog lives
     """
-    config = get_config(root)
-    return [Post(source, root, config) for source in (root / "posts").glob("**/*.mkd")]
+    return [Post(source) for source in (root / "posts").glob("**/*.mkd")]

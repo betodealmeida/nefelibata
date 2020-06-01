@@ -1,14 +1,27 @@
+from pathlib import Path
+from typing import Any
+from typing import Dict
 from unittest import mock
 
 from freezegun import freeze_time
 from nefelibata.assistants.warn_external_resources import WarnExternalResourcesAssistant
+from nefelibata.builders.post import PostBuilder
 
 __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
 
 
+config: Dict[str, Any] = {
+    "url": "https://example.com/",
+    "theme": "test-theme",
+    "webmention": {"endpoint": "https://webmention.io/example.com/webmention"},
+}
+
+
 def test_warn_external_resources(mock_post):
+    root = Path("/path/to/blog")
+
     with freeze_time("2020-01-01T00:00:00Z"):
         post = mock_post(
             """
@@ -29,13 +42,9 @@ def test_warn_external_resources(mock_post):
         This is an image tag without a source: <img />
         """,
         )
-    post.create()
+    PostBuilder(root, config).process_post(post)
 
-    config = {
-        "url": "https://example.com/",
-        "webmention": {"endpoint": "https://webmention.io/example.com/webmention"},
-    }
-    assistant = WarnExternalResourcesAssistant(post.root, config)
+    assistant = WarnExternalResourcesAssistant(root, config)
 
     with mock.patch(
         "nefelibata.assistants.warn_external_resources._logger",
@@ -55,6 +64,8 @@ def test_warn_external_resources(mock_post):
 
 
 def test_warn_external_resources_css(mock_post, fs):
+    root = Path("/path/to/blog")
+
     with freeze_time("2020-01-01T00:00:00Z"):
         post = mock_post(
             """
@@ -78,13 +89,9 @@ body {
         """,
         )
 
-    post.create()
+    PostBuilder(root, config).process_post(post)
 
-    config = {
-        "url": "https://example.com/",
-        "webmention": {"endpoint": "https://example.com/webmention"},
-    }
-    assistant = WarnExternalResourcesAssistant(post.root, config)
+    assistant = WarnExternalResourcesAssistant(root, config)
 
     with mock.patch(
         "nefelibata.assistants.warn_external_resources._logger",
@@ -93,4 +100,25 @@ body {
 
     mock_logger.warning.assert_called_with(
         "External resource found in /path/to/blog/posts/first/css/test.css: https://external.example.com/icon48.png",
+    )
+
+
+def test_process_site(mock_post, mocker, requests_mock, fs):
+    root = Path("/path/to/blog")
+
+    fs.create_dir(root / "build")
+    with open(root / "build/about.html", "w") as fp:
+        fp.write(
+            '<img src="https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png" />',
+        )
+
+    assistant = WarnExternalResourcesAssistant(root, config)
+
+    with mock.patch(
+        "nefelibata.assistants.warn_external_resources._logger",
+    ) as mock_logger:
+        assistant.process_site()
+
+    mock_logger.warning.assert_called_with(
+        "External resource found: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png",
     )

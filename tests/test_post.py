@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from datetime import timezone
+from pathlib import Path
 
 import pytest
 from dateutil.parser._parser import ParserError
 from freezegun import freeze_time
+from nefelibata.post import get_posts
 from nefelibata.post import Post
 
 __author__ = "Beto Dealmeida"
@@ -157,3 +159,18 @@ def test_post_subject_from_filename(mock_post):
         )
 
     assert post.title == "first"
+
+
+def test_get_posts(fs):
+    root = Path("/path/to/blog")
+    fs.create_dir(root / "/posts")
+    fs.create_dir(root / "posts/one")
+    fs.create_dir(root / "posts/two")
+
+    fs.create_file(root / "posts/one/index.mkd")
+    fs.create_file(root / "posts/two/index.mkd")
+
+    posts = get_posts(root)
+    assert len(posts) == 2
+    assert posts[0].file_path == Path(root / "posts/one/index.mkd")
+    assert posts[1].file_path == Path(root / "posts/two/index.mkd")

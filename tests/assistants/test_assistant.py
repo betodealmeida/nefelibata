@@ -31,6 +31,7 @@ class TestEntryPoint:
 
 
 def test_get_assistants(mocker):
+    root = Path("/path/to/blog")
     entry_points = [
         TestEntryPoint("test1", make_dummy_assistant(Scope.POST)),
         TestEntryPoint("test2", make_dummy_assistant(Scope.SITE)),
@@ -45,16 +46,15 @@ def test_get_assistants(mocker):
         "test2": {},
     }
 
-    root = Path("/path/to/blog")
     assistants = get_assistants(root, config, Scope.POST)
     assert len(assistants) == 1
     assert assistants[0].scopes == [Scope.POST]
 
 
 def test_wrong_scope(mock_post):
+    root = Path("/path/to/blog")
     config = {}
 
-    root = Path("/path/to/blog")
     post_assistant = make_dummy_assistant([Scope.POST])(root, config)
     with pytest.raises(Exception) as excinfo:
         post_assistant.process_site()
@@ -72,7 +72,7 @@ def test_wrong_scope(mock_post):
         """,
         )
 
-    site_assistant = make_dummy_assistant([Scope.SITE])(post.root, config)
+    site_assistant = make_dummy_assistant([Scope.SITE])(root, config)
     with pytest.raises(Exception) as excinfo:
         site_assistant.process_post(post)
 

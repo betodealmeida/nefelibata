@@ -23,7 +23,6 @@ def mock_post(fs):
 
         root = Path("/path/to/blog")
         fs.create_dir(root)
-
         fs.create_dir(root / "templates/test-theme")
         with open(root / "templates/test-theme/post.html", "w") as fp:
             fp.write(
@@ -51,12 +50,6 @@ def mock_post(fs):
         with open(file_path, "w") as fp:
             fp.write(contents)
 
-        config: Dict[str, Any] = {
-            "url": "https://example.com/",
-            "theme": "test-theme",
-            "webmention": {"endpoint": "https://webmention.io/example.com/webmention"},
-        }
-
-        return Post(file_path, root, config)
+        return Post(file_path)
 
     yield build_post

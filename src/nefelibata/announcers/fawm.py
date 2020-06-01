@@ -51,7 +51,7 @@ def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
     post_directory = post.file_path.parent
     mp3s = list(post_directory.glob("*.mp3"))
     if len(mp3s) == 1:
-        mp3_path = mp3s[0].relative_to(post.root / "posts")
+        mp3_path = mp3s[0].relative_to(post_directory.parent)
         demo = f'{config["url"]}{mp3_path}'
     elif len(mp3s) > 1:
         _logger.error("Multiple MP3s found, aborting!")
