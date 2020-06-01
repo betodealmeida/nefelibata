@@ -118,6 +118,8 @@ class Announcer:
             replies.sort(key=operator.itemgetter("timestamp"))
             with open(storage, "w") as fp:
                 json.dump(replies, fp)
+
+            # save file so that it's marked as stale
             self.post.save()
 
     def collect(self) -> List[Response]:

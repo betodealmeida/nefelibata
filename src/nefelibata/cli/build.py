@@ -3,7 +3,10 @@ import logging
 from pathlib import Path
 
 from nefelibata.announcers import get_announcers
+from nefelibata.assistants import Assistant
 from nefelibata.assistants import get_assistants
+from nefelibata.builders import Builder
+from nefelibata.builders import get_builders
 from nefelibata.builders import Scope
 from nefelibata.builders.atom import AtomBuilder
 from nefelibata.builders.categories import CategoriesBuilder
@@ -38,16 +41,17 @@ def run(root: Path, force: bool = False, collect_replies: bool = True) -> None:
             target.symlink_to(resource_directory, target_is_directory=True)
 
     logging.info("Processing posts")
+    post_builders = get_builders(root, config, Scope.POST)
     post_assistants = get_assistants(root, config, Scope.POST)
     for post in get_posts(root):
+        # first, collect replies so we can use them when building the post
         if collect_replies:
             for announcer in get_announcers(post, config):
                 announcer.update_replies()
 
-        # TODO use post_builders here
         if force or not post.up_to_date:
-            # post.create()
-
+            for builder in post_builders:
+                builder.process_post(post)
             for assistant in post_assistants:
                 assistant.process_post(post)
 
@@ -58,9 +62,9 @@ def run(root: Path, force: bool = False, collect_replies: bool = True) -> None:
         if post_directory.exists() and not target.exists():
             target.symlink_to(post_directory, target_is_directory=True)
 
-    # TODO use entry points; dont pass root
-    IndexBuilder(root, config).process_site()
-    CategoriesBuilder(root, config).process_site()
-    AtomBuilder(root, config).process_site()
-
-    # TODO call site_assistants after
+    site_builders = get_builders(root, config, Scope.SITE)
+    site_assistants = get_assistants(root, config, Scope.SITE)
+    for builder in site_builders:
+        builder.process_site()
+    for assistant in site_assistants:
+        assistant.process_site()
