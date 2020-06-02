@@ -8,15 +8,21 @@ def hash_n(text: bytes, numbers: int = 10) -> int:
     return int(hashlib.md5(text).hexdigest(), 16) % numbers
 
 
-def random_color(text: str) -> str:
+def random_color(
+    text: str, contrast: float = 4.5, contrast_luminance: float = 1,
+) -> str:
     """Generate a random color based on the hash of the string.
-
-    The color is generated with luminance 0.18 to ensure a contrast ratio of
-    at least 4.5:1 against white text.
     """
     hue = int(hashlib.md5(text.encode("utf-8")).hexdigest(), 16) / (2 ** 128)
     saturation = 1
-    luminance = 0.18
+
+    if contrast_luminance > 0.5:
+        luminance = ((contrast_luminance + 0.05) / contrast) - 0.05
+    else:
+        luminance = (contrast_luminance + 0.05) * contrast - 0.05
+
+    if not 0 <= luminance <= 1:
+        raise Exception(f"Computed luminance outside bounds: {luminance:.2f}")
 
     rgb = hls_to_rgb(hue, luminance, saturation)
     return "#%02x%02x%02x" % tuple(int(v * 255) for v in rgb)

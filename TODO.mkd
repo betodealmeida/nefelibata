@@ -27,7 +27,7 @@
 - [x] logger names
 - [x] https://indiewebify.me/
 - [x] add footer with link to project
-- [ ] Chrome performance
+- [x] Chrome performance
 - [ ] use track number to sort playlist
 - [ ] Neocities publisher
 - [ ] Medium collect
