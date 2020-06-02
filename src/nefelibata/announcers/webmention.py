@@ -80,6 +80,7 @@ def get_response_from_child(child: Dict[str, Any]) -> Response:
 
 class WebmentionAnnouncer(Announcer):
 
+    id = "webmention"
     name = "Webmention"
     url_header = "webmention-url"
 

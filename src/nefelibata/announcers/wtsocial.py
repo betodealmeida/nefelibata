@@ -87,6 +87,7 @@ def do_login(session: requests.Session, email: str, password: str) -> str:
 
 class WTSocialAnnouncer(Announcer):
 
+    id = "wtsocial"
     name = "WT.Social"
     url_header = "wtsocial-url"
 

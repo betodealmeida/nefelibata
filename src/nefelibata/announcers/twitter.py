@@ -68,6 +68,7 @@ class TwitterAnnouncer(Announcer):
 
     """
 
+    id = "twitter"
     name = "Twitter"
     url_header = "twitter-url"
 

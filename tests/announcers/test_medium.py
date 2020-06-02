@@ -1,5 +1,6 @@
 import urllib.parse
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import MagicMock
 
 from freezegun import freeze_time
@@ -23,11 +24,12 @@ def test_announcer(mock_post, requests_mock):
         """,
         )
 
+    root = "/path/to/blog"
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = MediumAnnouncer(post, config, "token", "public")
+    announcer = MediumAnnouncer(root, config, "token", "public")
 
     requests_mock.get(
         "https://api.medium.com/v1/me", json={"data": {"id": 1}},
@@ -37,7 +39,7 @@ def test_announcer(mock_post, requests_mock):
         json={"data": {"url": "https://medium.com/@user/hello-medium"}},
     )
 
-    url = announcer.announce()
+    url = announcer.announce(post)
     assert url == "https://medium.com/@user/hello-medium"
     assert urllib.parse.parse_qs(mock_post.last_request.text) == {
         "canonicalUrl": ["https://blog.example.com/first/index.html"],
@@ -49,5 +51,5 @@ def test_announcer(mock_post, requests_mock):
     }
 
     post.parsed["medium-url"] = "https://medium.com/@user/hello-medium"
-    responses = announcer.collect()
+    responses = announcer.collect(post)
     assert responses == []

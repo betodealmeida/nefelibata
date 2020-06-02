@@ -56,6 +56,7 @@ def test_run(mocker, fs):
 
     # mock announcers
     Announcer1 = MagicMock()
+    Announcer1.match.side_effect = [True, False]  # match only post1
     Announcer2 = MagicMock()
     mocker.patch(
         "nefelibata.cli.build.get_announcers", return_value=[Announcer1, Announcer2],
@@ -73,8 +74,8 @@ def test_run(mocker, fs):
     PostSiteAssistant.process_post.assert_has_calls(
         [call(post1, False), call(post2, False)],
     )
-    Announcer1.update_replies.assert_has_calls([call(), call()])
-    Announcer2.update_replies.assert_has_calls([call(), call()])
+    Announcer1.update_replies.assert_has_calls([call(post1)])
+    Announcer2.update_replies.assert_has_calls([call(post1), call(post2)])
     SiteBuilder.process_site.assert_has_calls([call(False)])
     PostSiteBuilder.process_site.assert_has_calls([call(False)])
     SiteAssistant.process_site.assert_has_calls([call(False)])
@@ -245,8 +246,8 @@ def test_run_post_up_to_date(mocker, fs):
     PostSiteBuilder.process_post.assert_has_calls([call(post2, False)])
     PostAssistant.process_post.assert_has_calls([call(post2, False)])
     PostSiteAssistant.process_post.assert_has_calls([call(post2, False)])
-    Announcer1.update_replies.assert_has_calls([call()])
-    Announcer2.update_replies.assert_has_calls([call()])
+    Announcer1.update_replies.assert_has_calls([call(post2)])
+    Announcer2.update_replies.assert_has_calls([call(post2)])
 
 
 def test_run_skip_symlink(mocker, fs):

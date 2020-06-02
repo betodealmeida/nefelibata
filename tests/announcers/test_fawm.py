@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os.path
 import textwrap
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -346,14 +347,15 @@ def test_announcer(mock_post, mocker, requests_mock):
         """,
         )
 
+    root = "/path/to/blog"
     config = {"url": "https://blog.example.com/"}
-    announcer = FAWMAnnouncer(post, config, "username", "password")
+    announcer = FAWMAnnouncer(root, config, "username", "password")
 
     requests_mock.post(
         "https://fawm.org/songs/add",
         headers={"Location": "https://fawm.org/songs/110082/"},
     )
-    url = announcer.announce()
+    url = announcer.announce(post)
     assert url == "https://fawm.org/songs/110082/"
 
     # store URL in post
@@ -382,7 +384,7 @@ def test_announcer(mock_post, mocker, requests_mock):
         "nefelibata.announcers.fawm.get_comments_from_fawm_page",
         mock_get_comments_from_fawm_page,
     )
-    announcer.collect()
+    announcer.collect(post)
     mock_get_comments_from_fawm_page.assert_called_with(
         "https://fawm.org/songs/110082/", "username", "password",
     )

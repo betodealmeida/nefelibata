@@ -170,6 +170,7 @@ class FAWMAnnouncer(Announcer):
 
     """
 
+    id = "fawm"
     name = "FAWM"
     url_header = "fawm-url"
 

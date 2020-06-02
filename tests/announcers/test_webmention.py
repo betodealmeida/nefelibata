@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os.path
 import textwrap
+from pathlib import Path
 from unittest.mock import call
 from unittest.mock import MagicMock
 
@@ -96,18 +97,28 @@ def test_announcer(mock_post, requests_mock):
         """,
         )
 
+    root = "/path/to/blog"
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        post, config, "https://webmention.io/example.com/webmention", True,
+        root, config, "https://webmention.io/example.com/webmention", True,
     )
 
     mock_send_mention = MagicMock()
     announcer._send_mention = mock_send_mention
 
-    url = announcer.announce()
+    url = announcer.announce(post)
     assert url == "https://commentpara.de/"
     mock_send_mention.assert_has_calls(
-        [call("https://blog.example.com/"), call("https://news.indieweb.org/en")],
+        [
+            call(
+                "https://blog.example.com/first/index.html",
+                "https://blog.example.com/",
+            ),
+            call(
+                "https://blog.example.com/first/index.html",
+                "https://news.indieweb.org/en",
+            ),
+        ],
     )
 
     # store URL in post
@@ -138,7 +149,7 @@ def test_announcer(mock_post, requests_mock):
     }
     requests_mock.get("https://webmention.io/api/mentions.jf2", json=webmentions)
 
-    results = announcer.collect()
+    results = announcer.collect(post)
     assert results == [
         {
             "source": "http://tantek.com/2013/112/t2/milestone-show-indieweb-comments-h-entry-pingback",
@@ -170,17 +181,25 @@ def test_announcer_no_indienews(mock_post):
         """,
         )
 
+    root = "/path/to/blog"
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        post, config, "https://webmention.io/example.com/webmention", False,
+        root, config, "https://webmention.io/example.com/webmention", False,
     )
 
     mock_send_mention = MagicMock()
     announcer._send_mention = mock_send_mention
 
-    url = announcer.announce()
+    url = announcer.announce(post)
     assert url == "https://commentpara.de/"
-    mock_send_mention.assert_has_calls([call("https://blog.example.com/")])
+    mock_send_mention.assert_has_calls(
+        [
+            call(
+                "https://blog.example.com/first/index.html",
+                "https://blog.example.com/",
+            ),
+        ],
+    )
 
 
 def test_announcer_indienews_no_language(mock_post):
@@ -196,17 +215,25 @@ def test_announcer_indienews_no_language(mock_post):
         """,
         )
 
+    root = "/path/to/blog"
     config = {"url": "https://blog.example.com/", "language": "pt_BR"}
     announcer = WebmentionAnnouncer(
-        post, config, "https://webmention.io/example.com/webmention", True,
+        root, config, "https://webmention.io/example.com/webmention", True,
     )
 
     mock_send_mention = MagicMock()
     announcer._send_mention = mock_send_mention
 
-    url = announcer.announce()
+    url = announcer.announce(post)
     assert url == "https://commentpara.de/"
-    mock_send_mention.assert_has_calls([call("https://blog.example.com/")])
+    mock_send_mention.assert_has_calls(
+        [
+            call(
+                "https://blog.example.com/first/index.html",
+                "https://blog.example.com/",
+            ),
+        ],
+    )
 
 
 def test_announcer_send_mention(mock_post, requests_mock):
@@ -222,9 +249,10 @@ def test_announcer_send_mention(mock_post, requests_mock):
         """,
         )
 
+    root = "/path/to/blog"
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        post, config, "https://webmention.io/example.com/webmention", True,
+        root, config, "https://webmention.io/example.com/webmention", True,
     )
 
     # indienews support webmention
@@ -241,4 +269,4 @@ def test_announcer_send_mention(mock_post, requests_mock):
     requests_mock.head("https://blog.example.com/")
     requests_mock.get("https://blog.example.com/", text=html)
 
-    announcer.announce()
+    announcer.announce(post)

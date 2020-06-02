@@ -33,6 +33,7 @@ def get_response_from_toot(toot: mastodon.AttribAccessDict) -> Response:
 
 class MastodonAnnouncer(Announcer):
 
+    id = "mastodon"
     name = "Mastodon"
     url_header = "mastodon-url"
 

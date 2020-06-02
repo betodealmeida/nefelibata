@@ -30,8 +30,8 @@
 - [x] Chrome performance
 - [x] honor --force when building categories
 - [x] consolidate entry points __init__
-- [ ] center footer on mobile
-- [ ] fix contrast post subtitle (summary)
+- [x] center footer on mobile (.footer { text-align: center; })
+- [x] fix contrast post subtitle (summary)
 - [ ] Medium collect
 - [ ] use track number to sort playlist
 - [ ] Neocities publisher

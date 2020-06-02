@@ -1,5 +1,6 @@
 import copy
 import json
+from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import List
@@ -65,30 +66,31 @@ response3 = {
 
 class TestAnnouncer(Announcer):
 
+    id = "test"
     name = "Test"
     url_header = "test-url"
 
     def __init__(
         self,
-        post: Post,
+        root: Path,
         config: Dict[str, Any],
         url: Optional[str] = None,
         responses: Optional[List[Response]] = None,
     ):
-        super().__init__(post, config)
+        super().__init__(root, config)
 
         self.url = url
         self.responses = responses or []
 
-    def announce(self) -> Optional[str]:
+    def announce(self, post: Post) -> Optional[str]:
         return self.url
 
-    def collect(self) -> List[Response]:
+    def collect(self, post: Post) -> List[Response]:
         return self.responses
 
 
 def make_dummy_announcer(name):
-    return type("SomeAnnouncer", (Announcer,), {"name": name})
+    return type("SomeAnnouncer", (Announcer,), {"name": name, "id": name.lower()})
 
 
 class TestEntryPoint:
@@ -113,13 +115,14 @@ def test_update_links(mock_post):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(post, config, "https://example.com/", [])
+    announcer = TestAnnouncer(root, config, "https://example.com/", [])
 
-    announcer.update_links()
+    announcer.update_links(post)
     with open(post.file_path.parent / "links.json") as fp:
         contents = fp.read()
     links = json.loads(contents)
@@ -139,18 +142,19 @@ def test_update_links_file_exists(mock_post):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(post, config, "https://example.com/", [])
+    announcer = TestAnnouncer(root, config, "https://example.com/", [])
 
     # add some initial content to the file
     contents = json.dumps({"Foo": "https://foo.example.com/"})
     with open(post.file_path.parent / "links.json", "w") as fp:
         fp.write(contents)
 
-    announcer.update_links()
+    announcer.update_links(post)
     with open(post.file_path.parent / "links.json") as fp:
         contents = fp.read()
     links = json.loads(contents)
@@ -170,18 +174,19 @@ def test_update_links_link_exists(mock_post):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(post, config, "https://example.com/", [])
+    announcer = TestAnnouncer(root, config, "https://example.com/", [])
 
     # add some initial content to the file
     contents = json.dumps({"Test": "https://example.com/"})
     with open(post.file_path.parent / "links.json", "w") as fp:
         fp.write(contents)
 
-    announcer.update_links()
+    announcer.update_links(post)
     with open(post.file_path.parent / "links.json") as fp:
         contents = fp.read()
     links = json.loads(contents)
@@ -201,13 +206,14 @@ def test_update_links_no_link(mock_post):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(post, config, None, [])
+    announcer = TestAnnouncer(root, config, None, [])
 
-    announcer.update_links()
+    announcer.update_links(post)
     assert not (post.file_path.parent / "links.json").exists()
 
 
@@ -225,13 +231,14 @@ def test_update_replies(mock_post):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(post, config, "https://example.com/", [response1])
+    announcer = TestAnnouncer(root, config, "https://example.com/", [response1])
 
-    announcer.update_replies()
+    announcer.update_replies(post)
     with open(post.file_path.parent / "replies.json") as fp:
         contents = fp.read()
     replies = json.loads(contents)
@@ -251,13 +258,14 @@ def test_update_replies_not_announced(mock_post):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(post, config, "https://example.com/", [])
+    announcer = TestAnnouncer(root, config, "https://example.com/", [])
 
-    announcer.update_replies()
+    announcer.update_replies(post)
     assert not (post.file_path.parent / "replies.json").exists()
 
 
@@ -275,18 +283,19 @@ def test_update_replies_storage_exists(mock_post):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(post, config, "https://example.com/", [response1])
+    announcer = TestAnnouncer(root, config, "https://example.com/", [response1])
 
     # add some initial content to the file
     contents = json.dumps([response2])
     with open(post.file_path.parent / "replies.json", "w") as fp:
         fp.write(contents)
 
-    announcer.update_replies()
+    announcer.update_replies(post)
     with open(post.file_path.parent / "replies.json") as fp:
         contents = fp.read()
     replies = json.loads(contents)
@@ -308,18 +317,19 @@ def test_update_replies_no_overwrite(mock_post):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(post, config, "https://example.com/", [response1])
+    announcer = TestAnnouncer(root, config, "https://example.com/", [response1])
 
     # add some initial content to the file
     contents = json.dumps([response1])
     with open(post.file_path.parent / "replies.json", "w") as fp:
         fp.write(contents)
 
-    announcer.update_replies()
+    announcer.update_replies(post)
     with open(post.file_path.parent / "replies.json") as fp:
         contents = fp.read()
     replies = json.loads(contents)
@@ -341,11 +351,12 @@ def test_update_replies_no_name_or_image(mock_post, mocker):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(post, config, "https://example.com/", [response3.copy()])
+    announcer = TestAnnouncer(root, config, "https://example.com/", [response3.copy()])
 
     # mf2py payload
     payload = {
@@ -365,7 +376,7 @@ def test_update_replies_no_name_or_image(mock_post, mocker):
     mock_mf2py.parse.return_value = payload
     mocker.patch("nefelibata.announcers.mf2py", mock_mf2py)
 
-    announcer.update_replies()
+    announcer.update_replies(post)
     with open(post.file_path.parent / "replies.json") as fp:
         contents = fp.read()
     replies = json.loads(contents)
@@ -401,11 +412,12 @@ def test_update_replies_no_name_or_image_no_hcard(mock_post, mocker):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(post, config, "https://example.com/", [response3.copy()])
+    announcer = TestAnnouncer(root, config, "https://example.com/", [response3.copy()])
 
     # mf2py payload
     payload = {
@@ -415,7 +427,7 @@ def test_update_replies_no_name_or_image_no_hcard(mock_post, mocker):
     mock_mf2py.parse.return_value = payload
     mocker.patch("nefelibata.announcers.mf2py", mock_mf2py)
 
-    announcer.update_replies()
+    announcer.update_replies(post)
     with open(post.file_path.parent / "replies.json") as fp:
         contents = fp.read()
     replies = json.loads(contents)
@@ -436,11 +448,12 @@ def test_update_replies_no_name_or_image_no_items(mock_post, mocker):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(post, config, "https://example.com/", [response3.copy()])
+    announcer = TestAnnouncer(root, config, "https://example.com/", [response3.copy()])
 
     # mf2py payload
     payload = {
@@ -450,7 +463,7 @@ def test_update_replies_no_name_or_image_no_items(mock_post, mocker):
     mock_mf2py.parse.return_value = payload
     mocker.patch("nefelibata.announcers.mf2py", mock_mf2py)
 
-    announcer.update_replies()
+    announcer.update_replies(post)
     with open(post.file_path.parent / "replies.json") as fp:
         contents = fp.read()
     replies = json.loads(contents)
@@ -476,6 +489,7 @@ def test_get_announcers_from_header(mock_post, mocker):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
@@ -484,7 +498,9 @@ def test_get_announcers_from_header(mock_post, mocker):
         "test2": {},
     }
 
-    announcers = get_announcers(post, config)
+    announcers = [
+        announcer for announcer in get_announcers(root, config) if announcer.match(post)
+    ]
     assert len(announcers) == 1
     assert announcers[0].name == "Test1"
 
@@ -507,6 +523,7 @@ def test_get_announcers_from_config(mock_post, mocker):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
@@ -515,7 +532,9 @@ def test_get_announcers_from_config(mock_post, mocker):
         "test2": {},
     }
 
-    announcers = get_announcers(post, config)
+    announcers = [
+        announcer for announcer in get_announcers(root, config) if announcer.match(post)
+    ]
     assert len(announcers) == 1
     assert announcers[0].name == "Test2"
 
@@ -539,6 +558,7 @@ def test_get_announcers_extra(mock_post, mocker):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
@@ -547,5 +567,7 @@ def test_get_announcers_extra(mock_post, mocker):
         "test2": {},
     }
 
-    announcers = get_announcers(post, config)
+    announcers = [
+        announcer for announcer in get_announcers(root, config) if announcer.match(post)
+    ]
     assert len(announcers) == 2

@@ -17,6 +17,7 @@ _logger = logging.getLogger(__name__)
 
 class MediumAnnouncer(Announcer):
 
+    id = "medium"
     name = "Medium"
     url_header = "medium-url"
 

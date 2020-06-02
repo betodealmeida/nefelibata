@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from pathlib import Path
+
 from bs4 import BeautifulSoup
 from freezegun import freeze_time
 from nefelibata.announcers.wtsocial import WTSocialAnnouncer
@@ -22,9 +24,10 @@ def test_announcer(mock_post, requests_mock):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/"}
     announcer = WTSocialAnnouncer(
-        post, config, "https://wtsocial.io/example.com/wtsocial", True,
+        root, config, "https://wtsocial.io/example.com/wtsocial", True,
     )
 
     # login
@@ -44,7 +47,7 @@ def test_announcer(mock_post, requests_mock):
         "https://wt.social/api/new-article", json={"0": {"URI": "/post/hash"}},
     )
 
-    url = announcer.announce()
+    url = announcer.announce(post)
     assert url == "https://wt.social/post/hash"
 
     # store URL in post
@@ -71,7 +74,7 @@ def test_announcer(mock_post, requests_mock):
     profile = r'"media":{"profile":{"filepath":"https:\/\/wtsocial-uploads.s3.amazonaws.com\/uploads\/2019-11\/fileName1574188367--profile_pic.jpg"}'
     requests_mock.get("https://wt.social/u/user", text=profile)
 
-    responses = announcer.collect()
+    responses = announcer.collect(post)
     assert responses == [
         {
             "source": "WT.Social",

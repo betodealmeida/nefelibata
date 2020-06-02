@@ -44,6 +44,7 @@ def test_run(mocker, fs):
 
     # mock announcers
     Announcer1 = MagicMock()
+    Announcer1.match.side_effect = [True, False]
     Announcer2 = MagicMock()
     mocker.patch(
         "nefelibata.cli.publish.get_announcers", return_value=[Announcer1, Announcer2],
@@ -53,5 +54,5 @@ def test_run(mocker, fs):
 
     Publisher1.publish.assert_called_with(False)
     Publisher2.publish.assert_called_with(False)
-    Announcer1.update_links.assert_has_calls([call(), call()])
-    Announcer2.update_links.assert_has_calls([call(), call()])
+    Announcer1.update_links.assert_has_calls([call(post1)])
+    Announcer2.update_links.assert_has_calls([call(post1), call(post2)])

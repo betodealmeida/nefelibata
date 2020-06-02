@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import twitter
@@ -57,19 +58,20 @@ def test_announcer(mock_post, mocker):
         """,
         )
 
+    root = "/path/to/blog"
     config = {
         "url": "http://blog.example.com/",
         "language": "en",
     }
     announcer = TwitterAnnouncer(
-        post, config, "oauth_token", "oauth_secret", "consumer_key", "consumer_secret",
+        root, config, "oauth_token", "oauth_secret", "consumer_key", "consumer_secret",
     )
 
-    url = announcer.announce()
+    url = announcer.announce(post)
     assert url == "https://twitter.com/user/status/1"
 
     post.parsed["twitter-url"] = "https://twitter.example.com/user/status/1"
-    responses = announcer.collect()
+    responses = announcer.collect(post)
     assert responses == [
         {
             "source": "Twitter",
@@ -109,12 +111,13 @@ def test_collect_exception(mock_post, mocker):
 
     post.parsed["twitter-url"] = "https://twitter.example.com/user/status/1"
 
+    root = "/path/to/blog"
     config = {
         "url": "http://blog.example.com/",
         "language": "en",
     }
     announcer = TwitterAnnouncer(
-        post, config, "oauth_token", "oauth_secret", "consumer_key", "consumer_secret",
+        root, config, "oauth_token", "oauth_secret", "consumer_key", "consumer_secret",
     )
-    responses = announcer.collect()
+    responses = announcer.collect(post)
     assert responses == []

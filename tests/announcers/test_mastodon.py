@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import MagicMock
 
 from freezegun import freeze_time
@@ -49,13 +50,14 @@ def test_announcer(mock_post, mocker):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = MastodonAnnouncer(post, config, "token", "https://mastodon.example.com")
+    announcer = MastodonAnnouncer(root, config, "token", "https://mastodon.example.com")
 
-    url = announcer.announce()
+    url = announcer.announce(post)
     assert url == "https://mastodon.example.com/@user/1"
     mock_client.return_value.status_post.assert_called_with(
         status="My first Mastodon post\n\nhttps://blog.example.com/first/index.html",
@@ -65,7 +67,7 @@ def test_announcer(mock_post, mocker):
     )
 
     post.parsed["mastodon-url"] = "https://mastodon.example.com/@user/1"
-    responses = announcer.collect()
+    responses = announcer.collect(post)
     assert responses == [
         {
             "source": "Mastodon",
