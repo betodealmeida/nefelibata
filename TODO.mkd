@@ -23,16 +23,16 @@
 - [x] builders
 - [x] do not pass root/config when initializing Post
 - [x] rename feed to Atom
-- [ ] unit test coverage
+- [x] unit test coverage
 - [ ] logger names
 - [ ] Neocities publisher
 - [ ] Medium collect
 - [ ] https://indiewebify.me/
+- [ ] add footer with link to project
 - [ ] Chrome performance
 - [ ] documentation
-- [ ] requirements.txt
-- [ ] add footer with link to project
 - [ ] use track number to sort playlist
+- [ ] requirements.txt
 - [ ] new release
 - [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
