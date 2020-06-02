@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from freezegun import freeze_time
+from mutagen import id3
 from nefelibata.assistants.playlist import PlaylistAssistant
 
 __author__ = "Beto Dealmeida"
@@ -47,6 +48,7 @@ def test_playlist(mock_post, mocker, fs):
                     "TALB": "Some Album",
                     "TDRC": 2020,
                     "info": AttrDict(length=60),
+                    "TRCK": id3.TRCK(encoding=id3.Encoding.LATIN1, text=["3"]),
                 },
             ),
             AttrDict(
@@ -74,13 +76,13 @@ def test_playlist(mock_post, mocker, fs):
 NumberOfEntries=2
 Version=2
 
-File1=https://example.com/first/demo1.mp3
-Title1=Some Album (2020) - Famous Artist - Title 1
-Length1=60
+File1=https://example.com/first/demo2.mp3
+Title1=Some Album (2020) - Famous Artist - Title 2
+Length1=45
 
-File2=https://example.com/first/demo2.mp3
-Title2=Some Album (2020) - Famous Artist - Title 2
-Length2=45
+File2=https://example.com/first/demo1.mp3
+Title2=Some Album (2020) - Famous Artist - Title 1
+Length2=60
     """.strip()
     )
 

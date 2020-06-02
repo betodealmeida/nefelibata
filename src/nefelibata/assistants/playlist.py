@@ -1,3 +1,4 @@
+import operator
 import urllib.parse
 from pathlib import Path
 from typing import List
@@ -16,6 +17,7 @@ class MP3Info(TypedDict):
     album: str
     year: int
     duration: int
+    track: int
 
 
 class PlaylistAssistant(Assistant):
@@ -37,8 +39,12 @@ class PlaylistAssistant(Assistant):
                     "album": mp3.get("TALB", "Unknown album"),
                     "year": mp3.get("TDRC", "Unknown year"),
                     "duration": int(mp3.info.length),
+                    "track": int(str(mp3.get("TRCK"))) if "TRCK" in mp3 else 0,
                 },
             )
+
+        # sort by track number
+        mp3s.sort(key=operator.itemgetter("track"))
 
         if not mp3s:
             return

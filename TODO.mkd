@@ -33,7 +33,7 @@
 - [x] center footer on mobile (.footer { text-align: center; })
 - [x] fix contrast post subtitle (summary)
 - [x] Medium collect
-- [ ] use track number to sort playlist
+- [x] use track number to sort playlist
 - [ ] Neocities publisher
 - [ ] documentation
 - [ ] requirements.txt
