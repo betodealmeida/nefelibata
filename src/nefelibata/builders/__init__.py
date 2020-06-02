@@ -18,7 +18,7 @@ class Builder:
 
     scopes: List[Scope] = []
 
-    def __init__(self, root: Path, config: Dict[str, Any]):
+    def __init__(self, root: Path, config: Dict[str, Any], *args: Any, **kwargs: Any):
         self.root = root
         self.config = config
 
@@ -43,7 +43,7 @@ def get_builders(
     builders = {a.name: a.load() for a in iter_entry_points("nefelibata.builder")}
 
     return [
-        builders[name](root, config)
+        builders[name](root, config, **config.get(name, {}))
         for name in names
         if scope in builders[name].scopes or scope is None
     ]

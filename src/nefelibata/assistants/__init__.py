@@ -24,7 +24,7 @@ def get_assistants(
     assistants = {a.name: a.load() for a in iter_entry_points("nefelibata.assistant")}
 
     return [
-        assistants[name](root, config)
+        assistants[name](root, config, **config.get(name, {}))
         for name in names
         if scope in assistants[name].scopes or scope is None
     ]

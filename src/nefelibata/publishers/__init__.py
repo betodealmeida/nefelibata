@@ -23,4 +23,4 @@ def get_publishers(root: Path, config: Dict[str, Any]) -> List[Publisher]:
         names = [names]
 
     publishers = {p.name: p.load() for p in iter_entry_points("nefelibata.publisher")}
-    return [publishers[name](root, config, **config[name]) for name in names]
+    return [publishers[name](root, config, **config.get(name, {})) for name in names]

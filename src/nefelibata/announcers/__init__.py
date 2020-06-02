@@ -152,5 +152,6 @@ def get_announcers(post: Post, config: Dict[str, Any]) -> List[Announcer]:
 
     announcers = {a.name: a.load() for a in iter_entry_points("nefelibata.announcer")}
     return [
-        announcers[name](post, config, **config[name]) for name in selected_announcers
+        announcers[name](post, config, **config.get(name, {}))
+        for name in selected_announcers
     ]
