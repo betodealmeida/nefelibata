@@ -1,6 +1,7 @@
 import logging
 import urllib.parse
 from datetime import timezone
+from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import List
@@ -18,9 +19,6 @@ max_length = 280
 
 def get_response_from_mention(tweet: Dict[str, Any]) -> Response:
     """Generate a standard reply from a Tweet.
-
-    Args:
-      tweet (Dict[str, any]): The tweet response from the Twitter API
     """
     return {
         "source": "Twitter",
@@ -75,21 +73,21 @@ class TwitterAnnouncer(Announcer):
 
     def __init__(
         self,
-        post: Post,
+        root: Path,
         config: Dict[str, Any],
         consumer_key: str,
         consumer_secret: str,
         oauth_token: str,
         oauth_secret: str,
     ):
-        super().__init__(post, config)
+        super().__init__(root, config)
 
         self.oauth_token = oauth_token
         self.oauth_secret = oauth_secret
         self.consumer_key = consumer_key
         self.consumer_secret = consumer_secret
 
-    def announce(self) -> str:
+    def announce(self, post: Post) -> str:
         """Publish the summary of a post to Twitter.
         """
         _logger.info("Posting to Twitter")
@@ -102,14 +100,14 @@ class TwitterAnnouncer(Announcer):
         )
         client = twitter.Twitter(auth=auth)
 
-        post_url = urllib.parse.urljoin(self.config["url"], self.post.url)
-        status = f"{self.post.summary[: max_length - 1 - len(post_url)]} {post_url}"
+        post_url = urllib.parse.urljoin(self.config["url"], post.url)
+        status = f"{post.summary[: max_length - 1 - len(post_url)]} {post_url}"
         response = client.statuses.update(status=status)
         _logger.info("Success!")
 
         return f'https://twitter.com/{response["user"]["screen_name"]}/status/{response["id_str"]}'
 
-    def collect(self) -> List[Response]:
+    def collect(self, post: Post) -> List[Response]:
         """Collect responses to a given tweet.
 
         Amazingly there's no support in the API to fetch all replies to a given
@@ -126,7 +124,7 @@ class TwitterAnnouncer(Announcer):
         )
         client = twitter.Twitter(auth=auth)
 
-        tweet_url = self.post.parsed[self.url_header]
+        tweet_url = post.parsed[self.url_header]
         tweet_id = tweet_url.rstrip("/").rsplit("/", 1)[1]
         try:
             mentions = client.statuses.mentions_timeline(

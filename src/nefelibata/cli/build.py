@@ -45,11 +45,13 @@ def run(root: Path, force: bool = False, collect_replies: bool = True) -> None:
     _logger.info("Processing posts")
     post_builders = get_builders(root, config, Scope.POST)
     post_assistants = get_assistants(root, config, Scope.POST)
+    announcers = get_announcers(root, config)
     for post in get_posts(root):
         # first, collect replies so we can use them when building the post
         if collect_replies:
-            for announcer in get_announcers(post, config):
-                announcer.update_replies()
+            for announcer in announcers:
+                if announcer.match(post):
+                    announcer.update_replies(post)
 
         for builder in post_builders:
             builder.process_post(post, force)

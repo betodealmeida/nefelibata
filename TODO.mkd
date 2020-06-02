@@ -29,12 +29,12 @@
 - [x] add footer with link to project
 - [x] Chrome performance
 - [x] honor --force when building categories
-- [ ] consolidate entry points __init__
-- [ ] fix contrast post subtitle (summary)
+- [x] consolidate entry points __init__
 - [ ] center footer on mobile
+- [ ] fix contrast post subtitle (summary)
+- [ ] Medium collect
 - [ ] use track number to sort playlist
 - [ ] Neocities publisher
-- [ ] Medium collect
 - [ ] documentation
 - [ ] requirements.txt
 - [ ] new release

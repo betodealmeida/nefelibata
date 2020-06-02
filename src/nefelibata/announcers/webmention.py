@@ -2,6 +2,7 @@ import json
 import logging
 import re
 import urllib.parse
+from pathlib import Path
 from typing import Any
 from typing import cast
 from typing import Dict
@@ -84,24 +85,26 @@ class WebmentionAnnouncer(Announcer):
 
     def __init__(
         self,
-        post: Post,
+        root: Path,
         config: Dict[str, Any],
         endpoint: str,
         post_to_indienews: bool,
     ):
-        super().__init__(post, config)
+        super().__init__(root, config)
 
         self.endpoint = endpoint  # used only in template
         self.post_to_indienews = post_to_indienews
 
-    def announce(self) -> str:
+    def announce(self, post: Post) -> str:
         _logger.info("Discovering links supporting webmention...")
 
-        soup = BeautifulSoup(self.post.html, "html.parser")
+        source = urllib.parse.urljoin(self.config["url"], post.url)
+
+        soup = BeautifulSoup(post.html, "html.parser")
         for el in soup.find_all("a", href=re.compile("http")):
             target = el.attrs.get("href")
             _logger.info(f"Checking {target}")
-            self._send_mention(target)
+            self._send_mention(source, target)
 
         if self.post_to_indienews:
             if self.config["language"] not in SUPPORTED_LANGUAGES:
@@ -111,26 +114,26 @@ class WebmentionAnnouncer(Announcer):
             else:
                 target = f'https://news.indieweb.org/{self.config["language"]}'
                 _logger.info(f"Checking {target}")
-                self._send_mention(target)
+                self._send_mention(source, target)
 
         _logger.info("Success!")
 
         return COMMENT_URL
 
-    def _send_mention(self, target: str) -> None:
+    def _send_mention(self, source: str, target: str) -> None:
         endpoint = get_webmention_endpoint(target)
         if endpoint:
             _logger.info(f"Sending mention to {endpoint}")
             payload = {
-                "source": urllib.parse.urljoin(self.config["url"], self.post.url),
+                "source": source,
                 "target": target,
             }
             requests.post(endpoint, data=payload)
 
-    def collect(self) -> List[Response]:
+    def collect(self, post: Post) -> List[Response]:
         _logger.info("Collecting webmentions")
 
-        target = urllib.parse.urljoin(self.config["url"], self.post.url)
+        target = urllib.parse.urljoin(self.config["url"], post.url)
         url = "https://webmention.io/api/mentions.jf2"
         payload = {"target": target}
         r = requests.get(url, params=payload)

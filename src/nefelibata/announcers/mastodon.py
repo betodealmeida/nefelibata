@@ -1,6 +1,7 @@
 import logging
 import urllib.parse
 from datetime import timezone
+from pathlib import Path
 from typing import Any
 from typing import cast
 from typing import Dict
@@ -36,9 +37,9 @@ class MastodonAnnouncer(Announcer):
     url_header = "mastodon-url"
 
     def __init__(
-        self, post: Post, config: Dict[str, Any], access_token: str, base_url: str,
+        self, root: Path, config: Dict[str, Any], access_token: str, base_url: str,
     ):
-        super().__init__(post, config)
+        super().__init__(root, config)
 
         self.base_url = base_url
 
@@ -46,26 +47,26 @@ class MastodonAnnouncer(Announcer):
             access_token=access_token, api_base_url=base_url,
         )
 
-    def announce(self) -> str:
+    def announce(self, post: Post) -> str:
         _logger.info(f"Posting to Mastodon ({self.base_url})")
 
-        language = self.post.parsed.get("language") or self.config["language"]
-        post_url = urllib.parse.urljoin(self.config["url"], self.post.url)
+        language = post.parsed.get("language") or self.config["language"]
+        post_url = urllib.parse.urljoin(self.config["url"], post.url)
 
         toot = self.client.status_post(
-            status=f"{self.post.summary}\n\n{post_url}",
+            status=f"{post.summary}\n\n{post_url}",
             visibility="public",
             language=language,
-            idempotency_key=str(self.post.file_path),
+            idempotency_key=str(post.file_path),
         )
         _logger.info("Success!")
 
         return cast(str, toot["url"])
 
-    def collect(self) -> List[Response]:
+    def collect(self, post: Post) -> List[Response]:
         _logger.info(f"Collecting replies from Mastodon ({self.base_url})")
 
-        toot_url = self.post.parsed[self.url_header]
+        toot_url = post.parsed[self.url_header]
         toot_id = toot_url.rstrip("/").rsplit("/", 1)[1]
         context = self.client.status_context(toot_id)
 

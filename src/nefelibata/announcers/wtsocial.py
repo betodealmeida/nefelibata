@@ -2,6 +2,7 @@ import logging
 import re
 import urllib.parse
 from datetime import timezone
+from pathlib import Path
 from typing import Any
 from typing import cast
 from typing import Dict
@@ -29,9 +30,6 @@ def get_user_image(username: str) -> Optional[str]:
 
 def get_response_from_comment(comment: Dict[str, Any]) -> Response:
     """Generate a standard reply from a comment.
-
-    Args:
-      comment (Dict[str, Any]): The comment response from the WT.Social API.
     """
     comment_url = (
         f'https://wt.social{comment["parentUrl"]}#comment-{comment["comment_id"]}'
@@ -92,13 +90,13 @@ class WTSocialAnnouncer(Announcer):
     name = "WT.Social"
     url_header = "wtsocial-url"
 
-    def __init__(self, post: Post, config: Dict[str, Any], email: str, password: str):
-        super().__init__(post, config)
+    def __init__(self, root: Path, config: Dict[str, Any], email: str, password: str):
+        super().__init__(root, config)
 
         self.email = email
         self.password = password
 
-    def announce(self) -> str:
+    def announce(self, post: Post) -> str:
         """Publish the summary of a post to WT.Social.
         """
         _logger.info("Posting to WT.Social")
@@ -106,13 +104,13 @@ class WTSocialAnnouncer(Announcer):
         session = requests.Session()
         html = do_login(session, self.email, self.password)
         csrf_token = get_csrf_token(html)
-        post_url = urllib.parse.urljoin(self.config["url"], self.post.url)
+        post_url = urllib.parse.urljoin(self.config["url"], post.url)
 
         url = "https://wt.social/api/new-article"
         params = {
             "collaborative": False,
-            "article_title": self.post.title,
-            "article_body": f"{self.post.summary}\n\n{post_url}",
+            "article_title": post.title,
+            "article_body": f"{post.summary}\n\n{post_url}",
             "edit-summary": "",
             # "to-user": "beto-dealmeida",
         }
@@ -125,7 +123,7 @@ class WTSocialAnnouncer(Announcer):
 
         return url
 
-    def collect(self) -> List[Response]:
+    def collect(self, post: Post) -> List[Response]:
         """Collect responses to a given post.
         """
         _logger.info("Collecting replies from WT.Social")
@@ -134,7 +132,7 @@ class WTSocialAnnouncer(Announcer):
         html = do_login(session, self.email, self.password)
         csrf_token = get_csrf_token(html)
 
-        post_url = self.post.parsed[self.url_header]
+        post_url = post.parsed[self.url_header]
         post_id = post_url.rsplit("/", 1)[1]
         url = f"https://wt.social/api/post/{post_id}"
         headers = {"X-CSRF-TOKEN": csrf_token}

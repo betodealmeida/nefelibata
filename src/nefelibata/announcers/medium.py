@@ -1,6 +1,7 @@
 import json
 import logging
 import urllib.parse
+from pathlib import Path
 from typing import Any
 from typing import cast
 from typing import Dict
@@ -21,17 +22,17 @@ class MediumAnnouncer(Announcer):
 
     def __init__(
         self,
-        post: Post,
+        root: Path,
         config: Dict[str, Any],
         access_token: str,
         publish_status: str,
     ):
-        super().__init__(post, config)
+        super().__init__(root, config)
 
         self.access_token = access_token
         self.publish_status = publish_status
 
-    def announce(self) -> str:
+    def announce(self, post: Post) -> str:
         _logger.info("Posting to Medium")
 
         headers = {
@@ -51,18 +52,16 @@ class MediumAnnouncer(Announcer):
         url = f"https://api.medium.com/v1/users/{user_id}/posts"
         # TODO: add license
         payload = {
-            "title": self.post.title,
+            "title": post.title,
             "contentFormat": "html",
-            "content": self.post.html,
-            "tags": [
-                tag.strip() for tag in self.post.parsed.get("keywords", "").split(",")
-            ],
-            "canonicalUrl": urllib.parse.urljoin(self.config["url"], self.post.url),
+            "content": post.html,
+            "tags": [tag.strip() for tag in post.parsed.get("keywords", "").split(",")],
+            "canonicalUrl": urllib.parse.urljoin(self.config["url"], post.url),
             "publishStatus": self.publish_status or "draft",
         }
         response = requests.post(url, data=payload, headers=headers)
         return cast(str, response.json()["data"]["url"])
 
-    def collect(self) -> List[Response]:
+    def collect(self, post: Post) -> List[Response]:
         _logger.info("Skipping Medium, since there's no API for replies")
         return []

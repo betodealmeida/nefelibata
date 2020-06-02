@@ -4,6 +4,7 @@ import textwrap
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
+from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import List
@@ -75,9 +76,6 @@ def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
 
 def get_response_from_li(song_id: int, url: str, el: Tag) -> Response:
     """Generate a standard response from a <li> element in the FAWM song page.
-
-    Args:
-      el (BeautifulSoup element): <li> with a comment
     """
     base_url = "https://fawm.org"
 
@@ -176,19 +174,19 @@ class FAWMAnnouncer(Announcer):
     url_header = "fawm-url"
 
     def __init__(
-        self, post: Post, config: Dict[str, Any], username: str, password: str,
+        self, root: Path, config: Dict[str, Any], username: str, password: str,
     ):
-        super().__init__(post, config)
+        super().__init__(root, config)
 
         self.username = username
         self.password = password
 
-    def announce(self) -> str:
+    def announce(self, post: Post) -> str:
         """Publish the song to FAWM.
         """
         _logger.info("Creating new song on FAWM")
 
-        params = extract_params(self.post, self.config)
+        params = extract_params(post, self.config)
         response = requests.post(
             "https://fawm.org/songs/add",
             data=params,
@@ -200,10 +198,10 @@ class FAWMAnnouncer(Announcer):
 
         return url
 
-    def collect(self) -> List[Response]:
+    def collect(self, post: Post) -> List[Response]:
         _logger.info("Collecting comments from FAWM")
 
-        url = self.post.parsed[self.url_header]
+        url = post.parsed[self.url_header]
         responses = get_comments_from_fawm_page(url, self.username, self.password)
 
         _logger.info("Success!")

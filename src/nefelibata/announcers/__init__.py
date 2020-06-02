@@ -1,10 +1,12 @@
 import json
 import logging
 import operator
+from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Set
 
 import mf2py
 from nefelibata.post import Post
@@ -49,17 +51,21 @@ def fetch_hcard(user: User) -> User:
 
 class Announcer:
 
+    id = "base"
     name = "Base"
     url_header = "base-url"
 
-    def __init__(self, post: Post, config: Dict[str, Any], *args: Any, **kwargs: Any):
-        self.post = post
+    def __init__(self, root: Path, config: Dict[str, Any], *args: Any, **kwargs: Any):
+        self.root = root
         self.config = config
 
-    def update_links(self) -> None:
+    def match(self, post: Post):
+        return self.id in get_post_announcers(self.config, post)
+
+    def update_links(self, post: Post) -> None:
         """Update links.json with link to where the post is announced.
         """
-        post_directory = self.post.file_path.parent
+        post_directory = post.file_path.parent
         storage = post_directory / "links.json"
         if storage.exists():
             with open(storage) as fp:
@@ -68,7 +74,7 @@ class Announcer:
             links = {}
 
         if self.name not in links:
-            link = self.announce()
+            link = self.announce(post)
             if not link:
                 return
 
@@ -78,21 +84,21 @@ class Announcer:
                 json.dump(links, fp)
 
             # also store in post header
-            self.post.parsed[self.url_header] = link
-            self.post.save()
+            post.parsed[self.url_header] = link
+            post.save()
 
-    def announce(self) -> Optional[str]:
+    def announce(self, post: Post) -> Optional[str]:
         """Publish a post in a service and return the URL.
         """
         raise NotImplementedError("Subclasses must implement announce")
 
-    def update_replies(self) -> None:
+    def update_replies(self, post: Post) -> None:
         """Update replies.json with new replies, if any.
         """
-        if self.url_header not in self.post.parsed:
+        if self.url_header not in post.parsed:
             return
 
-        post_directory = self.post.file_path.parent
+        post_directory = post.file_path.parent
         storage = post_directory / "replies.json"
         if storage.exists():
             with open(storage) as fp:
@@ -101,7 +107,7 @@ class Announcer:
             replies = []
 
         ids = {reply["id"] for reply in replies}
-        new_replies = [reply for reply in self.collect() if reply["id"] not in ids]
+        new_replies = [reply for reply in self.collect(post) if reply["id"] not in ids]
         for reply in new_replies:
             user = reply["user"]
 
@@ -111,29 +117,22 @@ class Announcer:
                 reply["user"] = fetch_hcard(user)
 
         if new_replies:
-            _logger.info(
-                f'Found new replies in post {self.config["url"]}{self.post.url}',
-            )
+            _logger.info(f'Found new replies in post {self.config["url"]}{post.url}')
             replies.extend(new_replies)
             replies.sort(key=operator.itemgetter("timestamp"))
             with open(storage, "w") as fp:
                 json.dump(replies, fp)
 
             # save file so that it's marked as stale
-            self.post.save()
+            post.save()
 
-    def collect(self) -> List[Response]:
+    def collect(self, post: Post) -> List[Response]:
         """Collect responses.
         """
         raise NotImplementedError("Subclasses must implement collect")
 
 
-def get_announcers(post: Post, config: Dict[str, Any]) -> List[Announcer]:
-    """Return all announcers associated with a post.
-
-    Args:
-      post (Post): the post object.
-    """
+def get_post_announcers(config: Dict[str, Any], post: Post) -> Set[str]:
     if "announce-on" in post.parsed:
         selected_announcers = {
             announcer.strip() for announcer in post.parsed["announce-on"].split(",")
@@ -150,8 +149,12 @@ def get_announcers(post: Post, config: Dict[str, Any]) -> List[Announcer]:
             for announcer in post.parsed["announce-on-extra"].split(",")
         )
 
+    return selected_announcers
+
+
+def get_announcers(root: Path, config: Dict[str, Any]) -> List[Announcer]:
     announcers = {a.name: a.load() for a in iter_entry_points("nefelibata.announcer")}
+
     return [
-        announcers[name](post, config, **config.get(name, {}))
-        for name in selected_announcers
+        announcers[name](root, config, **config.get(name, {})) for name in announcers
     ]
