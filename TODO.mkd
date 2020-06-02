@@ -28,7 +28,7 @@
 - [x] https://indiewebify.me/
 - [x] add footer with link to project
 - [x] Chrome performance
-- [ ] honor --force when building categories
+- [x] honor --force when building categories
 - [ ] use track number to sort playlist
 - [ ] Neocities publisher
 - [ ] Medium collect

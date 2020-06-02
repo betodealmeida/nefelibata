@@ -51,11 +51,10 @@ def run(root: Path, force: bool = False, collect_replies: bool = True) -> None:
             for announcer in get_announcers(post, config):
                 announcer.update_replies()
 
-        if force or not post.up_to_date:
-            for builder in post_builders:
-                builder.process_post(post)
-            for assistant in post_assistants:
-                assistant.process_post(post)
+        for builder in post_builders:
+            builder.process_post(post, force)
+        for assistant in post_assistants:
+            assistant.process_post(post, force)
 
         # symlink build -> posts
         post_directory = post.file_path.parent
@@ -67,6 +66,6 @@ def run(root: Path, force: bool = False, collect_replies: bool = True) -> None:
     site_builders = get_builders(root, config, Scope.SITE)
     site_assistants = get_assistants(root, config, Scope.SITE)
     for builder in site_builders:
-        builder.process_site()
+        builder.process_site(force)
     for assistant in site_assistants:
-        assistant.process_site()
+        assistant.process_site(force)

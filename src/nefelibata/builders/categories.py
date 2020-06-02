@@ -19,7 +19,7 @@ class CategoriesBuilder(Builder):
 
     scopes = [Scope.SITE]
 
-    def process_site(self) -> None:
+    def process_site(self, force: bool = False) -> None:
         """Generate pages for each category.
         """
         _logger.info("Creating categories pages")
@@ -53,7 +53,11 @@ class CategoriesBuilder(Builder):
                 file_path = self.root / "build" / name
 
                 # only update if there are changes to files in this category
-                if file_path.exists() and file_path.stat().st_mtime > last_modified:
+                if (
+                    not force
+                    and file_path.exists()
+                    and file_path.stat().st_mtime > last_modified
+                ):
                     break
 
                 # link to next page

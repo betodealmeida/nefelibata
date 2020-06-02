@@ -14,7 +14,7 @@ class AtomBuilder(Builder):
 
     scopes = [Scope.SITE]
 
-    def process_site(self) -> None:
+    def process_site(self, force: bool = False) -> None:
         """Generate Atom feed.
         """
         _logger.info("Creating Atom feed")

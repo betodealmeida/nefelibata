@@ -22,7 +22,7 @@ class PlaylistAssistant(Assistant):
 
     scopes = [Scope.POST]
 
-    def process_post(self, post: Post) -> None:
+    def process_post(self, post: Post, force: bool = False) -> None:
         post_directory = post.file_path.parent
 
         mp3s: List[MP3Info] = []

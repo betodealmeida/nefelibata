@@ -22,9 +22,12 @@ class PostBuilder(Builder):
 
     scopes = [Scope.POST]
 
-    def process_post(self, post: Post) -> None:
+    def process_post(self, post: Post, force: bool = False) -> None:
         """Generate Atom feed.
         """
+        if post.up_to_date and not force:
+            return
+
         _logger.info("Creating post")
 
         post_directory = post.file_path.parent

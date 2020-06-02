@@ -78,6 +78,34 @@ def test_process_post(mock_post, fs):
     )
 
 
+def test_process_post_up_to_date(mock_post, fs):
+    root = Path("/path/to/blog")
+
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: This is your first post
+        keywords: welcome, blog
+        summary: Hello, world!
+
+        # Welcome #
+
+        This is your first post. It should be written using Markdown.
+        """,
+        )
+
+    with freeze_time("2020-01-02T00:00:00Z"):
+        fs.create_file(post.file_path.with_suffix(".html"))
+
+    builder = PostBuilder(root, config)
+    with freeze_time("2020-01-03T00:00:00Z"):
+        builder.process_post(post)
+
+    assert datetime.fromtimestamp(
+        post.file_path.with_suffix(".html").stat().st_mtime,
+    ).astimezone(timezone.utc) == datetime(2020, 1, 2, 0, 0, tzinfo=timezone.utc)
+
+
 def test_jinja2_formatdate_string():
     assert (
         jinja2_formatdate("2020-01-01T00:00:00Z", "%Y-%m-%dT%H:%M:%S%z")

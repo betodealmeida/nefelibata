@@ -15,10 +15,10 @@ class WarnExternalResourcesAssistant(Assistant):
 
     scopes = [Scope.POST, Scope.SITE]
 
-    def process_post(self, post: Post) -> None:
+    def process_post(self, post: Post, force: bool = False) -> None:
         self._process_file(post.file_path.with_suffix(".html"))
 
-    def process_site(self) -> None:
+    def process_site(self, force: bool = False) -> None:
         for path in (self.root / "build").glob("*.html"):
             self._process_file(path)
 

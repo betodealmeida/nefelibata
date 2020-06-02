@@ -22,13 +22,13 @@ class Builder:
         self.root = root
         self.config = config
 
-    def process_post(self, post: Post) -> None:
+    def process_post(self, post: Post, force: bool = False) -> None:
         if Scope.POST not in self.scopes:
             raise Exception(f'Scope "post" not supported by {self.__class__.__name__}')
 
         raise NotImplementedError("Subclasses MUST implement `process_post`")
 
-    def process_site(self) -> None:
+    def process_site(self, force: bool = False) -> None:
         if Scope.SITE not in self.scopes:
             raise Exception(f'Scope "site" not supported by {self.__class__.__name__}')
 
