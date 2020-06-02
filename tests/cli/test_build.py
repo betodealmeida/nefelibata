@@ -63,16 +63,22 @@ def test_run(mocker, fs):
 
     run(root)
 
-    PostBuilder.process_post.assert_has_calls([call(post1), call(post2)])
-    PostSiteBuilder.process_post.assert_has_calls([call(post1), call(post2)])
-    PostAssistant.process_post.assert_has_calls([call(post1), call(post2)])
-    PostSiteAssistant.process_post.assert_has_calls([call(post1), call(post2)])
+    PostBuilder.process_post.assert_has_calls([call(post1, False), call(post2, False)])
+    PostSiteBuilder.process_post.assert_has_calls(
+        [call(post1, False), call(post2, False)],
+    )
+    PostAssistant.process_post.assert_has_calls(
+        [call(post1, False), call(post2, False)],
+    )
+    PostSiteAssistant.process_post.assert_has_calls(
+        [call(post1, False), call(post2, False)],
+    )
     Announcer1.update_replies.assert_has_calls([call(), call()])
     Announcer2.update_replies.assert_has_calls([call(), call()])
-    SiteBuilder.process_site.assert_has_calls([call()])
-    PostSiteBuilder.process_site.assert_has_calls([call()])
-    SiteAssistant.process_site.assert_has_calls([call()])
-    PostSiteAssistant.process_site.assert_has_calls([call()])
+    SiteBuilder.process_site.assert_has_calls([call(False)])
+    PostSiteBuilder.process_site.assert_has_calls([call(False)])
+    SiteAssistant.process_site.assert_has_calls([call(False)])
+    PostSiteAssistant.process_site.assert_has_calls([call(False)])
 
 
 def test_run_build_exists(mocker, fs):
@@ -235,10 +241,10 @@ def test_run_post_up_to_date(mocker, fs):
 
     run(root)
 
-    PostBuilder.process_post.assert_has_calls([call(post2)])
-    PostSiteBuilder.process_post.assert_has_calls([call(post2)])
-    PostAssistant.process_post.assert_has_calls([call(post2)])
-    PostSiteAssistant.process_post.assert_has_calls([call(post2)])
+    PostBuilder.process_post.assert_has_calls([call(post2, False)])
+    PostSiteBuilder.process_post.assert_has_calls([call(post2, False)])
+    PostAssistant.process_post.assert_has_calls([call(post2, False)])
+    PostSiteAssistant.process_post.assert_has_calls([call(post2, False)])
     Announcer1.update_replies.assert_has_calls([call()])
     Announcer2.update_replies.assert_has_calls([call()])
 

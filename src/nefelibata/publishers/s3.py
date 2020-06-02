@@ -59,6 +59,8 @@ class S3Publisher(Publisher):
 
     def __init__(
         self,
+        root: Path,
+        config: Dict[str, Any],
         bucket: str,
         AWS_ACCESS_KEY_ID: str,
         AWS_SECRET_ACCESS_KEY: str,
@@ -66,6 +68,8 @@ class S3Publisher(Publisher):
         configure_route53: Optional[str] = None,
         region: str = "us-east-1",
     ):
+        super().__init__(root, config)
+
         self.bucket = bucket
         self.aws_access_key_id = AWS_ACCESS_KEY_ID
         self.aws_secret_access_key = AWS_SECRET_ACCESS_KEY
@@ -73,17 +77,17 @@ class S3Publisher(Publisher):
         self.configure_route53 = configure_route53
         self.region = region
 
-    def publish(self, root: Path, force: bool = False) -> None:
+    def publish(self, force: bool = False) -> None:
         self._create_bucket()
 
         # store file with the last time weblog was published
-        last_published_file = root / "last_published"
+        last_published_file = self.root / "last_published"
         if last_published_file.exists():
             last_published = last_published_file.stat().st_mtime
         else:
             last_published = 0
 
-        build = root / "build"
+        build = self.root / "build"
         queue = [build]
         # manually walk, since `glob("**/*")` doesn't follow symlinks
         while queue:

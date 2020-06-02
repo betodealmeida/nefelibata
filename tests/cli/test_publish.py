@@ -51,7 +51,7 @@ def test_run(mocker, fs):
 
     run(root)
 
-    Publisher1.publish.assert_called_with(root, False)
-    Publisher2.publish.assert_called_with(root, False)
-    # Announcer1.update_links.assert_has_calls([call(), call()])
-    # Announcer2.update_links.assert_has_calls([call(), call()])
+    Publisher1.publish.assert_called_with(False)
+    Publisher2.publish.assert_called_with(False)
+    Announcer1.update_links.assert_has_calls([call(), call()])
+    Announcer2.update_links.assert_has_calls([call(), call()])

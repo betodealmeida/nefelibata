@@ -29,6 +29,9 @@
 - [x] add footer with link to project
 - [x] Chrome performance
 - [x] honor --force when building categories
+- [ ] consolidate entry points __init__
+- [ ] fix contrast post subtitle (summary)
+- [ ] center footer on mobile
 - [ ] use track number to sort playlist
 - [ ] Neocities publisher
 - [ ] Medium collect

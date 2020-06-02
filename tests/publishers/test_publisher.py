@@ -36,7 +36,8 @@ def test_get_publishers(mock_post, mocker):
         "test2": {},
     }
 
-    publishers = get_publishers(config)
+    root = Path("/path/to/blog")
+    publishers = get_publishers(root, config)
     assert len(publishers) == 1
     assert publishers[0].__class__ is entry_points[1].publisher
 
@@ -56,6 +57,7 @@ def test_get_publishers_string(mock_post, mocker):
         "test2": {},
     }
 
-    publishers = get_publishers(config)
+    root = Path("/path/to/blog")
+    publishers = get_publishers(root, config)
     assert len(publishers) == 1
     assert publishers[0].__class__ is entry_points[1].publisher

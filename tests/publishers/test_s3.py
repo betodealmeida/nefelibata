@@ -2,6 +2,8 @@ import os
 from datetime import datetime
 from datetime import timezone
 from pathlib import Path
+from typing import Any
+from typing import Dict
 from unittest import mock
 
 from botocore.exceptions import ClientError
@@ -13,8 +15,15 @@ __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
 
 
+config: Dict[str, Any] = {}
+
+
 def test_create_bucket():
+    root = Path("/path/to/blog")
+
     publisher = S3Publisher(
+        root,
+        config,
         bucket="blog.example.com",
         AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
         AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
@@ -33,7 +42,11 @@ def test_create_bucket():
 
 
 def test_create_bucket_error():
+    root = Path("/path/to/blog")
+
     publisher = S3Publisher(
+        root,
+        config,
         bucket="blog.example.com",
         AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
         AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
@@ -51,7 +64,11 @@ def test_create_bucket_error():
 
 
 def test_upload_file():
+    root = Path("/path/to/blog")
+
     publisher = S3Publisher(
+        root,
+        config,
         bucket="blog.example.com",
         AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
         AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
@@ -72,7 +89,11 @@ def test_upload_file():
 
 
 def test_upload_file_no_mimetype():
+    root = Path("/path/to/blog")
+
     publisher = S3Publisher(
+        root,
+        config,
         bucket="blog.example.com",
         AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
         AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
@@ -90,7 +111,11 @@ def test_upload_file_no_mimetype():
 
 
 def test_upload_file_error():
+    root = Path("/path/to/blog")
+
     publisher = S3Publisher(
+        root,
+        config,
         bucket="blog.example.com",
         AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
         AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
@@ -109,7 +134,11 @@ def test_upload_file_error():
 
 
 def test_configure_website():
+    root = Path("/path/to/blog")
+
     publisher = S3Publisher(
+        root,
+        config,
         bucket="blog.example.com",
         AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
         AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
@@ -126,7 +155,11 @@ def test_configure_website():
 
 
 def test_configure_route53():
+    root = Path("/path/to/blog")
+
     publisher = S3Publisher(
+        root,
+        config,
         bucket="blog.example.com",
         AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
         AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
@@ -167,7 +200,11 @@ def test_configure_route53():
 
 
 def test_configure_route53_no_zone():
+    root = Path("/path/to/blog")
+
     publisher = S3Publisher(
+        root,
+        config,
         bucket="blog.example.com",
         AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
         AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
@@ -187,7 +224,12 @@ def test_configure_route53_no_zone():
 
 
 def test_publish(fs):
+    root = Path("/path/to/blog")
+    fs.create_dir(root)
+
     publisher = S3Publisher(
+        root,
+        config,
         bucket="blog.example.com",
         AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
         AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
@@ -196,8 +238,6 @@ def test_publish(fs):
         region="us-east-1",
     )
 
-    root = Path("/path/to/blog")
-    fs.create_dir(root)
     with freeze_time("2020-01-01T00:00:00Z"):
         fs.create_file(root / "last_published")
 
@@ -218,7 +258,7 @@ def test_publish(fs):
                     {"Name": "example.com.", "Id": "1"},
                 ],
             }
-            publisher.publish(root)
+            publisher.publish()
 
     mock_boto3_client.return_value.upload_file.assert_called_once_with(
         "/path/to/blog/build/two/index.html",
@@ -234,15 +274,17 @@ def test_publish(fs):
 
 
 def test_publish_no_last_published(fs):
+    root = Path("/path/to/blog")
+    fs.create_dir(root)
+
     publisher = S3Publisher(
+        root,
+        config,
         bucket="blog.example.com",
         AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
         AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
         region="us-east-1",
     )
-
-    root = Path("/path/to/blog")
-    fs.create_dir(root)
 
     # create 2 posts, 1 of them up-to-date
     fs.create_dir(root / "build")
@@ -255,7 +297,7 @@ def test_publish_no_last_published(fs):
 
     with freeze_time("2020-01-03T00:00:00Z"):
         with mock.patch("nefelibata.publishers.s3.boto3.client") as mock_boto3_client:
-            publisher.publish(root)
+            publisher.publish()
 
     mock_boto3_client.return_value.upload_file.assert_has_calls(
         [
@@ -281,15 +323,17 @@ def test_publish_no_last_published(fs):
 
 
 def test_publish_broken_symlink(fs):
+    root = Path("/path/to/blog")
+    fs.create_dir(root)
+
     publisher = S3Publisher(
+        root,
+        config,
         bucket="blog.example.com",
         AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
         AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
         region="us-east-1",
     )
-
-    root = Path("/path/to/blog")
-    fs.create_dir(root)
 
     # create 2 posts, 1 of them up-to-date
     fs.create_dir(root / "build")
@@ -304,7 +348,7 @@ def test_publish_broken_symlink(fs):
 
     with freeze_time("2020-01-03T00:00:00Z"):
         with mock.patch("nefelibata.publishers.s3.boto3.client") as mock_boto3_client:
-            publisher.publish(root)
+            publisher.publish()
 
     mock_boto3_client.return_value.upload_file.assert_has_calls(
         [

@@ -22,8 +22,8 @@ def run(root: Path, force: bool = False) -> None:
     config = get_config(root)
     _logger.debug(config)
 
-    for publisher in get_publishers(config):
-        publisher.publish(root, force)
+    for publisher in get_publishers(root, config):
+        publisher.publish(force)
 
     # announce posts
     for post in get_posts(root):
