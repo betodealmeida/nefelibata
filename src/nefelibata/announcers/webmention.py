@@ -17,7 +17,7 @@ from nefelibata.announcers import Response
 from nefelibata.announcers import User
 from nefelibata.post import Post
 
-_logger = logging.getLogger("nefelibata")
+_logger = logging.getLogger(__name__)
 
 
 # languages supported by IndieNews

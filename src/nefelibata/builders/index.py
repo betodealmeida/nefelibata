@@ -10,7 +10,7 @@ from nefelibata.builders import Scope
 from nefelibata.builders.utils import hash_n
 from nefelibata.post import get_posts
 
-_logger = logging.getLogger("nefelibata")
+_logger = logging.getLogger(__name__)
 
 
 class IndexBuilder(Builder):

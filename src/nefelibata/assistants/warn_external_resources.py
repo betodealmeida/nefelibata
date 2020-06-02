@@ -8,7 +8,7 @@ from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
 from nefelibata.post import Post
 
-_logger = logging.getLogger("nefelibata")
+_logger = logging.getLogger(__name__)
 
 
 class WarnExternalResourcesAssistant(Assistant):

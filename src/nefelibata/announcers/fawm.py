@@ -18,7 +18,7 @@ from nefelibata.announcers import Announcer
 from nefelibata.announcers import Response
 from nefelibata.post import Post
 
-_logger = logging.getLogger("nefelibata")
+_logger = logging.getLogger(__name__)
 
 
 def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:

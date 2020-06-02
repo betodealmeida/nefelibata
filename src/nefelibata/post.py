@@ -13,7 +13,7 @@ from typing import List
 import markdown
 from bs4 import BeautifulSoup
 
-_logger = logging.getLogger("nefelibata")
+_logger = logging.getLogger(__name__)
 
 
 class Post:

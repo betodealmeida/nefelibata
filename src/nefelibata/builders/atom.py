@@ -7,7 +7,7 @@ from nefelibata.builders import Builder
 from nefelibata.builders import Scope
 from nefelibata.post import get_posts
 
-_logger = logging.getLogger("nefelibata")
+_logger = logging.getLogger(__name__)
 
 
 class AtomBuilder(Builder):

@@ -9,7 +9,7 @@ import boto3
 from botocore.exceptions import ClientError
 from nefelibata.publishers import Publisher
 
-_logger = logging.getLogger("nefelibata")
+_logger = logging.getLogger(__name__)
 
 
 class S3Publisher(Publisher):

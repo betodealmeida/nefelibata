@@ -11,7 +11,7 @@ from nefelibata.announcers import Announcer
 from nefelibata.announcers import Response
 from nefelibata.post import Post
 
-_logger = logging.getLogger("nefelibata")
+_logger = logging.getLogger(__name__)
 
 
 def get_response_from_toot(toot: mastodon.AttribAccessDict) -> Response:

@@ -11,7 +11,7 @@ from nefelibata.post import Post
 from pkg_resources import iter_entry_points
 from typing_extensions import TypedDict
 
-_logger = logging.getLogger("nefelibata")
+_logger = logging.getLogger(__name__)
 
 
 User = TypedDict(

@@ -24,7 +24,7 @@
 - [x] do not pass root/config when initializing Post
 - [x] rename feed to Atom
 - [x] unit test coverage
-- [ ] logger names
+- [x] logger names
 - [ ] Neocities publisher
 - [ ] Medium collect
 - [ ] https://indiewebify.me/
