@@ -166,10 +166,10 @@ h3 {
 
 .footer {
     padding: 1em 0;
+    font-size: 80%;
 }
 .footer a {
     color: #ccc;
-    font-size: 80%;
 }
 .footer .pure-menu a:hover,
 .footer .pure-menu a:focus {
@@ -198,6 +198,6 @@ h3 {
     }
 }
 
-.hidden {
-    display: hidden;
+.footer ul {
+    padding: 0;
 }
