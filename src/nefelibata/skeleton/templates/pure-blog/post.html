@@ -63,7 +63,7 @@
                             on <time class="dt-published" datetime="{{ post.date.isoformat() }}" pubdate>{{ post.date.strftime('%Y-%m-%d') }}</time>
                             under
                             {% for keyword in post.parsed.keywords.split(",") %}
-                            <a class="post-category post-category-{{ hash_n(keyword.strip().encode('utf-8'), 4) }} p-category" href="/{{ keyword.strip() }}.html">{{ keyword.strip() }}</a>
+                            <a class="post-category p-category" style="background-color: {{ random_color(keyword.strip()) }}" href="/{{ keyword.strip() }}.html">{{ keyword.strip() }}</a>
                             {% endfor %}
                         </p>
                     </header>

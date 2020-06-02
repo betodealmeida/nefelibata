@@ -12,6 +12,7 @@ from nefelibata import __version__
 from nefelibata.builders import Builder
 from nefelibata.builders import Scope
 from nefelibata.builders.utils import hash_n
+from nefelibata.builders.utils import random_color
 from nefelibata.post import Post
 
 _logger = logging.getLogger(__name__)
@@ -58,6 +59,7 @@ class PostBuilder(Builder):
             json=json_,
             breadcrumbs=[("Home", "/index.html"), (post.title, None)],
             hash_n=hash_n,
+            random_color=random_color,
         )
 
         with open(post.file_path.with_suffix(".html"), "w") as fp:

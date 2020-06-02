@@ -8,6 +8,7 @@ from nefelibata import __version__
 from nefelibata.builders import Builder
 from nefelibata.builders import Scope
 from nefelibata.builders.utils import hash_n
+from nefelibata.builders.utils import random_color
 from nefelibata.post import get_posts
 
 _logger = logging.getLogger(__name__)
@@ -52,6 +53,7 @@ class IndexBuilder(Builder):
                 previous=previous,
                 next=next,
                 hash_n=hash_n,
+                random_color=random_color,
             )
 
             file_path = self.root / "build" / name
