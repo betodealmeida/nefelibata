@@ -65,6 +65,7 @@ class Post:
     @property
     def up_to_date(self) -> bool:
         html = self.file_path.with_suffix(".html")
+        print(self.file_path, html)
         return html.exists() and html.stat().st_mtime >= self.file_path.stat().st_mtime
 
     def update_metadata(self) -> None:

@@ -18,21 +18,23 @@ __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
 
+_logger = logging.getLogger(__name__)
+
 
 def run(root: Path, force: bool = False, collect_replies: bool = True) -> None:
     """Build weblog from Markdown posts and social media interactions.
     """
-    logging.info("Building weblog")
+    _logger.info("Building weblog")
 
     config = get_config(root)
-    logging.debug(config)
+    _logger.debug(config)
 
     build = root / "build"
     if not build.exists():
-        logging.info("Creating build/ directory")
+        _logger.info("Creating build/ directory")
         build.mkdir()
 
-    logging.info("Syncing resources")
+    _logger.info("Syncing resources")
     resources = ["css", "js", "img"]
     for resource in resources:
         resource_directory = root / "templates" / config["theme"] / resource
@@ -40,7 +42,7 @@ def run(root: Path, force: bool = False, collect_replies: bool = True) -> None:
         if resource_directory.exists() and not target.exists():
             target.symlink_to(resource_directory, target_is_directory=True)
 
-    logging.info("Processing posts")
+    _logger.info("Processing posts")
     post_builders = get_builders(root, config, Scope.POST)
     post_assistants = get_assistants(root, config, Scope.POST)
     for post in get_posts(root):
@@ -59,6 +61,7 @@ def run(root: Path, force: bool = False, collect_replies: bool = True) -> None:
         post_directory = post.file_path.parent
         relative_directory = post_directory.relative_to(root / "posts")
         target = root / "build" / relative_directory
+        print(post_directory.exists() and not target.exists())
         if post_directory.exists() and not target.exists():
             target.symlink_to(post_directory, target_is_directory=True)
 

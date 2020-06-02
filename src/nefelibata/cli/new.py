@@ -11,11 +11,13 @@ __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
 
+_logger = logging.getLogger(__name__)
+
 
 def run(root: Path, directory: str) -> None:
     """Create a new post and open editor.
     """
-    logging.info("Creating new directory")
+    _logger.info("Creating new directory")
     title = directory
     directory = sanitize(directory)
     target = root / "posts" / directory
@@ -24,7 +26,7 @@ def run(root: Path, directory: str) -> None:
     target.mkdir()
     os.chdir(target)
 
-    logging.info("Adding resource files")
+    _logger.info("Adding resource files")
     resources = ["css", "js", "img"]
     for resource in resources:
         (target / resource).mkdir()
@@ -35,7 +37,7 @@ def run(root: Path, directory: str) -> None:
 
     editor = os.environ.get("EDITOR")
     if not editor:
-        logging.info("No EDITOR found, exiting")
+        _logger.info("No EDITOR found, exiting")
         return
 
     call([editor, filepath])

@@ -11,14 +11,16 @@ __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
 
+_logger = logging.getLogger(__name__)
+
 
 def run(root: Path, force: bool = False) -> None:
     """Publish weblog.
     """
-    logging.info("Publishing weblog")
+    _logger.info("Publishing weblog")
 
     config = get_config(root)
-    logging.debug(config)
+    _logger.debug(config)
 
     for publisher in get_publishers(config):
         publisher.publish(root, force)
