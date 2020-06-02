@@ -1,6 +1,8 @@
 import json
 import logging
 import urllib.parse
+from datetime import datetime
+from datetime import timezone
 from pathlib import Path
 from typing import Any
 from typing import cast
@@ -13,6 +15,39 @@ from nefelibata.announcers import Response
 from nefelibata.post import Post
 
 _logger = logging.getLogger(__name__)
+
+
+def get_responses_from_payload(payload: Dict[str, Any]) -> List[Response]:
+    responses: List[Response] = []
+    for comment in payload["value"]:
+        user_id = comment["creatorId"]
+        user_attributes = payload["references"]["User"][user_id]
+
+        responses.append(
+            {
+                "source": comment["title"],
+                "url": f'https://medium.com/p/{comment["inResponseToPostId"]}/responses/show',
+                "color": "#333333",
+                "id": f'medium:{comment["id"]}',
+                "timestamp": datetime.fromtimestamp(comment["createdAt"] / 1000.0)
+                .astimezone(timezone.utc)
+                .isoformat(),
+                "user": {
+                    "name": user_attributes["name"],
+                    "image": f'https://miro.medium.com/fit/c/128/128/{user_attributes["imageId"]}',
+                    "url": f'https://medium.com/@{user_attributes["username"]}',
+                    "description": user_attributes["bio"],
+                },
+                "comment": {
+                    "text": comment["previewContent"]["bodyModel"]["paragraphs"][0][
+                        "text"
+                    ],
+                    "url": f'https://medium.com/@{user_attributes["username"]}/{comment["uniqueSlug"]}',
+                },
+            },
+        )
+
+    return responses
 
 
 class MediumAnnouncer(Announcer):
@@ -64,5 +99,17 @@ class MediumAnnouncer(Announcer):
         return cast(str, response.json()["data"]["url"])
 
     def collect(self, post: Post) -> List[Response]:
-        _logger.info("Skipping Medium, since there's no API for replies")
-        return []
+        _logger.info("Collecting comments from Medium")
+
+        post_url = post.parsed[self.url_header]
+        post_id = post_url.rsplit("/", 1)[1]
+        comments_url = f"https://medium.com/p/{post_id}/responses/?format=json"
+
+        response = requests.get(comments_url)
+        payload = json.loads(response.text[16:])
+
+        responses = get_responses_from_payload(payload["payload"])
+
+        _logger.info("Success!")
+
+        return responses

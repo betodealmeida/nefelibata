@@ -32,7 +32,7 @@
 - [x] consolidate entry points __init__
 - [x] center footer on mobile (.footer { text-align: center; })
 - [x] fix contrast post subtitle (summary)
-- [ ] Medium collect
+- [x] Medium collect
 - [ ] use track number to sort playlist
 - [ ] Neocities publisher
 - [ ] documentation

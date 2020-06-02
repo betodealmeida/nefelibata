@@ -10,6 +10,9 @@ from nefelibata.assistants import Scope
 from nefelibata.post import Post
 
 
+CHUNK_SIZE = 2048
+
+
 def get_resource_extension(url: str) -> str:
     response = requests.head(url)
     content_type = response.headers["content-type"]
@@ -33,8 +36,8 @@ class MirrorImagesAssistant(Assistant):
         if not mirror.exists():
             mirror.mkdir()
 
-        with open(file_path) as fp:
-            html = fp.read()
+        with open(file_path) as inp:
+            html = inp.read()
 
         soup = BeautifulSoup(html, "html.parser")
         for el in soup.find_all("img", src=re.compile("http")):
@@ -48,9 +51,10 @@ class MirrorImagesAssistant(Assistant):
 
             # download and store locally
             if not local.exists():
-                r = requests.get(url)
-                with open(local, "w") as fp:
-                    fp.write(r.content.decode("utf-8"))
+                r = requests.get(url, stream=True)
+                with open(local, "wb") as outp:
+                    for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
+                        outp.write(chunk)
 
             el.attrs["src"] = "img/%s" % local.name
         html = str(soup)
