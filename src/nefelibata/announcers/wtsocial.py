@@ -1,16 +1,21 @@
 import logging
 import re
 import urllib.parse
-from typing import Any, Dict, List, Optional
+from datetime import timezone
+from typing import Any
+from typing import cast
+from typing import Dict
+from typing import List
+from typing import Optional
 
 import dateutil.parser
 import requests
 from bs4 import BeautifulSoup
-
-from nefelibata.announcers import Announcer, Response
+from nefelibata.announcers import Announcer
+from nefelibata.announcers import Response
 from nefelibata.post import Post
 
-_logger = logging.getLogger("nefelibata")
+_logger = logging.getLogger(__name__)
 
 
 def get_user_image(username: str) -> Optional[str]:
@@ -18,12 +23,12 @@ def get_user_image(username: str) -> Optional[str]:
     """
     url = f"https://wt.social/u/{username}"
     response = requests.get(url)
-    match = re.search("(https.*?--profile_pic\.\w+)", response.text)
+    match = re.search(r"(https.*?--profile_pic\.\w+)", response.text)
     return match.group(1).replace("\\", "") if match else None
 
 
-def get_reply_from_comment(comment: Dict[str, Any]) -> Response:
-    """Generate a standar reply from a comment.
+def get_response_from_comment(comment: Dict[str, Any]) -> Response:
+    """Generate a standard reply from a comment.
 
     Args:
       comment (Dict[str, Any]): The comment response from the WT.Social API.
@@ -35,12 +40,12 @@ def get_reply_from_comment(comment: Dict[str, Any]) -> Response:
         "source": "WT.Social",
         "color": "#1e1e1e",
         "id": f'wtsocial:{comment["comment_id"]}',
-        "timestamp": dateutil.parser.parse(
-            comment["formatted"]["created_at"]
-        ).timestamp(),
+        "timestamp": dateutil.parser.parse(comment["formatted"]["created_at"])
+        .astimezone(timezone.utc)
+        .isoformat(),
         "user": {
             "name": comment["users_name"],
-            "image": get_user_image(comment["user_uri"]),
+            "image": get_user_image(comment["user_uri"]) or "",
             "url": f'https://wt.social{comment["UURI"]}',
             "description": "",
         },
@@ -58,7 +63,7 @@ def get_csrf_token(html: str) -> str:
     """
     soup = BeautifulSoup(html, "html.parser")
     tag = soup.find("meta", attrs={"name": "csrf-token"})
-    return tag.attrs["content"]
+    return cast(str, tag.attrs["content"])
 
 
 def do_login(session: requests.Session, email: str, password: str) -> str:
@@ -71,7 +76,12 @@ def do_login(session: requests.Session, email: str, password: str) -> str:
     tag = soup.find("input", attrs={"name": "_token"})
     token = tag.attrs["value"]
 
-    params = {"email": email, "password": password, "_token": token, "remember": 1}
+    params = {
+        "email": email,
+        "password": password,
+        "_token": token,
+        "remember": 1,
+    }
     response = session.post(url, params=params)
 
     return response.text
@@ -127,15 +137,16 @@ class WTSocialAnnouncer(Announcer):
         post_url = self.post.parsed[self.url_header]
         post_id = post_url.rsplit("/", 1)[1]
         url = f"https://wt.social/api/post/{post_id}"
-        response = session.get(url)
+        headers = {"X-CSRF-TOKEN": csrf_token}
+        response = session.get(url, headers=headers)
         payload = response.json()
 
-        replies = []
+        responses = []
         for comment in payload["comment_list"]:
-            reply = get_reply_from_comment(comment)
-            reply["url"] = post_url
-            replies.append(reply)
+            replies = get_response_from_comment(comment)
+            replies["url"] = post_url
+            responses.append(replies)
 
         _logger.info("Success!")
 
-        return replies
+        return responses

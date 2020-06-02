@@ -1,20 +1,25 @@
 import logging
 import urllib.parse
-from typing import Any, Dict, List
+from datetime import timezone
+from typing import Any
+from typing import cast
+from typing import Dict
+from typing import List
 
 import mastodon
-from nefelibata.announcers import Announcer, Response
+from nefelibata.announcers import Announcer
+from nefelibata.announcers import Response
 from nefelibata.post import Post
 
-_logger = logging.getLogger("nefelibata")
+_logger = logging.getLogger(__name__)
 
 
-def get_reply_from_toot(toot: mastodon.AttribAccessDict) -> Response:
+def get_response_from_toot(toot: mastodon.AttribAccessDict) -> Response:
     return {
         "source": "Mastodon",
         "color": "#2b90d9",
         "id": f'mastodon:{toot["uri"]}',
-        "timestamp": toot.created_at.timestamp(),
+        "timestamp": toot.created_at.astimezone(timezone.utc).isoformat(),
         "user": {
             "name": toot.account.display_name,
             "image": toot.account.avatar,
@@ -31,14 +36,14 @@ class MastodonAnnouncer(Announcer):
     url_header = "mastodon-url"
 
     def __init__(
-        self, post: Post, config: Dict[str, Any], access_token: str, base_url: str
+        self, post: Post, config: Dict[str, Any], access_token: str, base_url: str,
     ):
         super().__init__(post, config)
 
         self.base_url = base_url
 
         self.client = mastodon.Mastodon(
-            access_token=access_token, api_base_url=base_url
+            access_token=access_token, api_base_url=base_url,
         )
 
     def announce(self) -> str:
@@ -55,7 +60,7 @@ class MastodonAnnouncer(Announcer):
         )
         _logger.info("Success!")
 
-        return toot["url"]
+        return cast(str, toot["url"])
 
     def collect(self) -> List[Response]:
         _logger.info(f"Collecting replies from Mastodon ({self.base_url})")
@@ -64,12 +69,12 @@ class MastodonAnnouncer(Announcer):
         toot_id = toot_url.rstrip("/").rsplit("/", 1)[1]
         context = self.client.status_context(toot_id)
 
-        replies = []
+        responses = []
         for toot in context["descendants"]:
-            reply = get_reply_from_toot(toot)
-            reply["url"] = toot_url
-            replies.append(reply)
+            response = get_response_from_toot(toot)
+            response["url"] = toot_url
+            responses.append(response)
 
         _logger.info("Success!")
 
-        return replies
+        return responses

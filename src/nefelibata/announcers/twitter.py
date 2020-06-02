@@ -1,19 +1,22 @@
 import logging
 import urllib.parse
-from typing import Any, Dict, List
+from datetime import timezone
+from typing import Any
+from typing import Dict
+from typing import List
 
 import dateutil.parser
 import twitter
-
-from nefelibata.announcers import Announcer, Response
+from nefelibata.announcers import Announcer
+from nefelibata.announcers import Response
 from nefelibata.post import Post
 
-_logger = logging.getLogger("nefelibata")
+_logger = logging.getLogger(__name__)
 
 max_length = 280
 
 
-def get_reply_from_mention(tweet: Dict[str, Any]) -> Response:
+def get_response_from_mention(tweet: Dict[str, Any]) -> Response:
     """Generate a standard reply from a Tweet.
 
     Args:
@@ -23,7 +26,9 @@ def get_reply_from_mention(tweet: Dict[str, Any]) -> Response:
         "source": "Twitter",
         "color": "#00acee",
         "id": f'twitter:{tweet["id_str"]}',
-        "timestamp": dateutil.parser.parse(tweet["created_at"]).timestamp(),
+        "timestamp": dateutil.parser.parse(tweet["created_at"])
+        .astimezone(timezone.utc)
+        .isoformat(),
         "user": {
             "name": tweet["user"]["name"],
             "image": tweet["user"]["profile_image_url_https"],
@@ -90,7 +95,10 @@ class TwitterAnnouncer(Announcer):
         _logger.info("Posting to Twitter")
 
         auth = twitter.OAuth(
-            self.oauth_token, self.oauth_secret, self.consumer_key, self.consumer_secret
+            self.oauth_token,
+            self.oauth_secret,
+            self.consumer_key,
+            self.consumer_secret,
         )
         client = twitter.Twitter(auth=auth)
 
@@ -111,7 +119,10 @@ class TwitterAnnouncer(Announcer):
         _logger.info("Collecting replies from Twitter")
 
         auth = twitter.OAuth(
-            self.oauth_token, self.oauth_secret, self.consumer_key, self.consumer_secret
+            self.oauth_token,
+            self.oauth_secret,
+            self.consumer_key,
+            self.consumer_secret,
         )
         client = twitter.Twitter(auth=auth)
 
@@ -125,16 +136,16 @@ class TwitterAnnouncer(Announcer):
                 contributor_details=True,
                 include_entities=True,
             )
-        except twitter.api.TwitterHTTPError:
+        except Exception:
             return []
 
-        replies = []
+        responses = []
         for mention in mentions:
             if mention["in_reply_to_status_id_str"] == tweet_id:
-                reply = get_reply_from_mention(mention)
-                reply["url"] = tweet_url
-                replies.append(reply)
+                response = get_response_from_mention(mention)
+                response["url"] = tweet_url
+                responses.append(response)
 
         _logger.info("Success!")
 
-        return replies
+        return responses

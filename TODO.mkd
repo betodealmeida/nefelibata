@@ -5,7 +5,7 @@
 - [x] atom feed
 - [x] upload to S3 only when changed
 - [x] Twitter announcer
-- [ ] FAWM announcer
+- [x] FAWM announcer
 - [x] display comments
 - [x] show link to comment
 - [x] update requirements.txt
@@ -13,8 +13,28 @@
 - [x] FB announcer
 - [x] WT.Social announcer
 - [x] Mastodon announcer
-- [ ] Instagram announcer
-- [ ] Medium announcer
-- [ ] microformats
-- [ ] linkbacks
+- [x] Medium announcer
+- [x] microformats
+- [x] linkbacks
+- [x] make timestamp an ISO string instead of float
+- [x] move mirror images to assistant
+- [x] check external resources as assistant
+- [x] check CSS for external resources
+- [x] builders
+- [x] do not pass root/config when initializing Post
+- [x] rename feed to Atom
+- [x] unit test coverage
+- [x] logger names
+- [ ] Neocities publisher
+- [ ] Medium collect
+- [ ] https://indiewebify.me/
+- [ ] add footer with link to project
+- [ ] Chrome performance
+- [ ] documentation
+- [ ] use track number to sort playlist
+- [ ] requirements.txt
+- [ ] new release
+- [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
+- [ ] Soundcloud announcer
+- [ ] Instagram announcer
