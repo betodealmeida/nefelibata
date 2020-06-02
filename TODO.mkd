@@ -25,13 +25,13 @@
 - [x] rename feed to Atom
 - [x] unit test coverage
 - [x] logger names
-- [ ] Neocities publisher
-- [ ] Medium collect
-- [ ] https://indiewebify.me/
+- [x] https://indiewebify.me/
 - [ ] add footer with link to project
 - [ ] Chrome performance
-- [ ] documentation
 - [ ] use track number to sort playlist
+- [ ] Neocities publisher
+- [ ] Medium collect
+- [ ] documentation
 - [ ] requirements.txt
 - [ ] new release
 - [ ] parallelize build/publish

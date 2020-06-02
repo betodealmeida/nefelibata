@@ -3,6 +3,7 @@ subtitle: Musings about the path and other things
 author:
     name: Beto Dealmeida
     email: roberto@dealmeida.net
+    note: This is me
 url: http://blog.taoetc.org/  # slashing trail is important
 posts-to-show: 5
 theme: pure-blog
@@ -20,18 +21,26 @@ social:
       url: "https://twitter.com/dealmeida"
       icon: icon-twitter
 
+builders:
+  - post
+  - index
+  - categories
+  - atom
+
+assistants:
+  - mirror_images
+  - warn_external_resources
+  - playlist
+
 publish-to:
   - S3
 
 announce-on:
   - webmention
   - mastodon
+  - wtsocial
   - twitter
   - medium
-  - wtsocial
-
-assistants:
-  - playlist
 
 # Apply for S3 here: http://aws.amazon.com/s3/
 S3:
