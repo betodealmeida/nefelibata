@@ -61,7 +61,6 @@ def run(root: Path, force: bool = False, collect_replies: bool = True) -> None:
         post_directory = post.file_path.parent
         relative_directory = post_directory.relative_to(root / "posts")
         target = root / "build" / relative_directory
-        print(post_directory.exists() and not target.exists())
         if post_directory.exists() and not target.exists():
             target.symlink_to(post_directory, target_is_directory=True)
 
