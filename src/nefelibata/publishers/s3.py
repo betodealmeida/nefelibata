@@ -88,19 +88,9 @@ class S3Publisher(Publisher):
             last_published = 0
 
         build = self.root / "build"
-        queue = [build]
-        # manually walk, since `glob("**/*")` doesn't follow symlinks
-        while queue:
-            current = queue.pop()
-            for path in current.glob("*"):
-                if not path.exists():
-                    # broken symlink
-                    continue
-                if path.is_dir():
-                    queue.append(path)
-                elif force or path.stat().st_mtime > last_published:
-                    key = str(path.relative_to(build))
-                    self._upload_file(path, key)
+        for path in self.find_modified_files(force, last_published):
+            key = str(path.relative_to(build))
+            self._upload_file(path, key)
 
         if self.configure_website:
             self._configure_website()

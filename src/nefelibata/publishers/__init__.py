@@ -11,6 +11,24 @@ class Publisher:
         self.root = root
         self.config = config
 
+    def find_modified_files(self, force: bool, since: float) -> List[Path]:
+        build = self.root / "build"
+        queue = [build]
+        # manually walk, since `glob("**/*")` doesn't follow symlinks
+        paths: List[Path] = []
+        while queue:
+            current = queue.pop()
+            for path in current.glob("*"):
+                if not path.exists():
+                    # broken symlink
+                    continue
+                if path.is_dir():
+                    queue.append(path)
+                elif force or path.stat().st_mtime > since:
+                    paths.append(path)
+
+        return paths
+
     def publish(self, force: bool = False) -> None:
         raise NotImplementedError("Subclasses must implement publish")
 

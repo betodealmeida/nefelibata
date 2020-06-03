@@ -286,7 +286,7 @@ def test_publish_no_last_published(fs):
         region="us-east-1",
     )
 
-    # create 2 posts, 1 of them up-to-date
+    # create 2 posts
     fs.create_dir(root / "build")
     with freeze_time("2019-12-31T00:00:00Z"):
         fs.create_dir(root / "build/one")
@@ -335,7 +335,7 @@ def test_publish_broken_symlink(fs):
         region="us-east-1",
     )
 
-    # create 2 posts, 1 of them up-to-date
+    # create 2 posts
     fs.create_dir(root / "build")
     with freeze_time("2019-12-31T00:00:00Z"):
         fs.create_dir(root / "build/one")
@@ -366,6 +366,7 @@ def test_publish_broken_symlink(fs):
             ),
         ],
     )
+
     mtime = (root / "last_published").stat().st_mtime
     assert (
         datetime.fromtimestamp(mtime).astimezone(timezone.utc).isoformat()

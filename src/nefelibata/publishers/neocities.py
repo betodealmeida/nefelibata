@@ -27,7 +27,7 @@ class NeocitiesPublisher(Publisher):
     ):
         super().__init__(root, config)
 
-        if (username and password) == (api_key is not None):
+        if bool(username and password) == (api_key is not None):
             raise Exception(
                 "You must provide exactly ONE of username/password or API key",
             )
@@ -53,25 +53,14 @@ class NeocitiesPublisher(Publisher):
             last_published = 0
 
         build = self.root / "build"
-        queue = [build]
-        # manually walk, since `glob("**/*")` doesn't follow symlinks
         filenames: List[Tuple[Path, str]] = []
-        while queue:
-            current = queue.pop()
-            for path in current.glob("*"):
-                if not path.exists():
-                    # broken symlink
-                    continue
-                if path.is_dir():
-                    queue.append(path)
-                elif force or path.stat().st_mtime > last_published:
-                    key = str(path.relative_to(build))
-                    filenames.append((path, key))
+        for path in self.find_modified_files(force, last_published):
+            key = str(path.relative_to(build))
+            filenames.append((path, key))
 
         # NeoCities API expects a dict in the following format:
         # { name_on_server: <file_object> }
         args = {pair[1]: open(pair[0], "rb") for pair in filenames}
-        print(args)
 
         url = "https://neocities.org/api/upload"
         requests.post(url, files=args, headers=self.headers)
