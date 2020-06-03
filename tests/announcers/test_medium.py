@@ -25,7 +25,7 @@ def test_announcer(mock_post, requests_mock):
         """,
         )
 
-    root = "/path/to/blog"
+    root = Path("/path/to/blog")
     config = {
         "url": "https://blog.example.com/",
         "language": "en",
@@ -553,3 +553,49 @@ def test_announcer(mock_post, requests_mock):
             },
         },
     ]
+
+
+def test_announcer_relative_links(mock_post, requests_mock):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, Medium!
+        keywords: test
+        summary: My first Medium post
+        announce-on: medium
+
+        Hi, there!
+
+        Here's a link that goes with this post: [somefile](somefile.txt)
+
+        And I also have this one in the root: [anotherfile](/anotherfile.txt)
+        """,
+        )
+
+    root = Path("/path/to/blog")
+    config = {
+        "url": "https://blog.example.com/",
+        "language": "en",
+    }
+    announcer = MediumAnnouncer(root, config, "token", "public")
+
+    requests_mock.get(
+        "https://api.medium.com/v1/me", json={"data": {"id": 1}},
+    )
+    mock_post = requests_mock.post(
+        "https://api.medium.com/v1/users/1/posts",
+        json={"data": {"url": "https://medium.com/@user/12345"}},
+    )
+
+    url = announcer.announce(post)
+    assert url == "https://medium.com/@user/12345"
+    assert urllib.parse.parse_qs(mock_post.last_request.text) == {
+        "title": ["Hello, Medium!"],
+        "contentFormat": ["html"],
+        "content": [
+            '<p>Hi, there!</p>\n<p>Here\'s a link that goes with this post: <a href="https://blog.example.com/first/somefile.txt">somefile</a></p>\n<p>And I also have this one in the root: <a href="https://blog.example.com/anotherfile.txt">anotherfile</a></p>',
+        ],
+        "tags": ["test"],
+        "canonicalUrl": ["https://blog.example.com/first/index.html"],
+        "publishStatus": ["public"],
+    }

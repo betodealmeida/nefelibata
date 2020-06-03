@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import urllib.parse
 from datetime import datetime
 from datetime import timezone
@@ -10,6 +11,7 @@ from typing import Dict
 from typing import List
 
 import requests
+from bs4 import BeautifulSoup
 from nefelibata.announcers import Announcer
 from nefelibata.announcers import Response
 from nefelibata.post import Post
@@ -90,7 +92,7 @@ class MediumAnnouncer(Announcer):
         payload = {
             "title": post.title,
             "contentFormat": "html",
-            "content": post.html,
+            "content": self._get_html_with_absolute_links(post),
             "tags": [tag.strip() for tag in post.parsed.get("keywords", "").split(",")],
             "canonicalUrl": urllib.parse.urljoin(self.config["url"], post.url),
             "publishStatus": self.publish_status or "draft",
@@ -113,3 +115,24 @@ class MediumAnnouncer(Announcer):
         _logger.info("Success!")
 
         return responses
+
+    def _get_html_with_absolute_links(self, post: Post) -> str:
+        """
+        Convert links to absolute URLs.
+
+        Since we upload the whole HTML response to Medium, we need to convert
+        relative liks to absolute ones, to prevent them from breaking.
+        """
+        soup = BeautifulSoup(post.html, "html.parser")
+        for el in soup.find_all("a", href=re.compile("^(?!https?://)")):
+            relative_url = el.attrs["href"]
+            if relative_url.startswith("/"):
+                absolute_url = urllib.parse.urljoin(self.config["url"], relative_url)
+            else:
+                directory_name = post.file_path.parent.relative_to(self.root / "posts")
+                absolute_url = urllib.parse.urljoin(
+                    self.config["url"], f"{directory_name}/{relative_url}",
+                )
+            el.attrs["href"] = absolute_url
+
+        return str(soup)

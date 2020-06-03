@@ -97,7 +97,7 @@ def test_announcer(mock_post, requests_mock):
         """,
         )
 
-    root = "/path/to/blog"
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
         root, config, "https://webmention.io/example.com/webmention", True,
@@ -181,7 +181,7 @@ def test_announcer_no_indienews(mock_post):
         """,
         )
 
-    root = "/path/to/blog"
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
         root, config, "https://webmention.io/example.com/webmention", False,
@@ -215,7 +215,7 @@ def test_announcer_indienews_no_language(mock_post):
         """,
         )
 
-    root = "/path/to/blog"
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "pt_BR"}
     announcer = WebmentionAnnouncer(
         root, config, "https://webmention.io/example.com/webmention", True,
@@ -249,7 +249,7 @@ def test_announcer_send_mention(mock_post, requests_mock):
         """,
         )
 
-    root = "/path/to/blog"
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
         root, config, "https://webmention.io/example.com/webmention", True,

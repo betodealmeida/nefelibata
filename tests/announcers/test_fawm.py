@@ -347,7 +347,7 @@ def test_announcer(mock_post, mocker, requests_mock):
         """,
         )
 
-    root = "/path/to/blog"
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/"}
     announcer = FAWMAnnouncer(root, config, "username", "password")
 

@@ -58,7 +58,7 @@ def test_announcer(mock_post, mocker):
         """,
         )
 
-    root = "/path/to/blog"
+    root = Path("/path/to/blog")
     config = {
         "url": "http://blog.example.com/",
         "language": "en",
@@ -111,7 +111,7 @@ def test_collect_exception(mock_post, mocker):
 
     post.parsed["twitter-url"] = "https://twitter.example.com/user/status/1"
 
-    root = "/path/to/blog"
+    root = Path("/path/to/blog")
     config = {
         "url": "http://blog.example.com/",
         "language": "en",
