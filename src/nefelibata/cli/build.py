@@ -47,7 +47,13 @@ def run(root: Path, force: bool = False, collect_replies: bool = True) -> None:
     post_assistants = get_assistants(root, config, Scope.POST)
     announcers = get_announcers(root, config)
     for post in get_posts(root):
-        # first, collect replies so we can use them when building the post
+        # freeze currently configured announcers, so that if a new announcer is
+        # added in the future old posts are not announced
+        if "announce-on" not in post.parsed:
+            post.parsed["announce-on"] = ", ".join(config["announce-on"])
+            post.save()
+
+        # collect replies so we can use them when building the post
         if collect_replies:
             for announcer in announcers:
                 if announcer.match(post):

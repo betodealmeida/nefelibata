@@ -36,8 +36,12 @@
 - [x] use track number to sort playlist
 - [x] Neocities publisher
 - [x] requirements.txt
+- [x] fix indienews link when no explicit announce
+- [ ] convert relative link to absolute when publishing to Medium
 - [ ] documentation
 - [ ] new release
+- [ ] per post language
+- [ ] spellcheck assistant
 - [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
 - [ ] Soundcloud announcer

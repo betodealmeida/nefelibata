@@ -14,6 +14,7 @@ __license__ = "mit"
 config = {
     "theme": "test-theme",
     "builders": ["post", "index", "categories", "atom"],
+    "announce-on": ["announcer1", "announcer2"],
 }
 
 

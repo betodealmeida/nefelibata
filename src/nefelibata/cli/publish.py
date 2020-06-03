@@ -28,12 +28,6 @@ def run(root: Path, force: bool = False) -> None:
     # announce posts
     announcers = get_announcers(root, config)
     for post in get_posts(root):
-        # freeze currently configured announcers, so that if a new announcer is
-        # added in the future old posts are not announced
-        if "announce-on" not in post.parsed:
-            post.parsed["announce-on"] = ", ".join(config["announce-on"])
-            post.save()
-
         for announcer in announcers:
             if announcer.match(post):
                 announcer.update_links(post)
