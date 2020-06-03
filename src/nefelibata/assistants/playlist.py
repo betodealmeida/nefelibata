@@ -66,5 +66,13 @@ class PlaylistAssistant(Assistant):
             lines.append("")
         pls = "\n".join(lines).strip()
 
-        with open(post_directory / "index.pls", "w") as fp:
+        # if the file exists and hasn't changed, skip to prevent it
+        # from being published again
+        pls_path = post_directory / "index.pls"
+        if pls_path.exists():
+            with open(pls_path) as fp:
+                if pls == fp.read():
+                    return
+
+        with open(pls_path, "w") as fp:
             fp.write(pls)

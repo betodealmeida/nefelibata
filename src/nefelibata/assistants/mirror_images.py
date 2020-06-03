@@ -40,8 +40,9 @@ class MirrorImagesAssistant(Assistant):
             html = inp.read()
 
         soup = BeautifulSoup(html, "html.parser")
-        for el in soup.find_all("img", src=re.compile("http")):
-            url = el.attrs["src"]
+        external_images = soup.find_all("img", src=re.compile("http"))
+        for image in external_images:
+            url = image.attrs["src"]
 
             extension = get_resource_extension(url)
             m = hashlib.md5()
@@ -56,8 +57,9 @@ class MirrorImagesAssistant(Assistant):
                     for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
                         outp.write(chunk)
 
-            el.attrs["src"] = "img/%s" % local.name
-        html = str(soup)
+            image.attrs["src"] = "img/%s" % local.name
 
-        with open(file_path, "w") as fp:
-            fp.write(html)
+        if external_images:
+            html = str(soup)
+            with open(file_path, "w") as fp:
+                fp.write(html)

@@ -1,3 +1,5 @@
+from datetime import datetime
+from datetime import timezone
 from pathlib import Path
 from typing import Any
 from typing import Dict
@@ -224,3 +226,32 @@ def test_process_site(mock_post, mocker, requests_mock, fs):
         contents = fp.read()
 
     assert contents == '<img src="img/e0e9a99aaf941ecd23bf4a3d2f0d82a2.png"/>'
+
+
+def test_process_post_not_modified(mock_post, mocker, requests_mock):
+    root = Path("/path/to/blog")
+
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, World!
+        keywords: test
+        summary: My first post
+
+        Hi, there!
+
+        This is an local image:
+
+        ![alt text](icon48.png "Logo Title Text 1")
+        """,
+        )
+        PostBuilder(root, config).process_post(post)
+
+    assistant = MirrorImagesAssistant(root, config)
+
+    assistant.process_post(post)
+
+    # file shouldn't have been touched
+    assert datetime.fromtimestamp(
+        post.file_path.with_suffix(".html").stat().st_mtime,
+    ).astimezone(timezone.utc) == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
