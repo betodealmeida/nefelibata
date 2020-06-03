@@ -35,7 +35,7 @@
 - [x] Medium collect
 - [x] use track number to sort playlist
 - [x] Neocities publisher
-- [ ] requirements.txt
+- [x] requirements.txt
 - [ ] documentation
 - [ ] new release
 - [ ] parallelize build/publish
