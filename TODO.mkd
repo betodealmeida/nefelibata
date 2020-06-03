@@ -34,9 +34,9 @@
 - [x] fix contrast post subtitle (summary)
 - [x] Medium collect
 - [x] use track number to sort playlist
-- [~] Neocities publisher
-- [ ] documentation
+- [x] Neocities publisher
 - [ ] requirements.txt
+- [ ] documentation
 - [ ] new release
 - [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
