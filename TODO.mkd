@@ -34,7 +34,7 @@
 - [x] fix contrast post subtitle (summary)
 - [x] Medium collect
 - [x] use track number to sort playlist
-- [ ] Neocities publisher
+- [~] Neocities publisher
 - [ ] documentation
 - [ ] requirements.txt
 - [ ] new release
