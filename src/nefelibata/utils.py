@@ -1,6 +1,7 @@
 import logging
 import re
 import sys
+import unicodedata
 from pathlib import Path
 from typing import Any
 from typing import Dict
@@ -55,10 +56,17 @@ def find_directory(cwd: Path) -> Path:
     return cwd
 
 
+def strip_accents(text: str) -> str:
+    text = unicodedata.normalize("NFD", text).encode("ascii", "ignore").decode("utf-8")
+
+    return str(text)
+
+
 def sanitize(directory: str) -> str:
     """Sanitize a post title into a directory name.
     """
     directory = directory.lower().replace(" ", "_")
     directory = re.sub(r"[^\w]", "", directory)
+    directory = strip_accents(directory)
 
     return directory

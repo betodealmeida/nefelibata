@@ -270,3 +270,34 @@ def test_announcer_send_mention(mock_post, requests_mock):
     requests_mock.get("https://blog.example.com/", text=html)
 
     announcer.announce(post)
+
+
+def test_announcer_exception(mock_post, requests_mock):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, friends!
+        keywords: test
+        summary: My first post
+        announce-on: webmention
+        webmention-url: https://commentpara.de/
+
+        Hi, there! I heard [this blog](https://blog.example.com/) supports webmention.
+        """,
+        )
+
+    root = Path("/path/to/blog")
+    config = {"url": "https://blog.example.com/", "language": "en"}
+    announcer = WebmentionAnnouncer(
+        root, config, "https://webmention.io/example.com/webmention", True,
+    )
+
+    # passing a target with non-ASCII characters results in a 500 from webmention.io
+    requests_mock.get(
+        "https://webmention.io/api/mentions.jf2",
+        status_code=500,
+        text="<h1>Internal Server Error</h1>",
+    )
+
+    results = announcer.collect(post)
+    assert results == []

@@ -52,9 +52,9 @@ class MirrorImagesAssistant(Assistant):
 
             # download and store locally
             if not local.exists():
-                r = requests.get(url, stream=True)
+                response = requests.get(url, stream=True)
                 with open(local, "wb") as outp:
-                    for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
+                    for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
                         outp.write(chunk)
 
             image.attrs["src"] = "img/%s" % local.name

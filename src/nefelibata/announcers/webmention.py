@@ -30,16 +30,16 @@ COMMENT_URL = "https://commentpara.de/"
 
 def get_webmention_endpoint(url) -> Optional[str]:
     # start with a HEAD request
-    r = requests.head(url)
-    if "Link" in r.headers:
-        header = r.headers["Link"]
+    response = requests.head(url)
+    if "Link" in response.headers:
+        header = response.headers["Link"]
         links = requests.utils.parse_header_links(header)
         for link in links:
             if link["rel"] == "webmention":
                 return cast(str, urllib.parse.urljoin(url, link["url"]))
 
-    r = requests.get(url)
-    html = r.content
+    response = requests.get(url)
+    html = response.content
     soup = BeautifulSoup(html, "html.parser")
     link = soup.find(rel="webmention")
     if link:
@@ -140,8 +140,14 @@ class WebmentionAnnouncer(Announcer):
         target = urllib.parse.urljoin(self.config["url"], post.url)
         url = "https://webmention.io/api/mentions.jf2"
         payload = {"target": target}
-        r = requests.get(url, params=payload)
-        feed = json.loads(r.content)
+        response = requests.get(url, params=payload)
+        try:
+            response.raise_for_status()
+        except Exception:
+            _logger.exception(f"Failed to load webmentions for {target}")
+            return []
+
+        feed = response.json()
 
         _logger.info("Success!")
 

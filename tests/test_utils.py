@@ -109,3 +109,4 @@ def test_find_directory(fs):
 
 def test_sanitize():
     assert sanitize("Hello, World!") == "hello_world"
+    assert sanitize("Olá, mundo!") == "ola_mundo"
