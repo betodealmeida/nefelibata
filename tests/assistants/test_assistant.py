@@ -12,7 +12,7 @@ __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
 
 
-class TestAssistant(Assistant):
+class MockAssistant(Assistant):
 
     scopes = [Scope.POST]
 
@@ -21,7 +21,7 @@ def make_dummy_assistant(scope):
     return type("SomeAssistant", (Assistant,), {"scopes": [scope]})
 
 
-class TestEntryPoint:
+class MockEntryPoint:
     def __init__(self, name: str, assistant: Assistant):
         self.name = name
         self.assistant = assistant
@@ -33,8 +33,8 @@ class TestEntryPoint:
 def test_get_assistants(mocker):
     root = Path("/path/to/blog")
     entry_points = [
-        TestEntryPoint("test1", make_dummy_assistant(Scope.POST)),
-        TestEntryPoint("test2", make_dummy_assistant(Scope.SITE)),
+        MockEntryPoint("test1", make_dummy_assistant(Scope.POST)),
+        MockEntryPoint("test2", make_dummy_assistant(Scope.SITE)),
     ]
     mocker.patch("nefelibata.assistants.iter_entry_points", return_value=entry_points)
 

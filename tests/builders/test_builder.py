@@ -12,7 +12,7 @@ __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
 
 
-class TestBuilder(Builder):
+class MockBuilder(Builder):
 
     scopes = [Scope.POST]
 
@@ -21,7 +21,7 @@ def make_dummy_builder(scope):
     return type("SomeBuilder", (Builder,), {"scopes": [scope]})
 
 
-class TestEntryPoint:
+class MockEntryPoint:
     def __init__(self, name: str, builder: Builder):
         self.name = name
         self.builder = builder
@@ -32,8 +32,8 @@ class TestEntryPoint:
 
 def test_get_builders(mocker):
     entry_points = [
-        TestEntryPoint("test1", make_dummy_builder(Scope.POST)),
-        TestEntryPoint("test2", make_dummy_builder(Scope.SITE)),
+        MockEntryPoint("test1", make_dummy_builder(Scope.POST)),
+        MockEntryPoint("test2", make_dummy_builder(Scope.SITE)),
     ]
     mocker.patch("nefelibata.builders.iter_entry_points", return_value=entry_points)
 

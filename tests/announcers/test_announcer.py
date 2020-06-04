@@ -64,7 +64,7 @@ response3 = {
 }
 
 
-class TestAnnouncer(Announcer):
+class MockAnnouncer(Announcer):
 
     id = "test"
     name = "Test"
@@ -93,7 +93,7 @@ def make_dummy_announcer(name):
     return type("SomeAnnouncer", (Announcer,), {"name": name, "id": name.lower()})
 
 
-class TestEntryPoint:
+class MockEntryPoint:
     def __init__(self, name: str, announcer: Announcer):
         self.name = name
         self.announcer = announcer
@@ -120,7 +120,7 @@ def test_update_links(mock_post):
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(root, config, "https://example.com/", [])
+    announcer = MockAnnouncer(root, config, "https://example.com/", [])
 
     announcer.update_links(post)
     with open(post.file_path.parent / "links.json") as fp:
@@ -147,7 +147,7 @@ def test_update_links_file_exists(mock_post):
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(root, config, "https://example.com/", [])
+    announcer = MockAnnouncer(root, config, "https://example.com/", [])
 
     # add some initial content to the file
     contents = json.dumps({"Foo": "https://foo.example.com/"})
@@ -179,7 +179,7 @@ def test_update_links_link_exists(mock_post):
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(root, config, "https://example.com/", [])
+    announcer = MockAnnouncer(root, config, "https://example.com/", [])
 
     # add some initial content to the file
     contents = json.dumps({"Test": "https://example.com/"})
@@ -211,7 +211,7 @@ def test_update_links_no_link(mock_post):
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(root, config, None, [])
+    announcer = MockAnnouncer(root, config, None, [])
 
     announcer.update_links(post)
     assert not (post.file_path.parent / "links.json").exists()
@@ -236,7 +236,7 @@ def test_update_replies(mock_post):
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(root, config, "https://example.com/", [response1])
+    announcer = MockAnnouncer(root, config, "https://example.com/", [response1])
 
     announcer.update_replies(post)
     with open(post.file_path.parent / "replies.json") as fp:
@@ -263,7 +263,7 @@ def test_update_replies_not_announced(mock_post):
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(root, config, "https://example.com/", [])
+    announcer = MockAnnouncer(root, config, "https://example.com/", [])
 
     announcer.update_replies(post)
     assert not (post.file_path.parent / "replies.json").exists()
@@ -288,7 +288,7 @@ def test_update_replies_storage_exists(mock_post):
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(root, config, "https://example.com/", [response1])
+    announcer = MockAnnouncer(root, config, "https://example.com/", [response1])
 
     # add some initial content to the file
     contents = json.dumps([response2])
@@ -322,7 +322,7 @@ def test_update_replies_no_overwrite(mock_post):
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(root, config, "https://example.com/", [response1])
+    announcer = MockAnnouncer(root, config, "https://example.com/", [response1])
 
     # add some initial content to the file
     contents = json.dumps([response1])
@@ -356,7 +356,7 @@ def test_update_replies_no_name_or_image(mock_post, mocker):
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(root, config, "https://example.com/", [response3.copy()])
+    announcer = MockAnnouncer(root, config, "https://example.com/", [response3.copy()])
 
     # mf2py payload
     payload = {
@@ -417,7 +417,7 @@ def test_update_replies_no_name_or_image_no_hcard(mock_post, mocker):
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(root, config, "https://example.com/", [response3.copy()])
+    announcer = MockAnnouncer(root, config, "https://example.com/", [response3.copy()])
 
     # mf2py payload
     payload = {
@@ -453,7 +453,7 @@ def test_update_replies_no_name_or_image_no_items(mock_post, mocker):
         "url": "https://blog.example.com/",
         "language": "en",
     }
-    announcer = TestAnnouncer(root, config, "https://example.com/", [response3.copy()])
+    announcer = MockAnnouncer(root, config, "https://example.com/", [response3.copy()])
 
     # mf2py payload
     payload = {
@@ -472,8 +472,8 @@ def test_update_replies_no_name_or_image_no_items(mock_post, mocker):
 
 def test_get_announcers_from_header(mock_post, mocker):
     entry_points = [
-        TestEntryPoint("test1", make_dummy_announcer("Test1")),
-        TestEntryPoint("test2", make_dummy_announcer("Test2")),
+        MockEntryPoint("test1", make_dummy_announcer("Test1")),
+        MockEntryPoint("test2", make_dummy_announcer("Test2")),
     ]
     mocker.patch("nefelibata.announcers.iter_entry_points", return_value=entry_points)
 
@@ -507,8 +507,8 @@ def test_get_announcers_from_header(mock_post, mocker):
 
 def test_get_announcers_from_config(mock_post, mocker):
     entry_points = [
-        TestEntryPoint("test1", make_dummy_announcer("Test1")),
-        TestEntryPoint("test2", make_dummy_announcer("Test2")),
+        MockEntryPoint("test1", make_dummy_announcer("Test1")),
+        MockEntryPoint("test2", make_dummy_announcer("Test2")),
     ]
     mocker.patch("nefelibata.announcers.iter_entry_points", return_value=entry_points)
 
@@ -541,8 +541,8 @@ def test_get_announcers_from_config(mock_post, mocker):
 
 def test_get_announcers_extra(mock_post, mocker):
     entry_points = [
-        TestEntryPoint("test1", make_dummy_announcer("Test1")),
-        TestEntryPoint("test2", make_dummy_announcer("Test2")),
+        MockEntryPoint("test1", make_dummy_announcer("Test1")),
+        MockEntryPoint("test2", make_dummy_announcer("Test2")),
     ]
     mocker.patch("nefelibata.announcers.iter_entry_points", return_value=entry_points)
 

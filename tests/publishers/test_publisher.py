@@ -12,7 +12,7 @@ def make_dummy_publisher(name):
     return type("SomePublisher", (Publisher,), {})
 
 
-class TestEntryPoint:
+class MockEntryPoint:
     def __init__(self, name: str, publisher: Publisher):
         self.name = name
         self.publisher = publisher
@@ -23,8 +23,8 @@ class TestEntryPoint:
 
 def test_get_publishers(mock_post, mocker):
     entry_points = [
-        TestEntryPoint("test1", make_dummy_publisher("Test1")),
-        TestEntryPoint("test2", make_dummy_publisher("Test2")),
+        MockEntryPoint("test1", make_dummy_publisher("Test1")),
+        MockEntryPoint("test2", make_dummy_publisher("Test2")),
     ]
     mocker.patch("nefelibata.publishers.iter_entry_points", return_value=entry_points)
 
@@ -44,8 +44,8 @@ def test_get_publishers(mock_post, mocker):
 
 def test_get_publishers_string(mock_post, mocker):
     entry_points = [
-        TestEntryPoint("test1", make_dummy_publisher("Test1")),
-        TestEntryPoint("test2", make_dummy_publisher("Test2")),
+        MockEntryPoint("test1", make_dummy_publisher("Test1")),
+        MockEntryPoint("test2", make_dummy_publisher("Test2")),
     ]
     mocker.patch("nefelibata.publishers.iter_entry_points", return_value=entry_points)
 
