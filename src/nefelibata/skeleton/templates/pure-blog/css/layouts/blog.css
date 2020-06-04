@@ -115,10 +115,11 @@ h3 {
 
 .post-category {
     margin: 0 0.1em;
-    padding: 0.3em 1em;
+    padding: 0.2em 1em;
     color: #fff;
     background: #999;
     font-size: 80%;
+    border-radius: 4px;
 }
     .post-category-0 {
         background: #5aba59;

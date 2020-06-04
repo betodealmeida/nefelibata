@@ -14,12 +14,7 @@ def test_hash_n():
 
 
 def test_random_color():
-    assert random_color("one") == "#5d000e"
-    assert random_color("two") == "#1e005d"
-    assert random_color("three") == "#455d00"
-
-    assert random_color("one", contrast_luminance=0) == "#59000d"
-
-    with pytest.raises(Exception) as excinfo:
-        random_color("one", contrast_luminance=0.5) == "59000d"
-    assert str(excinfo.value) == "Computed luminance outside bounds: 2.43"
+    assert random_color("one") == "#9c5d67"
+    assert random_color("two") == "#7a65a3"
+    assert random_color("three") == "#697546"
+    assert random_color("one", rgb=(0, 0, 0)) == "#ffffff"
