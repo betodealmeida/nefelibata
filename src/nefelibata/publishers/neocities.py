@@ -13,6 +13,9 @@ from nefelibata.publishers import Publisher
 _logger = logging.getLogger(__name__)
 
 
+blocklist = [".mkd"]
+
+
 class NeocitiesPublisher(Publisher):
 
     """A publisher that uploads the weblog to Neocities."""
@@ -55,15 +58,17 @@ class NeocitiesPublisher(Publisher):
         build = self.root / "build"
         filenames: List[Tuple[Path, str]] = []
         for path in self.find_modified_files(force, last_published):
-            key = str(path.relative_to(build))
-            filenames.append((path, key))
+            if path.suffix not in blocklist:
+                key = str(path.relative_to(build))
+                filenames.append((path, key))
 
         # NeoCities API expects a dict in the following format:
         # { name_on_server: <file_object> }
         args = {pair[1]: open(pair[0], "rb") for pair in filenames}
 
         url = "https://neocities.org/api/upload"
-        requests.post(url, files=args, headers=self.headers)
+        response = requests.post(url, files=args, headers=self.headers)
+        response.raise_for_status()
 
         # update last published
         last_published_file.touch()

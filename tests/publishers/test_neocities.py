@@ -31,9 +31,11 @@ def test_publish(fs, mocker):
     fs.create_dir(root / "build")
     with freeze_time("2019-12-31T00:00:00Z"):
         fs.create_dir(root / "build/one")
+        fs.create_file(root / "build/one/index.mkd")
         fs.create_file(root / "build/one/index.html")
     with freeze_time("2020-01-02T00:00:00Z"):
         fs.create_dir(root / "build/two")
+        fs.create_file(root / "build/two/index.mkd")
         fs.create_file(root / "build/two/index.html")
 
     mock_requests = MagicMock()
@@ -45,6 +47,7 @@ def test_publish(fs, mocker):
     with freeze_time("2020-01-03T00:00:00Z"):
         publisher.publish()
 
+    # the markdown files are *not* uploaded, since Neocities rejects them
     mock_requests.post.assert_called_with(
         "https://neocities.org/api/upload",
         files={"two/index.html": Path(root / "build/two/index.html")},

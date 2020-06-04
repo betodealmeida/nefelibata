@@ -1,9 +1,9 @@
 title: Tao etc.
 subtitle: Musings about the path and other things
 author:
-    name: Beto Dealmeida
-    email: roberto@dealmeida.net
-    note: This is me
+  name: Beto Dealmeida
+  email: roberto@dealmeida.net
+  note: This is me
 url: http://blog.taoetc.org/  # slashing trail is important
 posts-to-show: 5
 theme: pure-blog
@@ -11,30 +11,42 @@ language: en
 
 # These are social icons displayed on the footer
 social:
-    - title: Code
-      url: "https://github.com/betodealmeida"
-      icon: icon-github
-    - title: Facebook
-      url: "https://www.facebook.com/beto"
-      icon: icon-facebook
-    - title: Twitter
-      url: "https://twitter.com/dealmeida"
-      icon: icon-twitter
+  - title: Code
+    url: "https://github.com/betodealmeida"
+    icon: icon-github
+  - title: Facebook
+    url: "https://www.facebook.com/beto"
+    icon: icon-facebook
+  - title: Twitter
+    url: "https://twitter.com/dealmeida"
+    icon: icon-twitter
 
+
+# Builders define which parts of the blog are built
 builders:
   - post
   - index
   - categories
   - atom
 
+# Assistants post-process the HTML built, mirroring remote images locally,
+# warning if you're linking to external resources (CSS, images), and
+# generating playlist files (*.pls) from MP3s automatically.
 assistants:
   - mirror_images
   - warn_external_resources
   - playlist
 
+# Publishers define where your static pages will be uploaded to. Neocities
+# is easy to setup and recommended for beginners, but you can also upload
+# to S3. You probably need just one of them.
 publish-to:
+  - neocities
   - S3
 
+# Announcers will post links to your post on social media (or the whole post,
+# in the case of Medium), and also aggregate comments and replies back and
+# save them with your post.
 announce-on:
   - webmention
   - mastodon
@@ -42,16 +54,27 @@ announce-on:
   - twitter
   - medium
 
+
+# Sign for Neocities at: https://neocities.org
+neocities:
+  # Use your username/password for the first upload. Nefelibata will print
+  # out your API key, which you should add to this config and remove the
+  # username and password.
+  username:
+  password:
+  # api_key:
+
 # Apply for S3 here: http://aws.amazon.com/s3/
 S3:
-    AWS_ACCESS_KEY_ID:
-    AWS_SECRET_ACCESS_KEY:
-    bucket: blog.taoetc.org
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  bucket: blog.taoetc.org
 
-    # Nefelibata will configure the bucket as website and also set your DNS
-    # if you're using Route 53
-    configure_website: true
-    configure_route53: blog.taoetc.org.
+  # Nefelibata will configure the bucket as website and also set your DNS
+  # if you're using Route 53.
+  configure_website: true
+  configure_route53: blog.taoetc.org.
+
 
 # Visit the Twitter developer page and create a new application:
 #
@@ -61,36 +84,36 @@ S3:
 # application you can request the oauth_token and oauth_secret on the same
 # page.
 twitter:
-    consumer_key:
-    consumer_secret:
-    oauth_token:
-    oauth_secret:
+  consumer_key:
+  consumer_secret:
+  oauth_token:
+  oauth_secret:
 
 # FAWM is a website where people write 14 songs during the month of February.
 fawm:
-    username:
-    password:
+  username:
+  password:
 
 # Sign up to WT.Social and put your email and password here.
 wtsocial:
-    email:
-    password:
+  email:
+  password:
 
 # Create an application at https://{instance}/settings/applications/ with access
 # to the scopes `read:statuses` and write:statuses`.
 mastodon:
-    access_token:
-    base_url:
+  access_token:
+  base_url:
 
 # Currently webmention works with webmention.io; in the future AWS lambdas will
 # be supported.
 webmention:
-    endpoint: https://webmention.io/{your-blog-url}/webmention
-    # automatically post to https://news.indieweb.org/{language}
-    post_to_indienews: false
+  endpoint: https://webmention.io/{your-blog-url}/webmention
+  # automatically post to https://news.indieweb.org/{language}
+  post_to_indienews: false
 
+# Generate an integration token at: https://medium.com/me/settings
 medium:
-    # generate an integration token at https://medium.com/me/settings
-    access_token:
-    # public, draft or unlisted
-    publish_status: unlisted
+  access_token:
+  # public, draft or unlisted
+  publish_status: unlisted
