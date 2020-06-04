@@ -80,7 +80,7 @@
 
                     {% set announcers = post.parsed.get("announce-on", "").replace(" ", "").split(",") + post.parsed.get("announce-extra", "").replace(" ", "").split(",") %}
                     {% if "webmention" in announcers and config.webmention.post_to_indienews %}
-                    (<a href="https://news.indieweb.org/{{ config.language }}" class="u-syndication">Also posted on IndieNews</a>.)
+                    (<a href="https://news.indieweb.org/{{ post.parsed.get("language") or config.language }}" class="u-syndication">Also posted on IndieNews</a>.)
                     {% endif %}
                 </section>
 

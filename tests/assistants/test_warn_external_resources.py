@@ -14,6 +14,7 @@ __license__ = "mit"
 
 config: Dict[str, Any] = {
     "url": "https://example.com/",
+    "language": "en",
     "theme": "test-theme",
     "webmention": {"endpoint": "https://webmention.io/example.com/webmention"},
 }

@@ -56,6 +56,7 @@ class PostBuilder(Builder):
         html = template.render(
             __version__=__version__,
             config=self.config,
+            language=post.parsed.get("language") or self.config["language"],
             post=post,
             scripts=scripts,
             stylesheets=stylesheets,

@@ -48,6 +48,7 @@ class IndexBuilder(Builder):
             html = template.render(
                 __version__=__version__,
                 config=self.config,
+                language=self.config["language"],
                 posts=page_posts,
                 breadcrumbs=[("Recent Posts", None)],
                 previous=previous,

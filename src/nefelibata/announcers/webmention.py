@@ -108,12 +108,13 @@ class WebmentionAnnouncer(Announcer):
             self._send_mention(source, target)
 
         if self.post_to_indienews:
-            if self.config["language"] not in SUPPORTED_LANGUAGES:
+            language = post.parsed.get("language") or self.config["language"]
+            if language not in SUPPORTED_LANGUAGES:
                 _logger.error(
                     f'Currently IndieNews supports only the following languages: {", ".join(SUPPORTED_LANGUAGES)}',
                 )
             else:
-                target = f'https://news.indieweb.org/{self.config["language"]}'
+                target = f"https://news.indieweb.org/{language}"
                 _logger.info(f"Checking {target}")
                 self._send_mention(source, target)
 

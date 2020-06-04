@@ -66,6 +66,7 @@ class CategoriesBuilder(Builder):
                 html = template.render(
                     __version__=__version__,
                     config=self.config,
+                    language=self.config["language"],
                     posts=page_posts,
                     breadcrumbs=[
                         ("Home", "/index.html"),

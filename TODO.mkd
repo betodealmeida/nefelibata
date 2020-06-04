@@ -38,9 +38,10 @@
 - [x] requirements.txt
 - [x] fix indienews link when no explicit announce
 - [x] convert relative link to absolute when publishing to Medium
-- [ ] per post language
+- [x] per post language
 - [ ] documentation
 - [ ] new release
+- [ ] RSS club
 - [ ] spellcheck assistant?
 - [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
