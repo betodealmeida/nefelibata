@@ -78,9 +78,7 @@
                         -->
                     </div>
 
-                    {% set announcers = post.parsed.get("announce-on", "").replace(" ", "").split(",") + post.parsed.get("announce-extra", "").replace(" ", "").split(",") %}
-                    {% set language = post.parsed.get("language") or config.language %}
-                    {% if language in ["en", "sv", "de", "fr", "nl", "ru"] and "webmention" in announcers and config.webmention.post_to_indienews %}
+                    {% if json.indienews and json.indienews.posted %}
                     (<a href="https://news.indieweb.org/{{ language }}" class="u-syndication">Also posted on IndieNews</a>.)
                     {% endif %}
                 </section>

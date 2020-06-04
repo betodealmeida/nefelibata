@@ -117,6 +117,8 @@ class WebmentionAnnouncer(Announcer):
                 target = f"https://news.indieweb.org/{language}"
                 _logger.info(f"Checking {target}")
                 self._send_mention(source, target)
+                with open(post.file_path.parent / "indienews.json", "w") as fp:
+                    fp.write(json.dumps({"posted": True}))
 
         _logger.info("Success!")
 
