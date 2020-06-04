@@ -1,6 +1,8 @@
 import logging
 import time
 from datetime import datetime
+from email.header import decode_header
+from email.header import make_header
 from email.parser import Parser
 from email.utils import formatdate
 from email.utils import parsedate
@@ -31,12 +33,12 @@ class Post:
 
     @property
     def title(self) -> str:
-        return cast(str, self.parsed["subject"])
+        return str(make_header(decode_header(self.parsed["subject"])))
 
     @property
     def summary(self) -> str:
         if self.parsed["summary"]:
-            return cast(str, self.parsed["summary"])
+            return str(make_header(decode_header(self.parsed["summary"])))
 
         soup = BeautifulSoup(self.html, "html.parser")
         if soup.p:
