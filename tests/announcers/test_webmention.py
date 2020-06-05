@@ -38,7 +38,9 @@ Hello!
 </body>
 </html>
 """
-    requests_mock.head("https://user2.example.com/")
+    requests_mock.head(
+        "https://user2.example.com/", headers={"Content-Type": "text/html"},
+    )
     requests_mock.get(
         "https://user2.example.com/", text=html,
     )
@@ -56,12 +58,22 @@ def test_get_webmention_endpoint_anchor(requests_mock):
 </body>
 </html>
 """
-    requests_mock.head("https://user3.example.com/")
+    requests_mock.head(
+        "https://user3.example.com/", headers={"Content-Type": "text/html"},
+    )
     requests_mock.get(
         "https://user3.example.com/", text=html,
     )
     url = get_webmention_endpoint("https://user3.example.com/")
     assert url == "https://user3.example.com/webmention-endpoint"
+
+
+def test_get_webmention_non_html(requests_mock):
+    requests_mock.head(
+        "https://user4.example.com/", headers={"Content-Type": "application/pdf"},
+    )
+    url = get_webmention_endpoint("https://user4.example.com/")
+    assert url is None
 
 
 def test_get_webmention_endpoint_none(requests_mock):
@@ -266,7 +278,9 @@ def test_announcer_send_mention(mock_post, requests_mock):
 
     # the linked site does not
     html = "<html><head></head><body></body></html>"
-    requests_mock.head("https://blog.example.com/")
+    requests_mock.head(
+        "https://blog.example.com/", headers={"Content-Type": "text/html"},
+    )
     requests_mock.get("https://blog.example.com/", text=html)
 
     announcer.announce(post)
