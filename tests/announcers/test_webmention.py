@@ -101,7 +101,7 @@ def test_announcer(mock_post, requests_mock):
         post = mock_post(
             """
         subject: Hello, friends!
-        keywords: test
+        keywords: test, indieweb
         summary: My first post
         announce-on: webmention
 
@@ -112,7 +112,7 @@ def test_announcer(mock_post, requests_mock):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention", True,
+        root, config, "https://webmention.io/example.com/webmention",
     )
 
     mock_send_mention = MagicMock()
@@ -196,7 +196,7 @@ def test_announcer_no_indienews(mock_post):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention", False,
+        root, config, "https://webmention.io/example.com/webmention",
     )
 
     mock_send_mention = MagicMock()
@@ -219,7 +219,7 @@ def test_announcer_indienews_no_language(mock_post):
         post = mock_post(
             """
         subject: Hello, friends!
-        keywords: test
+        keywords: test, indieweb
         summary: My first post
         announce-on: webmention
 
@@ -230,7 +230,7 @@ def test_announcer_indienews_no_language(mock_post):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "pt_BR"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention", True,
+        root, config, "https://webmention.io/example.com/webmention",
     )
 
     mock_send_mention = MagicMock()
@@ -253,7 +253,7 @@ def test_announcer_send_mention(mock_post, requests_mock):
         post = mock_post(
             """
         subject: Hello, friends!
-        keywords: test
+        keywords: test, indieweb
         summary: My first post
         announce-on: webmention
 
@@ -264,7 +264,7 @@ def test_announcer_send_mention(mock_post, requests_mock):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention", True,
+        root, config, "https://webmention.io/example.com/webmention",
     )
 
     # indienews support webmention
@@ -291,7 +291,7 @@ def test_announcer_exception(mock_post, requests_mock):
         post = mock_post(
             """
         subject: Hello, friends!
-        keywords: test
+        keywords: test, indieweb
         summary: My first post
         announce-on: webmention
         webmention-url: https://commentpara.de/
@@ -303,7 +303,7 @@ def test_announcer_exception(mock_post, requests_mock):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention", True,
+        root, config, "https://webmention.io/example.com/webmention",
     )
 
     # passing a target with non-ASCII characters results in a 500 from webmention.io

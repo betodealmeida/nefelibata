@@ -107,10 +107,10 @@ mastodon:
 
 # Currently webmention works with webmention.io; in the future AWS lambdas will
 # be supported.
+# The announcer will post to IndieNews if your post has the keyword "indieweb"
+# or "indienews"
 webmention:
   endpoint: https://webmention.io/{your-blog-url}/webmention
-  # automatically post to https://news.indieweb.org/{language}
-  post_to_indienews: false
 
 # Generate an integration token at: https://medium.com/me/settings
 medium:

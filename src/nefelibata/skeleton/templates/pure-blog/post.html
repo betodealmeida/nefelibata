@@ -45,6 +45,7 @@
                 </h1>
 
                 <!-- A single blog post -->
+                {% set keywords = post.parsed.keywords.replace(" ", "").split(",") %}
                 <section class="post h-entry">
                     <header class="post-header">
                         <img width="48" height="48" alt="{{ config.author.name }}&#x27;s avatar" class="post-avatar" src="{{ config.author.profile_picture }}">
@@ -62,8 +63,8 @@
                             </span>
                             on <time class="dt-published" datetime="{{ post.date.isoformat() }}" pubdate>{{ post.date.strftime('%Y-%m-%d') }}</time>
                             under
-                            {% for keyword in post.parsed.keywords.split(",") %}
-                            <a class="post-category p-category" style="background-color: {{ random_color(keyword.strip()) }}" href="/{{ keyword.strip() }}.html">{{ keyword.strip() }}</a>
+                            {% for keyword in keywords %}
+                            <a class="post-category p-category" style="background-color: {{ random_color(keyword) }}" href="/{{ keyword }}.html">{{ keyword }}</a>
                             {% endfor %}
                         </p>
                     </header>
@@ -78,7 +79,7 @@
                         -->
                     </div>
 
-                    {% if json.indienews and json.indienews.posted %}
+                    {% if "indieweb" in keywords or "indienews" in keywords %}
                     (<a href="https://news.indieweb.org/{{ language }}" class="u-syndication">Also posted on IndieNews</a>.)
                     {% endif %}
                 </section>

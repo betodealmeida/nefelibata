@@ -87,16 +87,11 @@ class WebmentionAnnouncer(Announcer):
     url_header = "webmention-url"
 
     def __init__(
-        self,
-        root: Path,
-        config: Dict[str, Any],
-        endpoint: str,
-        post_to_indienews: bool,
+        self, root: Path, config: Dict[str, Any], endpoint: str,
     ):
         super().__init__(root, config)
 
         self.endpoint = endpoint  # used only in template
-        self.post_to_indienews = post_to_indienews
 
     def announce(self, post: Post) -> str:
         _logger.info("Discovering links supporting webmention...")
@@ -109,7 +104,10 @@ class WebmentionAnnouncer(Announcer):
             _logger.info(f"Checking {target}")
             self._send_mention(source, target)
 
-        if self.post_to_indienews:
+        keywords = [
+            keyword.strip() for keyword in post.parsed.get("keywords", "").split(",")
+        ]
+        if "indieweb" in keywords or "indienews" in keywords:
             language = post.parsed.get("language") or self.config["language"]
             if language not in SUPPORTED_LANGUAGES:
                 _logger.error(
@@ -119,8 +117,6 @@ class WebmentionAnnouncer(Announcer):
                 target = f"https://news.indieweb.org/{language}"
                 _logger.info(f"Checking {target}")
                 self._send_mention(source, target)
-                with open(post.file_path.parent / "indienews.json", "w") as fp:
-                    fp.write(json.dumps({"posted": True}))
 
         _logger.info("Success!")
 
