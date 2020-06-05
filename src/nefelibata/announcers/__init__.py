@@ -149,6 +149,13 @@ def get_post_announcers(config: Dict[str, Any], post: Post) -> Set[str]:
             for announcer in post.parsed["announce-on-extra"].split(",")
         )
 
+    if "announce-on-skip" in post.parsed:
+        excluded_announcers = {
+            announcer.strip()
+            for announcer in post.parsed["announce-on-skip"].split(",")
+        }
+        selected_announcers = selected_announcers - excluded_announcers
+
     return selected_announcers
 
 

@@ -571,3 +571,37 @@ def test_get_announcers_extra(mock_post, mocker):
         announcer for announcer in get_announcers(root, config) if announcer.match(post)
     ]
     assert len(announcers) == 2
+
+
+def test_get_announcers_skip(mock_post, mocker):
+    entry_points = [
+        MockEntryPoint("test1", make_dummy_announcer("Test1")),
+        MockEntryPoint("test2", make_dummy_announcer("Test2")),
+    ]
+    mocker.patch("nefelibata.announcers.iter_entry_points", return_value=entry_points)
+
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, there!
+        keywords: test
+        summary: My first post
+        announce-on-skip: test1
+
+        Hi, there!
+        """,
+        )
+
+    root = Path("/path/to/blog")
+    config = {
+        "url": "https://blog.example.com/",
+        "language": "en",
+        "announce-on": ["test1", "test2"],
+        "test1": {},
+        "test2": {},
+    }
+
+    announcers = [
+        announcer for announcer in get_announcers(root, config) if announcer.match(post)
+    ]
+    assert len(announcers) == 1
