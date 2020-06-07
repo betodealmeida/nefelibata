@@ -17,6 +17,10 @@ h3 {
     font-weight: 100;
 }
 
+p {
+    max-width: 44em;
+}
+
 /* LAYOUT CSS */
 .pure-img-responsive {
     max-width: 100%;
