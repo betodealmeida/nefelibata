@@ -62,6 +62,9 @@ class Announcer:
     def match(self, post: Post):
         return self.id in get_post_announcers(self.config, post)
 
+    def should_announce(self, post: Post) -> bool:
+        return self.url_header not in post.parsed
+
     def update_links(self, post: Post) -> None:
         """Update links.json with link to where the post is announced.
         """
@@ -73,7 +76,7 @@ class Announcer:
         else:
             links = {}
 
-        if self.name not in links:
+        if self.should_announce(post):
             link = self.announce(post)
             if not link:
                 return

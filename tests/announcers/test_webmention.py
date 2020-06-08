@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import os.path
 import textwrap
 from pathlib import Path
@@ -116,10 +117,12 @@ def test_announcer(mock_post, requests_mock):
     )
 
     mock_send_mention = MagicMock()
+    mock_send_mention.return_value = {"success": True}
     announcer._send_mention = mock_send_mention
 
-    url = announcer.announce(post)
-    assert url == "https://commentpara.de/"
+    announcer.update_links(post)
+    assert post.parsed["webmention-url"] == "https://commentpara.de/"
+
     mock_send_mention.assert_has_calls(
         [
             call(
@@ -132,9 +135,6 @@ def test_announcer(mock_post, requests_mock):
             ),
         ],
     )
-
-    # store URL in post
-    post.parsed["webmention-url"] = url
 
     webmentions = {
         "type": "feed",
@@ -180,6 +180,74 @@ def test_announcer(mock_post, requests_mock):
     ]
 
 
+def test_announcer_announced_partially(mock_post, requests_mock):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, friends!
+        keywords: test, indieweb
+        summary: My first post
+        announce-on: webmention
+
+        Hi, there! I heard [this blog](https://blog.example.com/) supports webmention.
+        """,
+        )
+
+    root = Path("/path/to/blog")
+    config = {"url": "https://blog.example.com/", "language": "en"}
+    announcer = WebmentionAnnouncer(
+        root, config, "https://webmention.io/example.com/webmention",
+    )
+
+    mock_send_mention = MagicMock()
+    mock_send_mention.return_value = {"success": True}
+    announcer._send_mention = mock_send_mention
+
+    with open(post.file_path.parent / "webmentions.json", "w") as fp:
+        json.dump({"https://blog.example.com/": {"success": True}}, fp)
+
+    announcer.update_links(post)
+    assert post.parsed["webmention-url"] == "https://commentpara.de/"
+
+    mock_send_mention.assert_called_with(
+        "https://blog.example.com/first/index.html", "https://news.indieweb.org/en",
+    )
+
+
+def test_announcer_announced_indienews_only(mock_post, requests_mock):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, friends!
+        keywords: test, indieweb
+        summary: My first post
+        announce-on: webmention
+
+        Hi, there! I heard [this blog](https://blog.example.com/) supports webmention.
+        """,
+        )
+
+    root = Path("/path/to/blog")
+    config = {"url": "https://blog.example.com/", "language": "en"}
+    announcer = WebmentionAnnouncer(
+        root, config, "https://webmention.io/example.com/webmention",
+    )
+
+    mock_send_mention = MagicMock()
+    mock_send_mention.return_value = {"success": True}
+    announcer._send_mention = mock_send_mention
+
+    with open(post.file_path.parent / "webmentions.json", "w") as fp:
+        json.dump({"https://news.indieweb.org/en": {"success": True}}, fp)
+
+    announcer.update_links(post)
+    assert post.parsed["webmention-url"] == "https://commentpara.de/"
+
+    mock_send_mention.assert_called_with(
+        "https://blog.example.com/first/index.html", "https://blog.example.com/",
+    )
+
+
 def test_announcer_no_indienews(mock_post):
     with freeze_time("2020-01-01T00:00:00Z"):
         post = mock_post(
@@ -200,6 +268,7 @@ def test_announcer_no_indienews(mock_post):
     )
 
     mock_send_mention = MagicMock()
+    mock_send_mention.return_value = {"success": True}
     announcer._send_mention = mock_send_mention
 
     url = announcer.announce(post)
@@ -234,6 +303,7 @@ def test_announcer_indienews_no_language(mock_post):
     )
 
     mock_send_mention = MagicMock()
+    mock_send_mention.return_value = {"success": True}
     announcer._send_mention = mock_send_mention
 
     url = announcer.announce(post)

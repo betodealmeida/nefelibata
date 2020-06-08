@@ -1,5 +1,7 @@
 import copy
 import json
+from datetime import datetime
+from datetime import timezone
 from pathlib import Path
 from typing import Any
 from typing import Dict
@@ -127,6 +129,41 @@ def test_update_links(mock_post):
         contents = fp.read()
     links = json.loads(contents)
     assert links == {"Test": "https://example.com/"}
+
+
+def test_update_links_already_announced(mock_post):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, there!
+        keywords: test
+        summary: My first post
+        announce-on: test
+        test-url: https://test.example.com
+
+        Hi, there!
+        """,
+        )
+
+    root = Path("/path/to/blog")
+    config = {
+        "url": "https://blog.example.com/",
+        "language": "en",
+    }
+    announcer = MockAnnouncer(root, config, "https://example.com/", [])
+
+    # add some initial content to the file
+    contents = json.dumps({"Test": "https://test.example.com/"})
+    with freeze_time("2020-01-01T00:00:00Z"):
+        with open(post.file_path.parent / "links.json", "w") as fp:
+            fp.write(contents)
+
+    with freeze_time("2020-01-02T00:00:00Z"):
+        announcer.update_links(post)
+
+    assert datetime.fromtimestamp(
+        (post.file_path.parent / "links.json").stat().st_mtime,
+    ).astimezone(timezone.utc) == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
 
 
 def test_update_links_file_exists(mock_post):

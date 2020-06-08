@@ -93,16 +93,32 @@ class WebmentionAnnouncer(Announcer):
 
         self.endpoint = endpoint  # used only in template
 
+    def should_announce(self, post: Post) -> bool:
+        # Since the plugin can announce to multiple places, and new places can be added
+        # after a post has been published, we always try to find new links to which we
+        # should send mentions.
+        return True
+
     def announce(self, post: Post) -> str:
         _logger.info("Discovering links supporting webmention...")
+
+        # store successful mentions and their responses in a JSON file
+        post_directory = post.file_path.parent
+        storage = post_directory / "webmentions.json"
+        if storage.exists():
+            with open(storage) as fp:
+                webmentions = json.load(fp)
+        else:
+            webmentions = {}
 
         source = urllib.parse.urljoin(self.config["url"], post.url)
 
         soup = BeautifulSoup(post.html, "html.parser")
         for el in soup.find_all("a", href=re.compile("http")):
             target = el.attrs.get("href")
-            _logger.info(f"Checking {target}")
-            self._send_mention(source, target)
+            if target not in webmentions:
+                _logger.info(f"Checking {target}")
+                webmentions["target"] = self._send_mention(source, target)
 
         keywords = [
             keyword.strip() for keyword in post.parsed.get("keywords", "").split(",")
@@ -115,22 +131,35 @@ class WebmentionAnnouncer(Announcer):
                 )
             else:
                 target = f"https://news.indieweb.org/{language}"
-                _logger.info(f"Checking {target}")
-                self._send_mention(source, target)
+                if target not in webmentions:
+                    _logger.info(f"Checking {target}")
+                    webmentions["target"] = self._send_mention(source, target)
+
+        with open(storage, "w") as fp:
+            json.dump(webmentions, fp)
 
         _logger.info("Success!")
 
         return COMMENT_URL
 
-    def _send_mention(self, source: str, target: str) -> None:
+    def _send_mention(self, source: str, target: str) -> Optional[Dict[str, Any]]:
         endpoint = get_webmention_endpoint(target)
-        if endpoint:
-            _logger.info(f"Sending mention to {endpoint}")
-            payload = {
-                "source": source,
-                "target": target,
-            }
-            requests.post(endpoint, data=payload)
+        if not endpoint:
+            _logger.info("No endpoint found")
+            return None
+
+        _logger.info(f"Sending mention to {endpoint}")
+        payload = {
+            "source": source,
+            "target": target,
+        }
+        response = requests.post(endpoint, data=payload)
+        try:
+            payload = response.json()
+        except ValueError:
+            payload = {"content": response.text}
+
+        return payload
 
     def collect(self, post: Post) -> List[Response]:
         _logger.info("Collecting webmentions")
