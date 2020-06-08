@@ -114,11 +114,13 @@ class WebmentionAnnouncer(Announcer):
         source = urllib.parse.urljoin(self.config["url"], post.url)
 
         soup = BeautifulSoup(post.html, "html.parser")
+        new_mentions = False
         for el in soup.find_all("a", href=re.compile("http")):
             target = el.attrs.get("href")
             if target not in webmentions:
                 _logger.info(f"Checking {target}")
                 webmentions[target] = self._send_mention(source, target)
+                new_mentions = True
 
         keywords = [
             keyword.strip() for keyword in post.parsed.get("keywords", "").split(",")
@@ -134,9 +136,11 @@ class WebmentionAnnouncer(Announcer):
                 if target not in webmentions:
                     _logger.info(f"Checking {target}")
                     webmentions[target] = self._send_mention(source, target)
+                    new_mentions = True
 
-        with open(storage, "w") as fp:
-            json.dump(webmentions, fp)
+        if new_mentions:
+            with open(storage, "w") as fp:
+                json.dump(webmentions, fp)
 
         _logger.info("Success!")
 

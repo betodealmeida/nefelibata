@@ -78,7 +78,7 @@ class Announcer:
 
         if self.should_announce(post):
             link = self.announce(post)
-            if not link:
+            if not link or links.get(self.name) == link:
                 return
 
             # store URL in links.json for template

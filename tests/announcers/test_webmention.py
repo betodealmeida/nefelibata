@@ -2,6 +2,8 @@
 import json
 import os.path
 import textwrap
+from datetime import datetime
+from datetime import timezone
 from pathlib import Path
 from unittest.mock import call
 from unittest.mock import MagicMock
@@ -211,6 +213,47 @@ def test_announcer_announced_partially(mock_post, requests_mock):
     mock_send_mention.assert_called_with(
         "https://blog.example.com/first/index.html", "https://news.indieweb.org/en",
     )
+
+
+def test_announcer_announced_no_new_mentions(mock_post, requests_mock):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, friends!
+        keywords: test, indieweb
+        summary: My first post
+        announce-on: webmention
+
+        Hi, there! I heard [this blog](https://blog.example.com/) supports webmention.
+        """,
+        )
+
+    root = Path("/path/to/blog")
+    config = {"url": "https://blog.example.com/", "language": "en"}
+    announcer = WebmentionAnnouncer(
+        root, config, "https://webmention.io/example.com/webmention",
+    )
+
+    mock_send_mention = MagicMock()
+    mock_send_mention.return_value = {"success": True}
+    announcer._send_mention = mock_send_mention
+
+    with freeze_time("2020-01-01T00:00:00Z"):
+        with open(post.file_path.parent / "webmentions.json", "w") as fp:
+            json.dump(
+                {
+                    "https://blog.example.com/": {"success": True},
+                    "https://news.indieweb.org/en": {"success": True},
+                },
+                fp,
+            )
+
+    with freeze_time("2020-01-02T00:00:00Z"):
+        announcer.update_links(post)
+
+    assert datetime.fromtimestamp(
+        (post.file_path.parent / "webmentions.json").stat().st_mtime,
+    ).astimezone(timezone.utc) == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
 
 
 def test_announcer_announced_exception_on_mention(mock_post, mocker, requests_mock):
