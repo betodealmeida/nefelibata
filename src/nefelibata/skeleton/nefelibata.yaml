@@ -4,7 +4,7 @@ author:
   name: Beto Dealmeida
   email: roberto@dealmeida.net
   note: This is me
-url: http://blog.taoetc.org/  # slashing trail is important
+url: http://blog.taoetc.org/  # traling slash is important
 posts-to-show: 5
 theme: pure-blog
 language: en
