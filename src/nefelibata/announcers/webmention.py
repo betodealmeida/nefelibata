@@ -118,7 +118,7 @@ class WebmentionAnnouncer(Announcer):
             target = el.attrs.get("href")
             if target not in webmentions:
                 _logger.info(f"Checking {target}")
-                webmentions["target"] = self._send_mention(source, target)
+                webmentions[target] = self._send_mention(source, target)
 
         keywords = [
             keyword.strip() for keyword in post.parsed.get("keywords", "").split(",")
@@ -133,7 +133,7 @@ class WebmentionAnnouncer(Announcer):
                 target = f"https://news.indieweb.org/{language}"
                 if target not in webmentions:
                     _logger.info(f"Checking {target}")
-                    webmentions["target"] = self._send_mention(source, target)
+                    webmentions[target] = self._send_mention(source, target)
 
         with open(storage, "w") as fp:
             json.dump(webmentions, fp)
@@ -142,11 +142,11 @@ class WebmentionAnnouncer(Announcer):
 
         return COMMENT_URL
 
-    def _send_mention(self, source: str, target: str) -> Optional[Dict[str, Any]]:
+    def _send_mention(self, source: str, target: str) -> Dict[str, Any]:
         endpoint = get_webmention_endpoint(target)
         if not endpoint:
             _logger.info("No endpoint found")
-            return None
+            return {"success": False}
 
         _logger.info(f"Sending mention to {endpoint}")
         payload = {
@@ -154,12 +154,14 @@ class WebmentionAnnouncer(Announcer):
             "target": target,
         }
         response = requests.post(endpoint, data=payload)
-        try:
-            payload = response.json()
-        except ValueError:
-            payload = {"content": response.text}
+        info: Dict[str, Any] = {"success": response.ok}
+        if response.ok:
+            try:
+                info["content"] = response.json()
+            except ValueError:
+                info["content"] = response.text
 
-        return payload
+        return info
 
     def collect(self, post: Post) -> List[Response]:
         _logger.info("Collecting webmentions")

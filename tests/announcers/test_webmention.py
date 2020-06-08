@@ -207,11 +207,53 @@ def test_announcer_announced_partially(mock_post, requests_mock):
         json.dump({"https://blog.example.com/": {"success": True}}, fp)
 
     announcer.update_links(post)
-    assert post.parsed["webmention-url"] == "https://commentpara.de/"
 
     mock_send_mention.assert_called_with(
         "https://blog.example.com/first/index.html", "https://news.indieweb.org/en",
     )
+
+
+def test_announcer_announced_exception_on_mention(mock_post, mocker, requests_mock):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, friends!
+        keywords: test, indieweb
+        summary: My first post
+        announce-on: webmention
+
+        Hi, there! I heard [this blog](https://blog.example.com/) supports webmention.
+        """,
+        )
+
+    root = Path("/path/to/blog")
+    config = {"url": "https://blog.example.com/", "language": "en"}
+    announcer = WebmentionAnnouncer(
+        root, config, "https://webmention.io/example.com/webmention",
+    )
+
+    mock_get_webmention_endpoint = MagicMock()
+    mock_get_webmention_endpoint.return_value = "https://endpoint.example.com/"
+    mocker.patch(
+        "nefelibata.announcers.webmention.get_webmention_endpoint",
+        mock_get_webmention_endpoint,
+    )
+
+    requests_mock.post("https://endpoint.example.com", status_code=500)
+
+    with open(post.file_path.parent / "webmentions.json", "w") as fp:
+        json.dump({"https://blog.example.com/": {"success": True}}, fp)
+
+    announcer.update_links(post)
+    assert post.parsed["webmention-url"] == "https://commentpara.de/"
+
+    with open(post.file_path.parent / "webmentions.json") as fp:
+        contents = json.load(fp)
+
+    assert contents == {
+        "https://blog.example.com/": {"success": True},
+        "https://news.indieweb.org/en": {"success": False},
+    }
 
 
 def test_announcer_announced_indienews_only(mock_post, requests_mock):
