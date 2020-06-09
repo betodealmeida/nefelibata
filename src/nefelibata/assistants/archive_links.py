@@ -91,9 +91,14 @@ class ArchiveLinksAssistant(Assistant):
                 json.dump(archives, fp)
 
         # now enrich links in the generated HTML
-        with open(post.file_path.with_suffix(".html")) as fp:
+        index_html = post.file_path.with_suffix(".html")
+        with open(index_html) as fp:
             html = fp.read()
         soup = BeautifulSoup(html, "html.parser")
+
+        # remove existing archive notes
+        for el in soup.find_all("span", attrs={"class": "archive"}):
+            el.decompose()
 
         modified = False
         for el in soup.find_all("a", href=re.compile("http")):
@@ -104,9 +109,16 @@ class ArchiveLinksAssistant(Assistant):
             if el.attrs.get("data-archive-url") != archives[url]["url"]:
                 el.attrs["data-archive-url"] = archives[url]["url"]
                 el.attrs["data-archive-date"] = archives[url]["date"]
+
+                span = soup.new_tag("span", attrs={"class": "archive"})
+                anchor = soup.new_tag("a", href=archives[url]["url"])
+                anchor.string = "archived"
+                span.extend(["[", anchor, "]"])
+                el.insert_after(span)
+
                 modified = True
 
         if modified:
             html = str(soup)
-            with open(post.file_path.with_suffix(".html"), "w") as fp:
+            with open(index_html, "w") as fp:
                 fp.write(html)
