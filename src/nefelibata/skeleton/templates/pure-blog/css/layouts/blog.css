@@ -207,3 +207,8 @@ h3 {
 .footer .love {
     color: rgb(61, 79, 93);
 }
+
+.archive {
+    vertical-align: super;
+    font-size: 80%;
+}
