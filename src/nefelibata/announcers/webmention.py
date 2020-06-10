@@ -37,7 +37,7 @@ def get_webmention_endpoint(url) -> Optional[str]:
         for link in links:
             if link["rel"] == "webmention":
                 return cast(str, urllib.parse.urljoin(url, link["url"]))
-    elif response.headers.get("Content-Type") != "text/html":
+    elif "text/html" not in response.headers.get("Content-Type", ""):
         return None
 
     response = requests.get(url)

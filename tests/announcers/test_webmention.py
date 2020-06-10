@@ -62,7 +62,8 @@ def test_get_webmention_endpoint_anchor(requests_mock):
 </html>
 """
     requests_mock.head(
-        "https://user3.example.com/", headers={"Content-Type": "text/html"},
+        "https://user3.example.com/",
+        headers={"Content-Type": "text/html; charset=UTF-8"},
     )
     requests_mock.get(
         "https://user3.example.com/", text=html,
