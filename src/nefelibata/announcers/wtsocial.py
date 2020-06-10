@@ -51,7 +51,7 @@ def get_response_from_comment(comment: Dict[str, Any]) -> Response:
     }
 
 
-def get_csrf_token(html: str) -> str:
+def get_csrf_token(html: str) -> Optional[str]:
     """Extract CSRF token from a page.
 
     The token is stored in a meta tag:
@@ -61,7 +61,7 @@ def get_csrf_token(html: str) -> str:
     """
     soup = BeautifulSoup(html, "html.parser")
     tag = soup.find("meta", attrs={"name": "csrf-token"})
-    return cast(str, tag.attrs["content"])
+    return cast(str, tag.attrs["content"]) if tag else None
 
 
 def do_login(session: requests.Session, email: str, password: str) -> str:
@@ -97,7 +97,7 @@ class WTSocialAnnouncer(Announcer):
         self.email = email
         self.password = password
 
-    def announce(self, post: Post) -> str:
+    def announce(self, post: Post) -> Optional[str]:
         """Publish the summary of a post to WT.Social.
         """
         _logger.info("Posting to WT.Social")
@@ -105,6 +105,10 @@ class WTSocialAnnouncer(Announcer):
         session = requests.Session()
         html = do_login(session, self.email, self.password)
         csrf_token = get_csrf_token(html)
+        if csrf_token is None:
+            _logger.error("Couldn't find a CSRF token, exiting...")
+            return None
+
         post_url = urllib.parse.urljoin(self.config["url"], post.url)
 
         url = "https://wt.social/api/new-article"
@@ -132,6 +136,9 @@ class WTSocialAnnouncer(Announcer):
         session = requests.Session()
         html = do_login(session, self.email, self.password)
         csrf_token = get_csrf_token(html)
+        if csrf_token is None:
+            _logger.error("Couldn't find a CSRF token, exiting...")
+            return []
 
         post_url = post.parsed[self.url_header]
         post_id = post_url.rsplit("/", 1)[1]
