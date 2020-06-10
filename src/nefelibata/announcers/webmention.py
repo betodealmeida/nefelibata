@@ -50,7 +50,7 @@ def get_webmention_endpoint(url) -> Optional[str]:
     return None
 
 
-def get_response_from_child(child: Dict[str, Any]) -> Response:
+def get_response_from_child(child: Dict[str, Any], target: str) -> Response:
     # for the source, let's try to find a name, else fall back to URL
     source = child.get("name") or child.get("url") or "Unknown"
 
@@ -67,8 +67,14 @@ def get_response_from_child(child: Dict[str, Any]) -> Response:
         "url": child["author"]["url"],
     }
 
-    text = child["content"].get("text", "") if "content" in child else ""
-    comment: Comment = {"text": text}
+    if "content" in child:
+        text = child["content"].get("text", "")
+        html = child["content"].get("html", "")
+        summary = summarize(html or text, target)
+    else:
+        text = summary = ""
+
+    comment: Comment = {"text": text, "summary": summary}
 
     return {
         "source": source,
@@ -78,6 +84,26 @@ def get_response_from_child(child: Dict[str, Any]) -> Response:
         "user": user,
         "comment": comment,
     }
+
+
+def summarize(text: str, target: Optional[str] = None) -> str:
+    soup = BeautifulSoup(text, "html.parser")
+
+    # search for a paragraph containing the link
+    if target:
+        anchor = soup.find("a", href=target)
+        if anchor:
+            p = anchor.find_parent("p")
+            if p:
+                # what should we do with really long paragraphs? is that
+                # even a problem?
+                return str(p.get_text())
+
+    # return the first line
+    text = soup.get_text()
+    lines = text.split("\n")
+
+    return lines[0]
 
 
 class WebmentionAnnouncer(Announcer):
@@ -184,4 +210,4 @@ class WebmentionAnnouncer(Announcer):
 
         _logger.info("Success!")
 
-        return [get_response_from_child(child) for child in feed["children"]]
+        return [get_response_from_child(child, target) for child in feed["children"]]

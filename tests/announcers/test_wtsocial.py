@@ -91,3 +91,44 @@ def test_announcer(mock_post, requests_mock):
             "url": "https://wt.social/post/hash",
         },
     ]
+
+
+def test_announcer_no_csrf_token(mock_post, requests_mock):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, WT.Social!
+        keywords: test
+        summary: My first WT.Social post
+        announce-on: wtsocial
+
+        Hi, there!
+        """,
+        )
+
+    root = Path("/path/to/blog")
+    config = {"url": "https://blog.example.com/"}
+    announcer = WTSocialAnnouncer(
+        root, config, "https://wtsocial.io/example.com/wtsocial", True,
+    )
+
+    # login
+    html1 = """
+<form method="POST" action="https://wt.social/login">
+    <input type="hidden" name="_token" value="token1">
+</form>
+    """
+    requests_mock.get("https://wt.social/login", text=html1)
+    html2 = ""
+    requests_mock.post("https://wt.social/login", text=html2)
+
+    # new post
+    requests_mock.post(
+        "https://wt.social/api/new-article", json={"0": {"URI": "/post/hash"}},
+    )
+
+    url = announcer.announce(post)
+    assert url is None
+
+    responses = announcer.collect(post)
+    assert responses == []

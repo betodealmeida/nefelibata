@@ -20,7 +20,7 @@ User = TypedDict(
     "User", {"name": str, "image": str, "url": str, "description": str}, total=False,
 )
 
-Comment = TypedDict("Comment", {"text": str, "url": str}, total=False)
+Comment = TypedDict("Comment", {"text": str, "url": str, "summary": str}, total=False)
 
 Response = TypedDict(
     "Response",
