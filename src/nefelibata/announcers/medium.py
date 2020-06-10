@@ -107,7 +107,6 @@ class MediumAnnouncer(Announcer):
         post_id = post_url.rsplit("/", 1)[1]
         comments_url = f"https://medium.com/p/{post_id}/responses/?format=json"
 
-        print(post.file_path)
         response = requests.get(comments_url)
         payload = json.loads(response.text[16:])
 
