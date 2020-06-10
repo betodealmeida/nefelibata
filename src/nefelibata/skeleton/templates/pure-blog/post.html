@@ -121,7 +121,7 @@
                                 {% endif %}
                             </div>
                             <div class="comment-description">
-                                <p>{{ reply.comment.text }}</p>
+                                <p>{{ reply.comment.summary or reply.comment.text }}</p>
                             </div>
                         </div>
                     </div>
