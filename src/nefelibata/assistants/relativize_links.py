@@ -44,15 +44,12 @@ class RelativizeLinksAssistant(Assistant):
                 base_dir = file_path.relative_to(self.root).parts[0]
 
                 if resource.startswith(self.config["url"]):
-                    print(1)
                     resource_path = (
                         self.root / base_dir / resource[len(self.config["url"]) :]
                     )
                 elif resource.startswith("/"):
-                    print(2)
                     resource_path = self.root / base_dir / resource[1:]
                 else:
-                    print(3)
                     # relative already
                     continue
 
