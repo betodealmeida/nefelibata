@@ -36,6 +36,8 @@ assistants:
   - mirror_images
   - warn_external_resources
   - playlist
+  - archive_links
+  - relativize_links
 
 # Publishers define where your static pages will be uploaded to. Neocities
 # is easy to setup and recommended for beginners, but you can also upload

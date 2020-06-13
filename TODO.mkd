@@ -47,3 +47,6 @@
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
 - [ ] Soundcloud announcer
 - [ ] Instagram announcer
+- [ ] `force` in assistants
+- [ ] threaded comments
+- [ ] Medium image upload (go deep post, eg)
