@@ -62,10 +62,17 @@ class WarnExternalResourcesAssistant(Assistant):
             # external CSS, should've been already flagged
             return
 
+        # this should be "posts", when `process_post` is called, or "build",
+        # when `process_site` is called
+        base_dir = file_path.relative_to(self.root).parts[0]
+
         if resource.startswith("/"):
-            css_path = self.root / "build" / resource[1:]
+            css_path = self.root / base_dir / resource[1:]
         else:
             css_path = file_path.parent / resource
+
+        if not css_path.exists():
+            return
 
         with open(css_path) as fp:
             css = fp.read()

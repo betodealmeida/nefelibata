@@ -50,7 +50,6 @@ class RelativizeLinksAssistant(Assistant):
                 elif resource.startswith("/"):
                     resource_path = self.root / base_dir / resource[1:]
                 else:
-                    # relative already
                     continue
 
                 up = Path(".")
