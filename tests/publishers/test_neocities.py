@@ -3,7 +3,6 @@ from datetime import timezone
 from pathlib import Path
 from typing import Any
 from typing import Dict
-from unittest.mock import call
 from unittest.mock import MagicMock
 
 import pytest
