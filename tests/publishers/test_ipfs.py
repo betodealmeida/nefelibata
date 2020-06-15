@@ -45,7 +45,7 @@ def test_publish(fs, mocker):
                 [
                     "rsync",
                     "-rL",
-                    root / "build/",
+                    "/path/to/blog/build/",
                     "ipfs@ipfs.example.com:blog.example.com/",
                 ],
             ),

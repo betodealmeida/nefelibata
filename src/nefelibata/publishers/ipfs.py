@@ -33,6 +33,7 @@ class IPFSPublisher(Publisher):
         self.host = host
 
     def publish(self, force: bool = False) -> None:
+        build_dir = self.root / "build"
         remote_dir = urllib.parse.urlparse(self.config["url"]).netloc
 
         _logger.info("Syncing content")
@@ -40,7 +41,7 @@ class IPFSPublisher(Publisher):
             [
                 "rsync",
                 "-rL",
-                self.root / "build/",
+                str(build_dir) + "/",  # ensure trailing slash for rsync
                 f"{self.username}@{self.host}:{remote_dir}/",
             ],
         )
