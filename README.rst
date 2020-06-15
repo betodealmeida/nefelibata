@@ -150,14 +150,14 @@ The S3 section looks like this:
     S3:
         AWS_ACCESS_KEY_ID:
         AWS_SECRET_ACCESS_KEY:
-        bucket: blog.taoetc.org
+        bucket: blog.example.com
 
         # Nefelibata will configure the bucket as website and also set your DNS
         # if you're using Route 53
         configure_website: true
-        configure_route53: blog.taoetc.org.
+        configure_route53: blog.example.com.
 
-You need to `create an S3 account <http://aws.amazon.com/s3/>`_ in order to get the AWS credentials. If you want the S3 publisher to create the bucket, configure it as a website, upload the website and configure Route 53 to point the domain name to it you need the following policy in your IAM account (replace ``blog.taoetc.org`` with your domain):
+You need to `create an S3 account <http://aws.amazon.com/s3/>`_ in order to get the AWS credentials. If you want the S3 publisher to create the bucket, configure it as a website, upload the website and configure Route 53 to point the domain name to it you need the following policy in your IAM account (replace ``blog.example.com`` with your domain):
 
 .. code-block:: json
 
@@ -175,8 +175,8 @@ You need to `create an S3 account <http://aws.amazon.com/s3/>`_ in order to get 
                     "s3:CreateBucket"
                 ],
                 "Resource": [
-                    "arn:aws:route53:::hostedzone/taoetc.org",
-                    "arn:aws:s3:::blog.taoetc.org"
+                    "arn:aws:route53:::hostedzone/example.com",
+                    "arn:aws:s3:::blog.example.com"
                 ]
             },
             {
@@ -187,7 +187,7 @@ You need to `create an S3 account <http://aws.amazon.com/s3/>`_ in order to get 
                     "s3:GetObject",
                     "s3:PutObjectAcl"
                 ],
-                "Resource": "arn:aws:s3:::blog.taoetc.org/*"
+                "Resource": "arn:aws:s3:::blog.example.com/*"
             },
             {
                 "Sid": "VisualEditor2",
