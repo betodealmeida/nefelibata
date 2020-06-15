@@ -45,6 +45,7 @@ assistants:
 publish-to:
   - neocities
   - S3
+  - ipfs
 
 # Announcers will post links to your post on social media (or the whole post,
 # in the case of Medium), and also aggregate comments and replies back and
@@ -119,3 +120,10 @@ medium:
   access_token:
   # public, draft or unlisted
   publish_status: unlisted
+
+# Publish to a host running an IPFS daemon; you need rsync and ssh locally,
+# since this will send the static files and run `ipfs add` and `ipfs name publish`
+# on them.
+ipfs:
+  username: ipfs
+  host: ipfs.example.com
