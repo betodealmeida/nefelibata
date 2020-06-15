@@ -18,7 +18,7 @@ Nefelibata (Portuguese for "one who walks on clouds") is an `IndieWeb <https://i
 The IndieWeb
 ============
 
-Nefelibata acknowledges that most interactions occur in social networks like Twitter or Mastodon. The engine can be configured with global or per-post **announcers** that will post to social networks linking back to the content, so that people can comment and discuss posts outside of the weblog, a concept called `POSSE <https://indieweb.org/POSSE>`_ (Publish (on your) Own Site, Syndicate Elsewhere) in the IndieWeb.
+Nefelibata acknowledges that most interactions occur in social networks like Twitter or Mastodon. The engine can be configured with global or per-post **announcers** that will post to social networks linking back to the content, so that people can comment and discuss posts outside of the weblog, a concept called `POSSE <https://indieweb.org/POSSE>`_ (Publish on your Own Site, Syndicate Elsewhere) in the IndieWeb.
 
 When the weblog is rebuilt, the announcers will collect any replies and store them locally, so that the comments are displayed in the weblog with your post. A post can be announced to multiple social networks, and the comments will be aggregated and preserved.
 
@@ -28,11 +28,11 @@ Getting started
 Installation
 ------------
 
-I recommend installing nefelibata using a virtual environment:
+First install nefelibata using a virtual environment:
 
 .. code-block:: bash
 
-    $ virtualenv -p python3 venv
+    $ python -m venv venv
     $ source venv/bin/activate
     $ pip install nefelibata
 
@@ -65,42 +65,83 @@ Here, the file ``nefelibata.yaml`` stores the configuration for your weblog. The
 Configuring your weblog
 -----------------------
 
-Open the file ``nefelibata.yaml``. The first part is self-explanatory:
+Open the file ``nefelibata.yaml``. The first part is self-explanatory, and you should populate with your information:
 
 .. code-block:: yaml
 
-    title: Tao etc.
-    subtitle: Musings about the path and other things
+    title: Example.com
+    subtitle: A blog about examples
     author:
-        name: Beto Dealmeida
-        email: roberto@dealmeida.net
-    url: https://blog.taoetc.org/  # slashing trail is important
+      name: John Doe
+      email: john.doe@example.com
+      note: This is me
+    url: https://blog.example.com/  # trailing slash is important
     posts-to-show: 5
     theme: pure-blog
     language: en
 
-    # These are social icons displayed on the footer
+    # These are social links displayed on the footer
     social:
-        - title: Code
-          url: "https://github.com/betodealmeida"
-          icon: icon-github
-        - title: Facebook
-          url: "https://www.facebook.com/beto"
-          icon: icon-facebook
-        - title: Twitter
-          url: "https://twitter.com/dealmeida"
-          icon: icon-twitter
+      - title: Code
+        url: "https://github.com/example"
+        icon: icon-github
+      - title: Facebook
+        url: "https://www.facebook.com/example"
+        icon: icon-facebook
+      - title: Twitter
+        url: "https://twitter.com/example"
+        icon: icon-twitter
 
-This is copied from `my weblog <https://blog.taoetc.org/>`_.
+Builders
+~~~~~~~~
 
-The second part defines where your weblog will be published to, and where new posts are announced:
+The second part defines which parts of your weblog will be built. Unless you know what you're doing you shouldn't change anything here:
 
 .. code-block:: yaml
 
-    publish-to: S3
-    announce-on: twitter, mastodon
+    builders:
+      - post
+      - index
+      - categories
+      - atom
 
-In this example, the static files from the weblog will be published to an S3 bucket, and new posts will be published to both Twitter and Mastodon.
+Assistants
+~~~~~~~~~~
+
+The next part defines "assistants", which are HTML post-processor that run after the builders. Assistants can mirror images locally, save external links in the `Wayback Machine <https://archive.org/web/>`_, and more:
+
+.. code-block:: yaml
+
+    assistants:
+      - mirror_images
+      - warn_external_resources
+      - playlist
+      - archive_links
+      - relativize_links
+
+Publishers
+~~~~~~~~~~
+
+The fourth part defines where your weblog will be published to once it's been built. `Neocities <https://neocities.org/>`_ is easy to setup and recommended for beginners, but you can also publish to S3 and IPFS:
+
+.. code-block:: yaml
+
+    publish-to:
+      - neocities
+      - S3
+      - ipfs
+
+Each one of the publishers has its own configuration section in the ``nefelibata.yaml`` file. For Neocities you only need your username and password:
+
+.. code-block:: yaml
+
+    neocities:
+      username: username
+      password: password
+      # api_key:
+
+After publishing for the first time, nefelibata will print out an API key that you can use instead of your username/password. Simply add it to the configuration file, and comment out the username and password fields.
+
 
 The S3 section looks like this:
 
@@ -159,7 +200,42 @@ You need to `create an S3 account <http://aws.amazon.com/s3/>`_ in order to get 
 
 This will upload your weblog to an S3 bucket and run the website from it over HTTP. If you want to serve the website over HTTPS (as I do), you need to disable Route 53 (``configure_route53`` should be empty) and `configure CloudFront <https://www.freecodecamp.org/news/simple-site-hosting-with-amazon-s3-and-https-5e78017f482a/>`_.
 
-Finally, if you want to announce your posts on Twitter or Mastodon you need to create custom applications on the respective developer websites, and add the access tokens to the file ``nefelibata.yaml``. The skeleton file has instructions on how to do this for each announcer. (There's also an announcer for `FAWM <https://fawm.org/>`_, but it's currently work in progress).
+For `IPFS <https://ipfs.io/>`_ you need a host running the IPFS daemon. The ``build/`` directory will be sent to the remote host via ``rsync``, added and published to the IPFS. The config itself is simple:
+
+.. code-block:: yaml 
+
+    ipfs:
+      username: ipfs
+      host: ipfs.example.com
+
+The weblog will be published to the `InterPlanetary Name System <https://docs.ipfs.io/concepts/ipns/>`_. If you want to give it an accessible and easy to remember name, create a text record for the subdomain ``_dnslink.blog.example.com`` with the following content:
+
+.. code-block::
+
+    _dnslink.blog.example.com descriptive text "dnslink=/ipns/<CID>"
+
+Where ``CID`` is the content identifier of your host. You can read more about `DNSLink <https://docs.ipfs.io/concepts/dnslink/#publish-using-a-subdomain>`_.
+
+Announcers
+~~~~~~~~~~
+
+Finally, the last part is used for syndicating your content. Currently nefelibata can publish to and collect replies from the following websites:
+
+.. code-block:: yaml
+
+    announce-on:
+      - webmention
+      - mastodon
+      - twitter
+      - wtsocial
+      - medium
+      - fawm
+
+Each announcer has its own configuration section, with different requirements. The `Mastodon <https://joinmastodon.org/>`_, `Twitter <https://twitter.com/>`_ and `WT.Social <https://wt.social/>`_ announcers will publish the summary of the post, with a link back to the post in the weblog. The `Medium <https://medium.com/>`_ announcer will publish the full HTML, on the other hand.
+
+The `Webmention <https://indieweb.org/Webmention>`_ announcer is different in that it will check all the links referenced in a post, trying to discover webmention endpoints, and sending a notification is positive. The announcer also collects mentions made to the weblog, by reading them from `Webmention.io <webmention.io>`_.
+
+Finally, `FAWM <https://fawm.org/>`_ is a website where people try to write 14 songs during the month of February. You can only publish to FAWM during February for obvious reasons. If you like making music you should try participating!
 
 Creating a new post
 -------------------
@@ -192,7 +268,7 @@ You'll notice that the ``index.mkd`` file has headers and a body. The file itsel
 
 Additionally, once the post is published a ``date`` header will be added. If the post is announced to Twitter/Mastodon/etc. a corresponding header (eg, ``mastodon-url``) will also be added.
 
-If you want to announce your post to a custom social network you can either override the default announcers by using the ``announce-on`` header, or add an extra announcer by using the ``announce-on-extra`` header.
+If you want to announce your post to a custom social network you can either override the default announcers by using the ``announce-on`` header, or add an extra announcer by using the ``announce-on-extra`` header. Similarly, if you want to skip a default announcer you can use the ``announce-on-skip`` header.
 
 Building the weblog
 -------------------

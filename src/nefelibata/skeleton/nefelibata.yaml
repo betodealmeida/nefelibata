@@ -1,10 +1,10 @@
-title: Tao etc.
-subtitle: Musings about the path and other things
+title: Example.com
+subtitle: A blog about examples
 author:
-  name: Beto Dealmeida
-  email: roberto@dealmeida.net
+  name: John Doe
+  email: john.doe@example.com
   note: This is me
-url: http://blog.taoetc.org/  # traling slash is important
+url: https://blog.example.com/  # traling slash is important
 posts-to-show: 5
 theme: pure-blog
 language: en
@@ -12,17 +12,18 @@ language: en
 # These are social icons displayed on the footer
 social:
   - title: Code
-    url: "https://github.com/betodealmeida"
+    url: "https://github.com/example"
     icon: icon-github
   - title: Facebook
-    url: "https://www.facebook.com/beto"
+    url: "https://www.facebook.com/example"
     icon: icon-facebook
   - title: Twitter
-    url: "https://twitter.com/dealmeida"
+    url: "https://twitter.com/example"
     icon: icon-twitter
 
 
-# Builders define which parts of the blog are built
+# Builders define which parts of the blog are built; you probably don't need
+# to change anything here.
 builders:
   - post
   - index
@@ -30,8 +31,10 @@ builders:
   - atom
 
 # Assistants post-process the HTML built, mirroring remote images locally,
-# warning if you're linking to external resources (CSS, images), and
-# generating playlist files (*.pls) from MP3s automatically.
+# warning if you're linking to external resources (CSS, images), generating
+# playlist files (*.pls) from MP3s automatically, and more. If you're
+# publishing to IPFS, make sure to enable relativize_links so that all links
+# are relative.
 assistants:
   - mirror_images
   - warn_external_resources
@@ -41,7 +44,7 @@ assistants:
 
 # Publishers define where your static pages will be uploaded to. Neocities
 # is easy to setup and recommended for beginners, but you can also upload
-# to S3. You probably need just one of them.
+# to S3 and IPFS.
 publish-to:
   - neocities
   - S3
@@ -71,19 +74,19 @@ neocities:
 S3:
   AWS_ACCESS_KEY_ID:
   AWS_SECRET_ACCESS_KEY:
-  bucket: blog.taoetc.org
+  bucket: blog.example.com
 
   # Nefelibata will configure the bucket as website and also set your DNS
   # if you're using Route 53.
   configure_website: true
-  configure_route53: blog.taoetc.org.
+  configure_route53: blog.example.com.
 
 
 # Visit the Twitter developer page and create a new application:
 #
 #     https://dev.twitter.com/apps/new
 #
-# This will get you a CONSUMER_KEY and CONSUMER_SECRET. After creating your
+# This will get you a consumer_key and consumer_secret. After creating your
 # application you can request the oauth_token and oauth_secret on the same
 # page.
 twitter:
