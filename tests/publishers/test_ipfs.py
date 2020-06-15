@@ -41,7 +41,14 @@ def test_publish(fs, mocker):
 
     mock_subprocess.run.assert_has_calls(
         [
-            call(["rsync", "-rL", "build/", "ipfs@ipfs.example.com:blog.example.com/"]),
+            call(
+                [
+                    "rsync",
+                    "-rL",
+                    root / "build/",
+                    "ipfs@ipfs.example.com:blog.example.com/",
+                ],
+            ),
             call(
                 [
                     "ssh",

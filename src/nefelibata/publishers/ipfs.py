@@ -37,7 +37,12 @@ class IPFSPublisher(Publisher):
 
         _logger.info("Syncing content")
         subprocess.run(
-            ["rsync", "-rL", "build/", f"{self.username}@{self.host}:{remote_dir}/"],
+            [
+                "rsync",
+                "-rL",
+                self.root / "build/",
+                f"{self.username}@{self.host}:{remote_dir}/",
+            ],
         )
 
         _logger.info("Adding to IPFS")
