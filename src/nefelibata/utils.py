@@ -9,6 +9,7 @@ from typing import Dict
 import yaml
 from libgravatar import Gravatar
 from nefelibata import config_filename
+from rich.logging import RichHandler
 
 
 def get_config(root: Path) -> Dict[str, Any]:
@@ -36,9 +37,9 @@ def setup_logging(loglevel: str) -> None:
     logformat = "[%(asctime)s] %(levelname)s: %(name)s: %(message)s"
     logging.basicConfig(
         level=level,
-        stream=sys.stdout,
         format=logformat,
-        datefmt="%Y-%m-%d %H:%M:%S",
+        datefmt="[%X]",
+        handlers=[RichHandler()],
         force=True,
     )
 
