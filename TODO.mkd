@@ -39,8 +39,8 @@
 - [x] fix indienews link when no explicit announce
 - [x] convert relative link to absolute when publishing to Medium
 - [x] per post language
+- [x] new release
 - [ ] documentation
-- [ ] new release
 - [ ] RSS club
 - [ ] spellcheck assistant?
 - [ ] parallelize build/publish
