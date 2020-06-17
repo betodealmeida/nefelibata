@@ -51,4 +51,9 @@ Version 0.2.1 - 2019-12-30
 Version 0.2 - 2019-12-30
 ========================
 
-- Rewrite from scratch for Python 3.
+- Rewrite from scratch for Python 3
+
+Version 0.1 - 2013-02-18
+========================
+
+- Initial release
