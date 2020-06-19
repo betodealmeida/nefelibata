@@ -4,6 +4,8 @@ nefelibata
 
 A weblog engine focusing on **data ownership** and **persistence**.
 
+You can find the `documentation on Read the Docs <https://nefelibata.readthedocs.io/en/latest/>`_.
+
 How is it different?
 ====================
 
