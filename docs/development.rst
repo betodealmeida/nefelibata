@@ -20,7 +20,7 @@ Builders
 This is the base builder class:
 
 
-.. code-block::python
+.. code-block:: python
 
     class Builder:
 
@@ -57,7 +57,7 @@ Publishers
 
 A publisher is a class that defines a ``publish`` method. Here's a simple example:
 
-.. code-block::python
+.. code-block:: python
 
     from pathlib import Path
     from typing import List
@@ -87,7 +87,7 @@ A publisher is a class that defines a ``publish`` method. Here's a simple exampl
 
 To use the custom publisher users would add this to their ``nefelibata.yaml``:
 
-.. code-block::yaml
+.. code-block:: yaml
 
     publish-to:
         - my_publisher
@@ -97,7 +97,7 @@ To use the custom publisher users would add this to their ``nefelibata.yaml``:
 
 This assumes that the publisher is exposed through an entry point:
 
-.. code-block::ini
+.. code-block:: ini
 
     nefelibata.publisher =
         my_publisher = nefelibata.publishers.my_publisher:MyPublisher
@@ -109,7 +109,7 @@ Announcers
 
 Announcers are responsible for two main tasks: publishing a post somewhere else, and fetching replies to it. These are performed by two methods, ``announce`` and ``collect``, respectively:
 
-.. code-block::python
+.. code-block:: python
 
     class MyAnnouncer(Announcer):
 
