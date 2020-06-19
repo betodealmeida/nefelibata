@@ -40,6 +40,8 @@
 - [x] convert relative link to absolute when publishing to Medium
 - [x] per post language
 - [x] new release
+- [ ] `force` in assistants
+- [ ] Medium image upload (go deep post, eg)
 - [ ] documentation
 - [ ] RSS club
 - [ ] spellcheck assistant?
@@ -47,6 +49,4 @@
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
 - [ ] Soundcloud announcer
 - [ ] Instagram announcer
-- [ ] `force` in assistants
 - [ ] threaded comments
-- [ ] Medium image upload (go deep post, eg)
