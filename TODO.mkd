@@ -41,13 +41,14 @@
 - [x] per post language
 - [x] new release
 - [x] documentation
+- [ ] categories
 - [ ] new theme
 - [ ] `force` in assistants
 - [ ] Medium image upload (go deep post, eg)
 - [ ] RSS club
-- [ ] spellcheck assistant?
 - [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
 - [ ] Soundcloud announcer
 - [ ] Instagram announcer
 - [ ] threaded comments
+- [ ] use bleach to clean HTML

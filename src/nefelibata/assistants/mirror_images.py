@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
 from nefelibata.post import Post
+from nefelibata.utils import modify_html
 
 
 CHUNK_SIZE = 2048
@@ -36,30 +37,23 @@ class MirrorImagesAssistant(Assistant):
         if not mirror.exists():
             mirror.mkdir()
 
-        with open(file_path) as inp:
-            html = inp.read()
+        soup: BeautifulSoup
+        with modify_html(file_path) as soup:
+            external_images = soup.find_all("img", src=re.compile("http"))
+            for image in external_images:
+                url = image.attrs["src"]
 
-        soup = BeautifulSoup(html, "html.parser")
-        external_images = soup.find_all("img", src=re.compile("http"))
-        for image in external_images:
-            url = image.attrs["src"]
+                extension = get_resource_extension(url)
+                m = hashlib.md5()
+                m.update(url.encode("utf-8"))
+                filename = f"{m.hexdigest()}{extension}"
+                local = mirror / filename
 
-            extension = get_resource_extension(url)
-            m = hashlib.md5()
-            m.update(url.encode("utf-8"))
-            filename = f"{m.hexdigest()}{extension}"
-            local = mirror / filename
+                # download and store locally
+                if not local.exists():
+                    response = requests.get(url, stream=True)
+                    with open(local, "wb") as outp:
+                        for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
+                            outp.write(chunk)
 
-            # download and store locally
-            if not local.exists():
-                response = requests.get(url, stream=True)
-                with open(local, "wb") as outp:
-                    for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
-                        outp.write(chunk)
-
-            image.attrs["src"] = "img/%s" % local.name
-
-        if external_images:
-            html = str(soup)
-            with open(file_path, "w") as fp:
-                fp.write(html)
+                image.attrs["src"] = "img/%s" % local.name

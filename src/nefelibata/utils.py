@@ -1,12 +1,16 @@
+import json
 import logging
 import re
 import sys
 import unicodedata
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 from typing import Dict
+from typing import Iterator
 
 import yaml
+from bs4 import BeautifulSoup
 from libgravatar import Gravatar
 from nefelibata import config_filename
 from rich.logging import RichHandler
@@ -71,3 +75,42 @@ def sanitize(directory: str) -> str:
     directory = strip_accents(directory)
 
     return directory
+
+
+@contextmanager
+def json_storage(file_path: Path) -> Iterator[Dict[str, Any]]:
+    """
+    Open a file and load it as JSON. Save back if modified.
+    """
+    if file_path.exists():
+        with open(file_path) as fp:
+            storage = json.load(fp)
+    else:
+        storage = {}
+
+    original = storage.copy()
+    try:
+        yield storage
+    finally:
+        if storage != original:
+            with open(file_path, "w") as fp:
+                json.dump(storage, fp)
+
+
+@contextmanager
+def modify_html(file_path: Path) -> Iterator[BeautifulSoup]:
+    """
+    Parse an HTML file to BeautifulSoup. Save back if modified.
+    """
+    with open(file_path) as fp:
+        html = fp.read()
+    soup = BeautifulSoup(html, "html.parser")
+
+    original = str(soup)
+    try:
+        yield soup
+    finally:
+        html = str(soup)
+        if html != original:
+            with open(file_path, "w") as fp:
+                fp.write(html)

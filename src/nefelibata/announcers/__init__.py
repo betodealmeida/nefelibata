@@ -10,6 +10,7 @@ from typing import Set
 
 import mf2py
 from nefelibata.post import Post
+from nefelibata.utils import json_storage
 from pkg_resources import iter_entry_points
 from typing_extensions import TypedDict
 
@@ -68,23 +69,18 @@ class Announcer:
     def update_links(self, post: Post) -> None:
         """Update links.json with link to where the post is announced.
         """
+        if not self.should_announce(post):
+            return
+
         post_directory = post.file_path.parent
         storage = post_directory / "links.json"
-        if storage.exists():
-            with open(storage) as fp:
-                links = json.load(fp)
-        else:
-            links = {}
-
-        if self.should_announce(post):
+        with json_storage(storage) as links:
             link = self.announce(post)
             if not link or links.get(self.name) == link:
                 return
 
             # store URL in links.json for template
             links[self.name] = link
-            with open(storage, "w") as fp:
-                json.dump(links, fp)
 
             # also store in post header
             post.parsed[self.url_header] = link
