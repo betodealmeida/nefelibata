@@ -60,7 +60,7 @@ class ArchiveLinksAssistant(Assistant):
 
             for el in soup.find_all("a", href=re.compile("http")):
                 url = el.attrs["href"]
-                if not url or url not in archives:
+                if url not in archives:
                     continue
 
                 el.attrs["data-archive-url"] = archives[url]["url"]

@@ -6,8 +6,8 @@ import unicodedata
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
-from typing import ContextManager
 from typing import Dict
+from typing import Iterator
 
 import yaml
 from bs4 import BeautifulSoup
@@ -78,7 +78,7 @@ def sanitize(directory: str) -> str:
 
 
 @contextmanager
-def json_storage(file_path: Path) -> ContextManager[Dict[str, Any]]:
+def json_storage(file_path: Path) -> Iterator[Dict[str, Any]]:
     if file_path.exists():
         with open(file_path) as fp:
             storage = json.load(fp)
@@ -95,7 +95,7 @@ def json_storage(file_path: Path) -> ContextManager[Dict[str, Any]]:
 
 
 @contextmanager
-def modify_html(file_path: Path) -> ContextManager[BeautifulSoup]:
+def modify_html(file_path: Path) -> Iterator[BeautifulSoup]:
     with open(file_path) as fp:
         html = fp.read()
     soup = BeautifulSoup(html, "html.parser")

@@ -17,6 +17,7 @@ from nefelibata.announcers import Comment
 from nefelibata.announcers import Response
 from nefelibata.announcers import User
 from nefelibata.post import Post
+from nefelibata.utils import json_storage
 
 _logger = logging.getLogger(__name__)
 
@@ -131,42 +132,31 @@ class WebmentionAnnouncer(Announcer):
         # store successful mentions and their responses in a JSON file
         post_directory = post.file_path.parent
         storage = post_directory / "webmentions.json"
-        if storage.exists():
-            with open(storage) as fp:
-                webmentions = json.load(fp)
-        else:
-            webmentions = {}
+        with json_storage(storage) as webmentions:
+            source = urllib.parse.urljoin(self.config["url"], post.url)
 
-        source = urllib.parse.urljoin(self.config["url"], post.url)
-
-        soup = BeautifulSoup(post.html, "html.parser")
-        new_mentions = False
-        for el in soup.find_all("a", href=re.compile("http")):
-            target = el.attrs.get("href")
-            if target not in webmentions:
-                _logger.info(f"Checking {target}")
-                webmentions[target] = self._send_mention(source, target)
-                new_mentions = True
-
-        keywords = [
-            keyword.strip() for keyword in post.parsed.get("keywords", "").split(",")
-        ]
-        if "indieweb" in keywords or "indienews" in keywords:
-            language = post.parsed.get("language") or self.config["language"]
-            if language not in SUPPORTED_LANGUAGES:
-                _logger.error(
-                    f'Currently IndieNews supports only the following languages: {", ".join(SUPPORTED_LANGUAGES)}',
-                )
-            else:
-                target = f"https://news.indieweb.org/{language}"
+            soup = BeautifulSoup(post.html, "html.parser")
+            for el in soup.find_all("a", href=re.compile("http")):
+                target = el.attrs.get("href")
                 if target not in webmentions:
                     _logger.info(f"Checking {target}")
                     webmentions[target] = self._send_mention(source, target)
-                    new_mentions = True
 
-        if new_mentions:
-            with open(storage, "w") as fp:
-                json.dump(webmentions, fp)
+            keywords = [
+                keyword.strip()
+                for keyword in post.parsed.get("keywords", "").split(",")
+            ]
+            if "indieweb" in keywords or "indienews" in keywords:
+                language = post.parsed.get("language") or self.config["language"]
+                if language not in SUPPORTED_LANGUAGES:
+                    _logger.error(
+                        f'Currently IndieNews supports only the following languages: {", ".join(SUPPORTED_LANGUAGES)}',
+                    )
+                else:
+                    target = f"https://news.indieweb.org/{language}"
+                    if target not in webmentions:
+                        _logger.info(f"Checking {target}")
+                        webmentions[target] = self._send_mention(source, target)
 
         _logger.info("Success!")
 
