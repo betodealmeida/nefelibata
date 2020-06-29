@@ -79,6 +79,9 @@ def sanitize(directory: str) -> str:
 
 @contextmanager
 def json_storage(file_path: Path) -> Iterator[Dict[str, Any]]:
+    """
+    Open a file and load it as JSON. Save back if modified.
+    """
     if file_path.exists():
         with open(file_path) as fp:
             storage = json.load(fp)
@@ -96,6 +99,9 @@ def json_storage(file_path: Path) -> Iterator[Dict[str, Any]]:
 
 @contextmanager
 def modify_html(file_path: Path) -> Iterator[BeautifulSoup]:
+    """
+    Parse an HTML file to BeautifulSoup. Save back if modified.
+    """
     with open(file_path) as fp:
         html = fp.read()
     soup = BeautifulSoup(html, "html.parser")
