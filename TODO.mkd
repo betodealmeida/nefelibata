@@ -41,20 +41,22 @@
 - [x] per post language
 - [x] new release
 - [x] documentation
-- [ ] cassette tape audio player
+- [x] cassette tape audio player
 - [ ] when mirroring images, add original URL as exif
+- [ ] categories
+- [ ] post categories: notes, songs? allow custom themes to be specified
 - [ ] new theme
 - [ ] `force` in assistants
 - [ ] Medium image upload (go deep post, eg)
 - [ ] RSS club
-- [ ] spellcheck assistant?
 - [ ] parallelize build/publish
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
+- [ ] Reddit announcer
 - [ ] Soundcloud announcer
 - [ ] Instagram announcer
 - [ ] threaded comments
 - [ ] style webmentioned links: https://www.ctrl.blog/media/hero/webmention.svg
-- [ ] post categories
 - [ ] mirror youtube videos in addition to images
 - [ ] PESOS?
 - [ ] self archive.org using wget?
+- [ ] use bleach to clean HTML

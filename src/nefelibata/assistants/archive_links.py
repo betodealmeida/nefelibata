@@ -6,6 +6,8 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
 from pathlib import Path
+from typing import Any
+from typing import Dict
 
 import dateutil.parser
 import requests
@@ -13,6 +15,8 @@ from bs4 import BeautifulSoup
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
 from nefelibata.post import Post
+from nefelibata.utils import json_storage
+from nefelibata.utils import modify_html
 
 _logger = logging.getLogger(__name__)
 
@@ -39,17 +43,39 @@ class ArchiveLinksAssistant(Assistant):
         return parsed.netloc.endswith("archive.org")
 
     def process_post(self, post: Post, force: bool = False) -> None:
+        # store all links to the post directory with information about where and
+        # when they were saved, so they can be used by templates
         post_directory = post.file_path.parent
         storage = post_directory / "archives.json"
-        if storage.exists():
-            with open(storage) as fp:
-                archives = json.load(fp)
-        else:
-            archives = {}
+        archives: Dict[str, Any]
+        with json_storage(storage) as archives:
+            self._archive_links(post, archives)
 
+        # now enrich links in the generated HTML with the saved link
+        index_html = post.file_path.with_suffix(".html")
+        soup: BeautifulSoup
+        with modify_html(index_html) as soup:
+            # remove existing archive notes
+            for el in soup.find_all("span", attrs={"class": "archive"}):
+                el.decompose()
+
+            for el in soup.find_all("a", href=re.compile("http")):
+                url = el.attrs["href"]
+                if url not in archives:
+                    continue
+
+                el.attrs["data-archive-url"] = archives[url]["url"]
+                el.attrs["data-archive-date"] = archives[url]["date"]
+
+                span = soup.new_tag("span", attrs={"class": "archive"})
+                anchor = soup.new_tag("a", href=archives[url]["url"])
+                anchor.string = "archived"
+                span.extend(["[", anchor, "]"])
+                el.insert_after(span)
+
+    def _archive_links(self, post: Post, archives: Dict[str, Any]) -> None:
         # find links from the post HTML
         soup = BeautifulSoup(post.html, "html.parser")
-        archived = False
         for el in soup.find_all("a", href=re.compile("http")):
             url = el.attrs["href"]
             if not url or self._safe(url):
@@ -84,41 +110,3 @@ class ArchiveLinksAssistant(Assistant):
                 "url": archived_url,
                 "date": datetime.now().astimezone(timezone.utc).isoformat(),
             }
-            archived = True
-
-        if archived:
-            with open(storage, "w") as fp:
-                json.dump(archives, fp)
-
-        # now enrich links in the generated HTML
-        index_html = post.file_path.with_suffix(".html")
-        with open(index_html) as fp:
-            html = fp.read()
-        soup = BeautifulSoup(html, "html.parser")
-
-        # remove existing archive notes
-        for el in soup.find_all("span", attrs={"class": "archive"}):
-            el.decompose()
-
-        modified = False
-        for el in soup.find_all("a", href=re.compile("http")):
-            url = el.attrs["href"]
-            if url not in archives:
-                continue
-
-            if el.attrs.get("data-archive-url") != archives[url]["url"]:
-                el.attrs["data-archive-url"] = archives[url]["url"]
-                el.attrs["data-archive-date"] = archives[url]["date"]
-
-                span = soup.new_tag("span", attrs={"class": "archive"})
-                anchor = soup.new_tag("a", href=archives[url]["url"])
-                anchor.string = "archived"
-                span.extend(["[", anchor, "]"])
-                el.insert_after(span)
-
-                modified = True
-
-        if modified:
-            html = str(soup)
-            with open(index_html, "w") as fp:
-                fp.write(html)
