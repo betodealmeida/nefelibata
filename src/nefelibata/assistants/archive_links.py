@@ -43,7 +43,8 @@ class ArchiveLinksAssistant(Assistant):
         return parsed.netloc.endswith("archive.org")
 
     def process_post(self, post: Post, force: bool = False) -> None:
-        # save all links to the post directory, so they can be used by tempaltes
+        # store all links to the post directory with information about where and
+        # when they were saved, so they can be used by templates
         post_directory = post.file_path.parent
         storage = post_directory / "archives.json"
         archives: Dict[str, Any]
