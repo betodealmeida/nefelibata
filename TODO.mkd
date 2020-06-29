@@ -41,6 +41,8 @@
 - [x] per post language
 - [x] new release
 - [x] documentation
+- [ ] cassette tape audio player
+- [ ] when mirroring images, add original URL as exif
 - [ ] new theme
 - [ ] `force` in assistants
 - [ ] Medium image upload (go deep post, eg)
@@ -51,3 +53,8 @@
 - [ ] Soundcloud announcer
 - [ ] Instagram announcer
 - [ ] threaded comments
+- [ ] style webmentioned links: https://www.ctrl.blog/media/hero/webmention.svg
+- [ ] post categories
+- [ ] mirror youtube videos in addition to images
+- [ ] PESOS?
+- [ ] self archive.org using wget?
