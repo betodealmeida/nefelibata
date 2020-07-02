@@ -18,14 +18,14 @@ content
 
 You probably only need to change the last one.
 
-The ``index.html`` template is used to generate the index page, as well as the paginated archives and category pages, ie, any page that shows a list of posts. It defines the following blocks:
+The ``index.html`` template is used to generate the index page, as well as the paginated archives and tags pages, ie, any page that shows a list of posts. It defines the following blocks:
 
 meta
     Metadata addade to the HTML head
 title
     The title of the page
 navigation
-    Elements used to paginate the archives and the categories
+    Elements used to paginate the archives and the tags
 content
     The actual HTML content of the posts
 

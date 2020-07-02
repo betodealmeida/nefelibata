@@ -38,7 +38,7 @@ The second part defines which parts of your weblog will be built. Unless you kno
     builders:
       - post
       - index
-      - categories
+      - tags
       - atom
 
 Assistants

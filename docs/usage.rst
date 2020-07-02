@@ -28,7 +28,7 @@ You'll notice that the ``index.mkd`` file has headers and a body. The file itsel
 
 - ``subject``: this is the title of your post.
 - ``summary``: this is a one-line summary of your post.
-- ``keywords``: a comma-separated list of keywords/tags/categories.
+- ``keywords``: a comma-separated list of keywords for tags.
 
 Additionally, once the post is published a ``date`` header will be added. If the post is announced to Twitter/Mastodon/etc. a corresponding header (eg, ``mastodon-url``) will also be added.
 
@@ -43,7 +43,7 @@ To build your weblog, simply run:
 
     $ nb build
 
-This will convert the Markdown files to HTML and build the weblog, with pages for archives and categories as well. Later, once posts have been announced to social networks, this command will also collect replies and store them locally.
+This will convert the Markdown files to HTML and build the weblog, with pages for archives and tags as well. Later, once posts have been announced to social networks, this command will also collect replies and store them locally.
 
 Previewing the weblog
 ---------------------
