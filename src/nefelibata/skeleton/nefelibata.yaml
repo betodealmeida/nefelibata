@@ -27,7 +27,7 @@ social:
 builders:
   - post
   - index
-  - categories
+  - tags
   - atom
 
 # Assistants post-process the HTML built, mirroring remote images locally,

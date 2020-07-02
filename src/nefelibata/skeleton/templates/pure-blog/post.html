@@ -63,7 +63,7 @@
                             </span>
                             on <time class="dt-published" datetime="{{ post.date.isoformat() }}" pubdate>{{ post.date.strftime('%Y-%m-%d') }}</time>
                             under
-                            {% if config.builders.categories %}
+                            {% if config.builders.tags %}
                             {% for keyword in keywords %}
                             <a class="post-category p-category" style="background-color: {{ random_color(keyword) }}" href="/{{ keyword }}.html">{{ keyword }}</a>
                             {% endfor %}

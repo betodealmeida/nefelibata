@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import dateutil.parser
 import pytest
 from freezegun import freeze_time
-from nefelibata.builders.categories import CategoriesBuilder
+from nefelibata.builders.tags import TagsBuilder
 from nefelibata.post import Post
 
 __author__ = "Beto Dealmeida"
@@ -25,10 +25,10 @@ test_template = """
 
 
 class MockPost:
-    def __init__(self, title: str, date: str, categories: List[str]):
+    def __init__(self, title: str, date: str, tags: List[str]):
         self.title = title
         self.date = date
-        self.parsed = {"keywords": ", ".join(categories)}
+        self.parsed = {"keywords": ", ".join(tags)}
 
         mock_file_path = MagicMock()
         mock_file_path.stat.return_value.st_mtime = dateutil.parser.parse(
@@ -52,14 +52,14 @@ def test_process_site(mocker, fs):
     with open(root / "templates/test-theme/index.html", "w") as fp:
         fp.write(test_template)
 
-    builder = CategoriesBuilder(root, config)
+    builder = TagsBuilder(root, config)
 
     posts = [
         MockPost("one", "2020-01-01", ["a", "b", "d"]),
         MockPost("two", "2020-01-02", ["b", "c", "d"]),
         MockPost("three", "2020-01-03", ["a", "c", "d"]),
     ]
-    mocker.patch("nefelibata.builders.categories.get_posts", return_value=posts)
+    mocker.patch("nefelibata.builders.tags.get_posts", return_value=posts)
     with freeze_time("2020-01-04"):
         builder.process_site()
 
@@ -71,31 +71,31 @@ def test_process_site(mocker, fs):
 
     with open(root / "build/a.html") as fp:
         contents = fp.read()
-    assert contents == '\nPosts about "a"\nthree\n\none\nNone'
+    assert contents == '\nPosts tagged "a"\nthree\n\none\nNone'
 
     with open(root / "build/b.html") as fp:
         contents = fp.read()
-    assert contents == '\nPosts about "b"\ntwo\n\none\nNone'
+    assert contents == '\nPosts tagged "b"\ntwo\n\none\nNone'
 
     with open(root / "build/c.html") as fp:
         contents = fp.read()
-    assert contents == '\nPosts about "c"\nthree\n\ntwo\nNone'
+    assert contents == '\nPosts tagged "c"\nthree\n\ntwo\nNone'
 
     with open(root / "build/d.html") as fp:
         contents = fp.read()
-    assert contents == '\nPosts about "d"\nthree\n\ntwo\nd1.html'
+    assert contents == '\nPosts tagged "d"\nthree\n\ntwo\nd1.html'
 
     with open(root / "build/d1.html") as fp:
         contents = fp.read()
-    assert contents == '\nPosts about "d"\none\nNone'
+    assert contents == '\nPosts tagged "d"\none\nNone'
 
-    # check that only categories with updated posts get rebuild
+    # check that only tags with updated posts get rebuild
     posts = [
         MockPost("one", "2020-01-05", ["a", "b", "d"]),
         MockPost("two", "2020-01-02", ["b", "c", "d"]),
         MockPost("three", "2020-01-03", ["a", "c", "d"]),
     ]
-    mocker.patch("nefelibata.builders.categories.get_posts", return_value=posts)
+    mocker.patch("nefelibata.builders.tags.get_posts", return_value=posts)
     with freeze_time("2020-01-06"):
         builder.process_site()
 

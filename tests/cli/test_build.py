@@ -13,7 +13,7 @@ __license__ = "mit"
 
 config = {
     "theme": "test-theme",
-    "builders": ["post", "index", "categories", "atom"],
+    "builders": ["post", "index", "tags", "atom"],
     "announce-on": ["announcer1", "announcer2"],
 }
 
