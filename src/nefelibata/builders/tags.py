@@ -15,14 +15,14 @@ from nefelibata.post import get_posts
 _logger = logging.getLogger(__name__)
 
 
-class CategoriesBuilder(Builder):
+class TagsBuilder(Builder):
 
     scopes = [Scope.SITE]
 
     def process_site(self, force: bool = False) -> None:
-        """Generate pages for each category.
+        """Generate pages for each tag.
         """
-        _logger.info("Creating categories pages")
+        _logger.info("Creating tags pages")
 
         env = Environment(
             loader=FileSystemLoader(
@@ -32,19 +32,19 @@ class CategoriesBuilder(Builder):
         template = env.get_template("index.html")
 
         posts = get_posts(self.root)
-        categories = defaultdict(list)
+        tags = defaultdict(list)
         for post in posts:
-            for category in post.parsed.get("keywords", "").split(","):
-                categories[category.strip()].append(post)
+            for tag in post.parsed.get("keywords", "").split(","):
+                tags[tag.strip()].append(post)
 
-        for category, posts in categories.items():
+        for tag, posts in tags.items():
             posts.sort(key=lambda x: x.date, reverse=True)
             last_modified = max(post.file_path.stat().st_mtime for post in posts)
             show = self.config.get("posts-to-show", 10)
 
             # first page; these will be updated
             page = 1
-            name: Optional[str] = f"{category}.html"
+            name: Optional[str] = f"{tag}.html"
             previous: Optional[str] = None
 
             while name:
@@ -52,7 +52,7 @@ class CategoriesBuilder(Builder):
 
                 file_path = self.root / "build" / name
 
-                # only update if there are changes to files in this category
+                # only update if there are changes to files in this tag
                 if (
                     not force
                     and file_path.exists()
@@ -61,7 +61,7 @@ class CategoriesBuilder(Builder):
                     break
 
                 # link to next page
-                next = f"{category}{page}.html" if posts else None
+                next = f"{tag}{page}.html" if posts else None
 
                 html = template.render(
                     __version__=__version__,
@@ -70,7 +70,7 @@ class CategoriesBuilder(Builder):
                     posts=page_posts,
                     breadcrumbs=[
                         ("Home", "/index.html"),
-                        (f'Posts about "{category}"', None),
+                        (f'Posts tagged "{tag}"', None),
                     ],
                     previous=previous,
                     next=next,
