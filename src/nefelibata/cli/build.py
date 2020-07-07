@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
 from pathlib import Path
+from typing import Optional
 
 from nefelibata.announcers import get_announcers
 from nefelibata.assistants import get_assistants
 from nefelibata.builders import get_builders
 from nefelibata.builders import Scope
 from nefelibata.post import get_posts
+from nefelibata.post import Post
 from nefelibata.utils import get_config
 
 __author__ = "Beto Dealmeida"
@@ -16,7 +18,7 @@ __license__ = "mit"
 _logger = logging.getLogger(__name__)
 
 
-def run(root: Path, force: bool = False, collect_replies: bool = True) -> None:
+def run(root: Path, post: Optional[Post] = None, force: bool = False, collect_replies: bool = True) -> None:
     """Build weblog from Markdown posts and social media interactions.
     """
     _logger.info("Building weblog")
@@ -41,7 +43,8 @@ def run(root: Path, force: bool = False, collect_replies: bool = True) -> None:
     post_builders = get_builders(root, config, Scope.POST)
     post_assistants = get_assistants(root, config, Scope.POST)
     announcers = get_announcers(root, config)
-    for post in get_posts(root):
+    posts = [post] if post else get_posts(root)
+    for post in posts:
         # freeze currently configured announcers, so that if a new announcer is
         # added in the future old posts are not announced
         if "announce-on" not in post.parsed and config["announce-on"]:
