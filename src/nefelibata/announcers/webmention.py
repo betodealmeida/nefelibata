@@ -139,8 +139,13 @@ class WebmentionAnnouncer(Announcer):
             for el in soup.find_all("a", href=re.compile("http")):
                 target = el.attrs.get("href")
                 if target not in webmentions:
-                    _logger.info(f"Checking {target}")
                     webmentions[target] = self._send_mention(source, target)
+                elif (
+                    webmentions[target]["success"]
+                    and isinstance(webmentions[target]["content"], dict)
+                    and webmentions[target]["content"].get("status") == "queued"
+                ):
+                    webmentions[target] = self._update_webmention(webmentions[target])
 
             keywords = [
                 keyword.strip()
@@ -155,14 +160,23 @@ class WebmentionAnnouncer(Announcer):
                 else:
                     target = f"https://news.indieweb.org/{language}"
                     if target not in webmentions:
-                        _logger.info(f"Checking {target}")
                         webmentions[target] = self._send_mention(source, target)
+                    elif (
+                        webmentions[target]["success"]
+                        and isinstance(webmentions[target]["content"], dict)
+                        and webmentions[target]["content"].get("status") == "queued"
+                    ):
+                        webmentions[target] = self._update_webmention(
+                            webmentions[target]
+                        )
 
         _logger.info("Success!")
 
         return COMMENT_URL
 
     def _send_mention(self, source: str, target: str) -> Dict[str, Any]:
+        _logger.info(f"Checking {target}")
+
         endpoint = get_webmention_endpoint(target)
         if not endpoint:
             _logger.info("No endpoint found")
@@ -174,14 +188,27 @@ class WebmentionAnnouncer(Announcer):
             "target": target,
         }
         response = requests.post(endpoint, data=payload)
-        info: Dict[str, Any] = {"success": response.ok}
+        webmention: Dict[str, Any] = {"success": response.ok}
         if response.ok:
             try:
-                info["content"] = response.json()
+                webmention["content"] = response.json()
             except ValueError:
-                info["content"] = response.text
+                webmention["content"] = response.text
 
-        return info
+        return webmention
+
+    def _update_webmention(self, webmention: Dict[str, Any]) -> Dict[str, Any]:
+        _logger.info("Found queued webmention response, checking for update")
+
+        location = webmention["content"]["location"]
+        response = requests.get(location)
+        if response.ok:
+            try:
+                webmention["content"] = response.json()
+            except ValueError:
+                webmention["content"] = response.text
+
+        return webmention
 
     def collect(self, post: Post) -> List[Response]:
         _logger.info("Collecting webmentions")

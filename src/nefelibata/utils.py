@@ -1,3 +1,4 @@
+import copy
 import json
 import logging
 import re
@@ -88,7 +89,7 @@ def json_storage(file_path: Path) -> Iterator[Dict[str, Any]]:
     else:
         storage = {}
 
-    original = storage.copy()
+    original = copy.deepcopy(storage)
     try:
         yield storage
     finally:
