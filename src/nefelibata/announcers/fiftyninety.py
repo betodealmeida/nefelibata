@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 import textwrap
@@ -9,6 +10,7 @@ from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import Tuple
 
 import dateutil.parser
 import requests
@@ -28,35 +30,62 @@ _logger = logging.getLogger(__name__)
 def get_session(username: str, password: str) -> requests.Session:
     session = requests.Session()
 
+    response = session.get("http://fiftyninety.fawmers.org/")
+    soup = BeautifulSoup(response.text, "html.parser")
+    el = soup.find("input", {"name": "form_build_id"})
+    form_build_id = el.attrs["value"]
+
     # get authentication cookie
-    url = "http://fiftyninety.fawmers.org/node?destination=node"
+    url = "http://fiftyninety.fawmers.org/node"
     params = {
-        "name": [username],
-        "pass": [password],
-        # "form_build_id": ["form-zgLFoABPzu6f6h8CYtZH7FI4wlVtEyEFi5bzJoD_wf4"],
-        "form_id": ["user_login_block"],
-        "op": ["Log in"],
+        "name": username,
+        "pass": password,
+        "form_build_id": form_build_id,
+        "form_id": "user_login_block",
+        "feed_me": "",
+        "op": "Log+in",
     }
-    session.post(url, params=params)
+    session.post(url, params={"destination": "node"}, data=params)
 
     return session
 
 
-def get_fid(session, demo: str) -> List[str]:
+def get_fid(session, options: str, demo: str) -> str:
+    url = "http://fiftyninety.fawmers.org/media/browser"
     params = {
-        "form_build_id": ["form-sMG77P3cOM7cQ8gffLft-mOMTWzf40znONztLbCbW6k"],
-        "form_id": ["remote_stream_wrapper_file_add_form"],
-        "form_token": ["yhjIst2_S1F3VYgvaYbAiBzNvA5GQgTU5jcaKOR5z-s"],
-        "op": ["Submit"],
-        "url": [demo],
+        "options": options,
+        "plugins": "undefined",
+        "render": "media-popup",
     }
-    response = session.post(
-        "https://fiftyninety.fawmers.org/media/browser?render=media-popup", data=params,
+    response = session.get(url, params=params)
+    form_build_id, form_token = get_form_params_from_input(
+        response.text, "remote-stream-wrapper-file-add-form",
     )
+
+    data = {
+        "form_build_id": form_build_id,
+        "form_id": "remote_stream_wrapper_file_add_form",
+        "form_token": form_token,
+        "op": "Submit",
+        "url": demo,
+    }
+    response = session.post(url, params=params, data=data, allow_redirects=False)
     url = response.headers["Location"]
     qs = urllib.parse.urlparse(url).query
     parsed = urllib.parse.parse_qs(qs)
-    return parsed["fid"]
+    return parsed["fid"][0]
+
+
+def get_form_params_from_input(html: str, form_id: str) -> Tuple[str, str]:
+    soup = BeautifulSoup(html, "html.parser")
+    form = soup.find("form", id=form_id)
+
+    el = form.find("input", {"name": "form_build_id"})
+    form_build_id = el.attrs["value"]
+    el = form.find("input", {"name": "form_token"})
+    form_token = el.attrs["value"]
+
+    return form_build_id, form_token
 
 
 def extract_params(
@@ -68,14 +97,18 @@ def extract_params(
 
     # liner notes are between <h1>s
     notes_h1 = soup.find("h1", text="Liner Notes")
-    els = []
+    lines = []
     next_sibling = notes_h1.next_sibling
     while next_sibling and next_sibling.name != "h1":
-        els.append(next_sibling)
+        try:
+            content = next_sibling.get_text()
+        except AttributeError:
+            content = next_sibling.string
+        lines.append(content)
         if next_sibling.name == "p":
-            els.append(NavigableString("\n"))
+            lines.append("\n")
         next_sibling = next_sibling.next_sibling
-    notes = "".join(el.string for el in els if el.string).strip()
+    notes = "".join(lines).strip()
 
     # lyrics are inside a <pre> element
     try:
@@ -86,7 +119,7 @@ def extract_params(
 
     # search for a single MP3 in the post directory to use as demo
     post_directory = post.file_path.parent
-    mp3s = list(post_directory.glob("*.mp3"))
+    mp3s = list(post_directory.glob("**/*.mp3"))
     if len(mp3s) == 1:
         mp3_path = mp3s[0].relative_to(post_directory.parent)
         demo = f'{config["url"]}{mp3_path}'
@@ -96,22 +129,41 @@ def extract_params(
     else:
         demo = ""
 
+    # get tokens used in POST
+    response = session.get("http://fiftyninety.fawmers.org/node/add/song")
+    form_build_id, form_token = get_form_params_from_input(
+        response.text, "song-node-form",
+    )
+
+    # get additional params for file upload; these are encoded in the JS
+    soup = BeautifulSoup(response.text, "html.parser")
+    el = soup.find("script", text=re.compile(r"^jQuery\.extend"))
+    match = re.search("{.*}", el.contents[0])
+    if not match:
+        raise Exception("Unable to parse options from Javascript")
+    payload = match.group(0)
+    arg = json.loads(payload)
+    options = arg["media"]["elements"][
+        ".js-media-element-edit-field-demo-und-0-upload"
+    ]["global"]["options"]
+
     # get an ID referencing the demo
-    fid = get_fid(session, demo) if demo else [""]
+    fid = get_fid(session, options, demo) if demo else ""
 
     return {
-        "body[und][0][value]": [notes],
-        "field_collab[und][0][_weight]": ["0"],
-        "field_demo[und][0][display]": ["1"],
-        "field_demo[und][0][fid]": [fid],
-        "field_downloadable[und]": ["1" if demo else "0"],
-        "field_lyrics[und][0][value]": [lyrics],
+        "body[und][0][value]": notes,
+        "field_collab[und][0][_weight]": "0",
+        "field_demo[und][0][display]": "1",
+        "field_demo[und][0][fid]": fid,
+        "field_downloadable[und]": "1" if demo else "0",
+        "field_lyrics[und][0][value]": lyrics,
         "field_tags[und]": post.parsed["keywords"],
-        # "form_build_id": ["form-dTpkHaCeTOa2TWTcam9XjnNgVhcUmNbmitazDypJ5Pk"],
-        "form_id": ["song_node_form"],
-        # "form_token": ["ldgwFXJ2KBcBcV567Ws-ywPg4tLnvWqK4fwb8vyIZi4"],
-        "op": ["Save"],
-        "title": [post.title],
+        "form_build_id": form_build_id,
+        "form_id": "song_node_form",
+        "form_token": form_token,
+        "op": "Save",
+        "title": post.title,
+        "changed": "",
     }
 
 
@@ -264,7 +316,9 @@ class FiftyNinetyAnnouncer(Announcer):
 
         params = extract_params(session, post, self.config)
         response = session.post(
-            "https://fiftyninety.fawmers.org/node/add/song", data=params,
+            "http://fiftyninety.fawmers.org/node/add/song",
+            data=params,
+            allow_redirects=False,
         )
         url = response.headers["Location"]
 

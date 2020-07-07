@@ -29,14 +29,18 @@ def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
 
     # liner notes are between <h1>s
     notes_h1 = soup.find("h1", text="Liner Notes")
-    els = []
+    lines = []
     next_sibling = notes_h1.next_sibling
     while next_sibling and next_sibling.name != "h1":
-        els.append(next_sibling)
+        try:
+            content = next_sibling.get_text()
+        except AttributeError:
+            content = next_sibling.string
+        lines.append(content)
         if next_sibling.name == "p":
-            els.append(NavigableString("\n"))
+            lines.append("\n")
         next_sibling = next_sibling.next_sibling
-    notes = "".join(el.string for el in els).strip()
+    notes = "".join(lines).strip()
 
     # lyrics are inside a <pre> element
     try:
@@ -50,7 +54,7 @@ def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
 
     # search for a single MP3 in the post directory to use as demo
     post_directory = post.file_path.parent
-    mp3s = list(post_directory.glob("*.mp3"))
+    mp3s = list(post_directory.glob("**/*.mp3"))
     if len(mp3s) == 1:
         mp3_path = mp3s[0].relative_to(post_directory.parent)
         demo = f'{config["url"]}{mp3_path}'
