@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
 from pathlib import Path
+from typing import Optional
 
 from nefelibata.announcers import get_announcers
 from nefelibata.post import get_posts
+from nefelibata.post import Post
 from nefelibata.publishers import get_publishers
 from nefelibata.utils import get_config
 
@@ -14,7 +16,7 @@ __license__ = "mit"
 _logger = logging.getLogger(__name__)
 
 
-def run(root: Path, force: bool = False) -> None:
+def run(root: Path, post: Optional[Post] = None, force: bool = False) -> None:
     """Publish weblog.
     """
     _logger.info("Publishing weblog")
@@ -27,7 +29,8 @@ def run(root: Path, force: bool = False) -> None:
 
     # announce posts
     announcers = get_announcers(root, config)
-    for post in get_posts(root):
+    posts = [post] if post else get_posts(root)
+    for post in posts:
         for announcer in announcers:
             if announcer.match(post):
                 announcer.update_links(post)

@@ -1,6 +1,7 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 
+from freezegun import freeze_time
 from nefelibata.console import main
 
 __author__ = "Beto Dealmeida"
@@ -16,7 +17,8 @@ def test_console_init(mocker):
         "build": False,
         "preview": False,
         "publish": False,
-        "DIRECTORY": None,
+        "ROOT_DIR": None,
+        "-s": None,
     }
     mocker.patch("nefelibata.console.docopt", return_value=arguments)
 
@@ -36,7 +38,8 @@ def test_console_init_with_directory(mocker):
         "build": False,
         "preview": False,
         "publish": False,
-        "DIRECTORY": "/path/to/blog",
+        "ROOT_DIR": "/path/to/blog",
+        "-s": None,
     }
     mocker.patch("nefelibata.console.docopt", return_value=arguments)
 
@@ -56,7 +59,8 @@ def test_console_new(mocker):
         "build": False,
         "preview": False,
         "publish": False,
-        "DIRECTORY": None,
+        "ROOT_DIR": None,
+        "-s": None,
         "POST": "Hello, world!",
     }
     mocker.patch("nefelibata.console.docopt", return_value=arguments)
@@ -80,7 +84,8 @@ def test_console_build(mocker):
         "build": True,
         "preview": False,
         "publish": False,
-        "DIRECTORY": None,
+        "ROOT_DIR": None,
+        "-s": None,
         "--force": True,
         "--no-collect": True,
     }
@@ -94,7 +99,48 @@ def test_console_build(mocker):
 
     main()
 
-    mock_build.run.assert_called_with(Path("/path/to/blog"), True, False)
+    mock_build.run.assert_called_with(Path("/path/to/blog"), None, True, False)
+
+
+def test_console_build_single_post(mocker, mock_post):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: This is your first post
+        keywords: welcome, blog
+        summary: Hello, world!
+
+        # Welcome #
+
+        This is your first post. It should be written using Markdown.
+        """,
+        )
+
+    mocker.patch("nefelibata.console.Post", return_value=post)
+
+    arguments = {
+        "--loglevel": "debug",
+        "init": False,
+        "new": False,
+        "build": True,
+        "preview": False,
+        "publish": False,
+        "ROOT_DIR": None,
+        "-s": "/path/to/blog/posts/first",
+        "--force": True,
+        "--no-collect": True,
+    }
+    mocker.patch("nefelibata.console.docopt", return_value=arguments)
+
+    mock_build = MagicMock()
+    mocker.patch("nefelibata.console.build", mock_build)
+    mocker.patch(
+        "nefelibata.console.find_directory", return_value=Path("/path/to/blog"),
+    )
+
+    main()
+
+    mock_build.run.assert_called_with(Path("/path/to/blog"), post, True, False)
 
 
 def test_console_preview(mocker):
@@ -105,7 +151,8 @@ def test_console_preview(mocker):
         "build": False,
         "preview": True,
         "publish": False,
-        "DIRECTORY": None,
+        "ROOT_DIR": None,
+        "-s": None,
         "-p": 8001,
     }
     mocker.patch("nefelibata.console.docopt", return_value=arguments)
@@ -129,7 +176,8 @@ def test_console_publish(mocker):
         "build": False,
         "preview": False,
         "publish": True,
-        "DIRECTORY": None,
+        "ROOT_DIR": None,
+        "-s": None,
         "--force": True,
     }
     mocker.patch("nefelibata.console.docopt", return_value=arguments)
@@ -142,7 +190,47 @@ def test_console_publish(mocker):
 
     main()
 
-    mock_publish.run.assert_called_with(Path("/path/to/blog"), True)
+    mock_publish.run.assert_called_with(Path("/path/to/blog"), None, True)
+
+
+def test_console_publish_single_post(mocker, mock_post):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: This is your first post
+        keywords: welcome, blog
+        summary: Hello, world!
+
+        # Welcome #
+
+        This is your first post. It should be written using Markdown.
+        """,
+        )
+
+    mocker.patch("nefelibata.console.Post", return_value=post)
+
+    arguments = {
+        "--loglevel": "debug",
+        "init": False,
+        "new": False,
+        "build": False,
+        "preview": False,
+        "publish": True,
+        "ROOT_DIR": None,
+        "-s": "/path/to/blog/posts/first/index.mkd",
+        "--force": True,
+    }
+    mocker.patch("nefelibata.console.docopt", return_value=arguments)
+
+    mock_publish = MagicMock()
+    mocker.patch("nefelibata.console.publish", mock_publish)
+    mocker.patch(
+        "nefelibata.console.find_directory", return_value=Path("/path/to/blog"),
+    )
+
+    main()
+
+    mock_publish.run.assert_called_with(Path("/path/to/blog"), post, True)
 
 
 def test_console_bogus(mocker):
@@ -153,7 +241,8 @@ def test_console_bogus(mocker):
         "build": False,
         "preview": False,
         "publish": False,
-        "DIRECTORY": None,
+        "ROOT_DIR": None,
+        "-s": None,
     }
     mocker.patch("nefelibata.console.docopt", return_value=arguments)
     mocker.patch(

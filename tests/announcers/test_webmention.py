@@ -210,7 +210,9 @@ def test_announcer_announced_partially(mock_post, requests_mock):
     announcer._send_mention = mock_send_mention
 
     with open(post.file_path.parent / "webmentions.json", "w") as fp:
-        json.dump({"https://blog.example.com/": {"success": True}}, fp)
+        json.dump(
+            {"https://blog.example.com/": {"success": True, "content": "Accepted"}}, fp,
+        )
 
     announcer.update_links(post)
 
@@ -239,7 +241,7 @@ def test_announcer_announced_no_new_mentions(mock_post, requests_mock):
     )
 
     mock_send_mention = MagicMock()
-    mock_send_mention.return_value = {"success": True}
+    mock_send_mention.return_value = {"success": True, "content": "Accepted"}
     announcer._send_mention = mock_send_mention
 
     with freeze_time("2020-01-01T00:00:00Z"):
@@ -289,7 +291,9 @@ def test_announcer_announced_exception_on_mention(mock_post, mocker, requests_mo
     requests_mock.post("https://endpoint.example.com", status_code=500)
 
     with open(post.file_path.parent / "webmentions.json", "w") as fp:
-        json.dump({"https://blog.example.com/": {"success": True}}, fp)
+        json.dump(
+            {"https://blog.example.com/": {"success": True, "content": "Accepted"}}, fp,
+        )
 
     announcer.update_links(post)
     assert post.parsed["webmention-url"] == "https://commentpara.de/"
@@ -298,7 +302,7 @@ def test_announcer_announced_exception_on_mention(mock_post, mocker, requests_mo
         contents = json.load(fp)
 
     assert contents == {
-        "https://blog.example.com/": {"success": True},
+        "https://blog.example.com/": {"success": True, "content": "Accepted"},
         "https://news.indieweb.org/en": {"success": False},
     }
 
@@ -327,7 +331,10 @@ def test_announcer_announced_indienews_only(mock_post, requests_mock):
     announcer._send_mention = mock_send_mention
 
     with open(post.file_path.parent / "webmentions.json", "w") as fp:
-        json.dump({"https://news.indieweb.org/en": {"success": True}}, fp)
+        json.dump(
+            {"https://news.indieweb.org/en": {"success": True, "content": "Accepted"}},
+            fp,
+        )
 
     announcer.update_links(post)
     assert post.parsed["webmention-url"] == "https://commentpara.de/"
@@ -357,7 +364,7 @@ def test_announcer_no_indienews(mock_post):
     )
 
     mock_send_mention = MagicMock()
-    mock_send_mention.return_value = {"success": True}
+    mock_send_mention.return_value = {"success": True, "content": "Accepted"}
     announcer._send_mention = mock_send_mention
 
     url = announcer.announce(post)
