@@ -227,7 +227,6 @@ def test_get_comments_from_fawm_page(requests_mock):
 
 
 def test_get_response_from_li():
-    song_id = 110082
     url = "https://fawm.org/songs/110082/"
     soup = BeautifulSoup(
         textwrap.dedent(
@@ -255,7 +254,7 @@ def test_get_response_from_li():
         features="html5lib",
     )
     el = soup.html.body.li
-    response = get_response_from_li(song_id, url, el)
+    response = get_response_from_li(url, el)
 
     assert response == {
         "source": "FAWM",
@@ -276,7 +275,6 @@ def test_get_response_from_li():
 
 
 def test_get_response_from_li_relative_timestamp():
-    song_id = 110082
     url = "https://fawm.org/songs/110082/"
     soup = BeautifulSoup(
         textwrap.dedent(
@@ -305,7 +303,7 @@ def test_get_response_from_li_relative_timestamp():
     )
     el = soup.html.body.li
     with freeze_time("2020-01-01T00:00:00Z"):
-        response = get_response_from_li(song_id, url, el)
+        response = get_response_from_li(url, el)
 
     assert response == {
         "source": "FAWM",
