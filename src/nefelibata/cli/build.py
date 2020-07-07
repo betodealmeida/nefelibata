@@ -18,7 +18,12 @@ __license__ = "mit"
 _logger = logging.getLogger(__name__)
 
 
-def run(root: Path, post: Optional[Post] = None, force: bool = False, collect_replies: bool = True) -> None:
+def run(
+    root: Path,
+    post: Optional[Post] = None,
+    force: bool = False,
+    collect_replies: bool = True,
+) -> None:
     """Build weblog from Markdown posts and social media interactions.
     """
     _logger.info("Building weblog")

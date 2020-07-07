@@ -167,7 +167,7 @@ class WebmentionAnnouncer(Announcer):
                         and webmentions[target]["content"].get("status") == "queued"
                     ):
                         webmentions[target] = self._update_webmention(
-                            webmentions[target]
+                            webmentions[target],
                         )
 
         _logger.info("Success!")
