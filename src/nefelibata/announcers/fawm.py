@@ -74,7 +74,7 @@ def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def get_response_from_li(song_id: int, url: str, el: Tag) -> Response:
+def get_response_from_li(url: str, el: Tag) -> Response:
     """Generate a standard response from a <li> element in the FAWM song page.
     """
     base_url = "https://fawm.org"
@@ -113,10 +113,7 @@ def get_response_from_li(song_id: int, url: str, el: Tag) -> Response:
         "id": f"fawm:{comment_id}",
         "timestamp": timestamp,
         "user": {"name": user_name, "image": user_image, "url": user_url},
-        "comment": {
-            "text": comment,
-            "url": f"{base_url}/songs/{song_id}/#c{comment_id}",
-        },
+        "comment": {"text": comment, "url": f"{url}#c{comment_id}"},
     }
 
 
@@ -131,10 +128,9 @@ def get_comments_from_fawm_page(
     soup = BeautifulSoup(html, "html.parser")
 
     responses = []
-    song_id = int(url.rstrip("/").rsplit("/", 1)[1])
     # there are non-comments with the class "comment-item", so we need to narrow down
     for el in soup.find_all("li", {"class": "comment-item", "id": re.compile(r"c\d+")}):
-        responses.append(get_response_from_li(song_id, url, el))
+        responses.append(get_response_from_li(url, el))
 
     return responses
 
