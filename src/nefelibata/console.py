@@ -68,9 +68,9 @@ def main() -> None:
     if arguments["-s"] is None:
         post = None
     elif arguments["-s"].endswith("index.mkd"):
-        post = Post(Path(arguments["-s"]))
+        post = Post(Path(arguments["-s"]).resolve())
     else:
-        post = Post(Path(arguments["-s"]) / "index.mkd")
+        post = Post(Path(arguments["-s"]).resolve() / "index.mkd")
 
     if arguments["init"]:
         init.run(root)

@@ -44,9 +44,10 @@
 - [x] cassette tape audio player
 - [ ] when mirroring images, add original URL as exif
 - [ ] categories
-- [ ] post categories: notes, songs? allow custom themes to be specified
+- [ ] post types: notes, songs? allow custom themes to be specified
 - [ ] new theme
 - [ ] `force` in assistants
+- [ ] search (build index and search using JS)
 - [ ] Medium image upload (go deep post, eg)
 - [ ] RSS club
 - [ ] parallelize build/publish
