@@ -186,7 +186,7 @@ def test_announcer(mock_post, requests_mock):
     ]
 
 
-def test_announcer_announced_partially(mock_post, requests_mock):
+def test_announcer_announced_partially(mock_post):
     with freeze_time("2020-01-01T00:00:00Z"):
         post = mock_post(
             """
@@ -221,7 +221,146 @@ def test_announcer_announced_partially(mock_post, requests_mock):
     )
 
 
-def test_announcer_announced_no_new_mentions(mock_post, requests_mock):
+def test_announcer_announced_queued(mock_post):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, friends!
+        keywords: test, indieweb
+        summary: My first post
+        announce-on: webmention
+
+        Hi, there! I heard [this blog](https://blog.example.com/) supports webmention.
+        """,
+        )
+
+    root = Path("/path/to/blog")
+    config = {"url": "https://blog.example.com/", "language": "en"}
+    announcer = WebmentionAnnouncer(
+        root, config, "https://webmention.io/example.com/webmention",
+    )
+
+    mock_update_webmention = MagicMock()
+    mock_update_webmention.return_value = {"success": True, "content": "Accepted"}
+    announcer._update_webmention = mock_update_webmention
+
+    with open(post.file_path.parent / "webmentions.json", "w") as fp:
+        json.dump(
+            {
+                "https://blog.example.com/": {
+                    "success": True,
+                    "content": {
+                        "status": "queued",
+                        "location": "https://blog.example.com/mention/12345",
+                    },
+                },
+                "https://news.indieweb.org/en": {
+                    "success": True,
+                    "content": {
+                        "status": "queued",
+                        "location": "https://news.indieweb.org/en/mention/12345",
+                    },
+                },
+            },
+            fp,
+        )
+
+    announcer.update_links(post)
+
+    mock_update_webmention.assert_has_calls(
+        [
+            call(
+                {
+                    "success": True,
+                    "content": {
+                        "status": "queued",
+                        "location": "https://blog.example.com/mention/12345",
+                    },
+                },
+            ),
+            call(
+                {
+                    "success": True,
+                    "content": {
+                        "status": "queued",
+                        "location": "https://news.indieweb.org/en/mention/12345",
+                    },
+                },
+            ),
+        ],
+    )
+
+
+def test_update_webmention(requests_mock):
+    root = Path("/path/to/blog")
+    config = {"url": "https://blog.example.com/", "language": "en"}
+    announcer = WebmentionAnnouncer(
+        root, config, "https://webmention.io/example.com/webmention",
+    )
+
+    webmention = {
+        "success": True,
+        "content": {
+            "status": "queued",
+            "location": "https://blog.example.com/mention/12345",
+        },
+    }
+    updated_webmention = {
+        "status": "accepted",
+        "location": "https://blog.example.com/mention/12345",
+    }
+    requests_mock.get("https://blog.example.com/mention/12345", json=updated_webmention)
+
+    assert announcer._update_webmention(webmention) == {
+        "success": True,
+        "content": updated_webmention,
+    }
+
+
+def test_update_webmention_error(requests_mock):
+    root = Path("/path/to/blog")
+    config = {"url": "https://blog.example.com/", "language": "en"}
+    announcer = WebmentionAnnouncer(
+        root, config, "https://webmention.io/example.com/webmention",
+    )
+
+    webmention = {
+        "success": True,
+        "content": {
+            "status": "queued",
+            "location": "https://blog.example.com/mention/12345",
+        },
+    }
+    requests_mock.get(
+        "https://blog.example.com/mention/12345", text="Not Found", status_code=404,
+    )
+
+    assert announcer._update_webmention(webmention) == webmention
+
+
+def test_update_webmention_not_json(requests_mock):
+    root = Path("/path/to/blog")
+    config = {"url": "https://blog.example.com/", "language": "en"}
+    announcer = WebmentionAnnouncer(
+        root, config, "https://webmention.io/example.com/webmention",
+    )
+
+    webmention = {
+        "success": True,
+        "content": {
+            "status": "queued",
+            "location": "https://blog.example.com/mention/12345",
+        },
+    }
+    requests_mock.get("https://blog.example.com/mention/12345", text="Accepted")
+
+    assert announcer._update_webmention(webmention) == {
+        "success": True,
+        "content": "Accepted",
+    }
+
+
+def test_announcer_announced_no_new_mentions(mock_post):
     with freeze_time("2020-01-01T00:00:00Z"):
         post = mock_post(
             """
@@ -248,8 +387,14 @@ def test_announcer_announced_no_new_mentions(mock_post, requests_mock):
         with open(post.file_path.parent / "webmentions.json", "w") as fp:
             json.dump(
                 {
-                    "https://blog.example.com/": {"success": True},
-                    "https://news.indieweb.org/en": {"success": True},
+                    "https://blog.example.com/": {
+                        "success": True,
+                        "content": "Accepted",
+                    },
+                    "https://news.indieweb.org/en": {
+                        "success": True,
+                        "content": "Accepted",
+                    },
                 },
                 fp,
             )
@@ -307,7 +452,7 @@ def test_announcer_announced_exception_on_mention(mock_post, mocker, requests_mo
     }
 
 
-def test_announcer_announced_indienews_only(mock_post, requests_mock):
+def test_announcer_announced_indienews_only(mock_post):
     with freeze_time("2020-01-01T00:00:00Z"):
         post = mock_post(
             """
