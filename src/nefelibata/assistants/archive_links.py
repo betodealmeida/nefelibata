@@ -89,7 +89,7 @@ class ArchiveLinksAssistant(Assistant):
                 # if the URL has not been archived but we tried
                 # recently, skip it to not overload archive.org
                 if (
-                    datetime.now().astimezone(timezone.utc)
+                    datetime.now(tz=timezone.utc)
                     - dateutil.parser.parse(archives[url]["date"])
                     < RETRY_TIMEOUT
                 ):
@@ -108,5 +108,5 @@ class ArchiveLinksAssistant(Assistant):
             # add link to archived version
             archives[url] = {
                 "url": archived_url,
-                "date": datetime.now().astimezone(timezone.utc).isoformat(),
+                "date": datetime.now(tz=timezone.utc).isoformat(),
             }

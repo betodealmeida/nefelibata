@@ -68,7 +68,7 @@ def test_archive_links(mock_post, requests_mock):
 </head>
 <body>
 <p>Hi, there!</p>
-<p>This is <a data-archive-date="2020-01-01T08:00:00+00:00" data-archive-url="https://web.archive.org/web/20200101000000/https://google.com/" href="https://google.com/">an external link</a><span class="archive">[<a href="https://web.archive.org/web/20200101000000/https://google.com/">archived</a>]</span>.
+<p>This is <a data-archive-date="2020-01-01T00:00:00+00:00" data-archive-url="https://web.archive.org/web/20200101000000/https://google.com/" href="https://google.com/">an external link</a><span class="archive">[<a href="https://web.archive.org/web/20200101000000/https://google.com/">archived</a>]</span>.
 This is a link to <a href="https://example.com/">the blog itself</a>.
 This is a link to <a href="https://archive.org/web">the Wayback Machine</a>.
 This is a link to <a href="https://webmention.io/example.com/webmention" rel="webmention">send webmentions</a>.</p>
@@ -212,6 +212,6 @@ def test_archive_links_update(mock_post, requests_mock):
     assert archives == {
         "https://google.com/": {
             "url": "https://web.archive.org/web/20200103080000/https://google.com/",
-            "date": "2020-01-03T08:00:00+00:00",
+            "date": "2020-01-03T00:00:00+00:00",
         },
     }

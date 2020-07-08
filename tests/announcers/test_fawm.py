@@ -310,7 +310,7 @@ def test_get_response_from_li_relative_timestamp():
         "url": "https://fawm.org/songs/110082/",
         "color": "#cc6600",
         "id": "fawm:562632",
-        "timestamp": "2019-12-30T08:00:00+00:00",
+        "timestamp": "2019-12-30T00:00:00+00:00",
         "user": {
             "name": "standup",
             "image": "https://fawm.org/img/avatars/479.big.jpg",

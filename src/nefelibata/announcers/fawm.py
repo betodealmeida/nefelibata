@@ -97,7 +97,7 @@ def get_response_from_li(url: str, el: Tag) -> Response:
         value, unit = fuzzy_timestamp.split()
         unit = unit.rstrip("s")
         delta = timedelta(**{f"{unit}s": int(value)})
-        timestamp = (datetime.now() - delta).astimezone(timezone.utc).isoformat()
+        timestamp = (datetime.now(tz=timezone.utc) - delta).isoformat()
 
     user_ref = el.find("a", {"class": "user-ref"})
     user_name = user_ref.text.strip()

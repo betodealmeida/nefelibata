@@ -32,7 +32,8 @@ def get_session(username: str, password: str) -> requests.Session:
 
     response = session.get("http://fiftyninety.fawmers.org/")
     soup = BeautifulSoup(response.text, "html.parser")
-    el = soup.find("input", {"name": "form_build_id"})
+    form = soup.find("form", id="user-login-form")
+    el = form.find("input", {"name": "form_build_id"})
     form_build_id = el.attrs["value"]
 
     # get authentication cookie
@@ -112,7 +113,7 @@ def extract_params(
 
     # lyrics are inside a <pre> element
     try:
-        pre = soup.find("h1", text="Lyrics").find("pre")
+        pre = soup.find("pre")
         lyrics = textwrap.dedent(pre.text).strip()
     except Exception:
         lyrics = "N/A"
@@ -138,6 +139,8 @@ def extract_params(
     # get additional params for file upload; these are encoded in the JS
     soup = BeautifulSoup(response.text, "html.parser")
     el = soup.find("script", text=re.compile(r"^jQuery\.extend"))
+    if not el:
+        raise Exception("Unable to find options from Javascript")
     match = re.search("{.*}", el.contents[0])
     if not match:
         raise Exception("Unable to parse options from Javascript")
@@ -241,7 +244,7 @@ def parse_fuzzy_timestamp(timestamp: str) -> datetime:
         - 1 day 16 hours
 
     """
-    now = datetime.now().astimezone(timezone.utc)
+    now = datetime.now(tz=timezone.utc)
 
     timedelta_units = {
         "sec": "seconds",
