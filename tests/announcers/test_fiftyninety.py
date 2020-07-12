@@ -488,7 +488,7 @@ def test_get_comments_from_fiftyninety_page():
             "user": {
                 "name": "coolparadiso",
                 "url": "http://fiftyninety.fawmers.org/user/coolparadiso",
-                "image": "http://fiftyninety.fawmers.org/sites/default/files/styles/medium/public/pictures/picture-448327-1561203958.jpg?itok=DpAOblZ6",
+                # "image": "http://fiftyninety.fawmers.org/sites/default/files/styles/medium/public/pictures/picture-448327-1561203958.jpg?itok=DpAOblZ6",
             },
             "comment": {
                 "text": "yeah i like that one. i love your notes its like reading swahili, but slowly getting to understand some words. i like the rain",

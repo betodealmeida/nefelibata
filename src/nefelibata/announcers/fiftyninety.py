@@ -204,11 +204,12 @@ def get_comments_from_fiftyninety_page(
     # extract comments and user images
     comments: List[Comment] = []
     for i, el in enumerate(soup.find_all("div", {"class": "comment-content"})):
-        # the linked image is low resolution, but we can replace it with a
-        # higher resolution version
-        users[i]["image"] = (
-            el.find("img").attrs["src"].replace("/smallthumb/", "/medium/")
-        )
+        if el.find("img"):
+            # the linked image is low resolution, but we can replace it with a
+            # higher resolution version
+            users[i]["image"] = (
+                el.find("img").attrs["src"].replace("/smallthumb/", "/medium/")
+            )
         comments.append(
             {
                 "text": "\n\n".join(p.text for p in el.find_all("p")),
