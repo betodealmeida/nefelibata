@@ -256,6 +256,8 @@ def parse_fuzzy_timestamp(timestamp: str) -> datetime:
         "hours": "hours",
         "day": "days",
         "days": "days",
+        "week": "weeks",
+        "weeks": "weeks",
     }
 
     kwargs = {}
