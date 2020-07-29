@@ -90,6 +90,7 @@ S3:
 # application you can request the oauth_token and oauth_secret on the same
 # page.
 twitter:
+  handle:
   consumer_key:
   consumer_secret:
   oauth_token:

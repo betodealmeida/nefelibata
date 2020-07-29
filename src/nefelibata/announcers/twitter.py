@@ -76,6 +76,7 @@ class TwitterAnnouncer(Announcer):
         self,
         root: Path,
         config: Dict[str, Any],
+        handle: str,
         consumer_key: str,
         consumer_secret: str,
         oauth_token: str,
