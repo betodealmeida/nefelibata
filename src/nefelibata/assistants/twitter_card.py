@@ -29,7 +29,7 @@ class TwitterCardAssistant(Assistant):
 
         container_path = post_directory / self.filename
         container_url = urllib.parse.urljoin(
-            self.config["url"], str(container_path.relative_to(self.root / "posts")),
+            self.config["url"], str(container_path.relative_to(self.root / "posts"))
         )
 
         card_metadata = {
@@ -56,11 +56,37 @@ class TwitterCardAssistant(Assistant):
             for name, content in card_metadata.items():
                 if not soup.head.find("meta", {"name": name, "content": content}):
                     meta = soup.new_tag(
-                        "meta", attrs={"name": name, "content": content},
+                        "meta", attrs={"name": name, "content": content}
                     )
-                    print(meta)
                     soup.head.append(meta)
 
         # create container.html
         if not container_path.exists():
             container_path.touch()
+
+        with modify_html(container_path) as soup:
+            css = soup.head.find("link")
+            if not css:
+                css = soup.new_tag("link", href="../css/cassette.css", rel="stylesheet")
+                soup.head.append(css)
+
+            audio = soup.find("audio")
+            if audio:
+                audio.decompose()
+            audio = soup.new_tag(
+                "audio",
+                attrs={
+                    "data-album": "album",
+                    "data-artist": "artist",
+                    "data-title": "title",
+                    "src": "src",
+                },
+            )
+            soup.body.append(audio)
+
+            js = soup.body.find("script")
+            if not js:
+                js = soup.new_tag(
+                    "script", attrs={"src": "../js/cassette.js", "async": ""}
+                )
+                soup.body.append(js)
