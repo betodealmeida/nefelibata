@@ -69,7 +69,7 @@ class PlaylistAssistant(Assistant):
         # if the file exists and hasn't changed, skip to prevent it
         # from being published again
         pls_path = post_directory / "index.pls"
-        if pls_path.exists():
+        if not force and pls_path.exists():
             with open(pls_path) as fp:
                 if pls == fp.read():
                     return
