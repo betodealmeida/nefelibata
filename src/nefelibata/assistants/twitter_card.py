@@ -6,6 +6,7 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+from mutagen.mp3 import MP3
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
 from nefelibata.post import Post
@@ -22,22 +23,26 @@ class TwitterCardAssistant(Assistant):
 
         # if this post doesn't have a single mp3, skip it
         post_directory = post.file_path.parent
-        mp3s = list(post_directory.glob("**/*.mp3"))
-        if len(mp3s) != 1:
+        mp3_paths = list(post_directory.glob("**/*.mp3"))
+        if len(mp3_paths) != 1:
             return
-        mp3 = mp3s[0]
+        mp3_path = mp3_paths[0]
+        mp3 = MP3(mp3_path)
 
         container_path = post_directory / self.filename
         container_url = urllib.parse.urljoin(
-            self.config["url"], str(container_path.relative_to(self.root / "posts"))
+            self.config["url"], str(container_path.relative_to(self.root / "posts")),
         )
 
+        # tested on https://cards-dev.twitter.com/validator
         card_metadata = {
             "twitter:card": "player",
             "twitter:title": "No title",
             "twitter:description": "No description",
-            "twitter:site": self.config["twitter"]["handle"],
-            "twitter:image": "https://via.placeholder.com/800x464?text=Lorem%20ipsum",
+            "twitter:site": f'@{self.config["twitter"]["handle"]}',
+            "twitter:image": urllib.parse.urljoin(
+                self.config["url"], "img/cassette.png",
+            ),
             "twitter:player": container_url,
             "twitter:player:width": 800,
             "twitter:player:height": 464,  # 463.15
@@ -56,18 +61,23 @@ class TwitterCardAssistant(Assistant):
             for name, content in card_metadata.items():
                 if not soup.head.find("meta", {"name": name, "content": content}):
                     meta = soup.new_tag(
-                        "meta", attrs={"name": name, "content": content}
+                        "meta", attrs={"name": name, "content": content},
                     )
                     soup.head.append(meta)
 
         # create container.html
         if not container_path.exists():
-            container_path.touch()
+            with open(container_path, "w") as fp:
+                fp.write("<!DOCTYPE html><html><head></head><body></body></html>")
 
         with modify_html(container_path) as soup:
             css = soup.head.find("link")
             if not css:
-                css = soup.new_tag("link", href="../css/cassette.css", rel="stylesheet")
+                css = soup.new_tag(
+                    "link",
+                    href=urllib.parse.urljoin(self.config["url"], "css/cassette.css"),
+                    rel="stylesheet",
+                )
                 soup.head.append(css)
 
             audio = soup.find("audio")
@@ -76,17 +86,25 @@ class TwitterCardAssistant(Assistant):
             audio = soup.new_tag(
                 "audio",
                 attrs={
-                    "data-album": "album",
-                    "data-artist": "artist",
-                    "data-title": "title",
-                    "src": "src",
+                    "class": "cassette",
+                    "data-album": mp3.get("TALB", "Unknown album"),
+                    "data-artist": mp3.get("TPE1", "Unknown artist"),
+                    "data-title": mp3.get("TIT2", mp3_path.stem),
+                    "src": mp3_path.relative_to(post.file_path.parent),
                 },
             )
-            soup.body.append(audio)
+            # do not append, since <script> tag should come last
+            soup.body.insert(0, audio)
 
             js = soup.body.find("script")
             if not js:
                 js = soup.new_tag(
-                    "script", attrs={"src": "../js/cassette.js", "async": ""}
+                    "script",
+                    attrs={
+                        "src": urllib.parse.urljoin(
+                            self.config["url"], "js/cassette.js",
+                        ),
+                        "async": "",
+                    },
                 )
                 soup.body.append(js)
