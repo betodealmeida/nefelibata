@@ -201,7 +201,11 @@ class WebmentionAnnouncer(Announcer):
         _logger.info("Found queued webmention response, checking for update")
 
         location = webmention["content"]["location"]
-        response = requests.get(location)
+        try:
+            response = requests.get(location)
+        except Exception:
+            return webmention
+
         if response.ok:
             try:
                 webmention["content"] = response.json()
