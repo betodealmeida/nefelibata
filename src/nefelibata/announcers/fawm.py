@@ -22,7 +22,7 @@ from nefelibata.post import Post
 _logger = logging.getLogger(__name__)
 
 
-def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
+def extract_params(post: Post, root: Path, config: Dict[str, Any]) -> Dict[str, Any]:
     """Extract params from a standard FAWM post.
     """
     soup = BeautifulSoup(post.html, "html.parser")
@@ -56,7 +56,7 @@ def extract_params(post: Post, config: Dict[str, Any]) -> Dict[str, Any]:
     post_directory = post.file_path.parent
     mp3s = list(post_directory.glob("**/*.mp3"))
     if len(mp3s) == 1:
-        mp3_path = mp3s[0].relative_to(post_directory.parent)
+        mp3_path = mp3s[0].relative_to(root / "posts")
         demo = f'{config["url"]}{mp3_path}'
     elif len(mp3s) > 1:
         _logger.error("Multiple MP3s found, aborting!")
@@ -187,7 +187,7 @@ class FAWMAnnouncer(Announcer):
         """
         _logger.info("Creating new song on FAWM")
 
-        params = extract_params(post, self.config)
+        params = extract_params(post, self.root, self.config)
         response = requests.post(
             "https://fawm.org/songs/add",
             data=params,

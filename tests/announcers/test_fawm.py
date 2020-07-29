@@ -40,10 +40,11 @@ def test_extract_params(mock_post, fs):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/"}
     fs.create_file(post.file_path.parent / "demo.mp3")
 
-    params = extract_params(post, config)
+    params = extract_params(post, root, config)
     assert params == {
         "id": "",
         "title": "Dance tag",
@@ -73,10 +74,11 @@ def test_extract_params_no_lyrics(mock_post, fs):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/"}
     fs.create_file(post.file_path.parent / "demo.mp3")
 
-    params = extract_params(post, config)
+    params = extract_params(post, root, config)
     assert params == {
         "id": "",
         "title": "Dance tag",
@@ -106,12 +108,13 @@ def test_extract_params_multiple_mp3s(mock_post, fs):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/"}
     fs.create_file(post.file_path.parent / "demo1.mp3")
     fs.create_file(post.file_path.parent / "demo2.mp3")
 
     with pytest.raises(Exception) as excinfo:
-        extract_params(post, config)
+        extract_params(post, root, config)
 
     assert str(excinfo.value) == "Only posts with a single MP3 can be announced on FAWM"
 
@@ -131,9 +134,10 @@ def test_extract_params_no_demo(mock_post, fs):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/"}
 
-    params = extract_params(post, config)
+    params = extract_params(post, root, config)
     assert params == {
         "id": "",
         "title": "Dance tag",

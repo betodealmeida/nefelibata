@@ -129,6 +129,7 @@ def test_extract_params(mocker, mock_post, fs):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/"}
     fs.create_file(post.file_path.parent / "demo.mp3")
 
@@ -136,7 +137,7 @@ def test_extract_params(mocker, mock_post, fs):
     mock_session.get.return_value.text = add_song_page
     mocker.patch("nefelibata.announcers.fiftyninety.get_fid", return_value="fid")
 
-    params = extract_params(mock_session, post, config)
+    params = extract_params(mock_session, post, root, config)
     assert params == {
         "body[und][0][value]": "This is a song about HTML.",
         "field_collab[und][0][_weight]": "0",
@@ -176,6 +177,7 @@ def test_extract_params_no_js(mocker, mock_post, fs):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/"}
     fs.create_file(post.file_path.parent / "demo.mp3")
 
@@ -184,7 +186,7 @@ def test_extract_params_no_js(mocker, mock_post, fs):
     mocker.patch("nefelibata.announcers.fiftyninety.get_fid", return_value="fid")
 
     with pytest.raises(Exception) as excinfo:
-        extract_params(mock_session, post, config)
+        extract_params(mock_session, post, root, config)
 
     assert str(excinfo.value) == "Unable to find options from Javascript"
 
@@ -192,7 +194,7 @@ def test_extract_params_no_js(mocker, mock_post, fs):
     mocker.patch("nefelibata.announcers.fiftyninety.get_fid", return_value="fid")
 
     with pytest.raises(Exception) as excinfo:
-        extract_params(mock_session, post, config)
+        extract_params(mock_session, post, root, config)
 
     assert str(excinfo.value) == "Unable to parse options from Javascript"
 
@@ -212,6 +214,7 @@ def test_extract_params_no_lyrics(mocker, mock_post, fs):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/"}
     fs.create_file(post.file_path.parent / "demo.mp3")
 
@@ -219,7 +222,7 @@ def test_extract_params_no_lyrics(mocker, mock_post, fs):
     mock_session.get.return_value.text = add_song_page
     mocker.patch("nefelibata.announcers.fiftyninety.get_fid", return_value="fid")
 
-    params = extract_params(mock_session, post, config)
+    params = extract_params(mock_session, post, root, config)
     assert params == {
         "body[und][0][value]": "This is a song about HTML.",
         "field_collab[und][0][_weight]": "0",
@@ -252,6 +255,7 @@ def test_extract_params_multiple_mp3s(mock_post, fs):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/"}
     fs.create_file(post.file_path.parent / "demo1.mp3")
     fs.create_file(post.file_path.parent / "demo2.mp3")
@@ -259,7 +263,7 @@ def test_extract_params_multiple_mp3s(mock_post, fs):
     mock_session = MagicMock()
 
     with pytest.raises(Exception) as excinfo:
-        extract_params(mock_session, post, config)
+        extract_params(mock_session, post, root, config)
 
     assert (
         str(excinfo.value)
@@ -282,13 +286,14 @@ def test_extract_params_no_demo(mocker, mock_post, fs):
         """,
         )
 
+    root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/"}
 
     mock_session = MagicMock()
     mock_session.get.return_value.text = add_song_page
     mocker.patch("nefelibata.announcers.fiftyninety.get_fid", return_value="fid")
 
-    params = extract_params(mock_session, post, config)
+    params = extract_params(mock_session, post, root, config)
     assert params == {
         "body[und][0][value]": "This is a song about HTML.",
         "field_collab[und][0][_weight]": "0",

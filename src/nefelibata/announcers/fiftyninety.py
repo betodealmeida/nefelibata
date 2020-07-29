@@ -90,7 +90,7 @@ def get_form_params_from_input(html: str, form_id: str) -> Tuple[str, str]:
 
 
 def extract_params(
-    session: requests.Session, post: Post, config: Dict[str, Any],
+    session: requests.Session, post: Post, root: Path, config: Dict[str, Any],
 ) -> Dict[str, Any]:
     """Extract params from a standard FiftyNinety post.
     """
@@ -122,7 +122,7 @@ def extract_params(
     post_directory = post.file_path.parent
     mp3s = list(post_directory.glob("**/*.mp3"))
     if len(mp3s) == 1:
-        mp3_path = mp3s[0].relative_to(post_directory.parent)
+        mp3_path = mp3s[0].relative_to(root / "posts")
         demo = f'{config["url"]}{mp3_path}'
     elif len(mp3s) > 1:
         _logger.error("Multiple MP3s found, aborting!")
@@ -320,7 +320,7 @@ class FiftyNinetyAnnouncer(Announcer):
         # login and store auth cookie
         session = get_session(self.username, self.password)
 
-        params = extract_params(session, post, self.config)
+        params = extract_params(session, post, self.root, self.config)
         response = session.post(
             "http://fiftyninety.fawmers.org/node/add/song",
             data=params,
