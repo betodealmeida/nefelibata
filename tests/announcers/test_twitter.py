@@ -64,7 +64,13 @@ def test_announcer(mock_post, mocker):
         "language": "en",
     }
     announcer = TwitterAnnouncer(
-        root, config, "oauth_token", "oauth_secret", "consumer_key", "consumer_secret",
+        root,
+        config,
+        "@handle",
+        "oauth_token",
+        "oauth_secret",
+        "consumer_key",
+        "consumer_secret",
     )
 
     url = announcer.announce(post)
@@ -117,7 +123,13 @@ def test_collect_exception(mock_post, mocker):
         "language": "en",
     }
     announcer = TwitterAnnouncer(
-        root, config, "oauth_token", "oauth_secret", "consumer_key", "consumer_secret",
+        root,
+        config,
+        "@handle",
+        "oauth_token",
+        "oauth_secret",
+        "consumer_key",
+        "consumer_secret",
     )
     responses = announcer.collect(post)
     assert responses == []
