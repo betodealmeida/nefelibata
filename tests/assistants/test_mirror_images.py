@@ -63,6 +63,9 @@ def test_process_post(mock_post, mocker, requests_mock):
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta content="article" property="og:type"/>
+<meta content="Post title" property="og:title"/>
+<meta content="This is the post description" property="og:description"/>
 <link href="https://webmention.io/example.com/webmention" rel="webmention"/>
 <link href="https://external.example.com/css/basic.css" rel="stylesheet"/>
 <link href="/css/style.css" rel="stylesheet"/>
@@ -124,6 +127,9 @@ def test_process_post_directory_exists(mock_post, mocker, requests_mock, fs):
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta content="article" property="og:type"/>
+<meta content="Post title" property="og:title"/>
+<meta content="This is the post description" property="og:description"/>
 <link href="https://webmention.io/example.com/webmention" rel="webmention"/>
 <link href="https://external.example.com/css/basic.css" rel="stylesheet"/>
 <link href="/css/style.css" rel="stylesheet"/>
@@ -181,6 +187,9 @@ def test_process_post_image_exists(mock_post, mocker, fs):
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta content="article" property="og:type"/>
+<meta content="Post title" property="og:title"/>
+<meta content="This is the post description" property="og:description"/>
 <link href="https://webmention.io/example.com/webmention" rel="webmention"/>
 <link href="https://external.example.com/css/basic.css" rel="stylesheet"/>
 <link href="/css/style.css" rel="stylesheet"/>

@@ -338,6 +338,28 @@ def test_update_webmention_error(requests_mock):
     assert announcer._update_webmention(webmention) == webmention
 
 
+def test_update_webmention_timeout(mocker):
+    root = Path("/path/to/blog")
+    config = {"url": "https://blog.example.com/", "language": "en"}
+    announcer = WebmentionAnnouncer(
+        root, config, "https://webmention.io/example.com/webmention",
+    )
+
+    webmention = {
+        "success": True,
+        "content": {
+            "status": "queued",
+            "location": "https://blog.example.com/mention/12345",
+        },
+    }
+    mocker.patch(
+        "nefelibata.announcers.webmention.requests.get",
+        side_effect=Exception("Timeout!"),
+    )
+
+    assert announcer._update_webmention(webmention) == webmention
+
+
 def test_update_webmention_not_json(requests_mock):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}

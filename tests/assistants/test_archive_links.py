@@ -62,6 +62,9 @@ def test_archive_links(mock_post, requests_mock):
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta content="article" property="og:type"/>
+<meta content="Post title" property="og:title"/>
+<meta content="This is the post description" property="og:description"/>
 <link href="https://webmention.io/example.com/webmention" rel="webmention"/>
 <link href="https://external.example.com/css/basic.css" rel="stylesheet"/>
 <link href="/css/style.css" rel="stylesheet"/>
