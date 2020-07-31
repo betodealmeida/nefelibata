@@ -60,6 +60,7 @@ class Post:
     @property
     def url(self) -> str:
         post_directory = self.file_path.parent
+        # TODO: this should be relative to root/posts instead
         return str(
             self.file_path.relative_to(post_directory.parent).with_suffix(".html"),
         )
