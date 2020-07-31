@@ -29,16 +29,15 @@ builders:
   - index
   - tags
   - atom
+  - playlist
 
 # Assistants post-process the HTML built, mirroring remote images locally,
-# warning if you're linking to external resources (CSS, images), generating
-# playlist files (*.pls) from MP3s automatically, and more. If you're
-# publishing to IPFS, make sure to enable relativize_links so that all links
-# are relative.
+# warning if you're linking to external resources (CSS, images), and more 
+# If you're publishing to IPFS, make sure to enable relativize_links so that
+# all links are relative.
 assistants:
   - mirror_images
   - warn_external_resources
-  - playlist
   - archive_links
   - relativize_links
 

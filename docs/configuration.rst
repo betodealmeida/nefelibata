@@ -40,6 +40,7 @@ The second part defines which parts of your weblog will be built. Unless you kno
       - index
       - tags
       - atom
+      - playlist
 
 Assistants
 ----------
@@ -51,7 +52,6 @@ The next part defines "assistants", which are HTML post-processor that run after
     assistants:
       - mirror_images
       - warn_external_resources
-      - playlist
       - archive_links
       - relativize_links
 
