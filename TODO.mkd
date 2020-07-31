@@ -63,3 +63,5 @@
 - [ ] self archive.org using wget?
 - [ ] use bleach to clean HTML
 - [ ] replace `post_directory.parent` with `root / posts` to allow for nested sub directories
+- [ ] make playlist assistant a builder
+- [ ] split twitter card into assistant/builder
