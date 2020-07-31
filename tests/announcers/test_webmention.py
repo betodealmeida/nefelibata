@@ -180,6 +180,7 @@ def test_announcer(mock_post, requests_mock):
             },
             "comment": {
                 "text": "Another milestone: @eschnou automatically shows #indieweb comments with h-entry sent via pingback http://eschnou.com/entry/testing-indieweb-federation-with-waterpigscouk-aaronpareckicom-and--62-24908.html",
+                "html": 'Another milestone: <a href="https://twitter.com/eschnou">@eschnou</a> automatically shows #indieweb comments with h-entry sent via pingback <a href="http://eschnou.com/entry/testing-indieweb-federation-with-waterpigscouk-aaronpareckicom-and--62-24908.html">http://eschnou.com/entry/testing-indieweb-federation-with-waterpigscouk-aaronpareckicom-and--62-24908.html</a>',
                 "summary": "Another milestone: @eschnou automatically shows #indieweb comments with h-entry sent via pingback http://eschnou.com/entry/testing-indieweb-federation-with-waterpigscouk-aaronpareckicom-and--62-24908.html",
             },
         },
@@ -700,5 +701,5 @@ def test_get_response_from_child():
             "image": "https://webmention.io/avatar/checkmention.appspot.com/18d522b2ddbef12a0a104dd17fbc24c15dcf0d123bc6611687e0051e13fc1559.png",
             "url": "https://checkmention.appspot.com/",
         },
-        "comment": {"text": "", "summary": ""},
+        "comment": {"text": "", "html": "", "summary": ""},
     }

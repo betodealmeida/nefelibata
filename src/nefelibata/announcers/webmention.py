@@ -73,9 +73,9 @@ def get_response_from_child(child: Dict[str, Any], target: str) -> Response:
         html = child["content"].get("html", "")
         summary = summarize(html or text, target)
     else:
-        text = summary = ""
+        text = html = summary = ""
 
-    comment: Comment = {"text": text, "summary": summary}
+    comment: Comment = {"text": text, "summary": summary, "html": html}
 
     return {
         "source": source,
