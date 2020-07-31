@@ -4,7 +4,7 @@ from pathlib import Path
 
 from freezegun import freeze_time
 from mutagen import id3
-from nefelibata.assistants.playlist import PlaylistAssistant
+from nefelibata.builders.playlist import PlaylistBuilder
 
 __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
@@ -34,14 +34,14 @@ def test_playlist(mock_post, mocker, fs):
         """,
         )
 
-    assistant = PlaylistAssistant(root, config)
+    builder = PlaylistBuilder(root, config)
 
     # create 2 empty "MP3" files
     fs.create_file(post.file_path.parent / "demo1.mp3")
     fs.create_file(post.file_path.parent / "demo2.mp3")
 
     mocker.patch(
-        "nefelibata.assistants.playlist.MP3",
+        "nefelibata.builders.playlist.MP3",
         side_effect=[
             AttrDict(
                 {
@@ -65,7 +65,7 @@ def test_playlist(mock_post, mocker, fs):
         ],
     )
 
-    assistant.process_post(post)
+    builder.process_post(post)
 
     with open(post.file_path.parent / "index.pls") as fp:
         contents = fp.read()
@@ -103,8 +103,8 @@ def test_playlist_no_files(mock_post, mocker, fs):
         """,
         )
 
-    assistant = PlaylistAssistant(root, config)
-    assistant.process_post(post)
+    builder = PlaylistBuilder(root, config)
+    builder.process_post(post)
 
     assert not (post.file_path.parent / "index.pls").exists()
 
@@ -123,14 +123,14 @@ def test_playlist_not_modified(mock_post, mocker, fs):
         """,
         )
 
-    assistant = PlaylistAssistant(root, config)
+    builder = PlaylistBuilder(root, config)
 
     # create 2 empty "MP3" files
     fs.create_file(post.file_path.parent / "demo1.mp3")
     fs.create_file(post.file_path.parent / "demo2.mp3")
 
     mocker.patch(
-        "nefelibata.assistants.playlist.MP3",
+        "nefelibata.builders.playlist.MP3",
         side_effect=[
             AttrDict(
                 {
@@ -173,7 +173,7 @@ Length2=60
         with open(pls_path, "w") as fp:
             fp.write(contents)
 
-    assistant.process_post(post)
+    builder.process_post(post)
 
     # file shouldn't have been touched
     assert datetime.fromtimestamp(pls_path.stat().st_mtime).astimezone(
@@ -195,14 +195,14 @@ def test_playlist_modified(mock_post, mocker, fs):
         """,
         )
 
-    assistant = PlaylistAssistant(root, config)
+    builder = PlaylistBuilder(root, config)
 
     # create 2 empty "MP3" files
     fs.create_file(post.file_path.parent / "demo1.mp3")
     fs.create_file(post.file_path.parent / "demo2.mp3")
 
     mocker.patch(
-        "nefelibata.assistants.playlist.MP3",
+        "nefelibata.builders.playlist.MP3",
         side_effect=[
             AttrDict(
                 {
@@ -242,7 +242,7 @@ Length1=45
             fp.write(contents)
 
     with freeze_time("2020-01-02T00:00:00Z"):
-        assistant.process_post(post)
+        builder.process_post(post)
 
     # file should have been touched
     assert datetime.fromtimestamp(pls_path.stat().st_mtime).astimezone(

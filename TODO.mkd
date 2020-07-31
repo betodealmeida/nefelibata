@@ -42,16 +42,18 @@
 - [x] new release
 - [x] documentation
 - [x] cassette tape audio player
+- [x] make playlist assistant a builder
 - [ ] check that `force` is being used in all relevant plugins
+- [ ] use bleach to clean HTML
 - [ ] when mirroring images, add original URL as exif?
 - [ ] categories
-- [ ] post types: notes, songs? allow custom themes to be specified
+- [ ] post types: likes, notes, songs? allow custom themes to be specified
 - [ ] new theme
-- [ ] `force` in assistants
 - [ ] search (build index and search using JS)
 - [ ] Medium image upload (go deep post, eg)
 - [ ] RSS club
 - [ ] parallelize build/publish
+- [ ] lxml parser for BeautifulSoup?
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
 - [ ] Reddit announcer
 - [ ] Soundcloud announcer
@@ -61,7 +63,5 @@
 - [ ] mirror youtube videos in addition to images
 - [ ] PESOS?
 - [ ] self archive.org using wget?
-- [ ] use bleach to clean HTML
 - [ ] replace `post_directory.parent` with `root / posts` to allow for nested sub directories
-- [ ] make playlist assistant a builder
 - [ ] split twitter card into assistant/builder

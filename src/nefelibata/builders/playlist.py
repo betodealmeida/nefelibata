@@ -5,8 +5,8 @@ from typing import List
 from typing import TypedDict
 
 from mutagen.mp3 import MP3
-from nefelibata.assistants import Assistant
-from nefelibata.assistants import Scope
+from nefelibata.builders import Builder
+from nefelibata.builders import Scope
 from nefelibata.post import Post
 
 
@@ -20,7 +20,7 @@ class MP3Info(TypedDict):
     track: int
 
 
-class PlaylistAssistant(Assistant):
+class PlaylistBuilder(Builder):
 
     scopes = [Scope.POST]
 
