@@ -20,6 +20,7 @@ from nefelibata.utils import modify_html
 
 _logger = logging.getLogger(__name__)
 
+SAVE_TIMEOUT = timedelta(seconds=10)
 RETRY_TIMEOUT = timedelta(days=1)
 
 
@@ -97,7 +98,13 @@ class ArchiveLinksAssistant(Assistant):
 
             # save to archive.org
             _logger.info(f"Requesting to save {url}")
-            response = requests.get(f"https://web.archive.org/save/{url}")
+            try:
+                response = requests.get(
+                    f"https://web.archive.org/save/{url}",
+                    timeout=SAVE_TIMEOUT.total_seconds(),
+                )
+            except requests.exceptions.ReadTimeout:
+                continue
             content_location = response.headers.get("Content-Location")
             archived_url = (
                 f"https://web.archive.org{content_location}"
