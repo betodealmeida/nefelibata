@@ -452,6 +452,10 @@ def test_parse_fuzzy_timestamp():
         timestamp = parse_fuzzy_timestamp("1 day 16 hours")
     assert timestamp == datetime(2019, 12, 30, 8, 0, tzinfo=timezone.utc)
 
+    with freeze_time("2020-01-01T00:00:00Z"):
+        timestamp = parse_fuzzy_timestamp("1 month 4 days")
+    assert timestamp == datetime(2019, 11, 28, 0, 0, tzinfo=timezone.utc)
+
 
 def test_get_comments_from_fiftyninety_page():
     url = "http://fiftyninety.fawmers.org/song/41558"

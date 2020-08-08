@@ -264,10 +264,15 @@ def parse_fuzzy_timestamp(timestamp: str) -> datetime:
     parts = timestamp.strip().split(" ")
     for number, units in zip(parts[::2], parts[1::2]):
         value = int(number)
-        kwarg = timedelta_units[units]
-        kwargs[kwarg] = value
 
-    return now - timedelta(**kwargs)
+        if units in ["month", "months"]:
+            units = "days"
+            value *= 30
+
+        kwargs = {timedelta_units[units]: value}
+        now -= timedelta(**kwargs)
+
+    return now
 
 
 class FiftyNinetyAnnouncer(Announcer):
