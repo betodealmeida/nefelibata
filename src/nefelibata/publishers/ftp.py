@@ -30,8 +30,8 @@ class FTPPublisher(Publisher):
         super().__init__(root, config)
 
         self.host = host
-        self.username = username
-        self.password = password
+        self.username = username or ""
+        self.password = password or ""
         self.basedir = basedir
 
     def publish(self, force: bool = False) -> None:
@@ -43,7 +43,6 @@ class FTPPublisher(Publisher):
             last_published = 0
 
         build = self.root / "build"
-        filenames: List[Tuple[Path, str]] = []
         with FTP(self.host, self.username, self.password) as ftp:
             if self.basedir:
                 ftp.cwd(self.basedir)
@@ -64,8 +63,8 @@ class FTPPublisher(Publisher):
                             ftp.cwd(directory)
                     pwd = basedir / relative_directory
 
-                with open(path) as fp:
-                    ftp.storbinary(f'STOR {path.name}', fp)
+                with open(path, "rb") as fp:
+                    ftp.storbinary(f"STOR {path.name}", fp)
 
         # update last published
         last_published_file.touch()
