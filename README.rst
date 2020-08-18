@@ -15,7 +15,7 @@ Nefelibata (Portuguese for "one who walks on clouds") is an `IndieWeb <https://i
 - Posts are converted into HTML, and the resulting weblog is composed of **only static files**. There are no databases, and all extra data is stored in JSON files.
 - External images are locally mirrored when the weblog is built, and the link is altered to point to the local resource. The engine **will warn you** if the generated HTML has any external resources (CSS, for example).
 - External links are saved to the `Wayback Machine <https://archive.org/web/>`_, and links are annotated with the archived link and date of archival, allowing readers to follow the original links even if they change in the future.
-- The weblog can be **published** to different locations, using a plugin architecture. Currently, nefelibata supports publishing to `Amazon S3 <https://aws.amazon.com/s3/>`_, `Neocities <https://neocities.org/>`_ and `IPFS <https://ipfs.io/>`_.
+- The weblog can be **published** to different locations, using a plugin architecture. Currently, nefelibata supports publishing to `Amazon S3 <https://aws.amazon.com/s3/>`_, `Neocities <https://neocities.org/>`_, FTP, and `IPFS <https://ipfs.io/>`_.
 
 The IndieWeb
 ============
@@ -124,7 +124,7 @@ The next part defines "assistants", which are HTML post-processor that run after
 Publishers
 ~~~~~~~~~~
 
-The fourth part defines where your weblog will be published to once it's been built. `Neocities <https://neocities.org/>`_ is easy to setup and recommended for beginners, but you can also publish to S3 and IPFS:
+The fourth part defines where your weblog will be published to once it's been built. `Neocities <https://neocities.org/>`_ is easy to setup and recommended for beginners, but you can also publish to S3, FTP and IPFS:
 
 .. code-block:: yaml
 
@@ -132,6 +132,7 @@ The fourth part defines where your weblog will be published to once it's been bu
       - neocities
       - S3
       - ipfs
+      - ftp
 
 Each one of the publishers has its own configuration section in the ``nefelibata.yaml`` file. For Neocities you only need your username and password:
 
@@ -201,6 +202,18 @@ You need to `create an S3 account <http://aws.amazon.com/s3/>`_ in order to get 
     }
 
 This will upload your weblog to an S3 bucket and run the website from it over HTTP. If you want to serve the website over HTTPS (as I do), you need to disable Route 53 (``configure_route53`` should be empty) and `configure CloudFront <https://www.freecodecamp.org/news/simple-site-hosting-with-amazon-s3-and-https-5e78017f482a/>`_.
+
+The FTP publisher requires a host, and optionally a username, a password and a directory to which the content should be uploaded to:
+
+.. code-block:: yaml
+
+    ftp:
+        host: ftp.example.com
+        username: user
+        password: secret
+        basedir: public
+
+In the example above, the files would be put inside the ``public`` directory. You can also specify an absolute path.
 
 For `IPFS <https://ipfs.io/>`_ you need a host running the IPFS daemon. The ``build/`` directory will be sent to the remote host via ``rsync``, added and published to the IPFS. The config itself is simple:
 

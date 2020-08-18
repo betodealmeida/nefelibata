@@ -13,7 +13,7 @@ Nefelibata (Portuguese for "one who walks on clouds") is an `IndieWeb <https://i
 - Posts are converted into HTML, and the resulting weblog is composed of **only static files**. There are no databases, and all extra data is stored in JSON files.
 - External images are locally mirrored when the weblog is built, and the link is altered to point to the local resource. The engine **will warn you** if the generated HTML has any external resources (CSS, for example).
 - External links are saved to the `Wayback Machine <https://archive.org/web/>`_, and links are annotated with the archived link and date of archival, allowing readers to follow the original links even if they change in the future.
-- The weblog can be **published** to different locations, using a plugin architecture. Currently, nefelibata supports publishing to `Amazon S3 <https://aws.amazon.com/s3/>`_, `Neocities <https://neocities.org/>`_ and `IPFS <https://ipfs.io/>`_.
+- The weblog can be **published** to different locations, using a plugin architecture. Currently, nefelibata supports publishing to `Amazon S3 <https://aws.amazon.com/s3/>`_, `Neocities <https://neocities.org/>`_, FTP, and `IPFS <https://ipfs.io/>`_.
 
 The IndieWeb
 ============
