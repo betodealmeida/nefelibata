@@ -304,7 +304,13 @@ def test_exif(mock_post, mocker, requests_mock):
 
     assistant.process_post(post)
 
-    im = Image.open(post.file_path.parent / "img/dcd819cdc3ca4b41c3e83ed160c92254.jpg")
+    # Image.open can take a Path, but not a fake_fs Path
+    im = Image.open(
+        str(post.file_path.parent / "img/dcd819cdc3ca4b41c3e83ed160c92254.jpg"),
+    )
     exif = piexif.load(im.info["exif"])
 
-    assert exif == {}
+    assert (
+        exif["0th"][piexif.ImageIFD.ImageDescription]
+        == b"https://example.com/images/image.jpg"
+    )
