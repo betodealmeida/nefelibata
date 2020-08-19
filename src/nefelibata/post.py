@@ -5,7 +5,7 @@ from email.header import decode_header
 from email.header import make_header
 from email.parser import Parser
 from email.utils import formatdate
-from email.utils import parsedate
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any
 from typing import cast
@@ -51,11 +51,9 @@ class Post:
 
     @property
     def date(self) -> datetime:
-        parsed = parsedate(self.parsed["date"])
-        if parsed is None:
+        if not self.parsed["date"]:
             raise Exception(f"Missing date on file {self.file_path}")
-
-        return datetime.fromtimestamp(time.mktime(parsed))
+        return parsedate_to_datetime(self.parsed["date"])
 
     @property
     def url(self) -> str:
