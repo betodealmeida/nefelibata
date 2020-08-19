@@ -2,6 +2,18 @@
 Changelog
 =========
 
+Version 0.3.5 - 2020-08-18
+
+- Simplified code using context managers to parse HTML and handle JSON storage
+- Renamed "categories" to "tags", in anticipation of proper categories
+- Allow building and/or publishing a single post with the ``-s`` option
+- When webmentions are queued, poll for their status on build
+- Added announcer for 50/90 (https://fiftyninety.fawmers.org/)
+- Add timeout to archive.org call
+- Playlist assistant is now a builder
+- Added support for Twitter cards
+- Added FTP publisher
+
 Version 0.3.4 - 2020-06-19
 ==========================
 
