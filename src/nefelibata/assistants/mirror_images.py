@@ -1,14 +1,18 @@
 import hashlib
 import mimetypes
 import re
+from collections import defaultdict
+from io import BytesIO
 from pathlib import Path
 
+import piexif
 import requests
 from bs4 import BeautifulSoup
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
 from nefelibata.post import Post
 from nefelibata.utils import modify_html
+from PIL import Image
 
 
 CHUNK_SIZE = 2048
@@ -43,17 +47,34 @@ class MirrorImagesAssistant(Assistant):
             for image in external_images:
                 url = image.attrs["src"]
 
-                extension = get_resource_extension(url)
+                extension = get_resource_extension(url).lower()
                 m = hashlib.md5()
                 m.update(url.encode("utf-8"))
                 filename = f"{m.hexdigest()}{extension}"
                 local = mirror / filename
+                image.attrs["src"] = "img/%s" % local.name
+
+                if local.exists():
+                    continue
 
                 # download and store locally
-                if not local.exists():
-                    response = requests.get(url, stream=True)
-                    with open(local, "wb") as outp:
-                        for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
-                            outp.write(chunk)
+                buf = BytesIO()
+                response = requests.get(url, stream=True)
+                for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
+                    buf.write(chunk)
 
-                image.attrs["src"] = "img/%s" % local.name
+                # store original URL in EXIF
+                if extension in [".jpeg", ".jpg"]:
+                    buf.seek(0)
+                    im = Image.open(buf)
+                    exif = (
+                        piexif.load(im.info["exif"])
+                        if "exif" in im.info
+                        else defaultdict(dict)
+                    )
+                    exif["0th"][piexif.ImageIFD.ImageDescription] = url
+                    buf = BytesIO()
+                    im.save(buf, "jpeg", exif=piexif.dump(exif))
+
+                with open(local, "wb") as outp:
+                    outp.write(buf.getvalue())
