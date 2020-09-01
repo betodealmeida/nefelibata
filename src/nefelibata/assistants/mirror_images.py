@@ -62,10 +62,10 @@ class MirrorImagesAssistant(Assistant):
                 response = requests.get(url, stream=True)
                 for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
                     buf.write(chunk)
-                buf.seek(0)
 
                 # store original URL in EXIF
                 if extension in [".jpeg", ".jpg"]:
+                    buf.seek(0)
                     im = Image.open(buf)
                     exif = (
                         piexif.load(im.info["exif"])
@@ -73,7 +73,8 @@ class MirrorImagesAssistant(Assistant):
                         else defaultdict(dict)
                     )
                     exif["0th"][piexif.ImageIFD.ImageDescription] = url
-                    im.save(local, exif=piexif.dump(exif))
-                else:
-                    with open(local, "wb") as outp:
-                        outp.write(buf.getvalue())
+                    buf = BytesIO()
+                    im.save(buf, "jpeg", exif=piexif.dump(exif))
+
+                with open(local, "wb") as outp:
+                    outp.write(buf.getvalue())

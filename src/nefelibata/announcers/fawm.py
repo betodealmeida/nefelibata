@@ -90,7 +90,9 @@ def get_response_from_li(url: str, el: Tag) -> Response:
     fuzzy_timestamp = el.find("small", {"class": "text-muted"}).text
     try:
         timestamp = (
-            dateutil.parser.parse(fuzzy_timestamp).astimezone(timezone.utc).isoformat()
+            dateutil.parser.parse(fuzzy_timestamp)
+            .replace(tzinfo=timezone.utc)
+            .isoformat()
         )
     except ParserError:
         # parse "1 day", etc.
