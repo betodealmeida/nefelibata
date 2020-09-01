@@ -17,8 +17,6 @@ from PIL import Image
 def has_valid_dimensions(path: Path) -> bool:
     im = Image.open(path)
     width, height = im.size
-    print(width, height)
-    print(144 <= width <= 4096 and 144 <= height <= 4096)
     return 144 <= width <= 4096 and 144 <= height <= 4096
 
 
@@ -43,7 +41,6 @@ class TwitterCardAssistant(Assistant):
         # find media in post
         mp3_paths = list(post_directory.glob("**/*.mp3"))
         jpg_paths = list(post_directory.glob("**/*.jpg"))
-        print(jpg_paths)
 
         # if the post has a single mp3 use a player card instead of summary
         if len(mp3_paths) == 1:

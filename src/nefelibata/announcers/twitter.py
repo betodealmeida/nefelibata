@@ -103,7 +103,10 @@ class TwitterAnnouncer(Announcer):
         client = twitter.Twitter(auth=auth)
 
         post_url = urllib.parse.urljoin(self.config["url"], post.url)
-        status = f"{post.summary[: max_length - 1 - len(post_url)]} {post_url}"
+        if "twitter_card" in self.config.assistants:
+            status = post_url
+        else:
+            status = f"{post.summary[: max_length - 1 - len(post_url)]} {post_url}"
         response = client.statuses.update(status=status)
         _logger.info("Success!")
 
