@@ -11,6 +11,15 @@ from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
 from nefelibata.post import Post
 from nefelibata.utils import modify_html
+from PIL import Image
+
+
+def has_valid_dimensions(path: Path) -> bool:
+    im = Image.open(path)
+    width, height = im.size
+    print(width, height)
+    print(144 <= width <= 4096 and 144 <= height <= 4096)
+    return 144 <= width <= 4096 and 144 <= height <= 4096
 
 
 class TwitterCardAssistant(Assistant):
@@ -31,8 +40,12 @@ class TwitterCardAssistant(Assistant):
             # "twitter:image:alt": "",
         }
 
-        # if the post has a single mp3 use a player card instead of summary
+        # find media in post
         mp3_paths = list(post_directory.glob("**/*.mp3"))
+        jpg_paths = list(post_directory.glob("**/*.jpg"))
+        print(jpg_paths)
+
+        # if the post has a single mp3 use a player card instead of summary
         if len(mp3_paths) == 1:
             container_path = post_directory / self.container_filename
             container_url = urllib.parse.urljoin(
@@ -48,6 +61,16 @@ class TwitterCardAssistant(Assistant):
             card_metadata["twitter:player"] = container_url
             card_metadata["twitter:player:width"] = "800"
             card_metadata["twitter:player:height"] = "464"  # 463.15
+
+        # otherwise try to use an image
+        elif jpg_paths:
+            for jpg_path in jpg_paths:
+                if has_valid_dimensions(jpg_path):
+                    card_metadata["twitter:image"] = urllib.parse.urljoin(
+                        self.config["url"],
+                        str(jpg_path.relative_to(self.root / "posts")),
+                    )
+                    break
 
         # add meta tags
         soup: BeautifulSoup
