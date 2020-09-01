@@ -2,6 +2,7 @@ title: Example.com
 subtitle: A blog about examples
 author:
   name: John Doe
+  url: https://example.com/
   email: john.doe@example.com
   note: This is me
 url: https://blog.example.com/  # traling slash is important
