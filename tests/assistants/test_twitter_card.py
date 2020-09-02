@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 from typing import Dict
 from unittest.mock import MagicMock
+from unittest.mock import PropertyMock
 
 from freezegun import freeze_time
 from mutagen import id3
@@ -48,6 +49,110 @@ def test_twitter_card(mock_post, requests_mock):
     PostBuilder(root, config).process_post(post)
 
     assistant = TwitterCardAssistant(root, config)
+
+    with freeze_time("2020-01-01T00:00:00Z"):
+        assistant.process_post(post)
+
+    with open(post.file_path.with_suffix(".html")) as fp:
+        contents = fp.read()
+
+    assert (
+        contents
+        == """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta content="article" property="og:type"/>
+<meta content="Post title" property="og:title"/>
+<meta content="This is the post description" property="og:description"/>
+<link href="https://webmention.io/example.com/webmention" rel="webmention"/>
+<link href="https://external.example.com/css/basic.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+<meta content="summary" name="twitter:card"/><meta content="@handle" name="twitter:site"/><meta content="Post title" name="twitter:title"/><meta content="This is the post description" name="twitter:description"/></head>
+<body>
+<p>Hi, there!</p>
+</body>
+</html>"""
+    )
+
+
+def test_twitter_card_with_image(mock_post, mocker, fs, requests_mock):
+    root = Path("/path/to/blog")
+
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, World!
+        keywords: test
+        summary: My first post
+
+        Hi, there!
+        """,
+        )
+    PostBuilder(root, config).process_post(post)
+
+    assistant = TwitterCardAssistant(root, config)
+
+    fs.create_file(post.file_path.parent / "img/image1.jpg")
+    fs.create_file(post.file_path.parent / "img/image2.jpg")
+
+    mock_image = MagicMock()
+    type(mock_image.open.return_value).size = PropertyMock(
+        side_effect=[(10, 10), (1000, 1000)],
+    )
+    mocker.patch("nefelibata.assistants.twitter_card.Image", mock_image)
+
+    with freeze_time("2020-01-01T00:00:00Z"):
+        assistant.process_post(post)
+
+    with open(post.file_path.with_suffix(".html")) as fp:
+        contents = fp.read()
+
+    assert (
+        contents
+        == """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta content="article" property="og:type"/>
+<meta content="Post title" property="og:title"/>
+<meta content="This is the post description" property="og:description"/>
+<link href="https://webmention.io/example.com/webmention" rel="webmention"/>
+<link href="https://external.example.com/css/basic.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+<meta content="summary" name="twitter:card"/><meta content="@handle" name="twitter:site"/><meta content="Post title" name="twitter:title"/><meta content="This is the post description" name="twitter:description"/><meta content="https://example.com/first/img/image2.jpg" name="twitter:image"/></head>
+<body>
+<p>Hi, there!</p>
+</body>
+</html>"""
+    )
+
+
+def test_twitter_card_with_image_no_valid_size(mock_post, mocker, fs, requests_mock):
+    root = Path("/path/to/blog")
+
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, World!
+        keywords: test
+        summary: My first post
+
+        Hi, there!
+        """,
+        )
+    PostBuilder(root, config).process_post(post)
+
+    assistant = TwitterCardAssistant(root, config)
+
+    fs.create_file(post.file_path.parent / "img/image1.jpg")
+    fs.create_file(post.file_path.parent / "img/image2.jpg")
+
+    mock_image = MagicMock()
+    type(mock_image.open.return_value).size = PropertyMock(
+        side_effect=[(10, 10), (10, 10)],
+    )
+    mocker.patch("nefelibata.assistants.twitter_card.Image", mock_image)
 
     with freeze_time("2020-01-01T00:00:00Z"):
         assistant.process_post(post)

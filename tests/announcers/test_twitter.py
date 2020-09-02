@@ -62,6 +62,7 @@ def test_announcer(mock_post, mocker):
     config = {
         "url": "http://blog.example.com/",
         "language": "en",
+        "assistants": [],
     }
     announcer = TwitterAnnouncer(
         root,
@@ -75,6 +76,9 @@ def test_announcer(mock_post, mocker):
 
     url = announcer.announce(post)
     assert url == "https://twitter.com/user/status/1"
+    mock_client.return_value.statuses.update.assert_called_with(
+        status="My first Twitter post http://blog.example.com/first/index.html",
+    )
 
     post.parsed["twitter-url"] = "https://twitter.example.com/user/status/1"
     responses = announcer.collect(post)
@@ -94,6 +98,49 @@ def test_announcer(mock_post, mocker):
             "url": "https://twitter.example.com/user/status/1",
         },
     ]
+
+
+def test_announcer_with_twitter_card(mock_post, mocker):
+    mock_client = MagicMock()
+    mock_client.return_value.statuses.update.return_value = {
+        "user": {"screen_name": "user"},
+        "id_str": "1",
+    }
+    mocker.patch("nefelibata.announcers.twitter.twitter.Twitter", mock_client)
+
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Hello, Twitter!
+        keywords: test
+        summary: My first Twitter post
+        announce-on: twitter
+
+        Hi, there!
+        """,
+        )
+
+    root = Path("/path/to/blog")
+    config = {
+        "url": "http://blog.example.com/",
+        "language": "en",
+        "assistants": ["twitter_card"],
+    }
+    announcer = TwitterAnnouncer(
+        root,
+        config,
+        "@handle",
+        "oauth_token",
+        "oauth_secret",
+        "consumer_key",
+        "consumer_secret",
+    )
+
+    url = announcer.announce(post)
+    assert url == "https://twitter.com/user/status/1"
+    mock_client.return_value.statuses.update.assert_called_with(
+        status="http://blog.example.com/first/index.html",
+    )
 
 
 def test_collect_exception(mock_post, mocker):

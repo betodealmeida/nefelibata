@@ -3,6 +3,7 @@ import mimetypes
 import re
 import urllib.parse
 from pathlib import Path
+from typing import Tuple
 
 import requests
 from bs4 import BeautifulSoup
@@ -16,7 +17,7 @@ from PIL import Image
 
 def has_valid_dimensions(path: Path) -> bool:
     im = Image.open(path)
-    width, height = im.size
+    width, height = im.size  # type: Tuple[int, int]
     return 144 <= width <= 4096 and 144 <= height <= 4096
 
 
