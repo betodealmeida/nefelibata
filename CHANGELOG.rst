@@ -2,7 +2,14 @@
 Changelog
 =========
 
+Version 0.3.6 - 2020-09-06
+==========================
+
+- Add missing entries for FTP publisher and 50/90 announcer in skeleton YAML
+- Fix Neocities publisher so it doesn't try to POST without modified files
+
 Version 0.3.5 - 2020-08-18
+==========================
 
 - Simplified code using context managers to parse HTML and handle JSON storage
 - Renamed "categories" to "tags", in anticipation of proper categories
