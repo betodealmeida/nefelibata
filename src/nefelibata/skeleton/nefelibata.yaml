@@ -46,6 +46,7 @@ assistants:
 # to S3 and IPFS.
 publish-to:
   - neocities
+  - ftp
   - S3
   - ipfs
 
@@ -68,6 +69,12 @@ neocities:
   username:
   password:
   # api_key:
+
+ftp:
+  host: ftp.example.com
+  username:
+  password:
+  basedir: public  # an optional directory where files will be uploaded to
 
 # Apply for S3 here: http://aws.amazon.com/s3/
 S3:
@@ -97,6 +104,11 @@ twitter:
 
 # FAWM is a website where people write 14 songs during the month of February.
 fawm:
+  username:
+  password:
+
+# Similarly, FiftyNinety is a website where people write 50 songs in 90 days.
+iftyninety:
   username:
   password:
 
