@@ -65,6 +65,8 @@ class NeocitiesPublisher(Publisher):
         # NeoCities API expects a dict in the following format:
         # { name_on_server: <file_object> }
         args = {pair[1]: open(pair[0], "rb") for pair in filenames}
+        if not args:
+            return
 
         url = "https://neocities.org/api/upload"
         response = requests.post(url, files=args, headers=self.headers)

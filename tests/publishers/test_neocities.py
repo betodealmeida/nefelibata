@@ -59,6 +59,15 @@ def test_publish(fs, mocker):
         == "2020-01-03T00:00:00+00:00"
     )
 
+    with freeze_time("2020-01-04T00:00:00Z"):
+        publisher.publish()
+
+    mtime = (root / "last_published").stat().st_mtime
+    assert (
+        datetime.fromtimestamp(mtime).astimezone(timezone.utc).isoformat()
+        == "2020-01-03T00:00:00+00:00"
+    )
+
 
 def test_publish_no_last_published(fs, mocker):
     root = Path("/path/to/blog")
@@ -114,7 +123,7 @@ def test_publish_username_password(fs, requests_mock):
     assert publisher.headers == {"Authorization": "Bearer XXX"}
 
 
-def test_publish_username_password_and_api_key(fs, requests_mock):
+def test_publish_username_password_and_api_key(fs):
     root = Path("/path/to/blog")
     fs.create_dir(root)
 
