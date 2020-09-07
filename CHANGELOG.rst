@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Version 0.3.7 - 2020-09-07
+==========================
+
+- Do not load non-configured announcers
+
 Version 0.3.6 - 2020-09-06
 ==========================
 
