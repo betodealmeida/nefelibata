@@ -69,6 +69,39 @@ def test_publish(fs, mocker):
     )
 
 
+def test_publish_error(fs, mocker, requests_mock):
+    root = Path("/path/to/blog")
+    fs.create_dir(root)
+
+    publisher = NeocitiesPublisher(root, config, api_key="XXX")
+
+    with freeze_time("2020-01-01T00:00:00Z"):
+        fs.create_file(root / "last_published")
+
+    fs.create_dir(root / "build")
+    with freeze_time("2020-01-02T00:00:00Z"):
+        fs.create_dir(root / "build/two")
+        fs.create_file(root / "build/two/index.mkd")
+        fs.create_file(root / "build/two/index.html")
+
+    requests_mock.post(
+        "https://neocities.org/api/upload", text="Some error", status_code=400,
+    )
+    mocker.patch(
+        "nefelibata.publishers.neocities.open",
+        side_effect=lambda filename, mode: b"content",
+    )
+    with freeze_time("2020-01-03T00:00:00Z"):
+        publisher.publish()
+
+    # should not be updated due to 400
+    mtime = (root / "last_published").stat().st_mtime
+    assert (
+        datetime.fromtimestamp(mtime).astimezone(timezone.utc).isoformat()
+        == "2020-01-01T00:00:00+00:00"
+    )
+
+
 def test_publish_no_last_published(fs, mocker):
     root = Path("/path/to/blog")
     fs.create_dir(root)

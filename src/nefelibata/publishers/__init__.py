@@ -34,11 +34,10 @@ class Publisher:
 
 
 def get_publishers(root: Path, config: Dict[str, Any]) -> List[Publisher]:
-    """Return all publishers.
-    """
+    """Return all publishers."""
     names = config["publish-to"] or []
     if isinstance(names, str):
         names = [names]
 
     publishers = {p.name: p.load() for p in iter_entry_points("nefelibata.publisher")}
-    return [publishers[name](root, config, **config.get(name, {})) for name in names]
+    return [publishers[name](root, config, **config[name]) for name in names]

@@ -63,6 +63,7 @@ class FTPPublisher(Publisher):
                             ftp.cwd(directory)
                     pwd = basedir / relative_directory
 
+                _logger.info(f"Uploading {path}")
                 with open(path, "rb") as fp:
                     ftp.storbinary(f"STOR {path.name}", fp)
 

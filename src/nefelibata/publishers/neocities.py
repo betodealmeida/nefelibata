@@ -70,7 +70,11 @@ class NeocitiesPublisher(Publisher):
 
         url = "https://neocities.org/api/upload"
         response = requests.post(url, files=args, headers=self.headers)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except Exception:
+            _logger.exception(f"Error uploading files: {response.text}")
+            return
 
         # update last published
         last_published_file.touch()

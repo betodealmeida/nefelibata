@@ -69,8 +69,7 @@ class Announcer:
         return self.url_header not in post.parsed
 
     def update_links(self, post: Post) -> None:
-        """Update links.json with link to where the post is announced.
-        """
+        """Update links.json with link to where the post is announced."""
         if not self.should_announce(post):
             return
 
@@ -89,13 +88,11 @@ class Announcer:
             post.save()
 
     def announce(self, post: Post) -> Optional[str]:
-        """Publish a post in a service and return the URL.
-        """
+        """Publish a post in a service and return the URL."""
         raise NotImplementedError("Subclasses must implement announce")
 
     def update_replies(self, post: Post) -> None:
-        """Update replies.json with new replies, if any.
-        """
+        """Update replies.json with new replies, if any."""
         if self.url_header not in post.parsed:
             return
 
@@ -128,8 +125,7 @@ class Announcer:
             post.save()
 
     def collect(self, post: Post) -> List[Response]:
-        """Collect responses.
-        """
+        """Collect responses."""
         raise NotImplementedError("Subclasses must implement collect")
 
 
@@ -162,7 +158,8 @@ def get_post_announcers(config: Dict[str, Any], post: Post) -> Set[str]:
 
 def get_announcers(root: Path, config: Dict[str, Any]) -> List[Announcer]:
     announcers = {a.name: a.load() for a in iter_entry_points("nefelibata.announcer")}
-
     return [
-        announcers[name](root, config, **config.get(name, {})) for name in announcers
+        announcers[name](root, config, **config[name])
+        for name in announcers
+        if name in config
     ]
