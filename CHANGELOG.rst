@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Version 0.3.8 - 2020-09-09
+==========================
+
+- New assistant that displays approximate reading time on posts
+
 Version 0.3.7 - 2020-09-07
 ==========================
 
