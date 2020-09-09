@@ -120,6 +120,8 @@ The next part defines "assistants", which are HTML post-processor that run after
       - playlist
       - archive_links
       - relativize_links
+      - twitter_card
+      - reading_time
 
 Publishers
 ~~~~~~~~~~
