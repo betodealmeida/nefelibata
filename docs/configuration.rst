@@ -54,6 +54,8 @@ The next part defines "assistants", which are HTML post-processor that run after
       - warn_external_resources
       - archive_links
       - relativize_links
+      - twitter_card
+      - reading_time
 
 Publishers
 ----------

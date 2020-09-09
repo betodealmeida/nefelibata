@@ -54,16 +54,19 @@
 
                         <h3 class="post-subtitle p-summary">{{ post.summary }}</h3>
 
+                        <p id="post-reading-time"></p>
+
                         <p class="post-meta">
+
                             By <span class="h-card p-author">
-                                <a class="p-name u-url" rel="author me" href="{{ config.url }}">{{ config.author.name }}</a>
+                                <a class="p-name u-url" rel="author me" href="{{ config.author.url }}">{{ config.author.name }}</a>
                                 (<a class="u-email" href="mailto:{{ config.author.email }}">{{ config.author.email }}</a>)
                                 <a class="u-photo hidden" href="{{ config.author.profile_picture }}"></a>
                                 <span class="p-note hidden">{{ config.author.note }}</span>
                             </span>
                             on <time class="dt-published" datetime="{{ post.date.isoformat() }}" pubdate>{{ post.date.strftime('%Y-%m-%d') }}</time>
                             under
-                            {% if config.builders.tags %}
+                            {% if "tags" in config.builders %}
                             {% for keyword in keywords %}
                             <a class="post-category p-category" style="background-color: {{ random_color(keyword) }}" href="/{{ keyword }}.html">{{ keyword }}</a>
                             {% endfor %}

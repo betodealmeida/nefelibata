@@ -40,6 +40,8 @@ assistants:
   - warn_external_resources
   - archive_links
   - relativize_links
+  - twitter_card
+  - reading_time
 
 # Publishers define where your static pages will be uploaded to. Neocities
 # is easy to setup and recommended for beginners, but you can also upload
@@ -59,6 +61,8 @@ announce-on:
   - wtsocial
   - twitter
   - medium
+  - fawm
+  - fiftyninety
 
 
 # Sign for Neocities at: https://neocities.org
@@ -87,6 +91,13 @@ S3:
   configure_website: true
   configure_route53: blog.example.com.
 
+# Publish to a host running an IPFS daemon; you need rsync and ssh locally,
+# since this will send the static files and run `ipfs add` and `ipfs name publish`
+# on them.
+ipfs:
+  username:
+  host:
+
 
 # Visit the Twitter developer page and create a new application:
 #
@@ -108,7 +119,7 @@ fawm:
   password:
 
 # Similarly, FiftyNinety is a website where people write 50 songs in 90 days.
-iftyninety:
+fiftyninety:
   username:
   password:
 
@@ -135,10 +146,3 @@ medium:
   access_token:
   # public, draft or unlisted
   publish_status: unlisted
-
-# Publish to a host running an IPFS daemon; you need rsync and ssh locally,
-# since this will send the static files and run `ipfs add` and `ipfs name publish`
-# on them.
-ipfs:
-  username: ipfs
-  host: ipfs.example.com

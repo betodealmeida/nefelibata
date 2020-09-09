@@ -111,7 +111,7 @@ div.post-description {
     color: #444;
     line-height: 1.8em;
 }
-.post-meta {
+.post-meta, #post-reading-time {
     color: #666;
     font-size: 90%;
     margin: 0;
@@ -211,4 +211,9 @@ div.post-description {
 .archive {
     vertical-align: super;
     font-size: 80%;
+}
+
+.post-header {
+    padding-bottom: 1em;
+    border-bottom: 1px solid #eee;
 }
