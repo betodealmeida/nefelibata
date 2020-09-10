@@ -55,7 +55,7 @@ def get_response_from_child(child: Dict[str, Any], target: str) -> Response:
     # for the source, let's try to find a name, else fall back to URL
     source = child.get("name") or child.get("url") or "Unknown"
 
-    url = child.get("url") or "#"
+    url = child.get("wm-source") or child.get("url") or "#"
     id_ = f'webmention:{child["wm-id"]}'
 
     # for timestamp we fall back to when the response was received
