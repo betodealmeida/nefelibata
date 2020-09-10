@@ -30,4 +30,5 @@ class ReadingTimeAssistant(Assistant):
             if el:
                 span = soup.new_tag("span")
                 span.string = f"Approximate reading time: {minutes} minutes"
+                el.clear()
                 el.append(span)

@@ -66,6 +66,14 @@ def test_process_post(mock_post):
 </html>"""
     )
 
+    # test idempotency
+    previous = html
+    assistant.process_post(post)
+    with open(post.file_path.with_suffix(".html")) as fp:
+        html = fp.read()
+
+    assert html == previous
+
 
 def test_process_post_too_short(mock_post):
     root = Path("/path/to/blog")

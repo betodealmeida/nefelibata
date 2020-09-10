@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Version 0.3.9 - 2020-09-10
+==========================
+
+- Fix for reading time assistant
+
 Version 0.3.8 - 2020-09-09
 ==========================
 
