@@ -110,7 +110,7 @@ The second part defines which parts of your weblog will be built. Unless you kno
 Assistants
 ~~~~~~~~~~
 
-The next part defines "assistants", which are HTML post-processor that run after the builders. Assistants can mirror images locally, save external links in the `Wayback Machine <https://archive.org/web/>`_, and more:
+The next part defines "assistants", which are HTML post-processors that run after the builders. Assistants can mirror images locally, save external links in the `Wayback Machine <https://archive.org/web/>`_, and more:
 
 .. code-block:: yaml
 
@@ -247,6 +247,7 @@ Finally, the last part is used for syndicating your content. Currently nefelibat
       - wtsocial
       - medium
       - fawm
+      - fiftyninety
 
 Each announcer has its own configuration section, with different requirements. The `Mastodon <https://joinmastodon.org/>`_, `Twitter <https://twitter.com/>`_ and `WT.Social <https://wt.social/>`_ announcers will publish the summary of the post, with a link back to the post in the weblog. The `Medium <https://medium.com/>`_ announcer will publish the full HTML, on the other hand.
 
