@@ -44,7 +44,7 @@
 - [x] cassette tape audio player
 - [x] make playlist assistant a builder
 - [x] when mirroring images, add original URL as exif
-- [ ] post types: likes, notes, songs? allow custom themes to be specified
+- [x] post types: likes, notes, songs? allow custom themes to be specified
 - [ ] template snippets for books or other things? music?
 - [ ] check that `force` is being used in all relevant plugins
 - [ ] replace `post_directory.parent` with `root / posts` to allow for nested sub directories

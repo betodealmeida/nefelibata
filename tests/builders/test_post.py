@@ -82,6 +82,71 @@ def test_process_post(mock_post, fs):
     )
 
 
+def test_process_post_custom_template(mock_post, fs):
+    root = Path("/path/to/blog")
+
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: I liked this page
+        keywords: blog
+        summary: I really liked this page about dogs
+        type: like
+        like-url: https://dogs.example.com/
+
+        """,
+        )
+
+    with open(root / "templates/test-theme/like.html", "w") as fp:
+        fp.write(
+            """
+<!DOCTYPE html><html lang="en">
+<head>
+<meta content="article" property="og:type"/>
+<meta content="Post title" property="og:title"/>
+<meta content="This is the post description" property="og:description"/>
+<link href="{{ config.webmention.endpoint }}" rel="webmention" />
+<link href="https://external.example.com/css/basic.css" rel="stylesheet">
+<link href="/css/style.css" rel="stylesheet">
+{% for stylesheet in stylesheets %}
+<link href="{{ stylesheet }}" rel="stylesheet">
+{% endfor %}
+</head>
+<body>
+<div class="h-entry">
+  <p class="p-summary">Liked: <a class="u-like-of" href="https://dogs.example.com/">https://dogs.example.com/</a></p>
+</div>
+</body>
+</html>""",
+        )
+
+    builder = PostBuilder(root, config)
+    builder.process_post(post)
+
+    with open(post.file_path.with_suffix(".html")) as fp:
+        contents = fp.read()
+    assert (
+        contents
+        == """
+<!DOCTYPE html><html lang="en">
+<head>
+<meta content="article" property="og:type"/>
+<meta content="Post title" property="og:title"/>
+<meta content="This is the post description" property="og:description"/>
+<link href="https://webmention.io/example.com/webmention" rel="webmention" />
+<link href="https://external.example.com/css/basic.css" rel="stylesheet">
+<link href="/css/style.css" rel="stylesheet">
+
+</head>
+<body>
+<div class="h-entry">
+  <p class="p-summary">Liked: <a class="u-like-of" href="https://dogs.example.com/">https://dogs.example.com/</a></p>
+</div>
+</body>
+</html>"""
+    )
+
+
 def test_process_post_up_to_date(mock_post, fs):
     root = Path("/path/to/blog")
 

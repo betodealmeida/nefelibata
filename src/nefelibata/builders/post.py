@@ -23,8 +23,7 @@ class PostBuilder(Builder):
     scopes = [Scope.POST]
 
     def process_post(self, post: Post, force: bool = False) -> None:
-        """Generate Atom feed.
-        """
+        """Generate Atom feed."""
         if post.up_to_date and not force:
             return
 
@@ -52,7 +51,8 @@ class PostBuilder(Builder):
             ),
         )
         env.filters["formatdate"] = jinja2_formatdate
-        template = env.get_template("post.html")
+        post_type = post.parsed.get("type", "post")
+        template = env.get_template(f"{post_type}.html")
         html = template.render(
             __version__=__version__,
             config=self.config,
