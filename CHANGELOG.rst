@@ -6,6 +6,7 @@ Version 0.3.10 - YYYY-MM-DD
 ===========================
 
 - Allow specifying a different template per post
+- New assistant for fetching current weather
 
 Version 0.3.9 - 2020-09-10
 ==========================

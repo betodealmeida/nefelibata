@@ -69,8 +69,7 @@ class Post:
         return html.exists() and html.stat().st_mtime >= self.file_path.stat().st_mtime
 
     def update_metadata(self) -> None:
-        """Automatically generate date and subject headers.
-        """
+        """Automatically generate date and subject headers."""
         modified = False
 
         if not self.parsed.get("date"):
@@ -99,6 +98,5 @@ class Post:
 
 
 def get_posts(root: Path) -> List[Post]:
-    """Return list of posts for a given root directory.
-    """
+    """Return list of posts for a given root directory."""
     return [Post(source) for source in (root / "posts").glob("**/*.mkd")]

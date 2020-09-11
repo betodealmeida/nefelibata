@@ -56,6 +56,10 @@
 
                         <p id="post-reading-time"></p>
 
+                        {% if json.weather %}
+                        <p class="post-weather">Current weather: {{ json.weather.current_condition[0].temp_C }}&deg;C ({{ json.weather.current_condition[0].weatherDesc[0].value }})</p>
+                        {% endif %}
+
                         <p class="post-meta">
 
                             By <span class="h-card p-author">

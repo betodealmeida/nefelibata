@@ -122,6 +122,7 @@ The next part defines "assistants", which are HTML post-processors that run afte
       - relativize_links
       - twitter_card
       - reading_time
+      - current_weather
 
 Publishers
 ~~~~~~~~~~

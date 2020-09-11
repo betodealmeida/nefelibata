@@ -1,3 +1,5 @@
+# Done #
+
 - [x] archive pages
 - [x] add warning on external resources
 - [x] category pages
@@ -45,22 +47,39 @@
 - [x] make playlist assistant a builder
 - [x] when mirroring images, add original URL as exif
 - [x] post types: likes, notes, songs? allow custom themes to be specified
-- [ ] template snippets for books or other things? music?
-- [ ] check that `force` is being used in all relevant plugins
-- [ ] replace `post_directory.parent` with `root / posts` to allow for nested sub directories
-- [ ] use bleach to clean HTML
-- [ ] categories
-- [ ] new theme
-- [ ] search (build index and search using JS)
-- [ ] Medium image upload (go deep post, eg)
-- [ ] RSS club
+- [x] store weather (curl wttr.in/?format=j1)
+
+# TODO #
+
+## Performance ##
+
 - [ ] parallelize build/publish
+- [ ] avoid parsing HTML for each plugin
 - [ ] lxml parser for BeautifulSoup?
+
+## Announcers ##
+
 - [ ] multiple announcers of the same type? (eg, 2 mastodon)
 - [ ] Reddit announcer
 - [ ] Soundcloud announcer
 - [ ] Instagram announcer
+
+## Comments ##
+
+- [ ] standardize all comments as webmentions
 - [ ] threaded comments
+- [ ] use bleach to clean HTML
+
+## Other ##
+
+- [ ] template snippets for books or other things? music? like, RSVP
+- [ ] check that `force` is being used in all relevant plugins
+- [ ] replace `post_directory.parent` with `root / posts` to allow for nested sub directories
+- [ ] categories
+- [ ] new theme
+- [ ] search (build index and search using JS)
+- [ ] Medium image upload ("Go Deep" post, eg)
+- [ ] RSS club
 - [ ] style webmentioned links: https://www.ctrl.blog/media/hero/webmention.svg
 - [ ] mirror youtube videos in addition to images
 - [ ] PESOS?
