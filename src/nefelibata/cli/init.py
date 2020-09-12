@@ -16,8 +16,7 @@ _logger = logging.getLogger(__name__)
 
 
 def run(root: Path) -> None:
-    """Create initial structure for weblog.
-    """
+    """Create initial structure for weblog."""
     resources = resource_listdir("nefelibata", "skeleton")
 
     for resource in resources:

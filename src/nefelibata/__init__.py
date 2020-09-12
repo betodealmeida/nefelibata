@@ -13,5 +13,3 @@ finally:
 
 
 config_filename = "nefelibata.yaml"
-
-new_post = "subject: {title}\nsummary: \nkeywords: \n\n\n"

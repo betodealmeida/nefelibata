@@ -17,8 +17,7 @@ _logger = logging.getLogger(__name__)
 
 
 def run(root: Path, post: Optional[Post] = None, force: bool = False) -> None:
-    """Publish weblog.
-    """
+    """Publish weblog."""
     _logger.info("Publishing weblog")
 
     config = get_config(root)

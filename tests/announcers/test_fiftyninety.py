@@ -342,7 +342,8 @@ def test_announcer(mock_post, mocker, requests_mock):
         "Location": "https://fiftyninety.org/songs/110082/",
     }
     mocker.patch(
-        "nefelibata.announcers.fiftyninety.get_session", return_value=mock_session,
+        "nefelibata.announcers.fiftyninety.get_session",
+        return_value=mock_session,
     )
     mocker.patch("nefelibata.announcers.fiftyninety.extract_params", return_value={})
     url = announcer.announce(post)
@@ -376,7 +377,10 @@ def test_announcer(mock_post, mocker, requests_mock):
     )
     announcer.collect(post)
     mock_get_comments_from_fiftyninety_page.assert_called_with(
-        mock_session, "https://fiftyninety.org/songs/110082/", "username", "password",
+        mock_session,
+        "https://fiftyninety.org/songs/110082/",
+        "username",
+        "password",
     )
 
 
@@ -384,7 +388,8 @@ def test_get_session(mocker):
     mock_session = MagicMock()
     mock_session.get.return_value.text = login_page
     mocker.patch(
-        "nefelibata.announcers.fiftyninety.requests.Session", return_value=mock_session,
+        "nefelibata.announcers.fiftyninety.requests.Session",
+        return_value=mock_session,
     )
 
     get_session("username", "password")
@@ -469,7 +474,10 @@ def test_get_comments_from_fiftyninety_page():
 
     with freeze_time("2020-01-01T00:00:00Z"):
         responses = get_comments_from_fiftyninety_page(
-            mock_session, url, "username", "password",
+            mock_session,
+            url,
+            "username",
+            "password",
         )
     assert responses == [
         {

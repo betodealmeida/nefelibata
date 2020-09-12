@@ -17,7 +17,9 @@ class Assistant(Builder):
 
 
 def get_assistants(
-    root: Path, config: Dict[str, Any], scope: Optional[Scope] = None,
+    root: Path,
+    config: Dict[str, Any],
+    scope: Optional[Scope] = None,
 ) -> List[Assistant]:
     names = config["assistants"] or []
 

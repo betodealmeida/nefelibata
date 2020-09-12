@@ -44,10 +44,12 @@ Hello!
 </html>
 """
     requests_mock.head(
-        "https://user2.example.com/", headers={"Content-Type": "text/html"},
+        "https://user2.example.com/",
+        headers={"Content-Type": "text/html"},
     )
     requests_mock.get(
-        "https://user2.example.com/", text=html,
+        "https://user2.example.com/",
+        text=html,
     )
     url = get_webmention_endpoint("https://user2.example.com/")
     assert url == "https://user2.example.com/webmention-endpoint"
@@ -68,7 +70,8 @@ def test_get_webmention_endpoint_anchor(requests_mock):
         headers={"Content-Type": "text/html; charset=UTF-8"},
     )
     requests_mock.get(
-        "https://user3.example.com/", text=html,
+        "https://user3.example.com/",
+        text=html,
     )
     url = get_webmention_endpoint("https://user3.example.com/")
     assert url == "https://user3.example.com/webmention-endpoint"
@@ -76,7 +79,8 @@ def test_get_webmention_endpoint_anchor(requests_mock):
 
 def test_get_webmention_non_html(requests_mock):
     requests_mock.head(
-        "https://user4.example.com/", headers={"Content-Type": "application/pdf"},
+        "https://user4.example.com/",
+        headers={"Content-Type": "application/pdf"},
     )
     url = get_webmention_endpoint("https://user4.example.com/")
     assert url is None
@@ -96,7 +100,8 @@ def test_get_webmention_endpoint_none(requests_mock):
         headers={"Link": '<https://user1.example.com/atom.xml>; rel="alternate"'},
     )
     requests_mock.get(
-        "https://user4.example.com/", text=html,
+        "https://user4.example.com/",
+        text=html,
     )
     url = get_webmention_endpoint("https://user4.example.com/")
     assert url is None
@@ -118,7 +123,9 @@ def test_announcer(mock_post, requests_mock):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     mock_send_mention = MagicMock()
@@ -203,7 +210,9 @@ def test_announcer_announced_partially(mock_post):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     mock_send_mention = MagicMock()
@@ -212,13 +221,15 @@ def test_announcer_announced_partially(mock_post):
 
     with open(post.file_path.parent / "webmentions.json", "w") as fp:
         json.dump(
-            {"https://blog.example.com/": {"success": True, "content": "Accepted"}}, fp,
+            {"https://blog.example.com/": {"success": True, "content": "Accepted"}},
+            fp,
         )
 
     announcer.update_links(post)
 
     mock_send_mention.assert_called_with(
-        "https://blog.example.com/first/index.html", "https://news.indieweb.org/en",
+        "https://blog.example.com/first/index.html",
+        "https://news.indieweb.org/en",
     )
 
 
@@ -238,7 +249,9 @@ def test_announcer_announced_queued(mock_post):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     mock_update_webmention = MagicMock()
@@ -296,7 +309,9 @@ def test_update_webmention(requests_mock):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     webmention = {
@@ -322,7 +337,9 @@ def test_update_webmention_error(requests_mock):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     webmention = {
@@ -333,7 +350,9 @@ def test_update_webmention_error(requests_mock):
         },
     }
     requests_mock.get(
-        "https://blog.example.com/mention/12345", text="Not Found", status_code=404,
+        "https://blog.example.com/mention/12345",
+        text="Not Found",
+        status_code=404,
     )
 
     assert announcer._update_webmention(webmention) == webmention
@@ -343,7 +362,9 @@ def test_update_webmention_timeout(mocker):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     webmention = {
@@ -365,7 +386,9 @@ def test_update_webmention_not_json(requests_mock):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     webmention = {
@@ -399,7 +422,9 @@ def test_announcer_announced_no_new_mentions(mock_post):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     mock_send_mention = MagicMock()
@@ -425,9 +450,12 @@ def test_announcer_announced_no_new_mentions(mock_post):
     with freeze_time("2020-01-02T00:00:00Z"):
         announcer.update_links(post)
 
-    assert datetime.fromtimestamp(
-        (post.file_path.parent / "webmentions.json").stat().st_mtime,
-    ).astimezone(timezone.utc) == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    assert (
+        datetime.fromtimestamp(
+            (post.file_path.parent / "webmentions.json").stat().st_mtime,
+        ).astimezone(timezone.utc)
+        == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    )
 
 
 def test_announcer_announced_exception_on_mention(mock_post, mocker, requests_mock):
@@ -446,7 +474,9 @@ def test_announcer_announced_exception_on_mention(mock_post, mocker, requests_mo
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     mock_get_webmention_endpoint = MagicMock()
@@ -460,7 +490,8 @@ def test_announcer_announced_exception_on_mention(mock_post, mocker, requests_mo
 
     with open(post.file_path.parent / "webmentions.json", "w") as fp:
         json.dump(
-            {"https://blog.example.com/": {"success": True, "content": "Accepted"}}, fp,
+            {"https://blog.example.com/": {"success": True, "content": "Accepted"}},
+            fp,
         )
 
     announcer.update_links(post)
@@ -491,7 +522,9 @@ def test_announcer_announced_indienews_only(mock_post):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     mock_send_mention = MagicMock()
@@ -508,7 +541,8 @@ def test_announcer_announced_indienews_only(mock_post):
     assert post.parsed["webmention-url"] == "https://commentpara.de/"
 
     mock_send_mention.assert_called_with(
-        "https://blog.example.com/first/index.html", "https://blog.example.com/",
+        "https://blog.example.com/first/index.html",
+        "https://blog.example.com/",
     )
 
 
@@ -528,7 +562,9 @@ def test_announcer_no_indienews(mock_post):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     mock_send_mention = MagicMock()
@@ -563,7 +599,9 @@ def test_announcer_indienews_no_language(mock_post):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "pt_BR"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     mock_send_mention = MagicMock()
@@ -598,7 +636,9 @@ def test_announcer_send_mention(mock_post, requests_mock):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     # indienews support webmention
@@ -613,7 +653,8 @@ def test_announcer_send_mention(mock_post, requests_mock):
     # the linked site does not
     html = "<html><head></head><body></body></html>"
     requests_mock.head(
-        "https://blog.example.com/", headers={"Content-Type": "text/html"},
+        "https://blog.example.com/",
+        headers={"Content-Type": "text/html"},
     )
     requests_mock.get("https://blog.example.com/", text=html)
 
@@ -637,7 +678,9 @@ def test_announcer_exception(mock_post, requests_mock):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/", "language": "en"}
     announcer = WebmentionAnnouncer(
-        root, config, "https://webmention.io/example.com/webmention",
+        root,
+        config,
+        "https://webmention.io/example.com/webmention",
     )
 
     # passing a target with non-ASCII characters results in a 500 from webmention.io

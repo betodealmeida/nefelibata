@@ -15,8 +15,7 @@ class AtomBuilder(Builder):
     scopes = [Scope.SITE]
 
     def process_site(self, force: bool = False) -> None:
-        """Generate Atom feed.
-        """
+        """Generate Atom feed."""
         _logger.info("Creating Atom feed")
 
         env = Environment(loader=FileSystemLoader(str(self.root / "templates")))

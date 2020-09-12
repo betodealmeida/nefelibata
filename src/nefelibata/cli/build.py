@@ -24,8 +24,7 @@ def run(
     force: bool = False,
     collect_replies: bool = True,
 ) -> None:
-    """Build weblog from Markdown posts and social media interactions.
-    """
+    """Build weblog from Markdown posts and social media interactions."""
     _logger.info("Building weblog")
 
     config = get_config(root)

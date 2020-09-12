@@ -20,8 +20,7 @@ _logger = logging.getLogger(__name__)
 
 
 def get_user_image(username: str) -> Optional[str]:
-    """Return URL of the profile picture of a given user.
-    """
+    """Return URL of the profile picture of a given user."""
     url = f"https://wt.social/u/{username}"
     response = requests.get(url)
     match = re.search(r"(https.*?--profile_pic\.\w+)", response.text)
@@ -29,8 +28,7 @@ def get_user_image(username: str) -> Optional[str]:
 
 
 def get_response_from_comment(comment: Dict[str, Any]) -> Response:
-    """Generate a standard reply from a comment.
-    """
+    """Generate a standard reply from a comment."""
     comment_url = (
         f'https://wt.social{comment["parentUrl"]}#comment-{comment["comment_id"]}'
     )
@@ -65,8 +63,7 @@ def get_csrf_token(html: str) -> Optional[str]:
 
 
 def do_login(session: requests.Session, email: str, password: str) -> str:
-    """Perform login and return HTML page.
-    """
+    """Perform login and return HTML page."""
     url = "https://wt.social/login"
     response = session.get(url)
     html = response.text
@@ -98,8 +95,7 @@ class WTSocialAnnouncer(Announcer):
         self.password = password
 
     def announce(self, post: Post) -> Optional[str]:
-        """Publish the summary of a post to WT.Social.
-        """
+        """Publish the summary of a post to WT.Social."""
         _logger.info("Posting to WT.Social")
 
         session = requests.Session()
@@ -129,8 +125,7 @@ class WTSocialAnnouncer(Announcer):
         return url
 
     def collect(self, post: Post) -> List[Response]:
-        """Collect responses to a given post.
-        """
+        """Collect responses to a given post."""
         _logger.info("Collecting replies from WT.Social")
 
         session = requests.Session()

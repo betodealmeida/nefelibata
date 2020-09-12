@@ -38,14 +38,19 @@ class MastodonAnnouncer(Announcer):
     url_header = "mastodon-url"
 
     def __init__(
-        self, root: Path, config: Dict[str, Any], access_token: str, base_url: str,
+        self,
+        root: Path,
+        config: Dict[str, Any],
+        access_token: str,
+        base_url: str,
     ):
         super().__init__(root, config)
 
         self.base_url = base_url
 
         self.client = mastodon.Mastodon(
-            access_token=access_token, api_base_url=base_url,
+            access_token=access_token,
+            api_base_url=base_url,
         )
 
     def announce(self, post: Post) -> str:

@@ -4,7 +4,7 @@ Nefelibata weblog engine.
 
 Usage:
   nb init [ROOT_DIR] [--loglevel=INFO]
-  nb new POST [ROOT_DIR] [--loglevel=INFO]
+  nb new POST [ROOT_DIR] [-t TYPE] [--loglevel=INFO]
   nb build [ROOT_DIR] [-f] [-s POST_DIR] [--no-collect] [--loglevel=INFO]
   nb preview [-p PORT] [ROOT_DIR] [--loglevel=INFO]
   nb publish [ROOT_DIR] [-f] [-s POST_DIR] [--loglevel=INFO]
@@ -19,10 +19,11 @@ Actions:
 Options:
   -h --help         Show this screen.
   --version         Show version.
-  -p PORT           Port to run the web server for preview. [default: 8000]
   -f --force        Force build/publishing of up-to-date resources.
   -s POST_DIR       Build/publish a single post by specifying its directory
   --no-collect      Do not collect replies when building.
+  -t TYPE           Custom template to use on the post. [default: post]
+  -p PORT           Port to run the web server for preview. [default: 8000]
   --loglevel=LEVEL  Level for logging. [default: INFO]
 
 Released under the MIT license.
@@ -50,8 +51,7 @@ __license__ = "mit"
 
 
 def main() -> None:
-    """Main entry point allowing external calls
-    """
+    """Main entry point allowing external calls"""
     arguments = docopt(__doc__, version=__version__)
 
     setup_logging(arguments["--loglevel"])
@@ -75,7 +75,7 @@ def main() -> None:
     if arguments["init"]:
         init.run(root)
     elif arguments["new"]:
-        new.run(root, arguments["POST"])
+        new.run(root, arguments["POST"], arguments["-t"])
     elif arguments["build"]:
         build.run(root, post, arguments["--force"], not arguments["--no-collect"])
     elif arguments["preview"]:

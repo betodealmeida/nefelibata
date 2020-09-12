@@ -33,7 +33,8 @@ def test_announcer(mock_post, requests_mock):
     announcer = MediumAnnouncer(root, config, "token", "public")
 
     requests_mock.get(
-        "https://api.medium.com/v1/me", json={"data": {"id": 1}},
+        "https://api.medium.com/v1/me",
+        json={"data": {"id": 1}},
     )
     mock_post = requests_mock.post(
         "https://api.medium.com/v1/users/1/posts",
@@ -580,7 +581,8 @@ def test_announcer_relative_links(mock_post, requests_mock):
     announcer = MediumAnnouncer(root, config, "token", "public")
 
     requests_mock.get(
-        "https://api.medium.com/v1/me", json={"data": {"id": 1}},
+        "https://api.medium.com/v1/me",
+        json={"data": {"id": 1}},
     )
     mock_post = requests_mock.post(
         "https://api.medium.com/v1/users/1/posts",

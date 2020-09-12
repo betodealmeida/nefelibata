@@ -18,8 +18,7 @@ from rich.logging import RichHandler
 
 
 def get_config(root: Path) -> Dict[str, Any]:
-    """Return the configuration file for a weblog.
-    """
+    """Return the configuration file for a weblog."""
     with open(root / config_filename) as fp:
         config: Dict[str, Any] = yaml.full_load(fp)
 
@@ -33,8 +32,7 @@ def get_config(root: Path) -> Dict[str, Any]:
 
 
 def setup_logging(loglevel: str) -> None:
-    """Setup basic logging
-    """
+    """Setup basic logging"""
     level = getattr(logging, loglevel.upper(), None)
     if not isinstance(level, int):
         raise ValueError("Invalid log level: %s" % loglevel)
@@ -69,8 +67,7 @@ def strip_accents(text: str) -> str:
 
 
 def sanitize(directory: str) -> str:
-    """Sanitize a post title into a directory name.
-    """
+    """Sanitize a post title into a directory name."""
     directory = directory.lower().replace(" ", "_")
     directory = re.sub(r"[^\w]", "", directory)
     directory = strip_accents(directory)

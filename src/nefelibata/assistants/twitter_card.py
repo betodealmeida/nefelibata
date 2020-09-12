@@ -54,7 +54,8 @@ class TwitterCardAssistant(Assistant):
 
             card_metadata["twitter:card"] = "player"
             card_metadata["twitter:image"] = urllib.parse.urljoin(
-                self.config["url"], "img/cassette.png",
+                self.config["url"],
+                "img/cassette.png",
             )
             card_metadata["twitter:player"] = container_url
             card_metadata["twitter:player:width"] = "800"
@@ -131,7 +132,8 @@ class TwitterCardAssistant(Assistant):
                     "script",
                     attrs={
                         "src": urllib.parse.urljoin(
-                            self.config["url"], "js/cassette.js",
+                            self.config["url"],
+                            "js/cassette.js",
                         ),
                         "async": "",
                     },

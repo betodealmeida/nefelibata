@@ -202,9 +202,12 @@ def test_twitter_card_existing(mock_post, requests_mock):
     with freeze_time("2020-01-02T00:00:00Z"):
         assistant.process_post(post)
 
-    assert datetime.fromtimestamp(
-        post.file_path.with_suffix(".html").stat().st_mtime,
-    ).astimezone(timezone.utc) == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    assert (
+        datetime.fromtimestamp(
+            post.file_path.with_suffix(".html").stat().st_mtime,
+        ).astimezone(timezone.utc)
+        == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    )
 
     # modify and process again
     with modify_html(post.file_path.with_suffix(".html")) as soup:
@@ -321,9 +324,12 @@ def test_twitter_card_with_mp3(mocker, mock_post, fs, requests_mock):
     with freeze_time("2020-01-02T00:00:00Z"):
         assistant.process_post(post)
 
-    assert datetime.fromtimestamp(
-        post.file_path.with_suffix(".html").stat().st_mtime,
-    ).astimezone(timezone.utc) == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    assert (
+        datetime.fromtimestamp(
+            post.file_path.with_suffix(".html").stat().st_mtime,
+        ).astimezone(timezone.utc)
+        == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    )
 
     with open(post.file_path.with_suffix(".html")) as fp:
         contents = fp.read()

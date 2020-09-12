@@ -20,8 +20,7 @@ class TagsBuilder(Builder):
     scopes = [Scope.SITE]
 
     def process_site(self, force: bool = False) -> None:
-        """Generate pages for each tag.
-        """
+        """Generate pages for each tag."""
         _logger.info("Creating tags pages")
 
         env = Environment(

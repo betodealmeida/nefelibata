@@ -161,9 +161,12 @@ def test_update_links_already_announced(mock_post):
     with freeze_time("2020-01-02T00:00:00Z"):
         announcer.update_links(post)
 
-    assert datetime.fromtimestamp(
-        (post.file_path.parent / "links.json").stat().st_mtime,
-    ).astimezone(timezone.utc) == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    assert (
+        datetime.fromtimestamp(
+            (post.file_path.parent / "links.json").stat().st_mtime,
+        ).astimezone(timezone.utc)
+        == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    )
 
 
 def test_update_links_file_exists(mock_post):

@@ -114,7 +114,10 @@ class WebmentionAnnouncer(Announcer):
     url_header = "webmention-url"
 
     def __init__(
-        self, root: Path, config: Dict[str, Any], endpoint: str,
+        self,
+        root: Path,
+        config: Dict[str, Any],
+        endpoint: str,
     ):
         super().__init__(root, config)
 

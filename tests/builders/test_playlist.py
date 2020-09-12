@@ -176,9 +176,12 @@ Length2=60
     builder.process_post(post)
 
     # file shouldn't have been touched
-    assert datetime.fromtimestamp(pls_path.stat().st_mtime).astimezone(
-        timezone.utc,
-    ) == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    assert (
+        datetime.fromtimestamp(pls_path.stat().st_mtime).astimezone(
+            timezone.utc,
+        )
+        == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    )
 
 
 def test_playlist_modified(mock_post, mocker, fs):
@@ -245,6 +248,9 @@ Length1=45
         builder.process_post(post)
 
     # file should have been touched
-    assert datetime.fromtimestamp(pls_path.stat().st_mtime).astimezone(
-        timezone.utc,
-    ) == datetime(2020, 1, 2, 0, 0, tzinfo=timezone.utc)
+    assert (
+        datetime.fromtimestamp(pls_path.stat().st_mtime).astimezone(
+            timezone.utc,
+        )
+        == datetime(2020, 1, 2, 0, 0, tzinfo=timezone.utc)
+    )

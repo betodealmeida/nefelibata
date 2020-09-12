@@ -106,7 +106,10 @@ def test_upload_file_no_mimetype():
 
     assert success
     mock_boto3_client.return_value.upload_file.assert_called_with(
-        "foo/bar", "blog.example.com", "foo/bar", ExtraArgs={"ACL": "public-read"},
+        "foo/bar",
+        "blog.example.com",
+        "foo/bar",
+        ExtraArgs={"ACL": "public-read"},
     )
 
 

@@ -388,5 +388,7 @@ def test_announcer(mock_post, mocker, requests_mock):
     )
     announcer.collect(post)
     mock_get_comments_from_fawm_page.assert_called_with(
-        "https://fawm.org/songs/110082/", "username", "password",
+        "https://fawm.org/songs/110082/",
+        "username",
+        "password",
     )

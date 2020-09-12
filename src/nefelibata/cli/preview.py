@@ -13,8 +13,7 @@ _logger = logging.getLogger(__name__)
 
 
 def run(root: Path, port: int = 8000) -> None:
-    """Run a local HTTP server.
-    """
+    """Run a local HTTP server."""
     _logger.info("Previewing weblog")
 
     build = root / "build"

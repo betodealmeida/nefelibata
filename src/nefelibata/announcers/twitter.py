@@ -18,8 +18,7 @@ max_length = 280
 
 
 def get_response_from_mention(tweet: Dict[str, Any]) -> Response:
-    """Generate a standard reply from a Tweet.
-    """
+    """Generate a standard reply from a Tweet."""
     return {
         "source": "Twitter",
         "color": "#00acee",
@@ -90,8 +89,7 @@ class TwitterAnnouncer(Announcer):
         self.consumer_secret = consumer_secret
 
     def announce(self, post: Post) -> str:
-        """Publish the summary of a post to Twitter.
-        """
+        """Publish the summary of a post to Twitter."""
         _logger.info("Posting to Twitter")
 
         auth = twitter.OAuth(

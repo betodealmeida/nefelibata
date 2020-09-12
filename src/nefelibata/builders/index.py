@@ -19,8 +19,7 @@ class IndexBuilder(Builder):
     scopes = [Scope.SITE]
 
     def process_site(self, force: bool = True) -> None:
-        """Generate index and archives.
-        """
+        """Generate index and archives."""
         _logger.info("Creating index")
 
         env = Environment(

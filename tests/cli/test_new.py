@@ -9,7 +9,7 @@ __copyright__ = "Beto Dealmeida"
 __license__ = "mit"
 
 
-def test_run(mocker, monkeypatch, fs):
+def test_run(monkeypatch, fs):
     monkeypatch.setenv("EDITOR", "")
 
     root = Path("/path/to/blog")
@@ -22,7 +22,7 @@ def test_run(mocker, monkeypatch, fs):
         assert (root / "posts" / directory / resource).exists()
 
 
-def test_run_no_overwrite(mocker, monkeypatch, fs):
+def test_run_no_overwrite(monkeypatch, fs):
     monkeypatch.setenv("EDITOR", "")
 
     root = Path("/path/to/blog")
@@ -48,3 +48,64 @@ def test_run_call_editor(mocker, monkeypatch, fs):
     run(root, directory)
 
     mock_call.assert_called_with(["vim", root / "posts" / directory / "index.mkd"])
+
+
+def test_custom_template(monkeypatch, fs):
+    monkeypatch.setenv("EDITOR", "")
+
+    root = Path("/path/to/blog")
+    fs.create_dir(root / "posts")
+    directory = "first_post"
+
+    with open(root / "nefelibata.yaml", "w") as fp:
+        fp.write(
+            """
+author:
+    name: John Doe
+    profile_picture: https://example.com/picture.jpg
+
+templates:
+    book:
+        - title
+        - rating
+            """,
+        )
+
+    run(root, directory, "book")
+
+    with open(root / "posts" / directory / "index.mkd") as fp:
+        content = fp.read()
+
+    assert content == (
+        """title: first_post
+summary: 
+keywords: 
+type: book
+book-title: 
+book-rating: 
+
+
+"""  # noqa: W291
+    )
+
+
+def test_invalid_template(monkeypatch, fs):
+    monkeypatch.setenv("EDITOR", "")
+
+    root = Path("/path/to/blog")
+    fs.create_dir(root / "posts")
+    directory = "first_post"
+
+    with open(root / "nefelibata.yaml", "w") as fp:
+        fp.write(
+            """
+author:
+    name: John Doe
+    profile_picture: https://example.com/picture.jpg
+            """,
+        )
+
+    with pytest.raises(Exception) as excinfo:
+        run(root, directory, "book")
+
+    assert str(excinfo.value) == "Invalid post type: book"

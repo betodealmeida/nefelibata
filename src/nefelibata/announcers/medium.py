@@ -131,7 +131,8 @@ class MediumAnnouncer(Announcer):
             else:
                 directory_name = post.file_path.parent.relative_to(self.root / "posts")
                 absolute_url = urllib.parse.urljoin(
-                    self.config["url"], f"{directory_name}/{relative_url}",
+                    self.config["url"],
+                    f"{directory_name}/{relative_url}",
                 )
             el.attrs["href"] = absolute_url
 

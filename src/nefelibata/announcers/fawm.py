@@ -23,8 +23,7 @@ _logger = logging.getLogger(__name__)
 
 
 def extract_params(post: Post, root: Path, config: Dict[str, Any]) -> Dict[str, Any]:
-    """Extract params from a standard FAWM post.
-    """
+    """Extract params from a standard FAWM post."""
     soup = BeautifulSoup(post.html, "html.parser")
 
     # liner notes are between <h1>s
@@ -79,8 +78,7 @@ def extract_params(post: Post, root: Path, config: Dict[str, Any]) -> Dict[str, 
 
 
 def get_response_from_li(url: str, el: Tag) -> Response:
-    """Generate a standard response from a <li> element in the FAWM song page.
-    """
+    """Generate a standard response from a <li> element in the FAWM song page."""
     base_url = "https://fawm.org"
 
     # the <li> has an id that starts with a `c`, followed by numbers
@@ -124,10 +122,11 @@ def get_response_from_li(url: str, el: Tag) -> Response:
 
 
 def get_comments_from_fawm_page(
-    url: str, username: str, password: str,
+    url: str,
+    username: str,
+    password: str,
 ) -> List[Response]:
-    """Extract comments from a given FAWM page.
-    """
+    """Extract comments from a given FAWM page."""
     response = requests.get(url, auth=(username, password))
     response.encoding = "UTF-8"
     html = response.text
@@ -177,7 +176,11 @@ class FAWMAnnouncer(Announcer):
     url_header = "fawm-url"
 
     def __init__(
-        self, root: Path, config: Dict[str, Any], username: str, password: str,
+        self,
+        root: Path,
+        config: Dict[str, Any],
+        username: str,
+        password: str,
     ):
         super().__init__(root, config)
 
@@ -185,8 +188,7 @@ class FAWMAnnouncer(Announcer):
         self.password = password
 
     def announce(self, post: Post) -> str:
-        """Publish the song to FAWM.
-        """
+        """Publish the song to FAWM."""
         _logger.info("Creating new song on FAWM")
 
         params = extract_params(post, self.root, self.config)
