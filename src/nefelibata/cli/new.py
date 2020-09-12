@@ -31,7 +31,7 @@ def run(root: Path, directory: str, type: str = "post") -> None:
         (target / resource).mkdir()
 
     headers = {
-        "title": title,
+        "subject": title,
         "summary": "",
         "keywords": "",
     }

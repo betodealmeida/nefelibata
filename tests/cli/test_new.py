@@ -77,7 +77,7 @@ templates:
         content = fp.read()
 
     assert content == (
-        """title: first_post
+        """subject: first_post
 summary: 
 keywords: 
 type: book
