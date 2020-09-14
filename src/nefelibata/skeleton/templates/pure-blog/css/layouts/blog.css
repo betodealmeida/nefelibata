@@ -226,3 +226,31 @@ div.codehilite {
     background-color: #f0f0f0;
     padding: 0.1em 1.0em;
 }
+
+blockquote {
+    position: relative;
+}
+
+blockquote:before {
+    color: #666;
+    position: absolute;
+    content: open-quote;
+    font-size: 4em;
+    margin-left: -0.6em;
+    margin-top: 0.3em;
+    font-family: Times, serif;
+}
+blockquote:after {
+    color: #666;
+    position: absolute;
+    content: close-quote;
+    font-size: 4em;
+    bottom: 0;
+    right: 0;
+    margin-right: -0.6em;
+    margin-bottom: -0.3em;
+    font-family: Times, serif;
+}
+blockquote p {
+    display: inline;
+}
