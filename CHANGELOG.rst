@@ -2,7 +2,7 @@
 Changelog
 =========
 
-Version 0.3.10 - YYYY-MM-DD
+Version 0.3.10 - 2020-10-11
 ===========================
 
 - Allow defining mini-templates for different post types
