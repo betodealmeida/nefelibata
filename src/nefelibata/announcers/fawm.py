@@ -24,7 +24,7 @@ _logger = logging.getLogger(__name__)
 
 def extract_params(post: Post, root: Path, config: Dict[str, Any]) -> Dict[str, Any]:
     """Extract params from a standard FAWM post."""
-    soup = BeautifulSoup(post.html, "html.parser")
+    soup = BeautifulSoup(post.render(config), "html.parser")
 
     # liner notes are between <h1>s
     notes_h1 = soup.find("h1", text="Liner Notes")
@@ -122,9 +122,7 @@ def get_response_from_li(url: str, el: Tag) -> Response:
 
 
 def get_comments_from_fawm_page(
-    url: str,
-    username: str,
-    password: str,
+    url: str, username: str, password: str,
 ) -> List[Response]:
     """Extract comments from a given FAWM page."""
     response = requests.get(url, auth=(username, password))
@@ -176,11 +174,7 @@ class FAWMAnnouncer(Announcer):
     url_header = "fawm-url"
 
     def __init__(
-        self,
-        root: Path,
-        config: Dict[str, Any],
-        username: str,
-        password: str,
+        self, root: Path, config: Dict[str, Any], username: str, password: str,
     ):
         super().__init__(root, config)
 

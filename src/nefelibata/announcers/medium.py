@@ -123,7 +123,7 @@ class MediumAnnouncer(Announcer):
         Since we upload the whole HTML response to Medium, we need to convert
         relative liks to absolute ones, to prevent them from breaking.
         """
-        soup = BeautifulSoup(post.html, "html.parser")
+        soup = BeautifulSoup(post.render(self.config), "html.parser")
         for el in soup.find_all("a", href=re.compile("^(?!https?://)")):
             relative_url = el.attrs["href"]
             if relative_url.startswith("/"):
@@ -131,8 +131,7 @@ class MediumAnnouncer(Announcer):
             else:
                 directory_name = post.file_path.parent.relative_to(self.root / "posts")
                 absolute_url = urllib.parse.urljoin(
-                    self.config["url"],
-                    f"{directory_name}/{relative_url}",
+                    self.config["url"], f"{directory_name}/{relative_url}",
                 )
             el.attrs["href"] = absolute_url
 

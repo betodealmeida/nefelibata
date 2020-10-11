@@ -76,7 +76,7 @@ class ArchiveLinksAssistant(Assistant):
 
     def _archive_links(self, post: Post, archives: Dict[str, Any]) -> None:
         # find links from the post HTML
-        soup = BeautifulSoup(post.html, "html.parser")
+        soup = BeautifulSoup(post.render(self.config), "html.parser")
         for el in soup.find_all("a", href=re.compile("http")):
             url = el.attrs["href"]
             if not url or self._safe(url):

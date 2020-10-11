@@ -36,9 +36,7 @@ class Builder:
 
 
 def get_builders(
-    root: Path,
-    config: Dict[str, Any],
-    scope: Optional[Scope] = None,
+    root: Path, config: Dict[str, Any], scope: Optional[Scope] = None,
 ) -> List[Builder]:
     names = config["builders"] or []
 

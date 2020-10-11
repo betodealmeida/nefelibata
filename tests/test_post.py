@@ -7,7 +7,6 @@ import pytest
 from dateutil.parser._parser import ParserError
 from freezegun import freeze_time
 from nefelibata.post import get_posts
-from nefelibata.post import Post
 
 __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"
@@ -31,13 +30,7 @@ def test_post(mock_post):
     assert post.title == "This is your first post"
     assert post.summary == "Hello, world!"
     assert post.date.astimezone(timezone.utc) == datetime(
-        2020,
-        1,
-        1,
-        0,
-        0,
-        0,
-        tzinfo=timezone.utc,
+        2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc,
     )
     assert post.url == "first/index.html"
     assert post.up_to_date is False
@@ -116,13 +109,7 @@ def test_post_with_date(mock_post):
         )
 
     assert post.date.astimezone(timezone.utc) == datetime(
-        2020,
-        1,
-        1,
-        20,
-        0,
-        0,
-        tzinfo=timezone.utc,
+        2020, 1, 1, 20, 0, 0, tzinfo=timezone.utc,
     )
 
 

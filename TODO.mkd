@@ -49,6 +49,7 @@
 - [x] post types: likes, notes, songs? allow custom themes to be specified
 - [x] store weather (curl wttr.in/?format=j1)
 - [x] template snippets for books or other things? music? like, RSVP
+- [x] replace `post_directory.parent` with `root / posts` to allow for nested sub directories
 
 # TODO #
 
@@ -74,7 +75,6 @@
 ## Other ##
 
 - [ ] check that `force` is being used in all relevant plugins
-- [ ] replace `post_directory.parent` with `root / posts` to allow for nested sub directories
 - [ ] categories
 - [ ] new theme
 - [ ] search (build index and search using JS)

@@ -24,17 +24,14 @@ def luminance(rgb: Tuple[float, float, float]) -> float:
 
 
 def contrast(
-    rgb1: Tuple[float, float, float],
-    rgb2: Tuple[float, float, float],
+    rgb1: Tuple[float, float, float], rgb2: Tuple[float, float, float],
 ) -> float:
     value = (luminance(rgb1) + 0.05) / (luminance(rgb2) + 0.05)
     return value if value >= 1 else 1 / value
 
 
 def random_color(
-    text: str,
-    target_contrast: float = 5,
-    rgb: Tuple[float, float, float] = (1, 1, 1),
+    text: str, target_contrast: float = 5, rgb: Tuple[float, float, float] = (1, 1, 1),
 ) -> str:
     """Generate a random color based on the hash of the string."""
     hue = int(hashlib.md5(text.encode("utf-8")).hexdigest(), 16) / (2 ** 128)

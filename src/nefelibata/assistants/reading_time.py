@@ -15,7 +15,7 @@ class ReadingTimeAssistant(Assistant):
 
     def process_post(self, post: Post, force: bool = False) -> None:
         # Use formula from Medium (https://www.quora.com/How-does-Medium-determine-an-article%E2%80%99s-estimated-read-time/answer/Alan-Hamlett)
-        soup = BeautifulSoup(post.html, "html.parser")
+        soup = BeautifulSoup(post.render(self.config), "html.parser")
         num_images = len(soup.find_all("img"))
         num_words = len(soup.text.split(" "))
         image_weight = max(13 - num_images, 3)

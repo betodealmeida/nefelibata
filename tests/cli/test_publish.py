@@ -26,11 +26,10 @@ def test_run(mocker, fs):
     fs.create_dir(root / "posts/two")
     with open(root / "posts/two/index.mkd", "w") as fp:
         fp.write("subject: Hello!\nannounce-on: announcer1\n")
-    post1 = Post(root / "posts/one/index.mkd")
-    post2 = Post(root / "posts/two/index.mkd")
+    post1 = Post(root, root / "posts/one/index.mkd")
+    post2 = Post(root, root / "posts/two/index.mkd")
     mocker.patch(
-        "nefelibata.cli.publish.get_posts",
-        return_value=[post1, post2],
+        "nefelibata.cli.publish.get_posts", return_value=[post1, post2],
     )
 
     # mock config
@@ -40,8 +39,7 @@ def test_run(mocker, fs):
     Publisher1 = MagicMock()
     Publisher2 = MagicMock()
     mocker.patch(
-        "nefelibata.cli.publish.get_publishers",
-        return_value=[Publisher1, Publisher2],
+        "nefelibata.cli.publish.get_publishers", return_value=[Publisher1, Publisher2],
     )
 
     # mock announcers
@@ -49,8 +47,7 @@ def test_run(mocker, fs):
     Announcer1.match.side_effect = [True, False]
     Announcer2 = MagicMock()
     mocker.patch(
-        "nefelibata.cli.publish.get_announcers",
-        return_value=[Announcer1, Announcer2],
+        "nefelibata.cli.publish.get_announcers", return_value=[Announcer1, Announcer2],
     )
 
     run(root)

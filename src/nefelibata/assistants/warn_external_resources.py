@@ -78,9 +78,7 @@ class WarnExternalResourcesAssistant(Assistant):
             css = fp.read()
 
         stylesheet = tinycss2.parse_stylesheet(
-            css,
-            skip_comments=True,
-            skip_whitespace=True,
+            css, skip_comments=True, skip_whitespace=True,
         )
         for rule in stylesheet:
             for token in rule.content:

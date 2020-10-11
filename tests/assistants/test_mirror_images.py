@@ -51,8 +51,7 @@ def test_process_post(mock_post, mocker, requests_mock):
         return_value=".png",
     )
     requests_mock.get(
-        "https://example.com/images/icon48.png",
-        text="image-content",
+        "https://example.com/images/icon48.png", text="image-content",
     )
 
     assistant.process_post(post)
@@ -115,8 +114,7 @@ def test_process_post_directory_exists(mock_post, mocker, requests_mock, fs):
         return_value=".png",
     )
     requests_mock.get(
-        "https://example.com/images/icon48.png",
-        text="image-content",
+        "https://example.com/images/icon48.png", text="image-content",
     )
 
     assistant.process_post(post)
@@ -208,8 +206,7 @@ def test_process_post_image_exists(mock_post, mocker, fs):
 
 def test_get_resource_extension(requests_mock):
     requests_mock.head(
-        "https://example.com/image",
-        headers={"content-type": "image/jpeg"},
+        "https://example.com/image", headers={"content-type": "image/jpeg"},
     )
     assert get_resource_extension("https://example.com/image") == ".jpg"
 
@@ -228,8 +225,7 @@ def test_process_site(mock_post, mocker, requests_mock, fs):
         return_value=".png",
     )
     requests_mock.get(
-        "https://example.com/images/icon48.png",
-        text="image-content",
+        "https://example.com/images/icon48.png", text="image-content",
     )
 
     assistant.process_site()
@@ -264,12 +260,9 @@ def test_process_post_not_modified(mock_post, mocker, requests_mock):
     assistant.process_post(post)
 
     # file shouldn't have been touched
-    assert (
-        datetime.fromtimestamp(
-            post.file_path.with_suffix(".html").stat().st_mtime,
-        ).astimezone(timezone.utc)
-        == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
-    )
+    assert datetime.fromtimestamp(
+        post.file_path.with_suffix(".html").stat().st_mtime,
+    ).astimezone(timezone.utc) == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
 
 
 def test_exif(mock_post, mocker, requests_mock):

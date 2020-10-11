@@ -25,11 +25,10 @@ def test_run(mocker, fs):
     # create a couple posts
     fs.create_file(root / "posts/one/index.mkd")
     fs.create_file(root / "posts/two/index.mkd")
-    post1 = Post(root / "posts/one/index.mkd")
-    post2 = Post(root / "posts/two/index.mkd")
+    post1 = Post(root, root / "posts/one/index.mkd")
+    post2 = Post(root, root / "posts/two/index.mkd")
     mocker.patch(
-        "nefelibata.cli.build.get_posts",
-        return_value=[post1, post2],
+        "nefelibata.cli.build.get_posts", return_value=[post1, post2],
     )
 
     # mock config
@@ -61,8 +60,7 @@ def test_run(mocker, fs):
     Announcer1.match.side_effect = [True, False]  # match only post1
     Announcer2 = MagicMock()
     mocker.patch(
-        "nefelibata.cli.build.get_announcers",
-        return_value=[Announcer1, Announcer2],
+        "nefelibata.cli.build.get_announcers", return_value=[Announcer1, Announcer2],
     )
 
     run(root)
@@ -96,11 +94,10 @@ def test_run_build_exists(mocker, fs):
     # create a couple posts
     fs.create_file(root / "posts/one/index.mkd")
     fs.create_file(root / "posts/two/index.mkd")
-    post1 = Post(root / "posts/one/index.mkd")
-    post2 = Post(root / "posts/two/index.mkd")
+    post1 = Post(root, root / "posts/one/index.mkd")
+    post2 = Post(root, root / "posts/two/index.mkd")
     mocker.patch(
-        "nefelibata.cli.build.get_posts",
-        return_value=[post1, post2],
+        "nefelibata.cli.build.get_posts", return_value=[post1, post2],
     )
 
     # mock config
@@ -131,8 +128,7 @@ def test_run_build_exists(mocker, fs):
     Announcer1 = MagicMock()
     Announcer2 = MagicMock()
     mocker.patch(
-        "nefelibata.cli.build.get_announcers",
-        return_value=[Announcer1, Announcer2],
+        "nefelibata.cli.build.get_announcers", return_value=[Announcer1, Announcer2],
     )
 
     run(root)
@@ -151,11 +147,10 @@ def test_run_no_collect_replies(mocker, fs):
     # create a couple posts
     fs.create_file(root / "posts/one/index.mkd")
     fs.create_file(root / "posts/two/index.mkd")
-    post1 = Post(root / "posts/one/index.mkd")
-    post2 = Post(root / "posts/two/index.mkd")
+    post1 = Post(root, root / "posts/one/index.mkd")
+    post2 = Post(root, root / "posts/two/index.mkd")
     mocker.patch(
-        "nefelibata.cli.build.get_posts",
-        return_value=[post1, post2],
+        "nefelibata.cli.build.get_posts", return_value=[post1, post2],
     )
 
     # mock config
@@ -186,8 +181,7 @@ def test_run_no_collect_replies(mocker, fs):
     Announcer1 = MagicMock()
     Announcer2 = MagicMock()
     mocker.patch(
-        "nefelibata.cli.build.get_announcers",
-        return_value=[Announcer1, Announcer2],
+        "nefelibata.cli.build.get_announcers", return_value=[Announcer1, Announcer2],
     )
 
     run(root, collect_replies=False)
@@ -207,11 +201,10 @@ def test_run_post_up_to_date(mocker, fs):
     # create a couple posts
     fs.create_file(root / "posts/one/index.mkd")
     fs.create_file(root / "posts/two/index.mkd")
-    post1 = Post(root / "posts/one/index.mkd")
-    post2 = Post(root / "posts/two/index.mkd")
+    post1 = Post(root, root / "posts/one/index.mkd")
+    post2 = Post(root, root / "posts/two/index.mkd")
     mocker.patch(
-        "nefelibata.cli.build.get_posts",
-        return_value=[post1, post2],
+        "nefelibata.cli.build.get_posts", return_value=[post1, post2],
     )
 
     # mock config
@@ -242,8 +235,7 @@ def test_run_post_up_to_date(mocker, fs):
     Announcer1 = MagicMock()
     Announcer2 = MagicMock()
     mocker.patch(
-        "nefelibata.cli.build.get_announcers",
-        return_value=[Announcer1, Announcer2],
+        "nefelibata.cli.build.get_announcers", return_value=[Announcer1, Announcer2],
     )
 
     # make sure one of the posts is up-to-date
@@ -265,10 +257,9 @@ def test_run_skip_symlink(mocker, fs):
 
     # create a first post
     fs.create_file(root / "posts/one/index.mkd")
-    post1 = Post(root / "posts/one/index.mkd")
+    post1 = Post(root, root / "posts/one/index.mkd")
     mocker.patch(
-        "nefelibata.cli.build.get_posts",
-        return_value=[post1],
+        "nefelibata.cli.build.get_posts", return_value=[post1],
     )
 
     # mock config
@@ -306,18 +297,16 @@ def test_run_skip_symlink(mocker, fs):
     Announcer1 = MagicMock()
     Announcer2 = MagicMock()
     mocker.patch(
-        "nefelibata.cli.build.get_announcers",
-        return_value=[Announcer1, Announcer2],
+        "nefelibata.cli.build.get_announcers", return_value=[Announcer1, Announcer2],
     )
 
     run(root)
 
     # create a second post
     fs.create_file(root / "posts/two/index.mkd")
-    post2 = Post(root / "posts/two/index.mkd")
+    post2 = Post(root, root / "posts/two/index.mkd")
     mocker.patch(
-        "nefelibata.cli.build.get_posts",
-        return_value=[post1, post2],
+        "nefelibata.cli.build.get_posts", return_value=[post1, post2],
     )
 
     run(root)

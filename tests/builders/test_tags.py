@@ -99,27 +99,15 @@ def test_process_site(mocker, fs):
     with freeze_time("2020-01-06"):
         builder.process_site()
 
-    assert (
-        datetime.fromtimestamp((root / "build/a.html").stat().st_mtime).astimezone(
-            timezone.utc,
-        )
-        == datetime(2020, 1, 6, 0, 0, tzinfo=timezone.utc)
-    )
-    assert (
-        datetime.fromtimestamp((root / "build/b.html").stat().st_mtime).astimezone(
-            timezone.utc,
-        )
-        == datetime(2020, 1, 6, 0, 0, tzinfo=timezone.utc)
-    )
-    assert (
-        datetime.fromtimestamp((root / "build/c.html").stat().st_mtime).astimezone(
-            timezone.utc,
-        )
-        == datetime(2020, 1, 4, 0, 0, tzinfo=timezone.utc)
-    )
-    assert (
-        datetime.fromtimestamp((root / "build/d.html").stat().st_mtime).astimezone(
-            timezone.utc,
-        )
-        == datetime(2020, 1, 6, 0, 0, tzinfo=timezone.utc)
-    )
+    assert datetime.fromtimestamp((root / "build/a.html").stat().st_mtime).astimezone(
+        timezone.utc,
+    ) == datetime(2020, 1, 6, 0, 0, tzinfo=timezone.utc)
+    assert datetime.fromtimestamp((root / "build/b.html").stat().st_mtime).astimezone(
+        timezone.utc,
+    ) == datetime(2020, 1, 6, 0, 0, tzinfo=timezone.utc)
+    assert datetime.fromtimestamp((root / "build/c.html").stat().st_mtime).astimezone(
+        timezone.utc,
+    ) == datetime(2020, 1, 4, 0, 0, tzinfo=timezone.utc)
+    assert datetime.fromtimestamp((root / "build/d.html").stat().st_mtime).astimezone(
+        timezone.utc,
+    ) == datetime(2020, 1, 6, 0, 0, tzinfo=timezone.utc)

@@ -85,6 +85,16 @@ def test_process_post(mock_post, fs):
 def test_process_post_custom_template(mock_post, fs):
     root = Path("/path/to/blog")
 
+    post_templates = root / "templates/test-theme/posts"
+    fs.create_dir(post_templates)
+    with open(post_templates / "like.html", "w") as fp:
+        fp.write(
+            """
+<p class="p-summary">Liked: <a class="u-like-of" href="{{ post.parsed['like-url'] }}">this link</a></p>
+{{ post.html }}
+""",
+        )
+
     with freeze_time("2020-01-01T00:00:00Z"):
         post = mock_post(
             """
@@ -94,30 +104,8 @@ def test_process_post_custom_template(mock_post, fs):
         type: like
         like-url: https://dogs.example.com/
 
+        It's cool.
         """,
-        )
-
-    with open(root / "templates/test-theme/like.html", "w") as fp:
-        fp.write(
-            """
-<!DOCTYPE html><html lang="en">
-<head>
-<meta content="article" property="og:type"/>
-<meta content="Post title" property="og:title"/>
-<meta content="This is the post description" property="og:description"/>
-<link href="{{ config.webmention.endpoint }}" rel="webmention" />
-<link href="https://external.example.com/css/basic.css" rel="stylesheet">
-<link href="/css/style.css" rel="stylesheet">
-{% for stylesheet in stylesheets %}
-<link href="{{ stylesheet }}" rel="stylesheet">
-{% endfor %}
-</head>
-<body>
-<div class="h-entry">
-  <p class="p-summary">Liked: <a class="u-like-of" href="https://dogs.example.com/">https://dogs.example.com/</a></p>
-</div>
-</body>
-</html>""",
         )
 
     builder = PostBuilder(root, config)
@@ -139,9 +127,9 @@ def test_process_post_custom_template(mock_post, fs):
 
 </head>
 <body>
-<div class="h-entry">
-  <p class="p-summary">Liked: <a class="u-like-of" href="https://dogs.example.com/">https://dogs.example.com/</a></p>
-</div>
+
+<p class="p-summary">Liked: <a class="u-like-of" href="https://dogs.example.com/">this link</a></p>
+<p>It's cool.</p>
 </body>
 </html>"""
     )
@@ -170,12 +158,9 @@ def test_process_post_up_to_date(mock_post, fs):
     with freeze_time("2020-01-03T00:00:00Z"):
         builder.process_post(post)
 
-    assert (
-        datetime.fromtimestamp(
-            post.file_path.with_suffix(".html").stat().st_mtime,
-        ).astimezone(timezone.utc)
-        == datetime(2020, 1, 2, 0, 0, tzinfo=timezone.utc)
-    )
+    assert datetime.fromtimestamp(
+        post.file_path.with_suffix(".html").stat().st_mtime,
+    ).astimezone(timezone.utc) == datetime(2020, 1, 2, 0, 0, tzinfo=timezone.utc)
 
 
 def test_jinja2_formatdate_string():
@@ -195,8 +180,7 @@ def test_jinja2_formatdate_float():
 def test_jinja2_formatdate_datetime():
     assert (
         jinja2_formatdate(
-            datetime(2020, 1, 1, tzinfo=timezone.utc),
-            "%Y-%m-%dT%H:%M:%S%z",
+            datetime(2020, 1, 1, tzinfo=timezone.utc), "%Y-%m-%dT%H:%M:%S%z",
         )
         == "2020-01-01T00:00:00+0000"
     )

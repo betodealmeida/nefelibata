@@ -27,10 +27,7 @@ def test_announcer(mock_post, requests_mock):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/"}
     announcer = WTSocialAnnouncer(
-        root,
-        config,
-        "https://wtsocial.io/example.com/wtsocial",
-        True,
+        root, config, "https://wtsocial.io/example.com/wtsocial", True,
     )
 
     # login
@@ -47,8 +44,7 @@ def test_announcer(mock_post, requests_mock):
 
     # new post
     requests_mock.post(
-        "https://wt.social/api/new-article",
-        json={"0": {"URI": "/post/hash"}},
+        "https://wt.social/api/new-article", json={"0": {"URI": "/post/hash"}},
     )
 
     url = announcer.announce(post)
@@ -73,8 +69,7 @@ def test_announcer(mock_post, requests_mock):
         },
     ]
     requests_mock.get(
-        "https://wt.social/api/post/hash",
-        json={"comment_list": comment_list},
+        "https://wt.social/api/post/hash", json={"comment_list": comment_list},
     )
     profile = r'"media":{"profile":{"filepath":"https:\/\/wtsocial-uploads.s3.amazonaws.com\/uploads\/2019-11\/fileName1574188367--profile_pic.jpg"}'
     requests_mock.get("https://wt.social/u/user", text=profile)
@@ -114,10 +109,7 @@ def test_announcer_no_csrf_token(mock_post, requests_mock):
     root = Path("/path/to/blog")
     config = {"url": "https://blog.example.com/"}
     announcer = WTSocialAnnouncer(
-        root,
-        config,
-        "https://wtsocial.io/example.com/wtsocial",
-        True,
+        root, config, "https://wtsocial.io/example.com/wtsocial", True,
     )
 
     # login
@@ -132,8 +124,7 @@ def test_announcer_no_csrf_token(mock_post, requests_mock):
 
     # new post
     requests_mock.post(
-        "https://wt.social/api/new-article",
-        json={"0": {"URI": "/post/hash"}},
+        "https://wt.social/api/new-article", json={"0": {"URI": "/post/hash"}},
     )
 
     url = announcer.announce(post)

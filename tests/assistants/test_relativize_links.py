@@ -106,12 +106,9 @@ def test_process_post_no_modification(mock_post):
     with freeze_time("2020-01-03T00:00:00Z"):
         assistant.process_post(post)
 
-    assert (
-        datetime.fromtimestamp(
-            post.file_path.with_suffix(".html").stat().st_mtime,
-        ).astimezone(timezone.utc)
-        == datetime(2020, 1, 2, 0, 0, tzinfo=timezone.utc)
-    )
+    assert datetime.fromtimestamp(
+        post.file_path.with_suffix(".html").stat().st_mtime,
+    ).astimezone(timezone.utc) == datetime(2020, 1, 2, 0, 0, tzinfo=timezone.utc)
 
 
 def test_process_site(fs):

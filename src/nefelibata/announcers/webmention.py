@@ -114,10 +114,7 @@ class WebmentionAnnouncer(Announcer):
     url_header = "webmention-url"
 
     def __init__(
-        self,
-        root: Path,
-        config: Dict[str, Any],
-        endpoint: str,
+        self, root: Path, config: Dict[str, Any], endpoint: str,
     ):
         super().__init__(root, config)
 
@@ -138,7 +135,7 @@ class WebmentionAnnouncer(Announcer):
         with json_storage(storage) as webmentions:
             source = urllib.parse.urljoin(self.config["url"], post.url)
 
-            soup = BeautifulSoup(post.html, "html.parser")
+            soup = BeautifulSoup(post.render(self.config), "html.parser")
             for el in soup.find_all("a", href=re.compile("http")):
                 target = el.attrs.get("href")
                 if target not in webmentions:

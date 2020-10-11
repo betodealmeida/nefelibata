@@ -14,24 +14,38 @@ from typing import List
 
 import markdown
 from bs4 import BeautifulSoup
+from jinja2 import Environment
+from jinja2 import FileSystemLoader
 
 _logger = logging.getLogger(__name__)
 
 
 class Post:
-    def __init__(self, file_path: Path):
+    def __init__(self, root: Path, file_path: Path):
+        self.root = root
         self.file_path = file_path
 
         with open(file_path) as fp:
             self.parsed = Parser().parse(fp)
 
         self.markdown = self.parsed.get_payload(decode=False)
-        self.html = markdown.markdown(
-            self.markdown,
-            extensions=["codehilite"],
-            output_format="html5",
+        self.html: str = markdown.markdown(
+            self.markdown, extensions=["codehilite"], output_format="html5",
         )
         self.update_metadata()
+
+    def render(self, config: Dict[str, Any]) -> str:
+        post_type = self.parsed.get("type")
+        if not post_type:
+            return self.html
+
+        env = Environment(
+            loader=FileSystemLoader(
+                str(self.root / "templates" / config["theme"] / "posts"),
+            ),
+        )
+        template = env.get_template(f"{post_type}.html")
+        return template.render(post=self)
 
     @property
     def title(self) -> str:
@@ -59,10 +73,8 @@ class Post:
 
     @property
     def url(self) -> str:
-        post_directory = self.file_path.parent
-        # TODO: this should be relative to root/posts instead
         return str(
-            self.file_path.relative_to(post_directory.parent).with_suffix(".html"),
+            self.file_path.relative_to(self.root / "posts").with_suffix(".html"),
         )
 
     @property
@@ -101,4 +113,4 @@ class Post:
 
 def get_posts(root: Path) -> List[Post]:
     """Return list of posts for a given root directory."""
-    return [Post(source) for source in (root / "posts").glob("**/*.mkd")]
+    return [Post(root, source) for source in (root / "posts").glob("**/*.mkd")]

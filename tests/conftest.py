@@ -22,8 +22,14 @@ def mock_post(fs):
     def build_post(markdown: str) -> Post:
 
         root = Path("/path/to/blog")
-        fs.create_dir(root)
-        fs.create_dir(root / "templates/test-theme")
+        try:
+            fs.create_dir(root)
+        except FileExistsError:
+            pass
+        try:
+            fs.create_dir(root / "templates/test-theme")
+        except FileExistsError:
+            pass
         with open(root / "templates/test-theme/post.html", "w") as fp:
             fp.write(
                 """
@@ -40,7 +46,7 @@ def mock_post(fs):
 {% endfor %}
 </head>
 <body>
-{{ post.html }}
+{{ post.render(config) }}
 </body>
 </html>""",
             )
@@ -53,6 +59,6 @@ def mock_post(fs):
         with open(file_path, "w") as fp:
             fp.write(contents)
 
-        return Post(file_path)
+        return Post(root, file_path)
 
     yield build_post

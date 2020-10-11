@@ -51,8 +51,7 @@ class PostBuilder(Builder):
             ),
         )
         env.filters["formatdate"] = jinja2_formatdate
-        post_type = post.parsed.get("type", "post")
-        template = env.get_template(f"{post_type}.html")
+        template = env.get_template("post.html")
         html = template.render(
             __version__=__version__,
             config=self.config,

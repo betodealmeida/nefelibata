@@ -60,8 +60,7 @@ def get_fid(session, options: str, demo: str) -> str:
     }
     response = session.get(url, params=params)
     form_build_id, form_token = get_form_params_from_input(
-        response.text,
-        "remote-stream-wrapper-file-add-form",
+        response.text, "remote-stream-wrapper-file-add-form",
     )
 
     data = {
@@ -91,13 +90,10 @@ def get_form_params_from_input(html: str, form_id: str) -> Tuple[str, str]:
 
 
 def extract_params(
-    session: requests.Session,
-    post: Post,
-    root: Path,
-    config: Dict[str, Any],
+    session: requests.Session, post: Post, root: Path, config: Dict[str, Any],
 ) -> Dict[str, Any]:
     """Extract params from a standard FiftyNinety post."""
-    soup = BeautifulSoup(post.html, "html.parser")
+    soup = BeautifulSoup(post.render(config), "html.parser")
 
     # liner notes are between <h1>s
     notes_h1 = soup.find("h1", text="Liner Notes")
@@ -136,8 +132,7 @@ def extract_params(
     # get tokens used in POST
     response = session.get("http://fiftyninety.fawmers.org/node/add/song")
     form_build_id, form_token = get_form_params_from_input(
-        response.text,
-        "song-node-form",
+        response.text, "song-node-form",
     )
 
     # get additional params for file upload; these are encoded in the JS
@@ -175,10 +170,7 @@ def extract_params(
 
 
 def get_comments_from_fiftyninety_page(
-    session: requests.Session,
-    url: str,
-    username: str,
-    password: str,
+    session: requests.Session, url: str, username: str, password: str,
 ) -> List[Response]:
     """Extract comments from a given FiftyNinety page."""
     base_url = "http://fiftyninety.fawmers.org"
@@ -223,12 +215,7 @@ def get_comments_from_fiftyninety_page(
             },
         )
 
-    for (
-        id_,
-        user,
-        timestamp,
-        comment,
-    ) in zip(ids, users, timestamps, comments):
+    for (id_, user, timestamp, comment) in zip(ids, users, timestamps, comments):
         responses.append(
             {
                 "source": "50/90",
@@ -321,11 +308,7 @@ class FiftyNinetyAnnouncer(Announcer):
     url_header = "fiftyninety-url"
 
     def __init__(
-        self,
-        root: Path,
-        config: Dict[str, Any],
-        username: str,
-        password: str,
+        self, root: Path, config: Dict[str, Any], username: str, password: str,
     ):
         super().__init__(root, config)
 
@@ -359,10 +342,7 @@ class FiftyNinetyAnnouncer(Announcer):
 
         url = post.parsed[self.url_header]
         responses = get_comments_from_fiftyninety_page(
-            session,
-            url,
-            self.username,
-            self.password,
+            session, url, self.username, self.password,
         )
 
         _logger.info("Success!")

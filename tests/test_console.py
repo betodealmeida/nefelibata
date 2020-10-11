@@ -69,8 +69,7 @@ def test_console_new(mocker):
     mock_new = MagicMock()
     mocker.patch("nefelibata.console.new", mock_new)
     mocker.patch(
-        "nefelibata.console.find_directory",
-        return_value=Path("/path/to/blog"),
+        "nefelibata.console.find_directory", return_value=Path("/path/to/blog"),
     )
 
     main()
@@ -96,8 +95,7 @@ def test_console_build(mocker):
     mock_build = MagicMock()
     mocker.patch("nefelibata.console.build", mock_build)
     mocker.patch(
-        "nefelibata.console.find_directory",
-        return_value=Path("/path/to/blog"),
+        "nefelibata.console.find_directory", return_value=Path("/path/to/blog"),
     )
 
     main()
@@ -138,8 +136,7 @@ def test_console_build_single_post(mocker, mock_post):
     mock_build = MagicMock()
     mocker.patch("nefelibata.console.build", mock_build)
     mocker.patch(
-        "nefelibata.console.find_directory",
-        return_value=Path("/path/to/blog"),
+        "nefelibata.console.find_directory", return_value=Path("/path/to/blog"),
     )
 
     main()
@@ -164,8 +161,7 @@ def test_console_preview(mocker):
     mock_preview = MagicMock()
     mocker.patch("nefelibata.console.preview", mock_preview)
     mocker.patch(
-        "nefelibata.console.find_directory",
-        return_value=Path("/path/to/blog"),
+        "nefelibata.console.find_directory", return_value=Path("/path/to/blog"),
     )
 
     main()
@@ -190,8 +186,7 @@ def test_console_publish(mocker):
     mock_publish = MagicMock()
     mocker.patch("nefelibata.console.publish", mock_publish)
     mocker.patch(
-        "nefelibata.console.find_directory",
-        return_value=Path("/path/to/blog"),
+        "nefelibata.console.find_directory", return_value=Path("/path/to/blog"),
     )
 
     main()
@@ -231,8 +226,7 @@ def test_console_publish_single_post(mocker, mock_post):
     mock_publish = MagicMock()
     mocker.patch("nefelibata.console.publish", mock_publish)
     mocker.patch(
-        "nefelibata.console.find_directory",
-        return_value=Path("/path/to/blog"),
+        "nefelibata.console.find_directory", return_value=Path("/path/to/blog"),
     )
 
     main()
@@ -253,8 +247,7 @@ def test_console_bogus(mocker):
     }
     mocker.patch("nefelibata.console.docopt", return_value=arguments)
     mocker.patch(
-        "nefelibata.console.find_directory",
-        return_value=Path("/path/to/blog"),
+        "nefelibata.console.find_directory", return_value=Path("/path/to/blog"),
     )
 
     main()

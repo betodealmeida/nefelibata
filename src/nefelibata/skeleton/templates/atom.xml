@@ -25,7 +25,7 @@
     <category term="{{ keyword.strip() }}" />
     {% endfor %}
     <content type="html">
-    	{{ post.html|e }}
+    	{{ post.render(config)|e }}
     	&lt;p&gt;&lt;a href="{{ config.url }}{{ post.url }}"&gt;Permalink&lt;/p&gt;
     </content>
 </entry>
