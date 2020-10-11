@@ -38,6 +38,7 @@
                 </h1>
 
                 {% for post in posts %}
+                {% set keywords = post.parsed.keywords.replace(" ", "").split(",") %}
                 <section class="post">
                     <header class="post-header">
                         <img width="48" height="48" alt="{{ config.author.name }}&#x27;s avatar" class="post-avatar" src="{{ config.author.profile_picture }}">
@@ -48,9 +49,11 @@
                             By <a class="post-author" href="mailto:{{ config.author.email }}">{{ config.author.name }}</a>
                             on <time datetime="{{ post.date.isoformat() }}" pubdate>{{ post.date.strftime('%Y-%m-%d') }}</time>
                             under
-                            {% for keyword in post.parsed.keywords.split(",") %}
-                            <a class="post-category p-category" style="background-color: {{ random_color(keyword.strip()) }}" href="/{{ keyword.strip() }}.html">{{ keyword.strip() }}</a>
+                            {% if "tags" in config.builders %}
+                            {% for keyword in keywords %}
+                            <a class="post-category p-category" style="background-color: {{ random_color(keyword) }}" href="/{{ keyword }}.html">{{ keyword }}</a>
                             {% endfor %}
+                            {% endif %}
                         </p>
                     </header>
 
