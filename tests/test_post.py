@@ -171,5 +171,19 @@ def test_get_posts(fs):
 
     posts = get_posts(root)
     assert len(posts) == 2
-    assert posts[0].file_path == Path(root / "posts/one/index.mkd")
-    assert posts[1].file_path == Path(root / "posts/two/index.mkd")
+    assert posts[0].file_path == Path(root / "posts/two/index.mkd")
+    assert posts[1].file_path == Path(root / "posts/one/index.mkd")
+
+
+def test_get_posts_limited(fs):
+    root = Path("/path/to/blog")
+    fs.create_dir(root / "/posts")
+    fs.create_dir(root / "posts/one")
+    fs.create_dir(root / "posts/two")
+
+    fs.create_file(root / "posts/one/index.mkd")
+    fs.create_file(root / "posts/two/index.mkd")
+
+    posts = get_posts(root, 1)
+    assert len(posts) == 1
+    assert posts[0].file_path == Path(root / "posts/two/index.mkd")

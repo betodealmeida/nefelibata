@@ -11,6 +11,7 @@ from typing import Any
 from typing import cast
 from typing import Dict
 from typing import List
+from typing import Optional
 
 import markdown
 from bs4 import BeautifulSoup
@@ -111,6 +112,12 @@ class Post:
             fp.write(str(self.parsed))
 
 
-def get_posts(root: Path) -> List[Post]:
+def get_posts(root: Path, n: Optional[int] = None) -> List[Post]:
     """Return list of posts for a given root directory."""
-    return [Post(root, source) for source in (root / "posts").glob("**/*.mkd")]
+    file_paths = list((root / "posts").glob("**/*.mkd"))
+    file_paths.sort(key=lambda file_path: file_path.stat().st_mtime, reverse=True)
+
+    if n is not None:
+        file_paths = file_paths[:n]
+
+    return [Post(root, file_path) for file_path in file_paths]

@@ -21,9 +21,8 @@ class AtomBuilder(Builder):
         env = Environment(loader=FileSystemLoader(str(self.root / "templates")))
         template = env.get_template("atom.xml")
 
-        posts = get_posts(self.root)
-        posts.sort(key=lambda x: x.date, reverse=True)
         show = self.config.get("posts-to-show", 10)
-        xml = template.render(config=self.config, posts=posts[:show])
+        posts = get_posts(self.root, show)
+        xml = template.render(config=self.config, posts=posts)
         with open(self.root / "build" / "atom.xml", "w") as fp:
             fp.write(xml)

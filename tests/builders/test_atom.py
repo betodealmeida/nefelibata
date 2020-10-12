@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from freezegun import freeze_time
 from nefelibata.builders.atom import AtomBuilder
 from nefelibata.post import Post
 
@@ -17,9 +18,8 @@ test_template = """
 
 
 class MockPost:
-    def __init__(self, title: str, date: str):
+    def __init__(self, title: str):
         self.title = title
-        self.date = date
 
 
 def test_process_site(mocker, fs):
@@ -37,12 +37,12 @@ def test_process_site(mocker, fs):
     with open(root / "templates/atom.xml", "w") as fp:
         fp.write(test_template)
 
-    posts = [
-        MockPost("one", "2020-01-01"),
-        MockPost("two", "2020-01-02"),
-        MockPost("three", "2020-01-03"),
-    ]
-    mocker.patch("nefelibata.builders.atom.get_posts", return_value=posts)
+    with freeze_time("2020-01-01T00:00:00Z"):
+        fs.create_file(root / "posts" / "one/index.mkd")
+    with freeze_time("2020-01-02T00:00:00Z"):
+        fs.create_file(root / "posts" / "two/index.mkd")
+    with freeze_time("2020-01-03T00:00:00Z"):
+        fs.create_file(root / "posts" / "three/index.mkd")
 
     builder = AtomBuilder(root, config)
     builder.process_site()
