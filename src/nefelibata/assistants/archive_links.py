@@ -8,6 +8,7 @@ from datetime import timezone
 from pathlib import Path
 from typing import Any
 from typing import Dict
+from typing import Optional
 
 import dateutil.parser
 import requests
@@ -62,7 +63,7 @@ class ArchiveLinksAssistant(Assistant):
 
             for el in soup.find_all("a", href=re.compile("http")):
                 url = el.attrs["href"]
-                if url not in archives:
+                if url not in archives or not archives[url]["url"]:
                     continue
 
                 el.attrs["data-archive-url"] = archives[url]["url"]
@@ -102,15 +103,20 @@ class ArchiveLinksAssistant(Assistant):
                 response = requests.get(
                     f"https://web.archive.org/save/{url}",
                     timeout=SAVE_TIMEOUT.total_seconds(),
+                    allow_redirects=True,
                 )
             except requests.exceptions.ReadTimeout:
+                _logger.info("Request timed out")
                 continue
-            content_location = response.headers.get("Content-Location")
-            archived_url = (
-                f"https://web.archive.org{content_location}"
-                if content_location
-                else None
-            )
+
+            archived_url: Optional[str] = None
+            link_header = response.headers.get("Link")
+            if link_header:
+                links = requests.utils.parse_header_links(link_header)
+                for link in links:
+                    if link["rel"] == "memento":
+                        archived_url = link["url"]
+                        break
 
             # add link to archived version
             archives[url] = {
