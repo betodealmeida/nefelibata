@@ -49,19 +49,28 @@ def test_current_weather(mock_post, requests_mock):
         contents = json.loads(fp.read())
 
     assert contents == {"foo": "bar"}
-    assert datetime.fromtimestamp(storage.stat().st_mtime).astimezone(
-        timezone.utc,
-    ) == datetime(2020, 1, 1, 0, 30, tzinfo=timezone.utc)
-    assert datetime.fromtimestamp(post.file_path.stat().st_mtime).astimezone(
-        timezone.utc,
-    ) == datetime(2020, 1, 1, 0, 30, tzinfo=timezone.utc)
+    assert (
+        datetime.fromtimestamp(storage.stat().st_mtime).astimezone(
+            timezone.utc,
+        )
+        == datetime(2020, 1, 1, 0, 30, tzinfo=timezone.utc)
+    )
+    assert (
+        datetime.fromtimestamp(post.file_path.stat().st_mtime).astimezone(
+            timezone.utc,
+        )
+        == datetime(2020, 1, 1, 0, 30, tzinfo=timezone.utc)
+    )
 
     with freeze_time("2020-01-03T00:00:00Z"):
         assistant.process_post(post)
 
-    assert datetime.fromtimestamp(storage.stat().st_mtime).astimezone(
-        timezone.utc,
-    ) == datetime(2020, 1, 1, 0, 30, tzinfo=timezone.utc)
+    assert (
+        datetime.fromtimestamp(storage.stat().st_mtime).astimezone(
+            timezone.utc,
+        )
+        == datetime(2020, 1, 1, 0, 30, tzinfo=timezone.utc)
+    )
 
 
 def test_current_weather_stale(mock_post, requests_mock):

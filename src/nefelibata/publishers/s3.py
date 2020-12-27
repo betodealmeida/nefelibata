@@ -145,7 +145,8 @@ class S3Publisher(Publisher):
             "IndexDocument": {"Suffix": "index.html"},
         }
         client.put_bucket_website(
-            Bucket=self.bucket, WebsiteConfiguration=website_configuration,
+            Bucket=self.bucket,
+            WebsiteConfiguration=website_configuration,
         )
 
     def _configure_route53(self, fqdn: str) -> None:

@@ -80,7 +80,7 @@ def test_process_post_too_short(mock_post):
 
     with freeze_time("2020-01-01T00:00:00Z"):
         post = mock_post(
-            f"""
+            """
         subject: Hello, World!
         keywords: test
         summary: My first post

@@ -388,5 +388,126 @@ def test_announcer(mock_post, mocker, requests_mock):
     )
     announcer.collect(post)
     mock_get_comments_from_fawm_page.assert_called_with(
-        "https://fawm.org/songs/110082/", "username", "password",
+        "https://fawm.org/songs/110082/",
+        "username",
+        "password",
     )
+
+
+def test_announcer_extra_comments(mock_post, mocker, requests_mock):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: Dance tag
+        keywords: pop, nerd
+        summary: A song about HTML
+        announce-on: fawm
+
+        # Liner Notes
+
+        This is a song about HTML.
+
+        # Lyrics
+
+        <pre>
+            Oh, HTML.
+            Will you dance with me?
+        </pre>
+        """,
+        )
+
+    root = Path("/path/to/blog")
+    config = {"url": "https://blog.example.com/"}
+    announcer = FAWMAnnouncer(root, config, "username", "password")
+
+    requests_mock.get(
+        "https://fawm.org/songs/1",
+        text=textwrap.dedent(
+            """
+            <li class="comment-item media" id="c562632">
+            <div class="media-left">
+            <a href="/fawmers/standup/">
+            <img alt="" class="media-object img-rounded comment-avatar" src="/img/avatars/479.big.jpg" style="background-color: #ff8766;"/>
+            </a>
+            </div>
+            <div class="media-body">
+            <h5 class="media-heading">@<a class="user-ref" href="/fawmers/standup/"><strong>standup</strong> <i class="icon-donated"></i></a> <small class="text-muted">Mar 1</small>
+            <small class="media-meta pull-right hidden-xs">
+            <!-- <a href="#"><i class="fa fa-flag"></i>report abuse</a>
+                        <a href="#"><i class="fa fa-pencil"></i>edit</a>
+                        <a href="#"><i class="fa fa-trash"></i>delete</a>  -->
+            </small></h5>
+            <p id="q562632">Cool sounds, I like the flowing melody that drops in early. Great tones. Bell sounds and echoey bits! The echo might be the Kaoss ? but sounds like it's only on a certain part. I like the floating piano parts too. There's a lot here to like. Those delays throughout are adding a lot. <br/>
+            <br/>
+            I was briefly tempted by the OP-Z, but my synths are modular and softsynths, they do the job, and it would be another thing to learn!</p>
+            </div>
+            </li>
+        """,
+        ),
+    )
+    requests_mock.get(
+        "https://fawm.org/songs/2",
+        text=textwrap.dedent(
+            """
+            <li id="c565501" class="comment-item media">
+            <div class="media-left">
+            <a href="/fawmers/phylo/">
+            <img class="media-object img-rounded comment-avatar" style="background-color: #cc9600;" src="/img/avatars/723.big.jpg" alt="">
+            </a>
+            </div>
+            <div class="media-body">
+            <h5 class="media-heading">@<a class='user-ref' href='/fawmers/phylo/'><strong>phylo</strong>&nbsp;<i class="icon-donated"></i></a>        <small class="text-muted">Mar&nbsp;3</small>
+            <small class="media-meta pull-right hidden-xs">
+            <span class="flagComment">
+            <a href="/songs/comment/flag/565501/"><i class="fa fa-flag"></i>report abuse</a>
+            </span>
+            <!-- <a href="#"><i class="fa fa-flag"></i>report abuse</a>
+            <a href="#"><i class="fa fa-pencil"></i>edit</a>
+            <a href="#"><i class="fa fa-trash"></i>delete</a>  -->
+            </small></h5>
+            <p id="q565501">This tune is so sweet!  The melody is very catchy.  There are lots of little surprises in there.  Nice work.</p>
+            </div>
+            </li>
+        """,
+        ),
+    )
+
+    # store URL in post
+    post.parsed["fawm-url"] = "https://fawm.org/songs/1"
+    post.parsed["fawm-extra-url"] = "https://fawm.org/songs/2"
+
+    responses = announcer.collect(post)
+    assert responses == [
+        {
+            "source": "FAWM",
+            "url": "https://fawm.org/songs/1",
+            "color": "#cc6600",
+            "id": "fawm:562632",
+            "timestamp": "2020-03-01T00:00:00+00:00",
+            "user": {
+                "name": "standup",
+                "image": "https://fawm.org/img/avatars/479.big.jpg",
+                "url": "https://fawm.org/fawmers/standup/",
+            },
+            "comment": {
+                "text": "Cool sounds, I like the flowing melody that drops in early. Great tones. Bell sounds and echoey bits! The echo might be the Kaoss ? but sounds like it's only on a certain part. I like the floating piano parts too. There's a lot here to like. Those delays throughout are adding a lot. \n\nI was briefly tempted by the OP-Z, but my synths are modular and softsynths, they do the job, and it would be another thing to learn!",
+                "url": "https://fawm.org/songs/1#c562632",
+            },
+        },
+        {
+            "source": "FAWM",
+            "url": "https://fawm.org/songs/2",
+            "color": "#cc6600",
+            "id": "fawm:565501",
+            "timestamp": "2020-03-03T00:00:00+00:00",
+            "user": {
+                "name": "phylo",
+                "image": "https://fawm.org/img/avatars/723.big.jpg",
+                "url": "https://fawm.org/fawmers/phylo/",
+            },
+            "comment": {
+                "text": "This tune is so sweet!  The melody is very catchy.  There are lots of little surprises in there.  Nice work.",
+                "url": "https://fawm.org/songs/2#c565501",
+            },
+        },
+    ]

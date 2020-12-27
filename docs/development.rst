@@ -1,7 +1,7 @@
 Development
 ===========
 
-Nefelibata is written in Python 3.8, and has been tested with Python 3.7 as well. It has a modularized plugin architecture, allowing new features to be easily added. Plugins are discovered through `entry points <https://packaging.python.org/specifications/entry-points/>`_, allowing anyone to write custom Python libraries that extend nefelibata.
+Nefelibata is written in Python 3.9, and has been tested with Python 3.7 and 3.8 as well. It has a modularized plugin architecture, allowing new features to be easily added. Plugins are discovered through `entry points <https://packaging.python.org/specifications/entry-points/>`_, allowing anyone to write custom Python libraries that extend nefelibata.
 
 There are 4 types of plugins:
 

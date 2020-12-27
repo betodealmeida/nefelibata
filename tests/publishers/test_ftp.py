@@ -49,7 +49,8 @@ def test_publish(fs, mocker):
     mock_ftp.return_value.__enter__.return_value.pwd.return_value = "/home/public"
     mocker.patch("nefelibata.publishers.ftp.FTP", mock_ftp)
     mocker.patch(
-        "nefelibata.publishers.ftp.open", side_effect=lambda filename, mode: filename,
+        "nefelibata.publishers.ftp.open",
+        side_effect=lambda filename, mode: filename,
     )
     with freeze_time("2020-01-03T00:00:00Z"):
         publisher.publish()
@@ -94,7 +95,8 @@ def test_publish_no_last_published(fs, mocker):
     mock_ftp.return_value.__enter__.return_value.pwd.return_value = "/home/public"
     mocker.patch("nefelibata.publishers.ftp.FTP", mock_ftp)
     mocker.patch(
-        "nefelibata.publishers.ftp.open", side_effect=lambda filename, mode: filename,
+        "nefelibata.publishers.ftp.open",
+        side_effect=lambda filename, mode: filename,
     )
     with freeze_time("2020-01-03T00:00:00Z"):
         publisher.publish()
@@ -115,7 +117,11 @@ def test_publish_no_basedir(fs, mocker):
     fs.create_dir(root)
 
     publisher = FTPPublisher(
-        root, config, host="ftp.example.com", username="anonymous", password="test",
+        root,
+        config,
+        host="ftp.example.com",
+        username="anonymous",
+        password="test",
     )
 
     with freeze_time("2020-01-01T00:00:00Z"):
@@ -136,7 +142,8 @@ def test_publish_no_basedir(fs, mocker):
     mock_ftp.return_value.__enter__.return_value.pwd.return_value = "/"
     mocker.patch("nefelibata.publishers.ftp.FTP", mock_ftp)
     mocker.patch(
-        "nefelibata.publishers.ftp.open", side_effect=lambda filename, mode: filename,
+        "nefelibata.publishers.ftp.open",
+        side_effect=lambda filename, mode: filename,
     )
     with freeze_time("2020-01-03T00:00:00Z"):
         publisher.publish()
@@ -149,7 +156,11 @@ def test_publish_create_dir(fs, mocker):
     fs.create_dir(root)
 
     publisher = FTPPublisher(
-        root, config, host="ftp.example.com", username="anonymous", password="test",
+        root,
+        config,
+        host="ftp.example.com",
+        username="anonymous",
+        password="test",
     )
 
     with freeze_time("2020-01-01T00:00:00Z"):
@@ -174,7 +185,8 @@ def test_publish_create_dir(fs, mocker):
     ]
     mocker.patch("nefelibata.publishers.ftp.FTP", mock_ftp)
     mocker.patch(
-        "nefelibata.publishers.ftp.open", side_effect=lambda filename, mode: filename,
+        "nefelibata.publishers.ftp.open",
+        side_effect=lambda filename, mode: filename,
     )
     with freeze_time("2020-01-03T00:00:00Z"):
         publisher.publish()

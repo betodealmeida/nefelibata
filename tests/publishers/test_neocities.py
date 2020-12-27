@@ -85,7 +85,9 @@ def test_publish_error(fs, mocker, requests_mock):
         fs.create_file(root / "build/two/index.html")
 
     requests_mock.post(
-        "https://neocities.org/api/upload", text="Some error", status_code=400,
+        "https://neocities.org/api/upload",
+        text="Some error",
+        status_code=400,
     )
     mocker.patch(
         "nefelibata.publishers.neocities.open",

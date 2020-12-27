@@ -131,9 +131,12 @@ def test_archive_links_storage_exists(mock_post, mocker):
 
     mock_requests.get.assert_not_called()
 
-    assert datetime.fromtimestamp(storage.stat().st_mtime).astimezone(
-        timezone.utc,
-    ) == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    assert (
+        datetime.fromtimestamp(storage.stat().st_mtime).astimezone(
+            timezone.utc,
+        )
+        == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    )
 
 
 def test_archive_links_already_modified(mock_post, requests_mock):
@@ -179,9 +182,12 @@ def test_archive_links_already_modified(mock_post, requests_mock):
     with freeze_time("2020-01-03T00:00:00Z"):
         assistant.process_post(post)
 
-    assert datetime.fromtimestamp(
-        post.file_path.with_suffix(".html").stat().st_mtime,
-    ).astimezone(timezone.utc) == datetime(2020, 1, 2, 0, 0, tzinfo=timezone.utc)
+    assert (
+        datetime.fromtimestamp(
+            post.file_path.with_suffix(".html").stat().st_mtime,
+        ).astimezone(timezone.utc)
+        == datetime(2020, 1, 2, 0, 0, tzinfo=timezone.utc)
+    )
 
 
 def test_archive_links_update(mock_post, requests_mock):
@@ -217,9 +223,12 @@ def test_archive_links_update(mock_post, requests_mock):
     with freeze_time("2020-01-01T01:00:00Z"):
         assistant.process_post(post)
 
-    assert datetime.fromtimestamp(storage.stat().st_mtime).astimezone(
-        timezone.utc,
-    ) == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    assert (
+        datetime.fromtimestamp(storage.stat().st_mtime).astimezone(
+            timezone.utc,
+        )
+        == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
+    )
 
     requests_mock.get(
         "https://web.archive.org/save/https://google.com/",

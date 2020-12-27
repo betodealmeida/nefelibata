@@ -31,7 +31,9 @@ class Post:
 
         self.markdown = self.parsed.get_payload(decode=False)
         self.html: str = markdown.markdown(
-            self.markdown, extensions=["codehilite"], output_format="html5",
+            self.markdown,
+            extensions=["codehilite"],
+            output_format="html",
         )
         self.update_metadata()
 

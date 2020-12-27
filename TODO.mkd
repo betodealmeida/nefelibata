@@ -74,6 +74,7 @@
 
 ## Other ##
 
+- [ ] Archive assistant should ignore archive.org links
 - [ ] check that `force` is being used in all relevant plugins
 - [ ] categories
 - [ ] new theme
