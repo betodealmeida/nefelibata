@@ -88,18 +88,19 @@ def get_response_from_li(url: str, el: Tag) -> Response:
 
     # the timestamp is a fuzzy date :(
     fuzzy_timestamp = el.find("small", {"class": "text-muted"}).text
+    now = datetime.now(tz=timezone.utc)
     try:
-        timestamp = (
-            dateutil.parser.parse(fuzzy_timestamp)
-            .replace(tzinfo=timezone.utc)
-            .isoformat()
-        )
+        timestamp = dateutil.parser.parse(fuzzy_timestamp).replace(tzinfo=timezone.utc)
     except ParserError:
         # parse "1 day", etc.
         value, unit = fuzzy_timestamp.split()
         unit = unit.rstrip("s")
         delta = timedelta(**{f"{unit}s": int(value)})
-        timestamp = (datetime.now(tz=timezone.utc) - delta).isoformat()
+        timestamp = now - delta
+
+    # ensure date is not in the future
+    if timestamp > now:
+        timestamp = timestamp.replace(year=timestamp.year - 1)
 
     user_ref = el.find("a", {"class": "user-ref"})
     user_name = user_ref.text.strip()
@@ -117,7 +118,7 @@ def get_response_from_li(url: str, el: Tag) -> Response:
         "url": url,
         "color": "#cc6600",
         "id": f"fawm:{comment_id}",
-        "timestamp": timestamp,
+        "timestamp": timestamp.isoformat(),
         "user": {"name": user_name, "image": user_image, "url": user_url},
         "comment": {"text": comment, "url": f"{url}#c{comment_id}"},
     }

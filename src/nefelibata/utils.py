@@ -4,17 +4,26 @@ import logging
 import re
 import sys
 import unicodedata
+import urllib.parse
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import Iterator
+from typing import Optional
+from typing import TypedDict
 
 import yaml
 from bs4 import BeautifulSoup
 from libgravatar import Gravatar
 from nefelibata import config_filename
 from rich.logging import RichHandler
+
+
+class EnclosureType(TypedDict):
+    type: str
+    length: str
+    href: str
 
 
 def get_config(root: Path) -> Dict[str, Any]:
@@ -112,3 +121,28 @@ def modify_html(file_path: Path) -> Iterator[BeautifulSoup]:
         if html != original:
             with open(file_path, "w") as fp:
                 fp.write(html)
+
+
+def get_enclosure(root: Path, file_path: Path) -> Optional[EnclosureType]:
+    """
+    Return attributes for an Atom enclosure element.
+
+        <link
+            rel="enclosure"
+            type="audio/mpeg"
+            length="1337"
+            href="http://example.org/audio/ph34r_my_podcast.mp3"
+        />
+    """
+    post_directory = file_path.parent
+
+    # single mp3?
+    mp3_paths = list(post_directory.glob("**/*.mp3"))
+    if len(mp3_paths) == 1:
+        return {
+            "type": "audio/mpeg",
+            "length": str(mp3_paths[0].stat().st_size),
+            "href": str(mp3_paths[0].relative_to(root / "posts")),
+        }
+
+    return None

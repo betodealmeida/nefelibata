@@ -17,6 +17,8 @@ import markdown
 from bs4 import BeautifulSoup
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
+from nefelibata.utils import EnclosureType
+from nefelibata.utils import get_enclosure
 
 _logger = logging.getLogger(__name__)
 
@@ -49,6 +51,10 @@ class Post:
         )
         template = env.get_template(f"{post_type}.html")
         return template.render(post=self)
+
+    @property
+    def enclosure(self) -> Optional[EnclosureType]:
+        return get_enclosure(self.root, self.file_path)
 
     @property
     def title(self) -> str:

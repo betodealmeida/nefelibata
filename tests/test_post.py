@@ -199,3 +199,27 @@ def test_get_posts_limited(fs):
     posts = get_posts(root, 1)
     assert len(posts) == 1
     assert posts[0].file_path == Path(root / "posts/two/index.mkd")
+
+
+def test_enclosure(mock_post, fs):
+    with freeze_time("2020-01-01T00:00:00Z"):
+        post = mock_post(
+            """
+        subject: This is your first post
+        keywords: welcome, blog
+        summary: Hello, world!
+
+        # Welcome #
+
+        This is your first post. It should be written using Markdown.
+        """,
+        )
+
+    assert post.enclosure is None
+
+    fs.create_file(post.file_path.parent / "song.mp3")
+    assert post.enclosure == {
+        "type": "audio/mpeg",
+        "length": "0",
+        "href": "first/song.mp3",
+    }

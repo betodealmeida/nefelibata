@@ -11,6 +11,10 @@
 <entry>
     <title>{{ post.title|striptags|e }}</title>
     <link rel="alternate" type="text/html" href="{{ config.url }}{{ post.url }}" />
+    {% if post.enclosure %}
+    <link rel="enclosure" type="{{ post.enclosure.type }}" length="{{ post.enclosure.length }}"
+        href="{{ config.url }}{{ post.enclosure.href }}"/>
+    {% endif %}
     <id>tag:{{ config.url.split('/')[2] }},{{ post.date.strftime('%Y-%m-%d') }}:{{ post.url }}</id>
     <updated>{{ post.date.strftime('%Y-%m-%dT%H:%I:%SZ') }}</updated>
     <summary type="html">
