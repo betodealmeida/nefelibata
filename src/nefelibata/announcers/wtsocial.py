@@ -69,6 +69,8 @@ def do_login(session: requests.Session, email: str, password: str) -> str:
     html = response.text
     soup = BeautifulSoup(html, "html.parser")
     tag = soup.find("input", attrs={"name": "_token"})
+    if not tag:
+        return ""
     token = tag.attrs["value"]
 
     params = {
