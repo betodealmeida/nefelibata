@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import dateutil.parser
 import pytest
 from freezegun import freeze_time
+
 from nefelibata.builders.tags import TagsBuilder
 from nefelibata.post import Post
 

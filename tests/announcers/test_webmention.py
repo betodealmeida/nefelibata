@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
 import os.path
-import textwrap
 from datetime import datetime
 from datetime import timezone
 from pathlib import Path
@@ -10,6 +9,7 @@ from unittest.mock import MagicMock
 
 from bs4 import BeautifulSoup
 from freezegun import freeze_time
+
 from nefelibata.announcers.webmention import get_response_from_child
 from nefelibata.announcers.webmention import get_webmention_endpoint
 from nefelibata.announcers.webmention import summarize

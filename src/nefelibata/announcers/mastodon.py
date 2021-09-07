@@ -8,6 +8,7 @@ from typing import Dict
 from typing import List
 
 import mastodon
+
 from nefelibata.announcers import Announcer
 from nefelibata.announcers import Response
 from nefelibata.post import Post

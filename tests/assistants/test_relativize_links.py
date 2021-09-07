@@ -3,9 +3,9 @@ from datetime import timezone
 from pathlib import Path
 from typing import Any
 from typing import Dict
-from unittest import mock
 
 from freezegun import freeze_time
+
 from nefelibata.assistants.relativize_links import RelativizeLinksAssistant
 from nefelibata.builders.post import PostBuilder
 

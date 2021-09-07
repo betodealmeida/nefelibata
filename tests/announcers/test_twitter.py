@@ -1,9 +1,9 @@
-from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import twitter
 from freezegun import freeze_time
+
 from nefelibata.announcers.twitter import TwitterAnnouncer
 
 __author__ = "Beto Dealmeida"

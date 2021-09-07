@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from freezegun import freeze_time
+
 from nefelibata.publishers.ftp import FTPPublisher
 
 __author__ = "Beto Dealmeida"

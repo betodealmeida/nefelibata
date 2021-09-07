@@ -8,6 +8,7 @@ from unittest import mock
 
 from botocore.exceptions import ClientError
 from freezegun import freeze_time
+
 from nefelibata.publishers.s3 import S3Publisher
 
 __author__ = "Beto Dealmeida"

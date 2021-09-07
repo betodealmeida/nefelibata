@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os.path
-import textwrap
 from datetime import datetime
 from datetime import timezone
 from pathlib import Path
@@ -9,6 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 from bs4 import BeautifulSoup
 from freezegun import freeze_time
+
 from nefelibata.announcers.fiftyninety import extract_params
 from nefelibata.announcers.fiftyninety import FiftyNinetyAnnouncer
 from nefelibata.announcers.fiftyninety import get_comments_from_fiftyninety_page

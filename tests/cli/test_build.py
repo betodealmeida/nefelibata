@@ -3,6 +3,7 @@ from unittest.mock import call
 from unittest.mock import MagicMock
 
 import pytest
+
 from nefelibata.cli.build import run
 from nefelibata.post import Post
 

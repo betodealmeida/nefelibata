@@ -1,11 +1,9 @@
-import json
 import logging
 import re
 import urllib.parse
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
-from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import Optional
@@ -13,6 +11,7 @@ from typing import Optional
 import dateutil.parser
 import requests
 from bs4 import BeautifulSoup
+
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
 from nefelibata.post import Post

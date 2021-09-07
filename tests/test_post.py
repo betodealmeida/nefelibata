@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 from dateutil.parser._parser import ParserError
 from freezegun import freeze_time
+
 from nefelibata.post import get_posts
 
 __author__ = "Beto Dealmeida"

@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from freezegun import freeze_time
+
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import get_assistants
 from nefelibata.assistants import Scope

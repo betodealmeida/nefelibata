@@ -1,6 +1,3 @@
-import hashlib
-import mimetypes
-import re
 import urllib.parse
 from pathlib import Path
 from typing import Tuple
@@ -8,11 +5,12 @@ from typing import Tuple
 import requests
 from bs4 import BeautifulSoup
 from mutagen.mp3 import MP3
+from PIL import Image
+
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
 from nefelibata.post import Post
 from nefelibata.utils import modify_html
-from PIL import Image
 
 
 def has_valid_dimensions(path: Path) -> bool:

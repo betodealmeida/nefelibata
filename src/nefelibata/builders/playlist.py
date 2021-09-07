@@ -5,6 +5,7 @@ from typing import List
 from typing import TypedDict
 
 from mutagen.mp3 import MP3
+
 from nefelibata.builders import Builder
 from nefelibata.builders import Scope
 from nefelibata.post import Post

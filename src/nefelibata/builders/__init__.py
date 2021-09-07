@@ -5,8 +5,9 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
-from nefelibata.post import Post
 from pkg_resources import iter_entry_points
+
+from nefelibata.post import Post
 
 
 class Scope(Enum):

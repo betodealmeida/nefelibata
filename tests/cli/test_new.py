@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
+
 from nefelibata.cli.new import run
 
 __author__ = "Beto Dealmeida"

@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 from bs4 import BeautifulSoup
 from freezegun import freeze_time
+
 from nefelibata.announcers.fawm import extract_params
 from nefelibata.announcers.fawm import FAWMAnnouncer
 from nefelibata.announcers.fawm import get_comments_from_fawm_page

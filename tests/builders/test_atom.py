@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from freezegun import freeze_time
+
 from nefelibata.builders.atom import AtomBuilder
 from nefelibata.post import Post
 

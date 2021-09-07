@@ -1,8 +1,8 @@
 import logging
-from pathlib import Path
 
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
+
 from nefelibata.builders import Builder
 from nefelibata.builders import Scope
 from nefelibata.post import get_posts

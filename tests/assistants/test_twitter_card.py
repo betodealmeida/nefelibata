@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 from datetime import timezone
 from pathlib import Path
@@ -9,6 +8,7 @@ from unittest.mock import PropertyMock
 
 from freezegun import freeze_time
 from mutagen import id3
+
 from nefelibata.assistants.twitter_card import TwitterCardAssistant
 from nefelibata.builders.post import PostBuilder
 from nefelibata.utils import modify_html

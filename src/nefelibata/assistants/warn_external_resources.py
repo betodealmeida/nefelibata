@@ -4,6 +4,7 @@ from pathlib import Path
 
 import tinycss2
 from bs4 import BeautifulSoup
+
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
 from nefelibata.post import Post

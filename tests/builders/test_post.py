@@ -6,6 +6,7 @@ from typing import Dict
 
 import pytest
 from freezegun import freeze_time
+
 from nefelibata.builders.post import jinja2_formatdate
 from nefelibata.builders.post import PostBuilder
 from nefelibata.post import Post

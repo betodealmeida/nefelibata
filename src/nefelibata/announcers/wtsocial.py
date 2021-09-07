@@ -12,6 +12,7 @@ from typing import Optional
 import dateutil.parser
 import requests
 from bs4 import BeautifulSoup
+
 from nefelibata.announcers import Announcer
 from nefelibata.announcers import Response
 from nefelibata.post import Post
@@ -113,7 +114,7 @@ class WTSocialAnnouncer(Announcer):
         post_url = urllib.parse.urljoin(self.config["url"], post.url)
 
         url = "https://wt.social/api/new-article"
-        params = {
+        params: Dict[str, Any] = {
             "collaborative": False,
             "article_title": post.title,
             "article_body": f"{post.summary}\n\n{post_url}",

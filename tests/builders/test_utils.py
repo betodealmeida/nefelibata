@@ -1,4 +1,5 @@
 import pytest
+
 from nefelibata.builders.utils import hash_n
 from nefelibata.builders.utils import random_color
 

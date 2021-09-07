@@ -1,4 +1,3 @@
-import json
 import logging
 import re
 import urllib.parse
@@ -12,6 +11,7 @@ from typing import Optional
 import dateutil.parser
 import requests
 from bs4 import BeautifulSoup
+
 from nefelibata.announcers import Announcer
 from nefelibata.announcers import Comment
 from nefelibata.announcers import Response

@@ -1,10 +1,10 @@
 import logging
 from collections import defaultdict
-from pathlib import Path
 from typing import Optional
 
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
+
 from nefelibata import __version__
 from nefelibata.builders import Builder
 from nefelibata.builders import Scope

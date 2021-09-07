@@ -7,13 +7,11 @@
     https://pytest.org/latest/plugins.html
 """
 import textwrap
-import time
 from pathlib import Path
-from typing import Any
-from typing import Dict
 from unittest.mock import MagicMock
 
 import pytest
+
 from nefelibata.post import Post
 
 

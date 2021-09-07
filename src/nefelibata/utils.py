@@ -2,7 +2,6 @@ import copy
 import json
 import logging
 import re
-import sys
 import unicodedata
 import urllib.parse
 from contextlib import contextmanager
@@ -16,8 +15,9 @@ from typing import TypedDict
 import yaml
 from bs4 import BeautifulSoup
 from libgravatar import Gravatar
-from nefelibata import config_filename
 from rich.logging import RichHandler
+
+from nefelibata import config_filename
 
 
 class EnclosureType(TypedDict):

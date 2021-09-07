@@ -4,6 +4,7 @@ from pathlib import Path
 
 from freezegun import freeze_time
 from mutagen import id3
+
 from nefelibata.builders.playlist import PlaylistBuilder
 
 __author__ = "Beto Dealmeida"
