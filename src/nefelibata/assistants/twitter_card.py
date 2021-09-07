@@ -9,6 +9,7 @@ from PIL import Image
 
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
+from nefelibata.builders.twitter_card import CONTAINER_FILENAME
 from nefelibata.post import Post
 from nefelibata.utils import modify_html
 
@@ -22,7 +23,6 @@ def has_valid_dimensions(path: Path) -> bool:
 class TwitterCardAssistant(Assistant):
 
     scopes = [Scope.POST]
-    container_filename = "twitter_card.html"
 
     def process_post(self, post: Post, force: bool = False) -> None:
         file_path = post.file_path.with_suffix(".html")
@@ -43,12 +43,11 @@ class TwitterCardAssistant(Assistant):
 
         # if the post has a single mp3 use a player card instead of summary
         if len(mp3_paths) == 1:
-            container_path = post_directory / self.container_filename
+            container_path = post_directory / CONTAINER_FILENAME
             container_url = urllib.parse.urljoin(
                 self.config["url"],
                 str(container_path.relative_to(self.root / "posts")),
             )
-            self._create_container(container_path, mp3_paths[0])
 
             card_metadata["twitter:card"] = "player"
             card_metadata["twitter:image"] = urllib.parse.urljoin(
@@ -67,6 +66,7 @@ class TwitterCardAssistant(Assistant):
                         self.config["url"],
                         str(jpg_path.relative_to(self.root / "posts")),
                     )
+                    # XXX add alt
                     break
 
         # add meta tags
@@ -89,51 +89,3 @@ class TwitterCardAssistant(Assistant):
 
                 meta = soup.new_tag("meta", attrs={"name": name, "content": content})
                 soup.head.append(meta)
-
-    def _create_container(self, container_path: Path, mp3_path: Path) -> None:
-        mp3 = MP3(mp3_path)
-
-        # create container.html
-        if not container_path.exists():
-            with open(container_path, "w") as fp:
-                fp.write("<!DOCTYPE html><html><head></head><body></body></html>")
-
-        with modify_html(container_path) as soup:
-            css = soup.head.find("link")
-            if not css:
-                css = soup.new_tag(
-                    "link",
-                    href=urllib.parse.urljoin(self.config["url"], "css/cassette.css"),
-                    rel="stylesheet",
-                )
-                soup.head.append(css)
-
-            audio = soup.find("audio")
-            if audio:
-                audio.decompose()
-            audio = soup.new_tag(
-                "audio",
-                attrs={
-                    "class": "cassette",
-                    "data-album": mp3.get("TALB", "Unknown album"),
-                    "data-artist": mp3.get("TPE1", "Unknown artist"),
-                    "data-title": mp3.get("TIT2", mp3_path.stem),
-                    "src": mp3_path.relative_to(container_path.parent),
-                },
-            )
-            # do not append, since <script> tag should come last
-            soup.body.insert(0, audio)
-
-            js = soup.body.find("script")
-            if not js:
-                js = soup.new_tag(
-                    "script",
-                    attrs={
-                        "src": urllib.parse.urljoin(
-                            self.config["url"],
-                            "js/cassette.js",
-                        ),
-                        "async": "",
-                    },
-                )
-                soup.body.append(js)

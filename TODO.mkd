@@ -51,6 +51,7 @@
 - [x] template snippets for books or other things? music? like, RSVP
 - [x] replace `post_directory.parent` with `root / posts` to allow for nested sub directories
 - [x] archive assistant should ignore archive.org links
+- [~] split twitter card into assistant/builder
 
 # TODO #
 
@@ -89,4 +90,3 @@
 - [ ] mirror youtube videos in addition to images
 - [ ] PESOS?
 - [ ] self archive.org using wget?
-- [ ] split twitter card into assistant/builder
