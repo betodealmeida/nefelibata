@@ -32,7 +32,7 @@ content
 In the ``pure-blog`` theme the template shows only the summary of each post, and it shows the number of posts defined in the ``nefelibata.yaml`` file.
 
 Post types
-==========
+----------
 
 You can also create mini-templates for different post types. Let's say you often review books, so you want to make a template for your reviews. Start by adding it to your ``nefelibata.yaml`` file:
 
