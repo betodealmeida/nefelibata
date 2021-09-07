@@ -70,7 +70,7 @@ def do_login(session: requests.Session, email: str, password: str) -> str:
     soup = BeautifulSoup(html, "html.parser")
     tag = soup.find("input", attrs={"name": "_token"})
     if not tag:
-        return ""
+        raise Exception("Couldn't find token element")
     token = tag.attrs["value"]
 
     params = {
@@ -101,8 +101,11 @@ class WTSocialAnnouncer(Announcer):
         _logger.info("Posting to WT.Social")
 
         session = requests.Session()
-        html = do_login(session, self.email, self.password)
-        csrf_token = get_csrf_token(html)
+        try:
+            html = do_login(session, self.email, self.password)
+            csrf_token = get_csrf_token(html)
+        except Exception:
+            csrf_token = None
         if csrf_token is None:
             _logger.error("Couldn't find a CSRF token, exiting...")
             return None
@@ -131,8 +134,11 @@ class WTSocialAnnouncer(Announcer):
         _logger.info("Collecting replies from WT.Social")
 
         session = requests.Session()
-        html = do_login(session, self.email, self.password)
-        csrf_token = get_csrf_token(html)
+        try:
+            html = do_login(session, self.email, self.password)
+            csrf_token = get_csrf_token(html)
+        except Exception:
+            csrf_token = None
         if csrf_token is None:
             _logger.error("Couldn't find a CSRF token, exiting...")
             return []
