@@ -70,11 +70,15 @@ class MastodonAnnouncer(Announcer):
         return cast(str, toot["url"])
 
     def collect(self, post: Post) -> List[Response]:
-        _logger.info(f"Collecting replies from Mastodon ({self.base_url})")
+        _logger.info("Collecting replies from Mastodon (%s)", self.base_url)
 
         toot_url = post.parsed[self.url_header]
         toot_id = toot_url.rstrip("/").rsplit("/", 1)[1]
-        context = self.client.status_context(toot_id)
+        try:
+            context = self.client.status_context(toot_id)
+        except mastodon.MastodonNotFoundError:
+            _logger.warning("Toot not found: %s", toot_url)
+            return []
 
         responses = []
         for toot in context["descendants"]:
