@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 import pytest
+
 from nefelibata import config_filename
 from nefelibata.utils import find_directory
 from nefelibata.utils import get_config

@@ -8,6 +8,7 @@ from typing import List
 
 import dateutil.parser
 import twitter
+
 from nefelibata.announcers import Announcer
 from nefelibata.announcers import Response
 from nefelibata.post import Post

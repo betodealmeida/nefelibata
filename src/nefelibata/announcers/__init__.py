@@ -9,10 +9,11 @@ from typing import Optional
 from typing import Set
 
 import mf2py
-from nefelibata.post import Post
-from nefelibata.utils import json_storage
 from pkg_resources import iter_entry_points
 from typing_extensions import TypedDict
+
+from nefelibata.post import Post
+from nefelibata.utils import json_storage
 
 _logger = logging.getLogger(__name__)
 

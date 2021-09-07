@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 from freezegun import freeze_time
+
 from nefelibata.console import main
 
 __author__ = "Beto Dealmeida"

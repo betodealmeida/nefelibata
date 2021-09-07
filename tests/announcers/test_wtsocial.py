@@ -3,6 +3,7 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 from freezegun import freeze_time
+
 from nefelibata.announcers.wtsocial import WTSocialAnnouncer
 from nefelibata.post import Post
 

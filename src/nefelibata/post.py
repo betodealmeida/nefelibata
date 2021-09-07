@@ -1,5 +1,4 @@
 import logging
-import time
 from datetime import datetime
 from email.header import decode_header
 from email.header import make_header
@@ -8,15 +7,15 @@ from email.utils import formatdate
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any
-from typing import cast
 from typing import Dict
 from typing import List
 from typing import Optional
 
-import markdown
+import markdown  # type: ignore
 from bs4 import BeautifulSoup
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
+
 from nefelibata.utils import EnclosureType
 from nefelibata.utils import get_enclosure
 
@@ -50,7 +49,7 @@ class Post:
             ),
         )
         template = env.get_template(f"{post_type}.html")
-        return template.render(post=self)
+        return str(template.render(post=self))
 
     @property
     def enclosure(self) -> Optional[EnclosureType]:

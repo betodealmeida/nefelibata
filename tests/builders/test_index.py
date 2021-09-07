@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from nefelibata.builders.index import IndexBuilder
 from nefelibata.post import Post
 

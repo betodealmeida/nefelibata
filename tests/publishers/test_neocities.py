@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from freezegun import freeze_time
+
 from nefelibata.publishers.neocities import NeocitiesPublisher
 
 __author__ = "Beto Dealmeida"

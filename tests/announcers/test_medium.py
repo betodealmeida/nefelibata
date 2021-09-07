@@ -1,10 +1,10 @@
 import json
 import urllib.parse
-from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock
 
 from freezegun import freeze_time
+
 from nefelibata.announcers.medium import MediumAnnouncer
 
 __author__ = "Beto Dealmeida"

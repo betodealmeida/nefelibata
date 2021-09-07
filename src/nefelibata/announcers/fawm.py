@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
 from bs4 import NavigableString
 from bs4.element import Tag
 from dateutil.parser._parser import ParserError
+
 from nefelibata.announcers import Announcer
 from nefelibata.announcers import Response
 from nefelibata.post import Post

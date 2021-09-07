@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
+
 from nefelibata.cli.preview import run
 
 __author__ = "Beto Dealmeida"

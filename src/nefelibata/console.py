@@ -35,6 +35,7 @@ from pathlib import Path
 from typing import Optional
 
 from docopt import docopt
+
 from nefelibata import __version__
 from nefelibata.cli import build
 from nefelibata.cli import init

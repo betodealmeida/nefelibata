@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 import mastodon
 from freezegun import freeze_time
 from mastodon import AttribAccessDict
+
 from nefelibata.announcers.mastodon import MastodonAnnouncer
 
 __author__ = "Beto Dealmeida"

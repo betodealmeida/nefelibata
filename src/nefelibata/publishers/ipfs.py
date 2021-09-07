@@ -1,16 +1,14 @@
 import logging
-import mimetypes
 import re
 import subprocess
 import urllib.parse
 from pathlib import Path
 from typing import Any
 from typing import Dict
-from typing import List
 from typing import Optional
-from typing import Tuple
 
 import requests
+
 from nefelibata.publishers import Publisher
 
 _logger = logging.getLogger(__name__)

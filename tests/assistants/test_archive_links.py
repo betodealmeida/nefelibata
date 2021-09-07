@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 
 import requests
 from freezegun import freeze_time
+
 from nefelibata.assistants.archive_links import ArchiveLinksAssistant
 from nefelibata.builders.post import PostBuilder
 

@@ -7,10 +7,11 @@ from typing import Dict
 
 import piexif
 from freezegun import freeze_time
+from PIL import Image
+
 from nefelibata.assistants.mirror_images import get_resource_extension
 from nefelibata.assistants.mirror_images import MirrorImagesAssistant
 from nefelibata.builders.post import PostBuilder
-from PIL import Image
 
 __author__ = "Beto Dealmeida"
 __copyright__ = "Beto Dealmeida"

@@ -1,4 +1,3 @@
-import copy
 import json
 from datetime import datetime
 from datetime import timezone
@@ -10,6 +9,7 @@ from typing import Optional
 from unittest.mock import MagicMock
 
 from freezegun import freeze_time
+
 from nefelibata.announcers import Announcer
 from nefelibata.announcers import get_announcers
 from nefelibata.announcers import Response

@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 
 import requests
 from freezegun import freeze_time
+
 from nefelibata.assistants.current_weather import CurrentWeatherAssistant
 from nefelibata.builders.post import PostBuilder
 

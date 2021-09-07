@@ -4,6 +4,7 @@ from datetime import timedelta
 from datetime import timezone
 
 import requests
+
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
 from nefelibata.post import Post

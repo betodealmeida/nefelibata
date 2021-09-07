@@ -4,6 +4,7 @@ from typing import Dict
 from unittest import mock
 
 from freezegun import freeze_time
+
 from nefelibata.assistants.warn_external_resources import WarnExternalResourcesAssistant
 from nefelibata.builders.post import PostBuilder
 

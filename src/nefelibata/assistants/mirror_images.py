@@ -8,11 +8,12 @@ from pathlib import Path
 import piexif
 import requests
 from bs4 import BeautifulSoup
+from PIL import Image
+
 from nefelibata.assistants import Assistant
 from nefelibata.assistants import Scope
 from nefelibata.post import Post
 from nefelibata.utils import modify_html
-from PIL import Image
 
 
 CHUNK_SIZE = 2048

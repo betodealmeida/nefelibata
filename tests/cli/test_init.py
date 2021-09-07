@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from nefelibata.cli.init import run
 
 __author__ = "Beto Dealmeida"
