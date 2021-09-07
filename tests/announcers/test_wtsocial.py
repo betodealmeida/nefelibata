@@ -120,15 +120,22 @@ def test_announcer_no_csrf_token(mock_post, requests_mock):
         True,
     )
 
+    # no token (HTML changed)
+    requests_mock.get("https://wt.social/login", text="")
+    url = announcer.announce(post)
+    assert url is None
+
+    responses = announcer.collect(post)
+    assert responses == []
+
     # login
-    html1 = """
+    html = """
 <form method="POST" action="https://wt.social/login">
     <input type="hidden" name="_token" value="token1">
 </form>
     """
-    requests_mock.get("https://wt.social/login", text=html1)
-    html2 = ""
-    requests_mock.post("https://wt.social/login", text=html2)
+    requests_mock.get("https://wt.social/login", text=html)
+    requests_mock.post("https://wt.social/login", text="")
 
     # new post
     requests_mock.post(

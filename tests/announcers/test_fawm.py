@@ -160,7 +160,7 @@ def test_get_comments_from_fawm_page(requests_mock):
         html = fp.read()
     requests_mock.get(url, text=html)
 
-    with freeze_time("2020-12-01T00:00:00Z"):
+    with freeze_time("2021-01-01T00:00:00Z"):
         comments = get_comments_from_fawm_page(url, "username", "password")
 
     assert comments == [

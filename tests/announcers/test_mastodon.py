@@ -3,6 +3,7 @@ from datetime import timezone
 from pathlib import Path
 from unittest.mock import MagicMock
 
+import mastodon
 from freezegun import freeze_time
 from mastodon import AttribAccessDict
 from nefelibata.announcers.mastodon import MastodonAnnouncer
@@ -88,3 +89,9 @@ def test_announcer(mock_post, mocker):
             "url": "https://mastodon.example.com/@user/1",
         },
     ]
+
+    mock_client.return_value.status_context.side_effect = (
+        mastodon.MastodonNotFoundError("Not found!")
+    )
+    responses = announcer.collect(post)
+    assert responses == []
