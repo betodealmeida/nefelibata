@@ -50,6 +50,7 @@
 - [x] store weather (curl wttr.in/?format=j1)
 - [x] template snippets for books or other things? music? like, RSVP
 - [x] replace `post_directory.parent` with `root / posts` to allow for nested sub directories
+- [x] archive assistant should ignore archive.org links
 
 # TODO #
 
@@ -80,9 +81,8 @@
 
 - [ ] categories
 - [ ] new theme
-- [ ] Archive assistant should ignore archive.org links
-- [ ] check that `force` is being used in all relevant plugins
 - [ ] search (build index and search using JS)
+- [ ] check that `force` is being used in all relevant plugins
 - [ ] Medium image upload ("Go Deep" post, eg)
 - [ ] RSS club
 - [ ] style webmentioned links: https://www.ctrl.blog/media/hero/webmention.svg
