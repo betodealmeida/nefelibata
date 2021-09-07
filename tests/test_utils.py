@@ -73,7 +73,7 @@ language: en
         "author": {
             "name": "Beto Dealmeida",
             "email": "roberto@dealmeida.net",
-            "profile_picture": "http://www.gravatar.com/avatar/58b573d3eac03131faee739dfc7b360a",
+            "profile_picture": "https://www.gravatar.com/avatar/58b573d3eac03131faee739dfc7b360a",
         },
         "url": "http://blog.taoetc.org/",
         "posts-to-show": 5,

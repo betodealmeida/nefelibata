@@ -160,7 +160,8 @@ def test_get_comments_from_fawm_page(requests_mock):
         html = fp.read()
     requests_mock.get(url, text=html)
 
-    comments = get_comments_from_fawm_page(url, "username", "password")
+    with freeze_time("2020-12-01T00:00:00Z"):
+        comments = get_comments_from_fawm_page(url, "username", "password")
 
     assert comments == [
         {
@@ -258,7 +259,8 @@ def test_get_response_from_li():
         features="html5lib",
     )
     el = soup.html.body.li
-    response = get_response_from_li(url, el)
+    with freeze_time("2020-12-01T00:00:00Z"):
+        response = get_response_from_li(url, el)
 
     assert response == {
         "source": "FAWM",
@@ -476,7 +478,8 @@ def test_announcer_extra_comments(mock_post, mocker, requests_mock):
     post.parsed["fawm-url"] = "https://fawm.org/songs/1"
     post.parsed["fawm-extra-url"] = "https://fawm.org/songs/2"
 
-    responses = announcer.collect(post)
+    with freeze_time("2020-12-01T00:00:00Z"):
+        responses = announcer.collect(post)
     assert responses == [
         {
             "source": "FAWM",
