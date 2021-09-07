@@ -13,7 +13,8 @@ import shutil
 import sys
 
 __location__ = os.path.join(
-    os.getcwd(), os.path.dirname(inspect.getfile(inspect.currentframe())),
+    os.getcwd(),
+    os.path.dirname(inspect.getfile(inspect.currentframe())),
 )
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -90,7 +91,7 @@ master_doc = "index"
 
 # General information about the project.
 project = u"nefelibata"
-copyright = u"2013-2020, Beto Dealmeida"
+copyright = u"2013, Beto Dealmeida"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

@@ -27,7 +27,7 @@ Options:
   --loglevel=LEVEL  Level for logging. [default: INFO]
 
 Released under the MIT license.
-(c) 2013-2020 Beto Dealmeida <roberto@dealmeida.net>
+(c) 2013 Beto Dealmeida <roberto@dealmeida.net>
 
 """
 import os
