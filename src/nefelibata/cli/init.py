@@ -2,6 +2,8 @@
 import logging
 import os
 import shutil
+import sqlite3
+import textwrap
 from pathlib import Path
 
 from pkg_resources import resource_filename
@@ -15,8 +17,31 @@ __license__ = "mit"
 _logger = logging.getLogger(__name__)
 
 
+def create_tables(root: Path) -> None:
+    """
+    Create support tables.
+    """
+    connection = sqlite3.connect(str(root / "nefelibata.db"))
+    cursor = connection.cursor()
+
+    cursor.execute(
+        textwrap.dedent(
+            """
+        CREATE TABLE IF NOT EXISTS updates (
+            plugin TEXT,
+            path TEXT,
+            last_updated TIMESTAMP,
+            PRIMARY KEY (plugin, path)
+        );
+            """
+        )
+    )
+
+
 def run(root: Path) -> None:
-    """Create initial structure for weblog."""
+    """
+    Create initial structure for weblog.
+    """
     resources = resource_listdir("nefelibata", "skeleton")
 
     for resource in resources:
@@ -33,5 +58,7 @@ def run(root: Path) -> None:
             shutil.copytree(origin, target)
         else:
             shutil.copy(origin, target)
+
+    create_tables(root)
 
     _logger.info("Weblog created!")

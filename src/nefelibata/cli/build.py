@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
+import sqlite3
 from pathlib import Path
 from typing import Optional
 
 from nefelibata.announcers import get_announcers
 from nefelibata.assistants import get_assistants
+from nefelibata.assistants import Order
 from nefelibata.builders import get_builders
 from nefelibata.builders import Scope
 from nefelibata.post import get_posts
@@ -30,6 +32,11 @@ def run(
     config = get_config(root)
     _logger.debug(config)
 
+    connection = sqlite3.connect(
+        str(root / "nefelibata.db"),
+        detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES,
+    )
+
     build = root / "build"
     if not build.exists():
         _logger.info("Creating build/ directory")
@@ -44,8 +51,8 @@ def run(
             target.symlink_to(resource_directory, target_is_directory=True)
 
     _logger.info("Processing posts")
-    post_builders = get_builders(root, config, Scope.POST)
-    post_assistants = get_assistants(root, config, Scope.POST)
+    post_builders = get_builders(root, config, Scope.POST, connection)
+    post_assistants = get_assistants(root, config, Scope.POST, connection)
     announcers = get_announcers(root, config)
     posts = [post] if post else get_posts(root)
     for post in posts:
@@ -61,10 +68,15 @@ def run(
                 if announcer.match(post):
                     announcer.update_replies(post)
 
+        # run assistants and builders
+        for assistant in post_assistants:
+            if assistant.order == Order.BEFORE:
+                assistant.process_post(post, force)
         for builder in post_builders:
             builder.process_post(post, force)
         for assistant in post_assistants:
-            assistant.process_post(post, force)
+            if assistant.order == Order.AFTER:
+                assistant.process_post(post, force)
 
         # symlink build -> posts
         post_directory = post.file_path.parent
@@ -73,9 +85,15 @@ def run(
         if post_directory.exists() and not target.exists():
             target.symlink_to(post_directory, target_is_directory=True)
 
-    site_builders = get_builders(root, config, Scope.SITE)
-    site_assistants = get_assistants(root, config, Scope.SITE)
+    site_builders = get_builders(root, config, Scope.SITE, connection)
+    site_assistants = get_assistants(root, config, Scope.SITE, connection)
+    for assistant in site_assistants:
+        if assistant.order == Order.BEFORE:
+            assistant.process_site(force)
     for builder in site_builders:
         builder.process_site(force)
     for assistant in site_assistants:
-        assistant.process_site(force)
+        if assistant.order == Order.AFTER:
+            assistant.process_site(force)
+
+    connection.commit()

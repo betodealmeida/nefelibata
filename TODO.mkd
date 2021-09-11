@@ -54,9 +54,11 @@
 
 # TODO #
 
+- [ ] improve media associated with a psot
+
 ## Performance ##
 
-- [ ] parallelize build/publish
+- [~] parallelize build/publish and improve performance
 - [ ] avoid parsing HTML for each plugin
 - [ ] lxml parser for BeautifulSoup?
 

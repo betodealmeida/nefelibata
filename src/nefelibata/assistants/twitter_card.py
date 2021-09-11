@@ -25,6 +25,9 @@ class TwitterCardAssistant(Assistant):
     container_filename = "twitter_card.html"
 
     def process_post(self, post: Post, force: bool = False) -> None:
+        if self.is_path_up_to_date(post.file_path):
+            return
+
         file_path = post.file_path.with_suffix(".html")
         post_directory = post.file_path.parent
 
@@ -89,6 +92,8 @@ class TwitterCardAssistant(Assistant):
 
                 meta = soup.new_tag("meta", attrs={"name": name, "content": content})
                 soup.head.append(meta)
+
+        self.update_path(post.file_path)
 
     def _create_container(self, container_path: Path, mp3_path: Path) -> None:
         mp3 = MP3(mp3_path)

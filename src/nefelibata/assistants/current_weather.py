@@ -6,6 +6,7 @@ from datetime import timezone
 import requests
 
 from nefelibata.assistants import Assistant
+from nefelibata.assistants import Order
 from nefelibata.assistants import Scope
 from nefelibata.post import Post
 from nefelibata.utils import json_storage
@@ -18,7 +19,15 @@ MAX_AGE = timedelta(days=1)
 
 class CurrentWeatherAssistant(Assistant):
 
+    """
+    Download weather data.
+
+    This returns the current weather data based on geolocation, so it's
+    not super precise and needs to run shortly after the post was written.
+    """
+
     scopes = [Scope.POST]
+    order = Order.BEFORE
 
     def process_post(self, post: Post, force: bool = False) -> None:
         post_directory = post.file_path.parent
@@ -33,6 +42,3 @@ class CurrentWeatherAssistant(Assistant):
         with json_storage(storage) as weather:
             response = requests.get("https://wttr.in/?format=j1&m")
             weather.update(response.json())
-
-        # touch file to ensure it rebuilds with the weather info
-        post.file_path.touch()

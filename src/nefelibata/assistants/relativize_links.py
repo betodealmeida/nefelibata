@@ -24,6 +24,9 @@ class RelativizeLinksAssistant(Assistant):
             self._process_file(path)
 
     def _process_file(self, file_path: Path) -> None:
+        if self.is_path_up_to_date(file_path):
+            return
+
         tag_attributes = [
             ("a", "href"),
             ("img", "src"),
@@ -67,3 +70,5 @@ class RelativizeLinksAssistant(Assistant):
                             up = up / ".."
 
                     el.attrs[attr] = up / relative_url
+
+        self.update_path(file_path)

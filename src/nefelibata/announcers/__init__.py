@@ -1,6 +1,9 @@
 import json
 import logging
 import operator
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 from pathlib import Path
 from typing import Any
 from typing import Dict
@@ -99,6 +102,10 @@ class Announcer:
     def update_replies(self, post: Post) -> None:
         """Update replies.json with new replies, if any."""
         if self.url_header not in post.parsed:
+            return
+
+        # XXX make configurable
+        if datetime.now(timezone.utc) - post.date > timedelta(days=7):
             return
 
         post_directory = post.file_path.parent

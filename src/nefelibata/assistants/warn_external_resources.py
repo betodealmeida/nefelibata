@@ -6,6 +6,7 @@ import tinycss2
 from bs4 import BeautifulSoup
 
 from nefelibata.assistants import Assistant
+from nefelibata.assistants import Order
 from nefelibata.assistants import Scope
 from nefelibata.post import Post
 
@@ -15,6 +16,7 @@ _logger = logging.getLogger(__name__)
 class WarnExternalResourcesAssistant(Assistant):
 
     scopes = [Scope.POST, Scope.SITE]
+    order = Order.AFTER
 
     def process_post(self, post: Post, force: bool = False) -> None:
         self._process_file(post.file_path.with_suffix(".html"))
@@ -38,6 +40,9 @@ class WarnExternalResourcesAssistant(Assistant):
         return False
 
     def _process_file(self, file_path: Path) -> None:
+        if self.is_path_up_to_date(file_path):
+            return
+
         with open(file_path) as fp:
             html = fp.read()
 
@@ -56,6 +61,8 @@ class WarnExternalResourcesAssistant(Assistant):
                     _logger.warning(f"External resource found: {resource}")
                 if resource.endswith(".css"):
                     self._check_css(resource, file_path)
+
+        self.update_path(file_path)
 
     def _check_css(self, resource: str, file_path: Path) -> None:
         """Check CSS for external URLs."""

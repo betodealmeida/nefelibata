@@ -1,5 +1,6 @@
 import logging
 import re
+import time
 import urllib.parse
 from datetime import datetime
 from datetime import timedelta
@@ -44,6 +45,9 @@ class ArchiveLinksAssistant(Assistant):
         return parsed.netloc.endswith("archive.org")
 
     def process_post(self, post: Post, force: bool = False) -> None:
+        if self.is_path_up_to_date(post.file_path) and not force:
+            return
+
         # store all links to the post directory with information about where and
         # when they were saved, so they can be used by templates
         post_directory = post.file_path.parent
@@ -73,6 +77,8 @@ class ArchiveLinksAssistant(Assistant):
                 anchor.string = "archived"
                 span.extend(["[", anchor, "]"])
                 el.insert_after(span)
+
+        self.update_path(post.file_path)
 
     def _archive_links(self, post: Post, archives: Dict[str, Any]) -> None:
         # find links from the post HTML
@@ -108,6 +114,9 @@ class ArchiveLinksAssistant(Assistant):
                 _logger.info("Request timed out")
                 continue
 
+            if response.status_code == 429:
+                continue
+
             archived_url: Optional[str] = None
             link_header = response.headers.get("Link")
             if link_header:
@@ -122,3 +131,7 @@ class ArchiveLinksAssistant(Assistant):
                 "url": archived_url,
                 "date": datetime.now(tz=timezone.utc).isoformat(),
             }
+
+            # archive.org restricts this to 5 per minute, see
+            # https://rationalwiki.org/wiki/Internet_Archive#Restrictions
+            time.sleep(12)

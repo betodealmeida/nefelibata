@@ -25,6 +25,9 @@ class PostBuilder(Builder):
 
     def process_post(self, post: Post, force: bool = False) -> None:
         """Generate Atom feed."""
+        if self.is_path_up_to_date(post.file_path):
+            return
+
         if post.up_to_date and not force:
             return
 
@@ -68,6 +71,8 @@ class PostBuilder(Builder):
 
         with open(post.file_path.with_suffix(".html"), "w") as fp:
             fp.write(html)
+
+        self.update_path(post.file_path)
 
 
 def jinja2_formatdate(obj: Union[str, int, float, datetime], fmt: str) -> str:
