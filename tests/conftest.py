@@ -64,7 +64,7 @@ def config(fs: FakeFilesystem, root: Path) -> Iterator[Config]:
     with open(root / CONFIG_FILENAME, "w", encoding="utf-8") as output:
         output.write(yaml.dump(CONFIG))
 
-    yield CONFIG
+    yield CONFIG.copy()
 
 
 @pytest.fixture

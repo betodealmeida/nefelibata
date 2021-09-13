@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 from freezegun import freeze_time
+from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
 
 from nefelibata.builders.gemini import GeminiBuilder
@@ -83,6 +84,7 @@ Read more about Nefelibata[1].
 @pytest.mark.asyncio
 async def test_builder_site(
     mocker: MockerFixture,
+    fs: FakeFilesystem,
     root: Path,
     config: Config,
     post: Post,
@@ -91,19 +93,36 @@ async def test_builder_site(
     Test ``process_site``.
     """
     _logger = mocker.patch("nefelibata.builders.gemini._logger")
-    env = mocker.patch("nefelibata.builders.gemini.Environment")
-    env.return_value.get_template.return_value.render.return_value = """
-# 道&c.: Musings about the path and other things
-
-    This is the Gemini capsule of Beto Dealmeida.
-
-    => https://taoetc.org/ Website
-    => mailto://roberto@dealmeida.net Email address
-
-    ## Posts
-""".strip()
     mocker.patch("nefelibata.builders.gemini.get_posts", return_value=[post])
 
+    fs.create_dir(root / "templates/gemini")
+    with open(root / "templates/gemini/index.gmi", "w", encoding="utf-8") as output:
+        output.write(
+            """# {{ config.title }}: {{ config.subtitle }}
+
+This is the Gemini capsule of {{ config.author.name }}.
+
+=> {{ config.author.url }} Website
+=> mailto://{{ config.author.email }} Email address
+
+## Posts
+
+{{ posts }}
+
+{% if config.social -%}
+## Links
+{%- endif %}
+
+{% for link in config.social -%}
+=> {{ link.url }} {{ link.title }}
+{% endfor %}
+Crafted with ❤️  using Nefelibata
+
+=> https://nefelibata.readthedocs.io/ Nefelibata
+""",
+        )
+
+    config["social"] = [{"title": "Mastodon", "url": "https://2c.taoetc.org/@beto"}]
     builder = GeminiBuilder(root, config)
     with freeze_time("2021-01-02T00:00:00Z"):
         await builder.process_site()
@@ -119,14 +138,22 @@ async def test_builder_site(
         content
         == """# 道&c.: Musings about the path and other things
 
-    This is the Gemini capsule of Beto Dealmeida.
+This is the Gemini capsule of Beto Dealmeida.
 
-    => https://taoetc.org/ Website
-    => mailto://roberto@dealmeida.net Email address
+=> https://taoetc.org/ Website
+=> mailto://roberto@dealmeida.net Email address
 
-    ## Posts
+## Posts
 
-=> first/index.gmi 2020-12-31 16:00:00-08:00 — This is your first post"""
+=> first/index.gmi 2020-12-31 16:00:00-08:00 — This is your first post
+
+## Links
+
+=> https://2c.taoetc.org/@beto Mastodon
+
+Crafted with ❤️  using Nefelibata
+
+=> https://nefelibata.readthedocs.io/ Nefelibata"""
     )
 
     # call again, test that file is up-to-date

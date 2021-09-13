@@ -60,10 +60,6 @@ class GeminiBuilder(Builder):
             output.write(gemini)
 
     async def process_site(self, force: bool = False) -> None:
-        env = Environment(loader=FileSystemLoader(str(self.root / "templates/gemini")))
-        template = env.get_template("index.gmi")
-        header = template.render(config=self.config)
-
         index_path = self.root / "build/gemini/index.gmi"
         last_update = index_path.stat().st_mtime if index_path.exists() else None
 
@@ -81,7 +77,10 @@ class GeminiBuilder(Builder):
         for post in get_posts(self.root):
             url = post.url + ".gmi"
             links.append(f"=> {url} {post.timestamp} — {post.title}")
-        gemini = header.strip() + "\n\n" + "\n".join(links)
+
+        env = Environment(loader=FileSystemLoader(str(self.root / "templates/gemini")))
+        template = env.get_template("index.gmi")
+        gemini = template.render(config=self.config, posts="\n".join(links))
 
         _logger.info("Creating Gemini index")
         with open(index_path, "w", encoding="utf-8") as output:

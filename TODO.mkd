@@ -2,6 +2,7 @@
 - [x] cancel build
 - [x] agnostic build system (Gemini, HTML)
 - [x] only build if needed
+- [ ] rebuild if template changed? or use force?
 - [ ] nb init: copy templates based on configured builders
 - [ ] nb new
 - [ ] nb publish
