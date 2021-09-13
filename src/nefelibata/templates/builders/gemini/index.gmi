@@ -4,14 +4,14 @@ This is the Gemini capsule of {{ config.author.name }}.
 
 => {{ config.author.url }} Website
 => mailto://{{ config.author.email }} Email address
-=> feed.gmi Gemlog
+=> {{ home }}/feed.gmi Gemlog
 
 {% if posts -%}
 ## Posts
 {%- endif %}
 
 {% for post in posts -%}
-=> {{ post.url }}.gmi {{ post.timestamp }} — {{ post.title }}
+=> {{ home }}/{{ post.url }}.gmi {{ post.timestamp }} — {{ post.title }}
 {%- endfor %}
 
 {% if config.social -%}

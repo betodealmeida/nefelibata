@@ -75,7 +75,7 @@ class Builder:
         # create build directory
         build_directory = self.root / "build" / self.name
         if not build_directory.exists():
-            build_directory.mkdir(parents=True, exist_ok=True)
+            build_directory.mkdir(parents=True)
 
     def get_environment(self) -> Environment:
         """

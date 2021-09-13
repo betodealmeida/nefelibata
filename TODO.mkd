@@ -5,6 +5,10 @@
 - [X] remove url from config (HTML concept)
 - [X] feed.gmi
 - [X] post.gmi with metadata (back, date, author)
+- [X] tags
+- [X] base URL in gemini
+- [ ] categories
 - [/] nb init: copy templates based on configured builders
 - [ ] nb new
 - [ ] nb publish
+- [ ] nb announce

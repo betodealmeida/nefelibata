@@ -73,6 +73,11 @@ Read more about Nefelibata[1].
 
 => https://nefelibata.readthedocs.io/ 1: https://nefelibata.readthedocs.io/
 
+# Tags
+
+=> gemini://localhost:1965/tags/welcome welcome
+=> gemini://localhost:1965/tags/blog blog
+
 # About
 
 Published on 2020-12-31 16:00:00-08:00 by Beto Dealmeida <roberto@dealmeida.net>.
@@ -116,7 +121,7 @@ async def test_builder_site(
         await builder.process_site()
 
     assets_directory = root / "build/gemini"
-    assets = ("index.gmi", "feed.gmi")
+    assets = ("index.gmi", "feed.gmi", "tags/welcome.gmi", "tags/blog.gmi")
 
     # test that files were created
     last_update: Dict[Any, Any] = {}
@@ -125,8 +130,14 @@ async def test_builder_site(
         last_update[asset] = (assets_directory / asset).stat().st_mtime
     _logger.info.assert_has_calls(
         [
-            mocker.call("Creating %s", "index.gmi"),
-            mocker.call("Creating %s", "feed.gmi"),
+            mocker.call("Creating %s", Path("/path/to/blog/build/gemini/index.gmi")),
+            mocker.call("Creating %s", Path("/path/to/blog/build/gemini/feed.gmi")),
+            mocker.call(
+                "Creating %s", Path("/path/to/blog/build/gemini/tags/welcome.gmi"),
+            ),
+            mocker.call(
+                "Creating %s", Path("/path/to/blog/build/gemini/tags/blog.gmi"),
+            ),
         ],
     )
     with open(assets_directory / "index.gmi", encoding="utf-8") as input_:
@@ -139,11 +150,11 @@ This is the Gemini capsule of Beto Dealmeida.
 
 => https://taoetc.org/ Website
 => mailto://roberto@dealmeida.net Email address
-=> feed.gmi Gemlog
+=> gemini://localhost:1965/feed.gmi Gemlog
 
 ## Posts
 
-=> first/index.gmi 2020-12-31 16:00:00-08:00 — This is your first post
+=> gemini://localhost:1965/first/index.gmi 2020-12-31 16:00:00-08:00 — This is your first post
 
 ## Links
 
@@ -161,7 +172,7 @@ Crafted with ❤️  using Nefelibata
 
 ## Beto Dealmeida's gemlog
 
-=> first/index.gmi 2020-12-31 — This is your first post"""
+=> gemini://localhost:1965/first/index.gmi 2020-12-31 — This is your first post"""
     )
 
     # call again, test that file is up-to-date
@@ -172,8 +183,22 @@ Crafted with ❤️  using Nefelibata
         assert (assets_directory / asset).stat().st_mtime == last_update[asset]
     _logger.info.assert_has_calls(
         [
-            mocker.call("File %s is up-to-date, nothing to do", "index.gmi"),
-            mocker.call("File %s is up-to-date, nothing to do", "feed.gmi"),
+            mocker.call(
+                "File %s is up-to-date, nothing to do",
+                Path("/path/to/blog/build/gemini/index.gmi"),
+            ),
+            mocker.call(
+                "File %s is up-to-date, nothing to do",
+                Path("/path/to/blog/build/gemini/feed.gmi"),
+            ),
+            mocker.call(
+                "File %s is up-to-date, nothing to do",
+                Path("/path/to/blog/build/gemini/tags/welcome.gmi"),
+            ),
+            mocker.call(
+                "File %s is up-to-date, nothing to do",
+                Path("/path/to/blog/build/gemini/tags/blog.gmi"),
+            ),
         ],
     )
 
@@ -185,7 +210,13 @@ Crafted with ❤️  using Nefelibata
         assert (assets_directory / asset).stat().st_mtime > last_update[asset]
     _logger.info.assert_has_calls(
         [
-            mocker.call("Creating %s", "index.gmi"),
-            mocker.call("Creating %s", "feed.gmi"),
+            mocker.call("Creating %s", Path("/path/to/blog/build/gemini/index.gmi")),
+            mocker.call("Creating %s", Path("/path/to/blog/build/gemini/feed.gmi")),
+            mocker.call(
+                "Creating %s", Path("/path/to/blog/build/gemini/tags/welcome.gmi"),
+            ),
+            mocker.call(
+                "Creating %s", Path("/path/to/blog/build/gemini/tags/blog.gmi"),
+            ),
         ],
     )

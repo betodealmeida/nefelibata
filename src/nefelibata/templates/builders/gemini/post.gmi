@@ -1,5 +1,11 @@
 {{ content }}
 
+# Tags
+{% set tags = post.metadata.keywords.replace(" ", "").split(",") %}
+{%- for tag in tags %}
+=> {{ home }}/tags/{{ tag }} {{ tag }}
+{%- endfor %}
+
 # About
 
 Published on {{ post.timestamp }} by {{ config.author.name }} <{{ config.author.email }}>.

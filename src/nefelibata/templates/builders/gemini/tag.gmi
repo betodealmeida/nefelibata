@@ -1,6 +1,4 @@
-# {{ config.title }}: {{ config.subtitle }}
-
-## {{ config.author.name }}'s gemlog
+# {{ tag }}
 
 {% for post in posts -%}
 => {{ home }}/{{ post.url }}.gmi {{ post.timestamp.date() }} — {{ post.title }}

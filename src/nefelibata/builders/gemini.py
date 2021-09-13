@@ -2,7 +2,9 @@
 A builder for Gemini (https://gemini.circumlunar.space/).
 """
 import logging
+from collections import defaultdict
 from pathlib import Path
+from typing import Any, List
 
 from md2gemini import md2gemini
 
@@ -24,10 +26,17 @@ class GeminiBuilder(Builder):
 
     def __init__(self, root: Path, config: Config, home: str, links: str = "paragraph"):
         super().__init__(root, config)
-        self.home = home
+        self.home = home.rstrip("/")
         self.links = links
 
         self.env = self.get_environment()
+
+    def setup(self) -> None:
+        super().setup()
+
+        tags_directory = self.root / "build/gemini/tags"
+        if not tags_directory.exists():
+            tags_directory.mkdir()
 
     async def process_post(self, post: Post, force: bool = False) -> None:
         post_path = (
@@ -61,22 +70,50 @@ class GeminiBuilder(Builder):
             output.write(gemini)
 
     async def process_site(self, force: bool = False) -> None:
+        posts = get_posts(self.root)
+
+        # build index and feed
         for asset in ("index.gmi", "feed.gmi"):
-            asset_path = self.root / "build/gemini" / asset
-            last_update = asset_path.stat().st_mtime if asset_path.exists() else None
+            path = self.root / "build/gemini" / asset
+            self._build_index(path, asset, posts, force)
 
-            posts = get_posts(self.root)
-            if (
-                last_update
-                and all(post.path.stat().st_mtime < last_update for post in posts)
-                and not force
-            ):
-                _logger.info("File %s is up-to-date, nothing to do", asset)
-                continue
+        # group posts by tag
+        tags = defaultdict(list)
+        for post in posts:
+            keywords = post.metadata.get("keywords", "")
+            post_tags = [keyword.strip() for keyword in keywords.split(",")]
+            for tag in post_tags:
+                tags[tag].append(post)
+        for tag, tag_posts in tags.items():
+            path = self.root / "build/gemini/tags" / (tag + ".gmi")
+            self._build_index(path, "tag.gmi", tag_posts, force, tag=tag)
 
-            template = self.env.get_template(asset)
-            gemini = template.render(config=self.config, posts=posts)
+    def _build_index(
+        self,
+        path: Path,
+        template_name: str,
+        posts: List[Post],
+        force: bool = False,
+        **kwargs: Any
+    ) -> None:
+        """
+        Build an index file from a list of posts.
+        """
+        last_update = path.stat().st_mtime if path.exists() else None
 
-            _logger.info("Creating %s", asset)
-            with open(asset_path, "w", encoding="utf-8") as output:
-                output.write(gemini)
+        if (
+            last_update
+            and all(post.path.stat().st_mtime < last_update for post in posts)
+            and not force
+        ):
+            _logger.info("File %s is up-to-date, nothing to do", path)
+            return
+
+        template = self.env.get_template(template_name)
+        gemini = template.render(
+            config=self.config, posts=posts, home=self.home, **kwargs
+        )
+
+        _logger.info("Creating %s", path)
+        with open(path, "w", encoding="utf-8") as output:
+            output.write(gemini)
