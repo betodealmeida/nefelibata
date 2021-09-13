@@ -12,6 +12,8 @@ POST_DATA = {
         "keywords": "welcome, blog",
         "summary": "Hello, world!",
     },
+    "tags": {"welcome", "blog"},
+    "categories": ["stem"],
     "url": "first/index",
     "content": """# Welcome #
 
@@ -40,4 +42,11 @@ CONFIG = {
         "note": "Este, sou eu",
     },
     "language": "en",
+    "categories": {
+        "stem": {
+            "label": "STEM",
+            "description": "Science, technology, engineering, & math",
+            "tags": ["blog", "programming"],
+        },
+    },
 }

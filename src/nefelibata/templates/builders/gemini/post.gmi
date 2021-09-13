@@ -1,10 +1,20 @@
 {{ content }}
+{% if post.tags %}
 
 # Tags
-{% set tags = post.metadata.keywords.replace(" ", "").split(",") %}
-{%- for tag in tags %}
-=> {{ home }}/tags/{{ tag }} {{ tag }}
-{%- endfor %}
+
+{% for tag in sorted(post.tags) %}
+=> {{ home }}/tags/{{ tag }}.gmi {{ tag }}
+{% endfor %}
+{% endif %}
+{% if post.categories %}
+
+# Categories
+
+{% for category in sorted(post.categories) %}
+=> {{ home }}/categories/{{ category }}.gmi {{ config['categories'][category]['label'] }}
+{% endfor %}
+{% endif %}
 
 # About
 

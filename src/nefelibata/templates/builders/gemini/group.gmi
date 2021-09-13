@@ -1,6 +1,8 @@
-# {{ config.title }}: {{ config.subtitle }}
+# {{ title }}
+{% if subtitle %}
 
-## {{ config.author.name }}'s Gemlog
+## {{ subtitle }}
+{% endif %}
 
 {% for post in posts %}
 => {{ home }}/{{ post.url }}.gmi {{ post.timestamp.date() }} — {{ post.title }}

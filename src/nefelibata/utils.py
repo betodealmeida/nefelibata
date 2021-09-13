@@ -45,7 +45,7 @@ def find_directory(cwd: Path) -> Path:
 
 def get_config(root: Path) -> Config:
     """
-    Return the configuration for a weblog.
+    Return the configuration for a blog.
     """
     path = root / CONFIG_FILENAME
     if not path.exists():

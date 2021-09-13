@@ -7,8 +7,7 @@
 - [X] post.gmi with metadata (back, date, author)
 - [X] tags
 - [X] base URL in gemini
-- [ ] categories
-- [/] nb init: copy templates based on configured builders
+- [X] categories
+- [X] nb init: copy templates based on configured builders
 - [ ] nb new
 - [ ] nb publish
-- [ ] nb announce

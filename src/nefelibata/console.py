@@ -2,10 +2,12 @@
 Nefelibata blog engine.
 
 Usage:
+  nb init [ROOT_DIR] [-f] [--loglevel=INFO]
   nb build [ROOT_DIR] [-f] [--loglevel=INFO]
 
 Actions:
-  build     Build blog from Markdown files and online interactions.
+  init              Create a new blog skeleton.
+  build             Build blog from Markdown files and online interactions.
 
 Options:
   -h --help         Show this screen.
@@ -24,7 +26,7 @@ from pathlib import Path
 from docopt import docopt
 
 from nefelibata import __version__
-from nefelibata.cli import build
+from nefelibata.cli import build, init
 from nefelibata.utils import find_directory, setup_logging
 
 _logger = logging.getLogger(__name__)
@@ -43,11 +45,13 @@ async def main() -> None:
     else:
         root = Path(arguments["ROOT_DIR"])
 
-    if arguments["build"]:
-        try:
+    try:
+        if arguments["build"]:
             await build.run(root, arguments["--force"])
-        except asyncio.CancelledError:
-            _logger.info("Canceled")
+        elif arguments["init"]:
+            await init.run(root, arguments["--force"])
+    except asyncio.CancelledError:
+        _logger.info("Canceled")
 
 
 def run() -> None:

@@ -11,6 +11,28 @@ from nefelibata import console
 
 
 @pytest.mark.asyncio
+async def test_main_init(mocker: MockerFixture) -> None:
+    """
+    Test ``main`` with the "init" action.
+    """
+    init = mocker.patch("nefelibata.console.init")
+    init.run = mocker.AsyncMock()
+
+    mocker.patch(
+        "nefelibata.console.docopt",
+        return_value={
+            "--loglevel": "debug",
+            "build": False,
+            "init": True,
+            "ROOT_DIR": "/path/to/blog",
+            "--force": False,
+        },
+    )
+    await console.main()
+    init.run.assert_called_with(Path("/path/to/blog"), False)
+
+
+@pytest.mark.asyncio
 async def test_main_build(mocker: MockerFixture) -> None:
     """
     Test ``main`` with the "build" action.
@@ -23,6 +45,7 @@ async def test_main_build(mocker: MockerFixture) -> None:
         return_value={
             "--loglevel": "debug",
             "build": True,
+            "init": False,
             "ROOT_DIR": "/path/to/blog",
             "--force": False,
         },
@@ -35,6 +58,7 @@ async def test_main_build(mocker: MockerFixture) -> None:
         return_value={
             "--loglevel": "debug",
             "build": True,
+            "init": False,
             "ROOT_DIR": "/path/to/blog",
             "--force": True,
         },
@@ -47,6 +71,7 @@ async def test_main_build(mocker: MockerFixture) -> None:
         return_value={
             "--loglevel": "debug",
             "build": True,
+            "init": False,
             "ROOT_DIR": None,
             "--force": True,
         },
@@ -69,6 +94,7 @@ async def test_main_no_action(mocker: MockerFixture) -> None:
         return_value={
             "--loglevel": "debug",
             "build": False,
+            "init": False,
             "ROOT_DIR": "/path/to/blog",
             "--force": False,
         },
@@ -90,6 +116,7 @@ async def test_main_canceled(mocker) -> None:
         return_value={
             "--loglevel": "debug",
             "build": True,
+            "init": False,
             "ROOT_DIR": "/path/to/blog",
             "--force": False,
         },

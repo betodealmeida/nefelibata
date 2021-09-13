@@ -6,9 +6,11 @@ from email.header import decode_header, make_header
 from email.parser import Parser
 from email.utils import formatdate, parsedate_to_datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 from pydantic import BaseModel
+
+from nefelibata.typing import Config
 
 
 class Post(BaseModel):  # pylint: disable=too-few-public-methods
@@ -28,6 +30,10 @@ class Post(BaseModel):  # pylint: disable=too-few-public-methods
     # all the headers from the post
     metadata: Dict[str, Any]
 
+    # special metadata
+    tags: Set[str]
+    categories: Set[str]
+
     # relative URL to the post, without any extensions
     # eg: first/index
     url: str
@@ -36,7 +42,7 @@ class Post(BaseModel):  # pylint: disable=too-few-public-methods
     content: str
 
 
-def build_post(root: Path, path: Path) -> Post:
+def build_post(root: Path, config: Config, path: Path) -> Post:
     """
     Build a post from a file path.
 
@@ -60,24 +66,35 @@ def build_post(root: Path, path: Path) -> Post:
             input_.write(str(parsed))
 
     metadata = {k: v for k, v in parsed.items() if k not in required}
+    tags = {
+        keyword.strip()
+        for keyword in parsed.get("keywords", "").split(",")
+        if keyword.strip()
+    }
+    categories = {
+        category
+        for category, params in config.get("categories", {}).items()
+        if tags & set(params["tags"])
+    }
 
     return Post(
         path=path,
         title=str(make_header(decode_header(parsed["subject"]))),
         timestamp=parsedate_to_datetime(parsed["date"]),
         metadata=metadata,
+        tags=tags,
+        categories=categories,
         url=str(path.relative_to(root / "posts").with_suffix("")),
         content=parsed.get_payload(decode=False),
     )
 
 
-def get_posts(root: Path, count: Optional[int] = None) -> List[Post]:
+def get_posts(root: Path, config: Config, count: Optional[int] = None) -> List[Post]:
     """
     Return all the posts.
     """
-
     paths = list((root / "posts").glob("**/*.mkd"))
     paths.sort(key=lambda path: path.stat().st_mtime, reverse=True)
     paths = paths[:count]  # a[:None] == a
 
-    return [build_post(root, path) for path in paths]
+    return [build_post(root, config, path) for path in paths]

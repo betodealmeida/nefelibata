@@ -38,6 +38,10 @@ class GeminiBuilder(Builder):
         if not tags_directory.exists():
             tags_directory.mkdir()
 
+        categories_directory = self.root / "build/gemini/categories"
+        if not categories_directory.exists():
+            categories_directory.mkdir()
+
     async def process_post(self, post: Post, force: bool = False) -> None:
         post_path = (
             self.root
@@ -56,6 +60,7 @@ class GeminiBuilder(Builder):
             return
 
         content = md2gemini(post.content, links=self.links, plain=True, md_links=True)
+        content = content.replace("\r", "")
 
         template = self.env.get_template("post.gmi")
         gemini = template.render(
@@ -63,6 +68,7 @@ class GeminiBuilder(Builder):
             post=post,
             content=content,
             home=self.home,
+            sorted=sorted,
         )
 
         _logger.info("Creating Gemini post")
@@ -70,7 +76,7 @@ class GeminiBuilder(Builder):
             output.write(gemini)
 
     async def process_site(self, force: bool = False) -> None:
-        posts = get_posts(self.root)
+        posts = get_posts(self.root, self.config)
 
         # build index and feed
         for asset in ("index.gmi", "feed.gmi"):
@@ -80,13 +86,29 @@ class GeminiBuilder(Builder):
         # group posts by tag
         tags = defaultdict(list)
         for post in posts:
-            keywords = post.metadata.get("keywords", "")
-            post_tags = [keyword.strip() for keyword in keywords.split(",")]
-            for tag in post_tags:
+            for tag in sorted(post.tags):
                 tags[tag].append(post)
         for tag, tag_posts in tags.items():
             path = self.root / "build/gemini/tags" / (tag + ".gmi")
-            self._build_index(path, "tag.gmi", tag_posts, force, tag=tag)
+            self._build_index(path, "group.gmi", tag_posts, force, title=tag)
+
+        # group tags by categories
+        categories = defaultdict(list)
+        for post in posts:
+            for category in sorted(post.categories):
+                categories[category].append(post)
+        for category, category_posts in categories.items():
+            path = self.root / "build/gemini/categories" / (category + ".gmi")
+            title = self.config["categories"][category]["label"]
+            subtitle = self.config["categories"][category]["description"]
+            self._build_index(
+                path,
+                "group.gmi",
+                category_posts,
+                force,
+                title=title,
+                subtitle=subtitle,
+            )
 
     def _build_index(
         self,
@@ -111,7 +133,7 @@ class GeminiBuilder(Builder):
 
         template = self.env.get_template(template_name)
         gemini = template.render(
-            config=self.config, posts=posts, home=self.home, **kwargs
+            config=self.config, posts=posts, home=self.home, sorted=sorted, **kwargs
         )
 
         _logger.info("Creating %s", path)

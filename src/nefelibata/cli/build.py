@@ -16,7 +16,7 @@ async def run(root: Path, force: bool = False) -> None:
     """
     Build blog from Markdown files and online interactions.
     """
-    _logger.info("Building weblog")
+    _logger.info("Building blog")
 
     config = get_config(root)
     _logger.debug(config)
@@ -29,7 +29,7 @@ async def run(root: Path, force: bool = False) -> None:
     tasks = []
 
     _logger.info("Processing posts")
-    posts = get_posts(root)
+    posts = get_posts(root, config)
     builders = get_builders(root, config, Scope.POST)
     for post in posts:
         for builder in builders:

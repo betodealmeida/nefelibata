@@ -10,6 +10,7 @@ from freezegun import freeze_time
 from pyfakefs.fake_filesystem import FakeFilesystem
 
 from nefelibata.post import Post, build_post, get_posts
+from nefelibata.typing import Config
 
 from .fakes import POST_CONTENT, POST_DATA
 
@@ -27,6 +28,8 @@ def test_post() -> None:
         "keywords": "welcome, blog",
         "summary": "Hello, world!",
     }
+    assert post.tags == {"welcome", "blog"}
+    assert post.categories == {"stem"}
     assert post.url == "first/index"
     assert (
         post.content
@@ -38,7 +41,7 @@ Read more about [Nefelibata](https://nefelibata.readthedocs.io/)."""
     )
 
 
-def test_build_post(fs: FakeFilesystem, root: Path) -> None:
+def test_build_post(fs: FakeFilesystem, root: Path, config: Config) -> None:
     """
     Test ``build_post``.
     """
@@ -50,7 +53,7 @@ def test_build_post(fs: FakeFilesystem, root: Path) -> None:
         with open(path, "w", encoding="utf-8") as output:
             output.write(POST_CONTENT)
 
-    post = build_post(root, path)
+    post = build_post(root, config, path)
 
     assert post.path == path
     assert post.title == "This is your first post"
@@ -89,11 +92,11 @@ Read more about [Nefelibata](https://nefelibata.readthedocs.io/)."""
     # build again, and test that the file wasn't modified since it
     # already has all the required headers
     last_update = path.stat().st_mtime
-    build_post(root, path)
+    build_post(root, config, path)
     assert path.stat().st_mtime == last_update
 
 
-def test_get_posts(fs: FakeFilesystem, root: Path) -> None:
+def test_get_posts(fs: FakeFilesystem, root: Path, config: Config) -> None:
     """
     Test ``get_posts``.
     """
@@ -101,11 +104,11 @@ def test_get_posts(fs: FakeFilesystem, root: Path) -> None:
         fs.create_dir(root / "posts" / subdir)
         fs.create_file(root / "posts" / subdir / "index.mkd")
 
-    posts = get_posts(root)
+    posts = get_posts(root, config)
     assert len(posts) == 2
     assert posts[0].path == Path(root / "posts/two/index.mkd")
     assert posts[1].path == Path(root / "posts/one/index.mkd")
 
     # test limited number of posts returned
-    posts = get_posts(root, 1)
+    posts = get_posts(root, config, 1)
     assert len(posts) == 1

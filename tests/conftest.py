@@ -72,7 +72,7 @@ def config(fs: FakeFilesystem, root: Path) -> Iterator[Config]:
 
 
 @pytest.fixture
-def post(fs: FakeFilesystem, root: Path) -> Iterator[Post]:
+def post(fs: FakeFilesystem, root: Path, config: Config) -> Iterator[Post]:
     """
     Create a post.
     """
@@ -82,6 +82,6 @@ def post(fs: FakeFilesystem, root: Path) -> Iterator[Post]:
     with freeze_time("2021-01-01T00:00:00Z"):
         with open(post_path, "w", encoding="utf-8") as output:
             output.write(POST_CONTENT)
-        post = build_post(root, post_path)
+        post = build_post(root, config, post_path)
 
     yield post

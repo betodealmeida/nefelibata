@@ -1,5 +1,0 @@
-# {{ tag }}
-
-{% for post in posts -%}
-=> {{ home }}/{{ post.url }}.gmi {{ post.timestamp.date() }} — {{ post.title }}
-{%- endfor %}

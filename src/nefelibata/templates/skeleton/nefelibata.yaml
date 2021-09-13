@@ -1,0 +1,44 @@
+title: 道&c.
+subtitle: Musings about the path and other things
+author:
+  name: Beto Dealmeida
+  url: https://taoetc.org/
+  email: roberto@dealmeida.net
+  note: Este, sou eu
+language: en
+
+social:
+  - title: Code
+    url: https://github.com/betodealmeida
+  - title: Music
+    url: https://thefishermenandthepriestess.com
+  - title: Mastodon
+    url: https://2c.taoetc.org/@beto
+
+categories:
+  stem:
+    label: STEM
+    description: Science, technology, engineering, & math
+    tags:
+      - programming
+      - python
+      - electronics
+      - arduino
+      - science
+      - blog
+      - internet
+      - engineering
+      - tech
+      - web
+  music:
+    label: Music
+    description: All things music
+    tags:
+      - music
+      - song
+      - fawm
+      - 5090
+
+builders:
+  - plugin: gemini
+    home: gemini://localhost:1965

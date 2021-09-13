@@ -55,6 +55,13 @@ def test_get_config(root: Path, config: Config) -> None:
             "note": "Este, sou eu",
         },
         "language": "en",
+        "categories": {
+            "stem": {
+                "label": "STEM",
+                "description": "Science, technology, engineering, & math",
+                "tags": ["blog", "programming"],
+            },
+        },
     }
 
     with pytest.raises(SystemExit) as excinfo:

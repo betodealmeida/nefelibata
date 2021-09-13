@@ -5,22 +5,23 @@ This is the Gemini capsule of {{ config.author.name }}.
 => {{ config.author.url }} Website
 => mailto://{{ config.author.email }} Email address
 => {{ home }}/feed.gmi Gemlog
+{% if posts %}
 
-{% if posts -%}
 ## Posts
-{%- endif %}
 
-{% for post in posts -%}
+{% for post in posts %}
 => {{ home }}/{{ post.url }}.gmi {{ post.timestamp }} — {{ post.title }}
-{%- endfor %}
+{% endfor %}
+{% endif %}
+{% if config.social %}
 
-{% if config.social -%}
 ## Links
-{%- endif %}
 
-{% for link in config.social -%}
+{% for link in config.social %}
 => {{ link.url }} {{ link.title }}
 {% endfor %}
+{% endif %}
+
 Crafted with ❤️  using Nefelibata
 
 => https://nefelibata.readthedocs.io/ Nefelibata

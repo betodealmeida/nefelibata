@@ -75,8 +75,12 @@ Read more about Nefelibata[1].
 
 # Tags
 
-=> gemini://localhost:1965/tags/welcome welcome
-=> gemini://localhost:1965/tags/blog blog
+=> gemini://localhost:1965/tags/blog.gmi blog
+=> gemini://localhost:1965/tags/welcome.gmi welcome
+
+# Categories
+
+=> gemini://localhost:1965/categories/stem.gmi STEM
 
 # About
 
@@ -133,10 +137,16 @@ async def test_builder_site(
             mocker.call("Creating %s", Path("/path/to/blog/build/gemini/index.gmi")),
             mocker.call("Creating %s", Path("/path/to/blog/build/gemini/feed.gmi")),
             mocker.call(
-                "Creating %s", Path("/path/to/blog/build/gemini/tags/welcome.gmi"),
+                "Creating %s",
+                Path("/path/to/blog/build/gemini/tags/blog.gmi"),
             ),
             mocker.call(
-                "Creating %s", Path("/path/to/blog/build/gemini/tags/blog.gmi"),
+                "Creating %s",
+                Path("/path/to/blog/build/gemini/tags/welcome.gmi"),
+            ),
+            mocker.call(
+                "Creating %s",
+                Path("/path/to/blog/build/gemini/categories/stem.gmi"),
             ),
         ],
     )
@@ -170,9 +180,10 @@ Crafted with ❤️  using Nefelibata
         content
         == """# 道&c.: Musings about the path and other things
 
-## Beto Dealmeida's gemlog
+## Beto Dealmeida's Gemlog
 
-=> gemini://localhost:1965/first/index.gmi 2020-12-31 — This is your first post"""
+=> gemini://localhost:1965/first/index.gmi 2020-12-31 — This is your first post
+"""
     )
 
     # call again, test that file is up-to-date
@@ -193,11 +204,15 @@ Crafted with ❤️  using Nefelibata
             ),
             mocker.call(
                 "File %s is up-to-date, nothing to do",
+                Path("/path/to/blog/build/gemini/tags/blog.gmi"),
+            ),
+            mocker.call(
+                "File %s is up-to-date, nothing to do",
                 Path("/path/to/blog/build/gemini/tags/welcome.gmi"),
             ),
             mocker.call(
                 "File %s is up-to-date, nothing to do",
-                Path("/path/to/blog/build/gemini/tags/blog.gmi"),
+                Path("/path/to/blog/build/gemini/categories/stem.gmi"),
             ),
         ],
     )
@@ -213,10 +228,16 @@ Crafted with ❤️  using Nefelibata
             mocker.call("Creating %s", Path("/path/to/blog/build/gemini/index.gmi")),
             mocker.call("Creating %s", Path("/path/to/blog/build/gemini/feed.gmi")),
             mocker.call(
-                "Creating %s", Path("/path/to/blog/build/gemini/tags/welcome.gmi"),
+                "Creating %s",
+                Path("/path/to/blog/build/gemini/tags/blog.gmi"),
             ),
             mocker.call(
-                "Creating %s", Path("/path/to/blog/build/gemini/tags/blog.gmi"),
+                "Creating %s",
+                Path("/path/to/blog/build/gemini/tags/welcome.gmi"),
+            ),
+            mocker.call(
+                "Creating %s",
+                Path("/path/to/blog/build/gemini/categories/stem.gmi"),
             ),
         ],
     )

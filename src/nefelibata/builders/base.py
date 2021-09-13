@@ -83,6 +83,8 @@ class Builder:
         """
         return Environment(
             loader=FileSystemLoader(str(self.root / "templates/builders" / self.name)),
+            lstrip_blocks=True,
+            trim_blocks=True,
         )
 
     async def process_post(self, post: Post, force: bool = False) -> None:
