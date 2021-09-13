@@ -18,6 +18,7 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from nefelibata.constants import CONFIG_FILENAME
 from nefelibata.post import Post, build_post
 from nefelibata.typing import Config
+from nefelibata.utils import get_project_root
 
 from .fakes import CONFIG, POST_CONTENT
 
@@ -51,6 +52,9 @@ def root(fs: FakeFilesystem) -> Iterator[Path]:
     """
     Create the blog root directory.
     """
+    root = get_project_root()
+    fs.add_real_directory(root / "src/nefelibata/templates")
+
     root = Path("/path/to/blog")
     fs.create_dir(root)
     yield root

@@ -3,10 +3,10 @@ Tests for ``nefelibata.builders.gemini``.
 """
 # pylint: disable=invalid-name
 from pathlib import Path
+from typing import Any, Dict
 
 import pytest
 from freezegun import freeze_time
-from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
 
 from nefelibata.builders.gemini import GeminiBuilder
@@ -15,19 +15,29 @@ from nefelibata.typing import Config
 
 
 @pytest.mark.asyncio
-async def test_builder_create_directory(root: Path, config: Config) -> None:
+async def test_builder_setup(root: Path, config: Config) -> None:
     """
-    Test that the build directory is created.
+    Test that templates and build directory are created.
     """
+    template_directory = root / "templates/builders/gemini"
     build_directory = root / "build/gemini"
+    assert not template_directory.exists()
     assert not build_directory.exists()
-    GeminiBuilder(root, config)
-    assert build_directory.exists()
 
-    # on the second call the directory should be unmodified
-    last_update = build_directory.stat().st_mtime
-    GeminiBuilder(root, config)
-    assert build_directory.stat().st_mtime == last_update
+    GeminiBuilder(root, config, "gemini://localhost:1965")
+    last_update: Dict[Any, Any] = {}
+    assert template_directory.exists()
+    for file in ("index.gmi", "feed.gmi", "post.gmi"):
+        assert (template_directory / file).exists()
+        last_update[file] = (template_directory / file).stat().st_mtime
+    assert build_directory.exists()
+    last_update[build_directory] = build_directory.stat().st_mtime
+
+    # on the second call the files and directories should be unmodified
+    GeminiBuilder(root, config, "gemini://localhost:1965")
+    for file in ("index.gmi", "feed.gmi", "post.gmi"):
+        assert (template_directory / file).stat().st_mtime == last_update[file]
+    assert build_directory.stat().st_mtime == last_update[build_directory]
 
 
 @pytest.mark.asyncio
@@ -42,7 +52,7 @@ async def test_builder_post(
     """
     _logger = mocker.patch("nefelibata.builders.gemini._logger")
 
-    builder = GeminiBuilder(root, config)
+    builder = GeminiBuilder(root, config, "gemini://localhost:1965")
     with freeze_time("2021-01-02T00:00:00Z"):
         await builder.process_post(post)
 
@@ -61,7 +71,13 @@ This is your first post. It should be written using Markdown.
 
 Read more about Nefelibata[1].
 
-=> https://nefelibata.readthedocs.io/ 1: https://nefelibata.readthedocs.io/"""
+=> https://nefelibata.readthedocs.io/ 1: https://nefelibata.readthedocs.io/
+
+# About
+
+Published on 2020-12-31 16:00:00-08:00 by Beto Dealmeida <roberto@dealmeida.net>.
+
+=> gemini://localhost:1965 Go back to the main index"""
     )
 
     # call again, test that file is up-to-date
@@ -84,7 +100,6 @@ Read more about Nefelibata[1].
 @pytest.mark.asyncio
 async def test_builder_site(
     mocker: MockerFixture,
-    fs: FakeFilesystem,
     root: Path,
     config: Config,
     post: Post,
@@ -95,35 +110,8 @@ async def test_builder_site(
     _logger = mocker.patch("nefelibata.builders.gemini._logger")
     mocker.patch("nefelibata.builders.gemini.get_posts", return_value=[post])
 
-    fs.create_dir(root / "templates/gemini")
-    with open(root / "templates/gemini/index.gmi", "w", encoding="utf-8") as output:
-        output.write(
-            """# {{ config.title }}: {{ config.subtitle }}
-
-This is the Gemini capsule of {{ config.author.name }}.
-
-=> {{ config.author.url }} Website
-=> mailto://{{ config.author.email }} Email address
-
-## Posts
-
-{{ posts }}
-
-{% if config.social -%}
-## Links
-{%- endif %}
-
-{% for link in config.social -%}
-=> {{ link.url }} {{ link.title }}
-{% endfor %}
-Crafted with ❤️  using Nefelibata
-
-=> https://nefelibata.readthedocs.io/ Nefelibata
-""",
-        )
-
     config["social"] = [{"title": "Mastodon", "url": "https://2c.taoetc.org/@beto"}]
-    builder = GeminiBuilder(root, config)
+    builder = GeminiBuilder(root, config, "gemini://localhost:1965")
     with freeze_time("2021-01-02T00:00:00Z"):
         await builder.process_site()
 

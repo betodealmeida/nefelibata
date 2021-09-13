@@ -2,16 +2,20 @@
 A builder for Gemini (https://gemini.circumlunar.space/).
 """
 import logging
+import shutil
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 from md2gemini import md2gemini
+from pkg_resources import resource_filename, resource_listdir
 
 from nefelibata.builders.base import Builder, Scope
 from nefelibata.post import Post, get_posts
 from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
+
+TEMPLATE_DIR = Path("templates/builders/gemini")
 
 
 class GeminiBuilder(Builder):
@@ -22,16 +26,34 @@ class GeminiBuilder(Builder):
 
     scopes = [Scope.POST, Scope.SITE]
 
-    def __init__(self, root: Path, config: Config, links: str = "paragraph"):
+    def __init__(self, root: Path, config: Config, home: str, links: str = "paragraph"):
         super().__init__(root, config)
+        self.home = home
         self.links = links
 
-        self._create_directory()
+        self.env = Environment(loader=FileSystemLoader(str(self.root / TEMPLATE_DIR)))
+        self.setup()
 
-    def _create_directory(self) -> None:
+    def setup(self) -> None:
         """
-        Create build directory.
+        Create templates and build directory.
         """
+        # create templates
+        resources = resource_listdir("nefelibata", str(TEMPLATE_DIR))
+        for resource in resources:
+            origin = Path(resource_filename("nefelibata", str(TEMPLATE_DIR / resource)))
+            target = self.root / TEMPLATE_DIR / resource
+            if target.exists():
+                continue
+            _logger.info("Creating %s", TEMPLATE_DIR / resource)
+            if origin.is_dir():
+                target.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(origin, target, dirs_exist_ok=True)
+            else:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(origin, target)
+
+        # create build directory
         build_directory = self.root / "build/gemini"
         if not build_directory.exists():
             build_directory.mkdir(parents=True, exist_ok=True)
@@ -53,35 +75,37 @@ class GeminiBuilder(Builder):
             _logger.info("Post %s is up-to-date, nothing to do", post_path)
             return
 
-        gemini = md2gemini(post.content, links=self.links, plain=True, md_links=True)
+        content = md2gemini(post.content, links=self.links, plain=True, md_links=True)
+
+        template = self.env.get_template("post.gmi")
+        gemini = template.render(
+            config=self.config,
+            post=post,
+            content=content,
+            home=self.home,
+        )
 
         _logger.info("Creating Gemini post")
         with open(post_path, "w", encoding="utf-8") as output:
             output.write(gemini)
 
     async def process_site(self, force: bool = False) -> None:
-        index_path = self.root / "build/gemini/index.gmi"
-        last_update = index_path.stat().st_mtime if index_path.exists() else None
+        for asset in ("index.gmi", "feed.gmi"):
+            asset_path = self.root / "build/gemini" / asset
+            last_update = asset_path.stat().st_mtime if asset_path.exists() else None
 
-        posts = get_posts(self.root)
-        if (
-            last_update
-            and all(post.path.stat().st_mtime < last_update for post in posts)
-            and not force
-        ):
-            _logger.info("Gemini index is up-to-date, nothing to do")
-            return
+            posts = get_posts(self.root)
+            if (
+                last_update
+                and all(post.path.stat().st_mtime < last_update for post in posts)
+                and not force
+            ):
+                _logger.info("File %s is up-to-date, nothing to do", asset)
+                return
 
-        # add links to posts
-        links = []
-        for post in get_posts(self.root):
-            url = post.url + ".gmi"
-            links.append(f"=> {url} {post.timestamp} — {post.title}")
+            template = self.env.get_template(asset)
+            gemini = template.render(config=self.config, posts=posts)
 
-        env = Environment(loader=FileSystemLoader(str(self.root / "templates/gemini")))
-        template = env.get_template("index.gmi")
-        gemini = template.render(config=self.config, posts="\n".join(links))
-
-        _logger.info("Creating Gemini index")
-        with open(index_path, "w", encoding="utf-8") as output:
-            output.write(gemini)
+            _logger.info("Creating %s", asset)
+            with open(asset_path, "w", encoding="utf-8") as output:
+                output.write(gemini)

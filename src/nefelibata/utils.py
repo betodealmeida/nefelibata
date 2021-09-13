@@ -55,3 +55,12 @@ def get_config(root: Path) -> Config:
         config: Config = yaml.full_load(input_)
 
     return config
+
+
+def get_project_root() -> Path:
+    """
+    Return the project root.
+
+    This is used for unit tests.
+    """
+    return Path(__file__).parent.parent.parent

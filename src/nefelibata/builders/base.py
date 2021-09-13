@@ -36,6 +36,19 @@ class Builder:
         self.config = config
         self.kwargs = kwargs
 
+        self.setup()
+
+    def setup(self) -> None:
+        """
+        Create templates and build directory.
+
+        This method is used to create templates required by the builder, as
+        well as the directory where the build will be stored. It's called
+        when the blog is first initialized (``nb init``), but also every time
+        the plugin is instantiated, in case the user configures a builder
+        after the blog initialization.
+        """
+
     async def process_post(self, post: Post, force: bool = False) -> None:
         """
         Process a single post.

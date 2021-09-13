@@ -1,0 +1,7 @@
+# {{ config.title }}: {{ config.subtitle }}
+
+## {{ config.author.name }}'s gemlog
+
+{% for post in posts -%}
+=> {{ post.url }}.gmi {{ post.timestamp.date() }} — {{ post.title }}
+{%- endfor %}

@@ -1,0 +1,26 @@
+# {{ config.title }}: {{ config.subtitle }}
+
+This is the Gemini capsule of {{ config.author.name }}.
+
+=> {{ config.author.url }} Website
+=> mailto://{{ config.author.email }} Email address
+=> feed.gmi Gemlog
+
+{% if posts -%}
+## Posts
+{%- endif %}
+
+{% for post in posts -%}
+=> {{ post.url }}.gmi {{ post.timestamp }} — {{ post.title }}
+{%- endfor %}
+
+{% if config.social -%}
+## Links
+{%- endif %}
+
+{% for link in config.social -%}
+=> {{ link.url }} {{ link.title }}
+{% endfor %}
+Crafted with ❤️  using Nefelibata
+
+=> https://nefelibata.readthedocs.io/ Nefelibata
