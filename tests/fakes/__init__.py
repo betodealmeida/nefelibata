@@ -39,6 +39,5 @@ CONFIG = {
         "email": "roberto@dealmeida.net",
         "note": "Este, sou eu",
     },
-    "url": "https://blog.taoetc.org",
     "language": "en",
 }

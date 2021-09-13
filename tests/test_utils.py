@@ -54,7 +54,6 @@ def test_get_config(root: Path, config: Config) -> None:
             "email": "roberto@dealmeida.net",
             "note": "Este, sou eu",
         },
-        "url": "https://blog.taoetc.org",
         "language": "en",
     }
 

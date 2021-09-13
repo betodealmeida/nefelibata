@@ -2,7 +2,7 @@
 - [X] cancel build
 - [X] agnostic build system (Gemini, HTML)
 - [X] only build if needed
-- [ ] remove url from config (HTML concept)
+- [X] remove url from config (HTML concept)
 - [X] feed.gmi
 - [X] post.gmi with metadata (back, date, author)
 - [/] nb init: copy templates based on configured builders
