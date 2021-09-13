@@ -2,20 +2,15 @@
 A builder for Gemini (https://gemini.circumlunar.space/).
 """
 import logging
-import shutil
 from pathlib import Path
 
-from jinja2 import Environment, FileSystemLoader
 from md2gemini import md2gemini
-from pkg_resources import resource_filename, resource_listdir
 
 from nefelibata.builders.base import Builder, Scope
 from nefelibata.post import Post, get_posts
 from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
-
-TEMPLATE_DIR = Path("templates/builders/gemini")
 
 
 class GeminiBuilder(Builder):
@@ -24,6 +19,7 @@ class GeminiBuilder(Builder):
     A builder for the Gemini protocol.
     """
 
+    name = "gemini"
     scopes = [Scope.POST, Scope.SITE]
 
     def __init__(self, root: Path, config: Config, home: str, links: str = "paragraph"):
@@ -31,32 +27,7 @@ class GeminiBuilder(Builder):
         self.home = home
         self.links = links
 
-        self.env = Environment(loader=FileSystemLoader(str(self.root / TEMPLATE_DIR)))
-        self.setup()
-
-    def setup(self) -> None:
-        """
-        Create templates and build directory.
-        """
-        # create templates
-        resources = resource_listdir("nefelibata", str(TEMPLATE_DIR))
-        for resource in resources:
-            origin = Path(resource_filename("nefelibata", str(TEMPLATE_DIR / resource)))
-            target = self.root / TEMPLATE_DIR / resource
-            if target.exists():
-                continue
-            _logger.info("Creating %s", TEMPLATE_DIR / resource)
-            if origin.is_dir():
-                target.mkdir(parents=True, exist_ok=True)
-                shutil.copytree(origin, target, dirs_exist_ok=True)
-            else:
-                target.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy(origin, target)
-
-        # create build directory
-        build_directory = self.root / "build/gemini"
-        if not build_directory.exists():
-            build_directory.mkdir(parents=True, exist_ok=True)
+        self.env = self.get_environment()
 
     async def process_post(self, post: Post, force: bool = False) -> None:
         post_path = (
@@ -101,7 +72,7 @@ class GeminiBuilder(Builder):
                 and not force
             ):
                 _logger.info("File %s is up-to-date, nothing to do", asset)
-                return
+                continue
 
             template = self.env.get_template(asset)
             gemini = template.render(config=self.config, posts=posts)

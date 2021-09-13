@@ -1,15 +1,20 @@
 """
 Base class for builders.
 """
+import logging
+import shutil
 from enum import Enum
 from pathlib import Path
 from pprint import pformat
 from typing import Any, List, Optional
 
-from pkg_resources import iter_entry_points
+from jinja2 import Environment, FileSystemLoader
+from pkg_resources import iter_entry_points, resource_filename, resource_listdir
 
 from nefelibata.post import Post
 from nefelibata.typing import Config
+
+_logger = logging.getLogger(__name__)
 
 
 class Scope(Enum):
@@ -29,6 +34,7 @@ class Builder:
     A post builder.
     """
 
+    name = ""
     scopes: List[Scope] = []
 
     def __init__(self, root: Path, config: Config, **kwargs: Any):
@@ -48,6 +54,36 @@ class Builder:
         the plugin is instantiated, in case the user configures a builder
         after the blog initialization.
         """
+        # create templates
+        template_directory = Path("templates/builders") / self.name
+        resources = resource_listdir("nefelibata", str(template_directory))
+        for resource in resources:
+            origin = Path(
+                resource_filename("nefelibata", str(template_directory / resource)),
+            )
+            target = self.root / template_directory / resource
+            if target.exists():
+                continue
+            _logger.info("Creating %s", template_directory / resource)
+            if origin.is_dir():
+                target.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(origin, target, dirs_exist_ok=True)
+            else:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(origin, target)
+
+        # create build directory
+        build_directory = self.root / "build" / self.name
+        if not build_directory.exists():
+            build_directory.mkdir(parents=True, exist_ok=True)
+
+    def get_environment(self) -> Environment:
+        """
+        Load a Jinja2 environment pointing to the templats.
+        """
+        return Environment(
+            loader=FileSystemLoader(str(self.root / "templates/builders" / self.name)),
+        )
 
     async def process_post(self, post: Post, force: bool = False) -> None:
         """

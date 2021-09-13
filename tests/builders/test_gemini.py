@@ -115,12 +115,21 @@ async def test_builder_site(
     with freeze_time("2021-01-02T00:00:00Z"):
         await builder.process_site()
 
-    index_path = root / "build/gemini/index.gmi"
+    assets_directory = root / "build/gemini"
+    assets = ("index.gmi", "feed.gmi")
 
-    # test that file was created
-    assert index_path.exists()
-    _logger.info.assert_called_with("Creating Gemini index")
-    with open(index_path, encoding="utf-8") as input_:
+    # test that files were created
+    last_update: Dict[Any, Any] = {}
+    for asset in assets:
+        assert (assets_directory / asset).exists()
+        last_update[asset] = (assets_directory / asset).stat().st_mtime
+    _logger.info.assert_has_calls(
+        [
+            mocker.call("Creating %s", "index.gmi"),
+            mocker.call("Creating %s", "feed.gmi"),
+        ],
+    )
+    with open(assets_directory / "index.gmi", encoding="utf-8") as input_:
         content = input_.read()
     assert (
         content
@@ -130,6 +139,7 @@ This is the Gemini capsule of Beto Dealmeida.
 
 => https://taoetc.org/ Website
 => mailto://roberto@dealmeida.net Email address
+=> feed.gmi Gemlog
 
 ## Posts
 
@@ -143,19 +153,39 @@ Crafted with ❤️  using Nefelibata
 
 => https://nefelibata.readthedocs.io/ Nefelibata"""
     )
+    with open(assets_directory / "feed.gmi", encoding="utf-8") as input_:
+        content = input_.read()
+    assert (
+        content
+        == """# 道&c.: Musings about the path and other things
+
+## Beto Dealmeida's gemlog
+
+=> first/index.gmi 2020-12-31 — This is your first post"""
+    )
 
     # call again, test that file is up-to-date
     _logger.reset_mock()
-    last_update = index_path.stat().st_mtime
     with freeze_time("2021-01-03T00:00:00Z"):
         await builder.process_site()
-    assert index_path.stat().st_mtime == last_update
-    _logger.info.assert_called_with("Gemini index is up-to-date, nothing to do")
+    for asset in assets:
+        assert (assets_directory / asset).stat().st_mtime == last_update[asset]
+    _logger.info.assert_has_calls(
+        [
+            mocker.call("File %s is up-to-date, nothing to do", "index.gmi"),
+            mocker.call("File %s is up-to-date, nothing to do", "feed.gmi"),
+        ],
+    )
 
     # call again, forcing a rebuild
     _logger.reset_mock()
-    last_update = index_path.stat().st_mtime
     with freeze_time("2021-01-04T00:00:00Z"):
         await builder.process_site(force=True)
-    assert index_path.stat().st_mtime > last_update
-    _logger.info.assert_called_with("Creating Gemini index")
+    for asset in assets:
+        assert (assets_directory / asset).stat().st_mtime > last_update[asset]
+    _logger.info.assert_has_calls(
+        [
+            mocker.call("Creating %s", "index.gmi"),
+            mocker.call("Creating %s", "feed.gmi"),
+        ],
+    )
