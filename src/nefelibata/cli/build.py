@@ -1,13 +1,11 @@
 """
 Build the blog.
 """
-
 import asyncio
 import logging
 from pathlib import Path
 
-from nefelibata.builders.base import get_builders
-from nefelibata.builders.base import Scope
+from nefelibata.builders.base import Scope, get_builders
 from nefelibata.post import get_posts
 from nefelibata.utils import get_config
 

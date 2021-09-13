@@ -16,21 +16,18 @@ Options:
 Released under the MIT license.
 (c) 2013 Beto Dealmeida <roberto@dealmeida.net>
 """
-
 import asyncio
 import logging
 import os
 from pathlib import Path
 
-import pkg_resources
 from docopt import docopt
 
+from nefelibata import __version__
 from nefelibata.cli import build
-from nefelibata.utils import find_directory
-from nefelibata.utils import setup_logging
+from nefelibata.utils import find_directory, setup_logging
 
 _logger = logging.getLogger(__name__)
-__version__ = pkg_resources.require("nefelibata")[0].version
 
 
 async def main() -> None:

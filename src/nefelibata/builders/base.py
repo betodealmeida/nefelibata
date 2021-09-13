@@ -1,13 +1,10 @@
 """
 Base class for builders.
 """
-
 from enum import Enum
 from pathlib import Path
 from pprint import pformat
-from typing import Any
-from typing import List
-from typing import Optional
+from typing import Any, List, Optional
 
 from pkg_resources import iter_entry_points
 
@@ -53,7 +50,9 @@ class Builder:
 
 
 def get_builders(
-    root: Path, config: Config, scope: Optional[Scope] = None
+    root: Path,
+    config: Config,
+    scope: Optional[Scope] = None,
 ) -> List[Builder]:
     """
     Return all the builders for a given scope.
@@ -67,7 +66,7 @@ def get_builders(
     for parameters in config["builders"]:
         if "plugin" not in parameters:
             raise Exception(
-                f'Invalid configuration, missing "plugin": {pformat(parameters)}'
+                f'Invalid configuration, missing "plugin": {pformat(parameters)}',
             )
         name = parameters["plugin"]
         class_ = classes[name]

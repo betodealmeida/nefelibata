@@ -1,18 +1,12 @@
 """
 A Nefelibata post (and associated functions).
 """
-
 from datetime import datetime
-from email.header import decode_header
-from email.header import make_header
+from email.header import decode_header, make_header
 from email.parser import Parser
-from email.utils import formatdate
-from email.utils import parsedate_to_datetime
+from email.utils import formatdate, parsedate_to_datetime
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -72,7 +66,7 @@ def build_post(root: Path, path: Path) -> Post:
         title=str(make_header(decode_header(parsed["subject"]))),
         timestamp=parsedate_to_datetime(parsed["date"]),
         metadata=metadata,
-        url=str(path.relative_to(root / "posts")),
+        url=str(path.relative_to(root / "posts").with_suffix("")),
         content=parsed.get_payload(decode=False),
     )
 

@@ -1,18 +1,14 @@
 """
 A builder for Gemini (https://gemini.circumlunar.space/).
 """
-
 import logging
 from pathlib import Path
 
-from jinja2 import Environment
-from jinja2 import FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
 from md2gemini import md2gemini
 
-from nefelibata.builders.base import Builder
-from nefelibata.builders.base import Scope
-from nefelibata.post import get_posts
-from nefelibata.post import Post
+from nefelibata.builders.base import Builder, Scope
+from nefelibata.post import Post, get_posts
 from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
@@ -84,7 +80,7 @@ class GeminiBuilder(Builder):
         links = []
         for post in get_posts(self.root):
             url = post.url + ".gmi"
-            links.append(f"=> {url} {post.title}")
+            links.append(f"=> {url} {post.timestamp} — {post.title}")
         gemini = header.strip() + "\n\n" + "\n".join(links)
 
         _logger.info("Creating Gemini index")

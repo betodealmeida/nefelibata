@@ -1,6 +1,7 @@
 - [x] async build
 - [x] cancel build
-- [x] agnostic
+- [x] agnostic build system (Gemini, HTML)
 - [x] only build if needed
-- [ ] nb init
+- [ ] nb init: copy templates based on configured builders
 - [ ] nb new
+- [ ] nb publish

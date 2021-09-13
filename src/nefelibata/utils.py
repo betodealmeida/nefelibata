@@ -1,7 +1,6 @@
 """
 Utility functions.
 """
-
 import logging
 from pathlib import Path
 
@@ -52,7 +51,7 @@ def get_config(root: Path) -> Config:
     if not path.exists():
         raise SystemExit("No configuration found!")
 
-    with open(path) as fp:
-        config: Config = yaml.full_load(fp)
+    with open(path, encoding="utf-8") as input_:
+        config: Config = yaml.full_load(input_)
 
     return config
