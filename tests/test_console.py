@@ -25,6 +25,7 @@ async def test_main_init(mocker: MockerFixture) -> None:
             "init": True,
             "new": False,
             "build": False,
+            "publish": False,
             "ROOT_DIR": "/path/to/blog",
             "--force": False,
         },
@@ -48,6 +49,7 @@ async def test_main_new(mocker: MockerFixture) -> None:
             "init": False,
             "new": True,
             "build": False,
+            "publish": False,
             "ROOT_DIR": "/path/to/blog",
             "POST": "A like",
             "-t": "like",
@@ -73,6 +75,7 @@ async def test_main_build(mocker: MockerFixture) -> None:
             "init": False,
             "new": False,
             "build": True,
+            "publish": False,
             "ROOT_DIR": "/path/to/blog",
             "--force": False,
         },
@@ -87,6 +90,7 @@ async def test_main_build(mocker: MockerFixture) -> None:
             "init": False,
             "new": False,
             "build": True,
+            "publish": False,
             "ROOT_DIR": "/path/to/blog",
             "--force": True,
         },
@@ -101,6 +105,7 @@ async def test_main_build(mocker: MockerFixture) -> None:
             "init": False,
             "new": False,
             "build": True,
+            "publish": False,
             "ROOT_DIR": None,
             "--force": True,
         },
@@ -111,6 +116,32 @@ async def test_main_build(mocker: MockerFixture) -> None:
     )
     await console.main()
     build.run.assert_called_with(Path("/path/to/blog"), True)
+
+
+@pytest.mark.asyncio
+async def test_main_publish(mocker: MockerFixture) -> None:
+    """
+    Test ``main`` with the "publish" action.
+    """
+    publish = mocker.patch("nefelibata.console.publish")
+    publish.run = mocker.AsyncMock()
+
+    mocker.patch(
+        "nefelibata.console.docopt",
+        return_value={
+            "--loglevel": "debug",
+            "init": False,
+            "new": False,
+            "build": False,
+            "publish": True,
+            "ROOT_DIR": "/path/to/blog",
+            "POST": "A like",
+            "-t": "like",
+            "--force": False,
+        },
+    )
+    await console.main()
+    publish.run.assert_called_with(Path("/path/to/blog"), False)
 
 
 @pytest.mark.asyncio
@@ -125,6 +156,7 @@ async def test_main_no_action(mocker: MockerFixture) -> None:
             "init": False,
             "new": False,
             "build": False,
+            "publish": False,
             "ROOT_DIR": "/path/to/blog",
             "--force": False,
         },
@@ -148,6 +180,7 @@ async def test_main_canceled(mocker) -> None:
             "init": False,
             "new": False,
             "build": True,
+            "publish": False,
             "ROOT_DIR": "/path/to/blog",
             "--force": False,
         },

@@ -65,8 +65,7 @@ def config(fs: FakeFilesystem, root: Path) -> Iterator[Config]:
     """
     Create configuration file.
     """
-    with open(root / CONFIG_FILENAME, "w", encoding="utf-8") as output:
-        output.write(yaml.dump(CONFIG))
+    fs.create_file(root / CONFIG_FILENAME, contents=yaml.dump(CONFIG))
 
     yield CONFIG.copy()
 
@@ -78,10 +77,8 @@ def post(fs: FakeFilesystem, root: Path, config: Config) -> Iterator[Post]:
     """
     post_directory = root / "posts/first"
     post_path = post_directory / "index.mkd"
-    fs.create_dir(post_directory)
     with freeze_time("2021-01-01T00:00:00Z"):
-        with open(post_path, "w", encoding="utf-8") as output:
-            output.write(POST_CONTENT)
+        fs.create_file(post_path, contents=POST_CONTENT)
         post = build_post(root, config, post_path)
 
     yield post

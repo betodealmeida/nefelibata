@@ -1,5 +1,5 @@
 """
-Test ``nefelibata.cli.init``.
+Test ``nefelibata.cli.new``.
 """
 from pathlib import Path
 

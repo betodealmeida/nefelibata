@@ -10,4 +10,6 @@
 - [X] categories
 - [X] nb init: copy templates based on configured builders
 - [X] nb new
-- [ ] nb publish
+- [X] nb publish
+- [ ] antenna announcer
+- [ ] html builder

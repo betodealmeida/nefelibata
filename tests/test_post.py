@@ -49,9 +49,7 @@ def test_build_post(fs: FakeFilesystem, root: Path, config: Config) -> None:
 
     # create post
     with freeze_time("2021-01-01T00:00:00Z"):
-        fs.create_dir("/path/to/blog/posts/first")
-        with open(path, "w", encoding="utf-8") as output:
-            output.write(POST_CONTENT)
+        fs.create_file(path, contents=POST_CONTENT)
 
     post = build_post(root, config, path)
 
