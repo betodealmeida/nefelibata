@@ -66,10 +66,10 @@ class FTPPublisher(Publisher):
                 if relative_directory != pwd.relative_to(basedir):
                     if pwd != basedir:
                         ftp.cwd(str(basedir))
-                    try:
-                        ftp.cwd(str(relative_directory))
-                    except error_perm:
-                        for directory in relative_directory.parts:
+                    for directory in relative_directory.parts:
+                        try:
+                            ftp.cwd(directory)
+                        except error_perm:
                             ftp.mkd(directory)
                             ftp.cwd(directory)
                     pwd = basedir / relative_directory

@@ -65,7 +65,9 @@ async def test_builder_post(
         content = input_.read()
     assert (
         content
-        == """# Welcome
+        == """# This is your first post
+
+# Welcome
 
 This is your first post. It should be written using Markdown.
 
@@ -170,7 +172,7 @@ This is the Gemini capsule of Beto Dealmeida.
 
 => https://2c.taoetc.org/@beto Mastodon
 
-Crafted with ❤️  using Nefelibata
+Crafted with ❤️ using Nefelibata
 
 => https://nefelibata.readthedocs.io/ Nefelibata"""
     )
@@ -178,9 +180,7 @@ Crafted with ❤️  using Nefelibata
         content = input_.read()
     assert (
         content
-        == """# 道&c.: Musings about the path and other things
-
-## Beto Dealmeida's Gemlog
+        == """# 道&c.
 
 => gemini://localhost:1965/first/index.gmi 2020-12-31 — This is your first post
 """

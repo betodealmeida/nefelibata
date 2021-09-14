@@ -22,6 +22,6 @@ This is the Gemini capsule of {{ config.author.name }}.
 {% endfor %}
 {% endif %}
 
-Crafted with ❤️  using Nefelibata
+Crafted with ❤️ using Nefelibata
 
 => https://nefelibata.readthedocs.io/ Nefelibata
