@@ -3,16 +3,19 @@ Nefelibata blog engine.
 
 Usage:
   nb init [ROOT_DIR] [-f] [--loglevel=INFO]
+  nb new POST [ROOT_DIR] [-t TYPE] [--loglevel=INFO]
   nb build [ROOT_DIR] [-f] [--loglevel=INFO]
 
 Actions:
   init              Create a new blog skeleton.
+  new               Create a new post.
   build             Build blog from Markdown files and online interactions.
 
 Options:
   -h --help         Show this screen.
   --version         Show version.
-  -f --force        Force building up-to-date resources.
+  -f --force        Force operation (eg, building up-to-date resources).
+  -t TYPE           Custom template to use on the post. [default: post]
   --loglevel=LEVEL  Level for logging. [default: INFO]
 
 Released under the MIT license.
@@ -26,7 +29,7 @@ from pathlib import Path
 from docopt import docopt
 
 from nefelibata import __version__
-from nefelibata.cli import build, init
+from nefelibata.cli import build, init, new
 from nefelibata.utils import find_directory, setup_logging
 
 _logger = logging.getLogger(__name__)
@@ -46,10 +49,12 @@ async def main() -> None:
         root = Path(arguments["ROOT_DIR"])
 
     try:
-        if arguments["build"]:
-            await build.run(root, arguments["--force"])
-        elif arguments["init"]:
+        if arguments["init"]:
             await init.run(root, arguments["--force"])
+        elif arguments["new"]:
+            await new.run(root, arguments["POST"], arguments["-t"])
+        elif arguments["build"]:
+            await build.run(root, arguments["--force"])
     except asyncio.CancelledError:
         _logger.info("Canceled")
 

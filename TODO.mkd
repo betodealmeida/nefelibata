@@ -9,5 +9,5 @@
 - [X] base URL in gemini
 - [X] categories
 - [X] nb init: copy templates based on configured builders
-- [ ] nb new
+- [X] nb new
 - [ ] nb publish

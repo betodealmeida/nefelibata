@@ -22,14 +22,40 @@ async def test_main_init(mocker: MockerFixture) -> None:
         "nefelibata.console.docopt",
         return_value={
             "--loglevel": "debug",
-            "build": False,
             "init": True,
+            "new": False,
+            "build": False,
             "ROOT_DIR": "/path/to/blog",
             "--force": False,
         },
     )
     await console.main()
     init.run.assert_called_with(Path("/path/to/blog"), False)
+
+
+@pytest.mark.asyncio
+async def test_main_new(mocker: MockerFixture) -> None:
+    """
+    Test ``main`` with the "new" action.
+    """
+    new = mocker.patch("nefelibata.console.new")
+    new.run = mocker.AsyncMock()
+
+    mocker.patch(
+        "nefelibata.console.docopt",
+        return_value={
+            "--loglevel": "debug",
+            "init": False,
+            "new": True,
+            "build": False,
+            "ROOT_DIR": "/path/to/blog",
+            "POST": "A like",
+            "-t": "like",
+            "--force": False,
+        },
+    )
+    await console.main()
+    new.run.assert_called_with(Path("/path/to/blog"), "A like", "like")
 
 
 @pytest.mark.asyncio
@@ -44,8 +70,9 @@ async def test_main_build(mocker: MockerFixture) -> None:
         "nefelibata.console.docopt",
         return_value={
             "--loglevel": "debug",
-            "build": True,
             "init": False,
+            "new": False,
+            "build": True,
             "ROOT_DIR": "/path/to/blog",
             "--force": False,
         },
@@ -57,8 +84,9 @@ async def test_main_build(mocker: MockerFixture) -> None:
         "nefelibata.console.docopt",
         return_value={
             "--loglevel": "debug",
-            "build": True,
             "init": False,
+            "new": False,
+            "build": True,
             "ROOT_DIR": "/path/to/blog",
             "--force": True,
         },
@@ -70,8 +98,9 @@ async def test_main_build(mocker: MockerFixture) -> None:
         "nefelibata.console.docopt",
         return_value={
             "--loglevel": "debug",
-            "build": True,
             "init": False,
+            "new": False,
+            "build": True,
             "ROOT_DIR": None,
             "--force": True,
         },
@@ -93,8 +122,9 @@ async def test_main_no_action(mocker: MockerFixture) -> None:
         "nefelibata.console.docopt",
         return_value={
             "--loglevel": "debug",
-            "build": False,
             "init": False,
+            "new": False,
+            "build": False,
             "ROOT_DIR": "/path/to/blog",
             "--force": False,
         },
@@ -115,8 +145,9 @@ async def test_main_canceled(mocker) -> None:
         "nefelibata.console.docopt",
         return_value={
             "--loglevel": "debug",
-            "build": True,
             "init": False,
+            "new": False,
+            "build": True,
             "ROOT_DIR": "/path/to/blog",
             "--force": False,
         },
