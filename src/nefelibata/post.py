@@ -65,8 +65,8 @@ def build_post(root: Path, config: Config, path: Path) -> Post:
             parsed[header] = default
             modified = True
     if modified:
-        with open(path, "w", encoding="utf-8") as input_:
-            input_.write(str(parsed))
+        with open(path, "w", encoding="utf-8") as output:
+            output.write(str(parsed))
 
     type_ = parsed.get("type", "post")
 
