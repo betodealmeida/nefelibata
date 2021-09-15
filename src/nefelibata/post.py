@@ -1,6 +1,7 @@
 """
 A Nefelibata post (and associated functions).
 """
+import operator
 from datetime import datetime
 from email.header import decode_header, make_header
 from email.parser import Parser
@@ -98,9 +99,13 @@ def build_post(root: Path, config: Config, path: Path) -> Post:
 def get_posts(root: Path, config: Config, count: Optional[int] = None) -> List[Post]:
     """
     Return all the posts.
+
+    Posts are sorted by timestamp in descending order.
     """
     paths = list((root / "posts").glob("**/*.mkd"))
-    paths.sort(key=lambda path: path.stat().st_mtime, reverse=True)
-    paths = paths[:count]  # a[:None] == a
-
-    return [build_post(root, config, path) for path in paths]
+    posts = sorted(
+        (build_post(root, config, path) for path in paths),
+        key=operator.attrgetter("timestamp"),
+        reverse=True,
+    )
+    return posts[:count]  # a[:None] == a

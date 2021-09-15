@@ -102,9 +102,12 @@ def test_get_posts(fs: FakeFilesystem, root: Path, config: Config) -> None:
     """
     Test ``get_posts``.
     """
-    for subdir in ["one", "two"]:
-        fs.create_dir(root / "posts" / subdir)
-        fs.create_file(root / "posts" / subdir / "index.mkd")
+    with freeze_time("2021-01-01T00:00:00Z"):
+        fs.create_dir(root / "posts/one")
+        fs.create_file(root / "posts/one/index.mkd")
+    with freeze_time("2021-01-02T00:00:00Z"):
+        fs.create_dir(root / "posts/two")
+        fs.create_file(root / "posts/two/index.mkd")
 
     posts = get_posts(root, config)
     assert len(posts) == 2
