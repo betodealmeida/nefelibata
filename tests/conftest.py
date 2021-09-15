@@ -52,8 +52,16 @@ def root(fs: FakeFilesystem) -> Iterator[Path]:
     """
     Create the blog root directory.
     """
+    # Add the templates to the fake filesystem, so builders can load them
+    # during tests. The actual path depends if we're running in development
+    # mode (``src/``) or installed (``site-packages``).
     root = get_project_root()
-    fs.add_real_directory(root / "src/nefelibata/templates")
+    locations = ("src/nefelibata/templates", "site-packages/nefelibata/templates")
+    for location in locations:
+        try:
+            fs.add_real_directory(root / location)
+        except FileNotFoundError:
+            pass
 
     root = Path("/path/to/blog")
     fs.create_dir(root)
