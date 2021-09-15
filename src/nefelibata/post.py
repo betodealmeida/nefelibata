@@ -34,6 +34,9 @@ class Post(BaseModel):  # pylint: disable=too-few-public-methods
     tags: Set[str]
     categories: Set[str]
 
+    # a custom type will use a custom template
+    type: str
+
     # relative URL to the post, without any extensions
     # eg: first/index
     url: str
@@ -65,6 +68,8 @@ def build_post(root: Path, config: Config, path: Path) -> Post:
         with open(path, "w", encoding="utf-8") as input_:
             input_.write(str(parsed))
 
+    type_ = parsed.get("type", "post")
+
     metadata = {k: v for k, v in parsed.items() if k not in required}
     tags = {
         keyword.strip()
@@ -84,6 +89,7 @@ def build_post(root: Path, config: Config, path: Path) -> Post:
         metadata=metadata,
         tags=tags,
         categories=categories,
+        type=type_,
         url=str(path.relative_to(root / "posts").with_suffix("")),
         content=parsed.get_payload(decode=False),
     )

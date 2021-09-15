@@ -62,7 +62,7 @@ class GeminiBuilder(Builder):
         content = md2gemini(post.content, links=self.links, plain=True, md_links=True)
         content = content.replace("\r", "")
 
-        template = self.env.get_template("post.gmi")
+        template = self.env.get_template(f"{post.type}.gmi")
         gemini = template.render(
             config=self.config,
             post=post,
@@ -116,7 +116,7 @@ class GeminiBuilder(Builder):
         template_name: str,
         posts: List[Post],
         force: bool = False,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """
         Build an index file from a list of posts.

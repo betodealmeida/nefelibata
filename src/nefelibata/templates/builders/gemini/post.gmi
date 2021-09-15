@@ -1,23 +1,23 @@
 # {{ post.title }}
 
 {{ content }}
-{% if post.tags %}
 
+{% if post.tags %}
 # Tags
 
 {% for tag in sorted(post.tags) %}
 => {{ home }}/tags/{{ tag }}.gmi {{ tag }}
 {% endfor %}
+
 {% endif %}
 {% if post.categories %}
-
 # Categories
 
 {% for category in sorted(post.categories) %}
 => {{ home }}/categories/{{ category }}.gmi {{ config['categories'][category]['label'] }}
 {% endfor %}
-{% endif %}
 
+{% endif %}
 # About
 
 Published on {{ post.timestamp }} by {{ config.author.name }} <{{ config.author.email }}>.

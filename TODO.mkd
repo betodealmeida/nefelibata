@@ -11,5 +11,6 @@
 - [X] nb init: copy templates based on configured builders
 - [X] nb new
 - [X] nb publish
-- [ ] antenna announcer
+- [ ] antenna announcer?
+- [ ] mastodon announcer
 - [ ] html builder

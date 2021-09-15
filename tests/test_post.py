@@ -30,6 +30,7 @@ def test_post() -> None:
     }
     assert post.tags == {"welcome", "blog"}
     assert post.categories == {"stem"}
+    assert post.type == "post"
     assert post.url == "first/index"
     assert (
         post.content
@@ -60,6 +61,9 @@ def test_build_post(fs: FakeFilesystem, root: Path, config: Config) -> None:
         "keywords": "welcome, blog",
         "summary": "Hello, world!",
     }
+    assert post.tags == {"welcome", "blog"}
+    assert post.categories == {"stem"}
+    assert post.type == "post"
     assert post.url == "first/index"
     assert (
         post.content
