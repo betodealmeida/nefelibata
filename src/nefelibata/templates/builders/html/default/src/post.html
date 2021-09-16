@@ -1,0 +1,36 @@
+{% extends "default/src/base.html" %}
+
+{% block title %}{{ config.title|striptags|e }}: {{ post.title }}{% endblock %}
+
+{% block content %}
+    <article class="prose">
+      <h1>{{ post.title }}</h1>
+
+      {{ render(post.content) }}
+    </article>
+
+    {% if post.tags %}
+    <h2>Tags</h2>
+
+    <ul>
+    {% for tag in sorted(post.tags) %}
+      <li><a href="{{ home }}/tags/{{ tag }}.html">{{ tag }}</a></li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if post.categories %}
+    <h2>Categories</h2>
+
+    <ul>
+    {% for category in sorted(post.categories) %}
+      <li><a href="{{ home }}/categories/{{ category }}.html">{{ category }}</a></li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h2>About</h2>
+
+    <p>Published on {{ post.timestamp }} by <a href="mailto:{{ config.author.email }}">{{ config.author.name }}</a>.</p>
+
+{% endblock %}

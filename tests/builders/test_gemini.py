@@ -50,7 +50,7 @@ async def test_builder_post(
     """
     Test ``process_post``.
     """
-    _logger = mocker.patch("nefelibata.builders.gemini._logger")
+    _logger = mocker.patch("nefelibata.builders.base._logger")
 
     builder = GeminiBuilder(root, config, "gemini://localhost:1965")
     with freeze_time("2021-01-02T00:00:00Z"):
@@ -60,7 +60,7 @@ async def test_builder_post(
 
     # test that file was created
     assert post_path.exists()
-    _logger.info.assert_called_with("Creating Gemini post")
+    _logger.info.assert_called_with("Creating %s post", "Gemini")
     with open(post_path, encoding="utf-8") as input_:
         content = input_.read()
     assert (
@@ -105,7 +105,7 @@ Published on 2020-12-31 16:00:00-08:00 by Beto Dealmeida <roberto@dealmeida.net>
     with freeze_time("2021-01-04T00:00:00Z"):
         await builder.process_post(post, force=True)
     assert post_path.stat().st_mtime > last_update
-    _logger.info.assert_called_with("Creating Gemini post")
+    _logger.info.assert_called_with("Creating %s post", "Gemini")
 
 
 @pytest.mark.asyncio
@@ -118,8 +118,8 @@ async def test_builder_site(
     """
     Test ``process_site``.
     """
-    _logger = mocker.patch("nefelibata.builders.gemini._logger")
-    mocker.patch("nefelibata.builders.gemini.get_posts", return_value=[post])
+    _logger = mocker.patch("nefelibata.builders.base._logger")
+    mocker.patch("nefelibata.builders.base.get_posts", return_value=[post])
 
     config["social"] = [{"title": "Mastodon", "url": "https://2c.taoetc.org/@beto"}]
     builder = GeminiBuilder(root, config, "gemini://localhost:1965")
@@ -127,7 +127,13 @@ async def test_builder_site(
         await builder.process_site()
 
     assets_directory = root / "build/gemini"
-    assets = ("index.gmi", "feed.gmi", "tags/welcome.gmi", "tags/blog.gmi")
+    assets = (
+        "index.gmi",
+        "feed.gmi",
+        "tags/welcome.gmi",
+        "tags/blog.gmi",
+        "categories/stem.gmi",
+    )
 
     # test that files were created
     last_update: Dict[Any, Any] = {}

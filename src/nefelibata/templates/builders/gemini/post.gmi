@@ -1,6 +1,6 @@
 # {{ post.title }}
 
-{{ content }}
+{{ render(post.content) }}
 
 {% if post.tags %}
 # Tags

@@ -8,6 +8,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from nefelibata.builders.base import Builder, Scope, get_builders
+from nefelibata.typing import Config
 
 from ..conftest import MockEntryPoint
 
@@ -40,8 +41,8 @@ def test_get_builders(
 
     config = {
         "builders": [
-            {"plugin": "site_builder"},
-            {"plugin": "post_builder"},
+            {"plugin": "site_builder", "home": "https://example.com/"},
+            {"plugin": "post_builder", "home": "https://example.com/"},
         ],
     }
     builders = get_builders(root, config, Scope.POST)
@@ -60,3 +61,11 @@ def test_get_builders(
         str(excinfo.value)
         == """Invalid configuration, missing "plugin": {'invalid': 'site_builder'}"""
     )
+
+
+def test_builder_render(root: Path, config: Config):
+    """
+    Test the ``render`` method in ``Builder``.
+    """
+    builder = Builder(root, config, "https://example.com/")
+    assert builder.render("test") == "test"

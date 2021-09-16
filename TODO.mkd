@@ -11,13 +11,14 @@
 - [X] nb init: copy templates based on configured builders
 - [X] nb new
 - [X] nb publish
-- [/] reading time assistant
+- [X] html builder with atom
+- [ ] html templates (with striptags|e)
+- [ ] reading time assistant
 - [ ] antenna announcer
 - [ ] mastodon announcer
 - [ ] html builder
 - [ ] weather assistant
 
-- [ ] html builder with atom
 - [ ] playlist assistant
 - [ ] warn_external_resources => site assistant
 - [ ] mirror_images and archive_links => post assistants

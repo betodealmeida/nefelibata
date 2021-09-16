@@ -63,6 +63,7 @@ repos:
     - types-python-dateutil
     - types-pkg_resources
     - types-PyYAML
+    - types-Markdown
 - repo: https://github.com/asottile/add-trailing-comma
   rev: v2.1.0
   hooks:
