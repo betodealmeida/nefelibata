@@ -9,6 +9,7 @@ import pytest
 from freezegun import freeze_time
 from pytest_mock import MockerFixture
 
+from nefelibata import __version__
 from nefelibata.builders.html import HTMLBuilder
 from nefelibata.post import Post
 from nefelibata.typing import Config
@@ -65,11 +66,11 @@ async def test_builder_post(
         content = input_.read()
     assert (
         content
-        == """<!doctype html>
+        == f"""<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name=generator content="Nefelibata 0.3.10.post1.dev30+g863c0f1.d20210915">
+    <meta name=generator content="Nefelibata {__version__}">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Musings about the path and other things">
@@ -182,11 +183,11 @@ async def test_builder_site(
     print(content)
     assert (
         content
-        == """<!doctype html>
+        == f"""<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name=generator content="Nefelibata 0.3.10.post1.dev30+g863c0f1.d20210915">
+    <meta name=generator content="Nefelibata {__version__}">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Musings about the path and other things">

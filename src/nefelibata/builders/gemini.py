@@ -22,7 +22,7 @@ class GeminiBuilder(Builder):
     label = "Gemini"
     extension = ".gmi"
     template_base = ""
-    assets = ["index.gmi", "feed.gmi"]
+    site_templates = ["index.gmi", "feed.gmi"]
 
     scopes = [Scope.POST, Scope.SITE]
 

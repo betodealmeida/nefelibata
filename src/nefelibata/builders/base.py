@@ -50,10 +50,10 @@ class Builder:
     template_base = ""
 
     # A list of templates that should be processed when building the site.
-    assets: List[str] = []
+    site_templates: List[str] = []
 
     # The scopes in which the builder should run, either processing a single post
-    # (``Scope.POST``) or processing the whole site (``Scope.SITE``).
+    # (``Scope.POST``), processing the whole site (``Scope.SITE``), or both.
     scopes: List[Scope] = []
 
     def __init__(self, root: Path, config: Config, home: str, **kwargs: Any):
@@ -166,7 +166,7 @@ class Builder:
         posts = get_posts(self.root, self.config)
 
         # build index and feed
-        for asset in self.assets:
+        for asset in self.site_templates:
             path = self.root / "build" / self.name / asset
             template_name = f"{self.template_base}{asset}"
             self._build_index(path, template_name, posts, force)

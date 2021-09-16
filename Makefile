@@ -14,3 +14,6 @@ clean:
 
 spellcheck:
 	codespell -S "*.json" src/nefelibata docs/*rst tests templates
+
+check:
+	pre-commit run --all-files

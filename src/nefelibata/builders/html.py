@@ -21,7 +21,7 @@ class HTMLBuilder(Builder):
     name = "html"
     label = "HTML"
     extension = ".html"
-    assets = ["index.html", "atom.xml"]
+    site_templates = ["index.html", "atom.xml"]
 
     scopes = [Scope.POST, Scope.SITE]
 
