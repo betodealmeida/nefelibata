@@ -2,11 +2,12 @@
 An FTP publisher.
 """
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from ftplib import FTP, FTP_TLS, error_perm
 from pathlib import Path
+from typing import Optional
 
-from nefelibata.publishers.base import Publisher
+from nefelibata.publishers.base import Publisher, Publishing
 from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
@@ -36,13 +37,11 @@ class FTPPublisher(Publisher):
         self.basedir = basedir
         self.use_tls = use_tls
 
-    async def publish(self, force: bool = False) -> None:
-        last_published_file = self.root / "last_published"
-        if last_published_file.exists():
-            last_published = last_published_file.stat().st_mtime
-        else:
-            last_published = 0
-
+    async def publish(
+        self,
+        since: Optional[datetime] = None,
+        force: bool = False,
+    ) -> Optional[Publishing]:
         build = self.root / "build"
 
         FTPClass = FTP_TLS if self.use_tls else FTP
@@ -55,12 +54,12 @@ class FTPPublisher(Publisher):
             pwd = basedir = Path(ftp.pwd())
 
             # get files that need to be published
-            since = datetime.fromtimestamp(last_published)
             modified_files = list(self.find_modified_files(force, since))
 
             # sort files to minimize ``CWD`` calls
             modified_files = sorted(modified_files)
 
+            updated = False
             for path in modified_files:
                 relative_directory = path.relative_to(build).parent
                 if relative_directory != pwd.relative_to(basedir):
@@ -77,6 +76,9 @@ class FTPPublisher(Publisher):
                 _logger.info("Uploading %s", path)
                 with open(path, "rb") as input_:
                     ftp.storbinary(f"STOR {path.name}", input_)
+                updated = True
 
-        # update last published
-        last_published_file.touch()
+        if updated:
+            return Publishing(timestamp=datetime.now(timezone.utc))
+
+        return None

@@ -248,8 +248,7 @@ async def test_builder_site(
         &lt;p&gt;&lt;a href="https://example.com/first/index"&gt;Permalink&lt;/p&gt;
     </content>
 </entry>
-</feed>
-"""
+</feed>"""
     )
 
     # call again, test that file is up-to-date

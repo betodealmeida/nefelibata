@@ -12,17 +12,15 @@
 - [X] nb new
 - [X] nb publish
 - [X] html builder with atom
-- [ ] html templates (with striptags|e)
+- [/] html templates (with striptags|e)
+- [/] antenna announcer
 - [ ] reading time assistant
-- [ ] antenna announcer
 - [ ] mastodon announcer
-- [ ] html builder
 - [ ] weather assistant
 
 - [ ] playlist assistant
 - [ ] warn_external_resources => site assistant
 - [ ] mirror_images and archive_links => post assistants
-- [ ] url stored in yaml together with each built post, used for announcer (eg, build/gemini/first/url.yaml has 'gemini: gemini://taoetc.org/first/post.gmi')
 - [ ] assistants store yaml files with source (mkd), option to copy the source files (mkd/yaml) to build for backup
 - [ ] atom: <link rel="alternate" type="text/gemini" href="gemini://..." /> ?
 - [ ] add enclosures to post
@@ -33,3 +31,5 @@ gemini://warmedal.se/~antenna/submit?<percent encoded URL to your feed>
 collect responses? gemini://ew.srht.site/en/2021/20210915-re-changing-old-code-is-risky.gmi
 gemini://taoetc.org/changing_old_code_is_risky/index.gmi
 gemini://geminispace.info/backlinks?gemini%3A%2F%2Ftaoetc.org%2Fchanging_old_code_is_risky%2Findex.gmi
+
+Multiple announcers in parallel => add lock to antenna?

@@ -47,7 +47,7 @@ def test_get_builders(
     }
     builders = get_builders(root, config, Scope.POST)
     assert len(builders) == 1
-    assert isinstance(builders[0], PostBuilder)
+    assert isinstance(builders["post_builder"], PostBuilder)
 
     config = {
         "builders": [

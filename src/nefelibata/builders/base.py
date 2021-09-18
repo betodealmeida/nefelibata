@@ -7,7 +7,7 @@ from collections import defaultdict
 from enum import Enum
 from pathlib import Path
 from pprint import pformat
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from jinja2 import Environment, FileSystemLoader
 from pkg_resources import iter_entry_points, resource_filename, resource_listdir
@@ -248,7 +248,7 @@ def get_builders(
     root: Path,
     config: Config,
     scope: Optional[Scope] = None,
-) -> List[Builder]:
+) -> Dict[str, Builder]:
     """
     Return all the builders for a given scope.
     """
@@ -257,17 +257,17 @@ def get_builders(
         for entry_point in iter_entry_points("nefelibata.builder")
     }
 
-    builders = []
-    for parameters in config["builders"]:
+    builders = {}
+    for name, parameters in config["builders"].items():
         if "plugin" not in parameters:
             raise Exception(
                 f'Invalid configuration, missing "plugin": {pformat(parameters)}',
             )
-        name = parameters["plugin"]
-        class_ = classes[name]
+        plugin = parameters["plugin"]
+        class_ = classes[plugin]
         kwargs = {k: v for k, v in parameters.items() if k != "plugin"}
 
-        if scope in class_.scopes or scope is None:
-            builders.append(class_(root, config, **kwargs))
+        if scope is None or scope in class_.scopes:
+            builders[name] = class_(root, config, **kwargs)
 
     return builders

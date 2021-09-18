@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional, Set
 from pydantic import BaseModel
 
 from nefelibata.typing import Config
+from nefelibata.utils import split_header
 
 
 class Post(BaseModel):  # pylint: disable=too-few-public-methods
@@ -34,6 +35,7 @@ class Post(BaseModel):  # pylint: disable=too-few-public-methods
     # special metadata
     tags: Set[str]
     categories: Set[str]
+    announcers: Set[str]
 
     # a custom type will use a custom template
     type: str
@@ -72,16 +74,21 @@ def build_post(root: Path, config: Config, path: Path) -> Post:
     type_ = parsed.get("type", "post")
 
     metadata = {k: v for k, v in parsed.items() if k not in required}
-    tags = {
-        keyword.strip()
-        for keyword in parsed.get("keywords", "").split(",")
-        if keyword.strip()
-    }
+    tags = split_header(parsed.get("keywords"))
     categories = {
         category
-        for category, params in config.get("categories", {}).items()
-        if tags & set(params["tags"])
+        for category, parameters in config.get("categories", {}).items()
+        if tags & set(parameters["tags"])
     }
+
+    if "announce-on" in metadata:
+        announcers = split_header(metadata.get("announce-on"))
+    else:
+        announcers = set(config.get("announcers", {}))
+    if "announce-on-extra" in metadata:
+        announcers |= split_header(metadata.get("announce-on-extra"))
+    if "announce-on-skip" in metadata:
+        announcers -= split_header(metadata.get("announce-on-skip"))
 
     return Post(
         path=path,
@@ -90,6 +97,7 @@ def build_post(root: Path, config: Config, path: Path) -> Post:
         metadata=metadata,
         tags=tags,
         categories=categories,
+        announcers=announcers,
         type=type_,
         url=str(path.relative_to(root / "posts").with_suffix("")),
         content=parsed.get_payload(decode=False),

@@ -23,7 +23,7 @@ async def test_run(
     builder.process_site = mocker.AsyncMock()
 
     mocker.patch("nefelibata.cli.init.get_config")
-    mocker.patch("nefelibata.cli.init.get_builders", return_value=[builder])
+    mocker.patch("nefelibata.cli.init.get_builders", return_value={"builder": builder})
 
     _logger = mocker.patch("nefelibata.cli.init._logger")
 

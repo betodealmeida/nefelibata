@@ -14,6 +14,7 @@ POST_DATA = {
     },
     "tags": {"welcome", "blog"},
     "categories": ["stem"],
+    "announcers": [],
     "type": "post",
     "url": "first/index",
     "content": """# Welcome #

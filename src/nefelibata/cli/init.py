@@ -39,7 +39,7 @@ async def run(root: Path, force: bool = False) -> None:
 
     # create templates
     config = get_config(root)
-    for builder in get_builders(root, config):
+    for builder in get_builders(root, config).values():
         builder.setup()
 
     _logger.info("Blog created!")
