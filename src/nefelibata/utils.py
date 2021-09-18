@@ -95,3 +95,18 @@ def load_yaml(path: Path, class_: Type[BaseModel]) -> Dict[str, BaseModel]:
             _logger.warning("Invalid YAML file: %s", path)
 
     return {}
+
+
+def dict_merge(original, update):
+    """
+    Recursive ``dict.update``.
+    """
+    for key in update:
+        if (
+            key in original
+            and isinstance(original[key], dict)
+            and isinstance(update[key], dict)
+        ):
+            dict_merge(original[key], update[key])
+        else:
+            original[key] = update[key]

@@ -12,18 +12,26 @@
 - [X] nb new
 - [X] nb publish
 - [X] html builder with atom
+- [X] antenna announcer
+- [X] geminiinfo announcer
+- [X] freeze announce-on
 - [/] html templates (with striptags|e)
-- [/] antenna announcer
+
 - [ ] reading time assistant
+
+- [ ] add enclosures to post
 - [ ] mastodon announcer
 - [ ] weather assistant
-
 - [ ] playlist assistant
+
+- [ ] announcer staleness
+- [ ] builder path
+- [ ] publisher path
+
 - [ ] warn_external_resources => site assistant
 - [ ] mirror_images and archive_links => post assistants
 - [ ] assistants store yaml files with source (mkd), option to copy the source files (mkd/yaml) to build for backup
 - [ ] atom: <link rel="alternate" type="text/gemini" href="gemini://..." /> ?
-- [ ] add enclosures to post
 
 
 

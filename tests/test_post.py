@@ -52,6 +52,8 @@ def test_build_post(fs: FakeFilesystem, root: Path, config: Config) -> None:
     with freeze_time("2021-01-01T00:00:00Z"):
         fs.create_file(path, contents=POST_CONTENT)
 
+    config["announcers"] = {"antenna": {"plugin": "antenna"}}
+
     post = build_post(root, config, path)
 
     assert post.path == path
@@ -83,6 +85,7 @@ Read more about [Nefelibata](https://nefelibata.readthedocs.io/)."""
 keywords: welcome, blog
 summary: Hello, world!
 date: Thu, 31 Dec 2020 16:00:00 -0800
+announce-on: antenna
 
 # Welcome #
 

@@ -3,6 +3,7 @@ An Antenna (gemini://warmedal.se/~antenna/) announcer.
 """
 import logging
 import re
+import ssl
 import urllib.parse
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -83,9 +84,8 @@ class AntennaAnnouncer(Announcer):
             _, uri, name = re.split(r"\s+", line, 2)
             for post in posts:
                 reply = f"Re: {post.title}"
-                if reply in name:
-                    # XXX fetch site and check that it points to the blog
-                    id_ = uri
+                if reply in name and await self._link_in_post(post.url, uri):
+                    id_ = f"reply,{uri}"
                     interactions[post.path][id_] = Interaction(
                         id=id_,
                         name=name,
@@ -94,3 +94,21 @@ class AntennaAnnouncer(Announcer):
                     )
 
         return interactions
+
+    async def _link_in_post(self, post_url: str, uri: str) -> bool:
+        """
+        Check that a given URI actually links to the post URL.
+        """
+        try:
+            response = await self.client.get(URL(uri))
+        except ssl.SSLCertVerificationError:
+            return True
+
+        payload = await response.read()
+        content = payload.decode("utf-8")
+
+        for line in content.split("\n"):
+            if line.startswith("=>") and post_url in line:
+                return True
+
+        return False

@@ -3,6 +3,7 @@ Tests for ``nefelibata.publishers.ftp``.
 """
 # pylint: disable=invalid-name
 import ftplib
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -59,12 +60,9 @@ async def test_publish_last_published(
     with freeze_time("2021-01-01T00:00:00Z"):
         fs.create_file(root / "build/one", contents="Hello, world!")
 
-    with freeze_time("2021-01-02T00:00:00Z"):
-        fs.create_file(root / "last_published")
-
     publisher = FTPPublisher(root, config, "ftp.example.com", "username", "password")
 
-    await publisher.publish()
+    await publisher.publish(since=datetime(2021, 1, 2, tzinfo=timezone.utc))
 
     ftp.storbinary.assert_not_called()
 

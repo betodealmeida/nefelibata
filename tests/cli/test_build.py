@@ -37,7 +37,10 @@ async def test_run(
     builder.process_site.assert_called_with(False)
     _logger.info.assert_has_calls(
         [
+            mocker.call("Building blog"),
             mocker.call("Creating `build/` directory"),
+            mocker.call("Collecting interactions from posts"),
+            mocker.call("Collecting interactions from site"),
             mocker.call("Processing posts"),
             mocker.call("Processing site"),
         ],

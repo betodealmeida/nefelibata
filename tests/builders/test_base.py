@@ -40,20 +40,20 @@ def test_get_builders(
     )
 
     config = {
-        "builders": [
-            {"plugin": "site_builder", "home": "https://example.com/"},
-            {"plugin": "post_builder", "home": "https://example.com/"},
-        ],
+        "builders": {
+            "site_builder": {"plugin": "site_builder", "home": "https://example.com/"},
+            "post_builder": {"plugin": "post_builder", "home": "https://example.com/"},
+        },
     }
     builders = get_builders(root, config, Scope.POST)
     assert len(builders) == 1
     assert isinstance(builders["post_builder"], PostBuilder)
 
     config = {
-        "builders": [
-            {"invalid": "site_builder"},
-            {"plugin": "post_builder"},
-        ],
+        "builders": {
+            "invalid": {"invalid": "site_builder"},
+            "post_builder": {"plugin": "post_builder"},
+        },
     }
     with pytest.raises(Exception) as excinfo:
         get_builders(root, config, Scope.POST)

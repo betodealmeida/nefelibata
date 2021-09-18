@@ -3,6 +3,7 @@ Build the blog.
 """
 import asyncio
 import logging
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict
 
@@ -11,10 +12,22 @@ import yaml
 from nefelibata.announcers.base import Announcer, Interaction, get_announcers
 from nefelibata.builders.base import Scope, get_builders
 from nefelibata.constants import INTERACTIONS_FILENAME
-from nefelibata.post import get_posts
-from nefelibata.utils import get_config, load_yaml
+from nefelibata.post import Post, get_posts
+from nefelibata.utils import dict_merge, get_config, load_yaml
 
 _logger = logging.getLogger(__name__)
+
+
+async def collect_post(
+    post: Post,
+    announcer: Announcer,
+    post_interactions,
+) -> None:
+    """
+    Collect site interactions using a given announcer.
+    """
+    interactions = await announcer.collect_post(post)
+    post_interactions[post.path].update(interactions)
 
 
 async def collect_site(
@@ -25,7 +38,7 @@ async def collect_site(
     Collect site interactions using a given announcer.
     """
     interactions = await announcer.collect_site()
-    post_interactions.update(interactions)
+    dict_merge(post_interactions, interactions)
 
 
 async def save_interactions(
@@ -37,7 +50,8 @@ async def save_interactions(
     """
     path = post_directory / INTERACTIONS_FILENAME
     current_interactions = load_yaml(path, Interaction)
-    current_interactions.update(interactions)
+    # recursive update
+    dict_merge(current_interactions, interactions)
     with open(path, "w", encoding="utf-8") as output:
         return yaml.dump(
             {
@@ -48,7 +62,10 @@ async def save_interactions(
         )
 
 
-async def run(root: Path, force: bool = False) -> None:
+async def run(  # pylint: disable=too-many-locals
+    root: Path,
+    force: bool = False,
+) -> None:
     """
     Build blog from Markdown files and online interactions.
     """
@@ -66,7 +83,17 @@ async def run(root: Path, force: bool = False) -> None:
 
     # collect interactions from posts/site
     tasks = []
-    post_interactions: Dict[Path, Dict[str, Interaction]] = {}
+    post_interactions: Dict[Path, Dict[str, Interaction]] = defaultdict(dict)
+
+    _logger.info("Collecting interactions from posts")
+    announcers = get_announcers(root, config, Scope.POST)
+    for post in posts:
+        for name, announcer in announcers.items():
+            if name in post.announcers:
+                task = asyncio.create_task(
+                    collect_post(post, announcer, post_interactions),
+                )
+                tasks.append(task)
 
     _logger.info("Collecting interactions from site")
     announcers = get_announcers(root, config, Scope.SITE)

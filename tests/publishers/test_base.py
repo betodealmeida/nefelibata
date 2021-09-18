@@ -4,7 +4,7 @@ Tests for ``nefelibata.publishers.base``.
 # pylint: disable=invalid-name
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Type
+from typing import Optional, Type
 
 import pytest
 from freezegun import freeze_time
@@ -31,7 +31,11 @@ def test_get_publishers(
         A dummy publisher.
         """
 
-        async def publish(self, force: bool = False) -> None:
+        async def publish(
+            self,
+            since: Optional[datetime] = None,
+            force: bool = False,
+        ) -> None:
             pass
 
     entry_points = [make_entry_point("dummy_publisher", DummyPublisher)]
@@ -41,14 +45,14 @@ def test_get_publishers(
     )
 
     config = {
-        "publishers": [{"plugin": "dummy_publisher"}],
+        "publishers": {"dummy": {"plugin": "dummy_publisher"}},
     }
     publishers = get_publishers(root, config)
     assert len(publishers) == 1
-    assert isinstance(publishers[0], DummyPublisher)
+    assert isinstance(publishers["dummy"], DummyPublisher)
 
     config = {
-        "publishers": [{"invalid": "dummy_publisher"}],
+        "publishers": {"invalid": {"invalid": "dummy_publisher"}},
     }
     with pytest.raises(Exception) as excinfo:
         get_publishers(root, config)

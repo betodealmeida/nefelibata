@@ -102,6 +102,7 @@ async def run(  # pylint: disable=too-many-locals
 
     # persist publishings
     with open(root / PUBLISHINGS_FILENAME, "w", encoding="utf-8") as output:
+        print(publishings)
         yaml.dump(
             {name: publishing.dict() for name, publishing in publishings.items()},
             output,
