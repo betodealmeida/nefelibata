@@ -4,7 +4,6 @@ Base class for publishers.
 
 from datetime import datetime
 from pathlib import Path
-from pprint import pformat
 from typing import Any, Dict, Iterator, Optional
 
 from pkg_resources import iter_entry_points
@@ -29,9 +28,10 @@ class Publisher:
 
     name = ""
 
-    def __init__(self, root: Path, config: Config, **kwargs: Any):
+    def __init__(self, root: Path, config: Config, path: str, **kwargs: Any):
         self.root = root
         self.config = config
+        self.path = path
         self.kwargs = kwargs
 
     async def publish(
@@ -55,7 +55,7 @@ class Publisher:
         # convert to timestamp to compare with ``st_mtime``
         last_published = since.timestamp() if since else 0
 
-        build = self.root / "build"
+        build = self.root / "build" / self.path
         queue = [build]
         while queue:
             current = queue.pop()
@@ -68,7 +68,20 @@ class Publisher:
 
 def get_publishers(root: Path, config: Config) -> Dict[str, Publisher]:
     """
-    Return all the publishers.
+    Return configured publishers.
+
+    Publishers are defined for each build, eg:
+
+        builders:
+          ...
+          gemini:
+            publish-to:
+              - vsftp
+
+        publishers:
+          vsftp:
+            ...
+
     """
     classes = {
         entry_point.name: entry_point.load()
@@ -76,15 +89,14 @@ def get_publishers(root: Path, config: Config) -> Dict[str, Publisher]:
     }
 
     publishers = {}
-    for name, parameters in config["publishers"].items():
-        if "plugin" not in parameters:
-            raise Exception(
-                f'Invalid configuration, missing "plugin": {pformat(parameters)}',
-            )
-        plugin = parameters["plugin"]
-        class_ = classes[plugin]
-        kwargs = {k: v for k, v in parameters.items() if k != "plugin"}
+    for builder_name, builder_parameters in config["builders"].items():
+        for publisher_name in builder_parameters["publish-to"]:
+            publisher_parameters = config["publishers"][publisher_name]
+            plugin = publisher_parameters["plugin"]
+            class_ = classes[plugin]
+            path = builder_parameters["path"]
 
-        publishers[name] = class_(root, config, **kwargs)
+            name = f"{builder_name} => {publisher_name}"
+            publishers[name] = class_(root, config, path, **publisher_parameters)
 
     return publishers

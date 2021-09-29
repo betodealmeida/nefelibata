@@ -3,6 +3,7 @@ A builder for Gemini (https://gemini.circumlunar.space/).
 """
 import logging
 from pathlib import Path
+from typing import Any
 
 from md2gemini import md2gemini
 
@@ -26,8 +27,16 @@ class GeminiBuilder(Builder):
 
     scopes = [Scope.POST, Scope.SITE]
 
-    def __init__(self, root: Path, config: Config, home: str, links: str = "paragraph"):
-        super().__init__(root, config, home)
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        root: Path,
+        config: Config,
+        home: str,
+        path: str = "",
+        links: str = "paragraph",
+        **kwargs: Any,
+    ):
+        super().__init__(root, config, home, path, **kwargs)
         self.links = links
 
         self.setup()

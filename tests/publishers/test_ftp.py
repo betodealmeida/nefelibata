@@ -30,12 +30,19 @@ async def test_publish(
     mocker.patch.object(
         FTPPublisher,
         "find_modified_files",
-        return_value=iter([root / "build/one"]),
+        return_value=iter([root / "build/generic/one"]),
     )
 
-    fs.create_file(root / "build/one", contents="Hello, world!")
+    fs.create_file(root / "build/generic/one", contents="Hello, world!")
 
-    publisher = FTPPublisher(root, config, "ftp.example.com", "username", "password")
+    publisher = FTPPublisher(
+        root,
+        config,
+        "generic",
+        "ftp.example.com",
+        "username",
+        "password",
+    )
 
     await publisher.publish()
 
@@ -58,9 +65,16 @@ async def test_publish_last_published(
     ftp = FTP.return_value.__enter__.return_value
 
     with freeze_time("2021-01-01T00:00:00Z"):
-        fs.create_file(root / "build/one", contents="Hello, world!")
+        fs.create_file(root / "build/generic/one", contents="Hello, world!")
 
-    publisher = FTPPublisher(root, config, "ftp.example.com", "username", "password")
+    publisher = FTPPublisher(
+        root,
+        config,
+        "generic",
+        "ftp.example.com",
+        "username",
+        "password",
+    )
 
     await publisher.publish(since=datetime(2021, 1, 2, tzinfo=timezone.utc))
 
@@ -86,14 +100,15 @@ async def test_publish_tls(
     mocker.patch.object(
         FTPPublisher,
         "find_modified_files",
-        return_value=iter([root / "build/one"]),
+        return_value=iter([root / "build/generic/one"]),
     )
 
-    fs.create_file(root / "build/one", contents="Hello, world!")
+    fs.create_file(root / "build/generic/one", contents="Hello, world!")
 
     publisher = FTPPublisher(
         root,
         config,
+        "generic",
         "ftp.example.com",
         "username",
         "password",
@@ -121,15 +136,18 @@ async def test_publish_with_basedir(
     mocker.patch.object(
         FTPPublisher,
         "find_modified_files",
-        return_value=iter([root / "build/subdir1/one", root / "build/subdir2/two"]),
+        return_value=iter(
+            [root / "build/generic/subdir1/one", root / "build/generic/subdir2/two"],
+        ),
     )
 
-    fs.create_file(root / "build/subdir1/one", contents="Hello, world!")
-    fs.create_file(root / "build/subdir2/two", contents="Goodbye, world!")
+    fs.create_file(root / "build/generic/subdir1/one", contents="Hello, world!")
+    fs.create_file(root / "build/generic/subdir2/two", contents="Goodbye, world!")
 
     publisher = FTPPublisher(
         root,
         config,
+        "generic",
         "ftp.example.com",
         "username",
         "password",
@@ -164,12 +182,19 @@ async def test_publish_create_directory(
     mocker.patch.object(
         FTPPublisher,
         "find_modified_files",
-        return_value=iter([root / "build/subdir1/one"]),
+        return_value=iter([root / "build/generic/subdir1/one"]),
     )
 
-    fs.create_file(root / "build/subdir1/one", contents="Hello, world!")
+    fs.create_file(root / "build/generic/subdir1/one", contents="Hello, world!")
 
-    publisher = FTPPublisher(root, config, "ftp.example.com", "username", "password")
+    publisher = FTPPublisher(
+        root,
+        config,
+        "generic",
+        "ftp.example.com",
+        "username",
+        "password",
+    )
 
     await publisher.publish()
 

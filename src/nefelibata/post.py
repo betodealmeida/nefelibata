@@ -84,10 +84,6 @@ def build_post(root: Path, config: Config, path: Path) -> Post:
         announcers = set(config.get("announcers", {}))
         parsed["announce-on"] = ", ".join(announcers)
         modified = True
-    if "announce-on-extra" in metadata:
-        announcers |= split_header(metadata.get("announce-on-extra"))
-    if "announce-on-skip" in metadata:
-        announcers -= split_header(metadata.get("announce-on-skip"))
 
     if modified:
         with open(path, "w", encoding="utf-8") as output:

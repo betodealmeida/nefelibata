@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timezone
 from ftplib import FTP, FTP_TLS, error_perm
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from nefelibata.publishers.base import Publisher, Publishing
 from nefelibata.typing import Config
@@ -23,13 +23,15 @@ class FTPPublisher(Publisher):
         self,
         root: Path,
         config: Config,
+        path: str,
         hostname: str,
         username: str = "",
         password: str = "",
         basedir: str = "",
         use_tls: bool = False,
+        **kwargs: Any,
     ):
-        super().__init__(root, config)
+        super().__init__(root, config, path, **kwargs)
 
         self.hostname = hostname
         self.username = username
@@ -42,7 +44,7 @@ class FTPPublisher(Publisher):
         since: Optional[datetime] = None,
         force: bool = False,
     ) -> Optional[Publishing]:
-        build = self.root / "build"
+        build = self.root / "build" / self.path
 
         FTPClass = FTP_TLS if self.use_tls else FTP
         with FTPClass(self.hostname, self.username, self.password) as ftp:

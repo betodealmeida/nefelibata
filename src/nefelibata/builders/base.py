@@ -6,7 +6,6 @@ import shutil
 from collections import defaultdict
 from enum import Enum
 from pathlib import Path
-from pprint import pformat
 from typing import Any, Dict, List, Optional
 
 from jinja2 import Environment, FileSystemLoader
@@ -56,9 +55,12 @@ class Builder:
     # (``Scope.POST``), processing the whole site (``Scope.SITE``), or both.
     scopes: List[Scope] = []
 
-    def __init__(self, root: Path, config: Config, home: str, **kwargs: Any):
+    def __init__(
+        self, root: Path, config: Config, home: str, path: str = "", **kwargs: Any
+    ):
         self.root = root
         self.config = config
+        self.path = path or self.name
         self.home = home.rstrip("/")
         self.kwargs = kwargs
 
@@ -93,17 +95,23 @@ class Builder:
                 shutil.copy(origin, target)
 
         # create build directories
-        build_directory = self.root / "build" / self.name
+        build_directory = self.root / "build" / self.path
         if not build_directory.exists():
             build_directory.mkdir(parents=True)
 
-        tags_directory = self.root / "build" / self.name / "tags"
+        tags_directory = self.root / "build" / self.path / "tags"
         if not tags_directory.exists():
             tags_directory.mkdir()
 
-        categories_directory = self.root / "build" / self.name / "categories"
+        categories_directory = self.root / "build" / self.path / "categories"
         if not categories_directory.exists():
             categories_directory.mkdir()
+
+    def absolute_uri(self, post: Post) -> str:
+        """
+        Return the absolute URI for a post.
+        """
+        return f"{self.home}/{post.url}{self.extension}"
 
     @staticmethod
     def render(content: str) -> str:
@@ -129,7 +137,7 @@ class Builder:
         post_path = (
             self.root
             / "build"
-            / self.name
+            / self.path
             / post.path.relative_to(self.root / "posts").with_suffix(self.extension)
         )
         last_update = post_path.stat().st_mtime if post_path.exists() else None
@@ -167,7 +175,7 @@ class Builder:
 
         # build index and feed
         for asset in self.site_templates:
-            path = self.root / "build" / self.name / asset
+            path = self.root / "build" / self.path / asset
             template_name = f"{self.template_base}{asset}"
             self._build_index(path, template_name, posts, force)
 
@@ -180,7 +188,7 @@ class Builder:
             for tag in sorted(post.tags):
                 tags[tag].append(post)
         for tag, tag_posts in tags.items():
-            path = self.root / "build" / self.name / "tags" / (tag + self.extension)
+            path = self.root / "build" / self.path / "tags" / (tag + self.extension)
             self._build_index(path, template_name, tag_posts, force, title=tag)
 
         # group tags by categories
@@ -192,7 +200,7 @@ class Builder:
             path = (
                 self.root
                 / "build"
-                / self.name
+                / self.path
                 / "categories"
                 / (category + self.extension)
             )
@@ -259,15 +267,10 @@ def get_builders(
 
     builders = {}
     for name, parameters in config["builders"].items():
-        if "plugin" not in parameters:
-            raise Exception(
-                f'Invalid configuration, missing "plugin": {pformat(parameters)}',
-            )
         plugin = parameters["plugin"]
         class_ = classes[plugin]
-        kwargs = {k: v for k, v in parameters.items() if k != "plugin"}
 
         if scope is None or scope in class_.scopes:
-            builders[name] = class_(root, config, **kwargs)
+            builders[name] = class_(root, config, **parameters)
 
     return builders

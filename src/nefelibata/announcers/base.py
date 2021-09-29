@@ -1,17 +1,19 @@
 """
 Base class for announcers.
 """
+import logging
 from datetime import datetime
 from pathlib import Path
-from pprint import pformat
 from typing import Any, Dict, List, Literal, Optional
 
 from pkg_resources import iter_entry_points
 from pydantic import BaseModel
 
-from nefelibata.builders.base import Scope
+from nefelibata.builders.base import Builder, Scope, get_builders
 from nefelibata.post import Post
 from nefelibata.typing import Config
+
+_logger = logging.getLogger(__name__)
 
 
 class Announcement(BaseModel):  # pylint: disable=too-few-public-methods
@@ -47,9 +49,12 @@ class Announcer:
 
     scopes: List[Scope] = []
 
-    def __init__(self, root: Path, config: Config, **kwargs: Any):
+    def __init__(
+        self, root: Path, config: Config, builders: List[Builder], **kwargs: Any
+    ):
         self.root = root
         self.config = config
+        self.builders = builders
         self.kwargs = kwargs
 
     async def announce_post(self, post: Post) -> Optional[Announcement]:
@@ -64,13 +69,13 @@ class Announcer:
         """
         raise NotImplementedError("Subclasses must implement ``announce_site``")
 
-    async def collect_post(self, post: Post) -> List[str]:
+    async def collect_post(self, post: Post) -> Dict[str, Interaction]:
         """
         Collect interactions on a post.
         """
         raise NotImplementedError("Subclasses must implement ``collect_post``")
 
-    async def collect_site(self) -> List[str]:
+    async def collect_site(self) -> Dict[Path, Dict[str, Interaction]]:
         """
         Collect interactions on a site.
         """
@@ -83,8 +88,10 @@ def get_announcers(
     scope: Optional[Scope] = None,
 ) -> Dict[str, Announcer]:
     """
-    Return a dictionary of announcers.
+    Return configured announcers.
     """
+    builders = get_builders(root, config, scope)
+
     classes = {
         announcer.name: announcer.load()
         for announcer in iter_entry_points("nefelibata.announcer")
@@ -92,15 +99,17 @@ def get_announcers(
 
     announcers = {}
     for name, parameters in config["announcers"].items():
-        if "plugin" not in parameters:
-            raise Exception(
-                f'Invalid configuration, missing "plugin": {pformat(parameters)}',
-            )
         plugin = parameters["plugin"]
         class_ = classes[plugin]
-        kwargs = {k: v for k, v in parameters.items() if k != "plugin"}
+
+        # find all builders that the announcer should handle
+        announcer_builders = [
+            builders[builder_name]
+            for builder_name, builder_parameters in config["builders"].items()
+            if name in builder_parameters["announce-on"]
+        ]
 
         if scope is None or scope in class_.scopes:
-            announcers[name] = class_(root, config, **kwargs)
+            announcers[name] = class_(root, config, announcer_builders, **parameters)
 
     return announcers

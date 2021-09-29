@@ -91,7 +91,7 @@ def load_yaml(path: Path, class_: Type[BaseModel]) -> Dict[str, BaseModel]:
         try:
             content = yaml.load(input_, Loader=yaml.SafeLoader)
             return {name: class_(**parameters) for name, parameters in content.items()}
-        except yaml.parser.ParserError:
+        except (AttributeError, yaml.parser.ParserError):
             _logger.warning("Invalid YAML file: %s", path)
 
     return {}

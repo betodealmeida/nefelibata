@@ -6,7 +6,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Type
 
-import pytest
 from freezegun import freeze_time
 from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
@@ -46,20 +45,18 @@ def test_get_publishers(
 
     config = {
         "publishers": {"dummy": {"plugin": "dummy_publisher"}},
+        "builders": {
+            "site_builder": {
+                "plugin": "site_builder",
+                "publish-to": ["dummy"],
+                "home": "https://example.com/",
+                "path": "site",
+            },
+        },
     }
     publishers = get_publishers(root, config)
     assert len(publishers) == 1
-    assert isinstance(publishers["dummy"], DummyPublisher)
-
-    config = {
-        "publishers": {"invalid": {"invalid": "dummy_publisher"}},
-    }
-    with pytest.raises(Exception) as excinfo:
-        get_publishers(root, config)
-    assert (
-        str(excinfo.value)
-        == """Invalid configuration, missing "plugin": {'invalid': 'dummy_publisher'}"""
-    )
+    assert isinstance(publishers["site_builder => dummy"], DummyPublisher)
 
 
 def test_find_modified_files(
@@ -70,17 +67,18 @@ def test_find_modified_files(
     """
     Test ``find_modified_files``.
     """
-    publisher = Publisher(root, config)
+    publisher = Publisher(root, config, "generic")
 
-    fs.create_dir(root / "build/subdir")
+    fs.create_dir(root / "build/generic")
+    fs.create_dir(root / "build/generic/subdir")
     with freeze_time("2021-01-01T00:00:00Z"):
-        (root / "build/one").touch()
+        (root / "build/generic/one").touch()
     with freeze_time("2021-01-02T00:00:00Z"):
-        (root / "build/subdir/two").touch()
+        (root / "build/generic/subdir/two").touch()
 
     since = datetime(2021, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
     modified_files = list(publisher.find_modified_files(force=False, since=since))
-    assert modified_files == [Path("/path/to/blog/build/subdir/two")]
+    assert modified_files == [Path("/path/to/blog/build/generic/subdir/two")]
 
     since = datetime(2021, 1, 2, 12, 0, 0, tzinfo=timezone.utc)
     modified_files = list(publisher.find_modified_files(force=False, since=since))
@@ -89,6 +87,6 @@ def test_find_modified_files(
     since = datetime(2021, 1, 2, 12, 0, 0, tzinfo=timezone.utc)
     modified_files = list(publisher.find_modified_files(force=True, since=since))
     assert modified_files == [
-        Path("/path/to/blog/build/one"),
-        Path("/path/to/blog/build/subdir/two"),
+        Path("/path/to/blog/build/generic/one"),
+        Path("/path/to/blog/build/generic/subdir/two"),
     ]

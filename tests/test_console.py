@@ -165,7 +165,7 @@ async def test_main_no_action(mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_main_canceled(mocker) -> None:
+async def test_main_canceled(mocker: MockerFixture) -> None:
     """
     Test canceling the ``main`` coroutine.
     """

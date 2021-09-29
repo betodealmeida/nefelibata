@@ -15,29 +15,26 @@
 - [X] antenna announcer
 - [X] geminiinfo announcer
 - [X] freeze announce-on
+- [X] builder path
+- [/] publisher path
+- [ ] mastodon announcer
+- [ ] mastodon announcer with media
+- [ ] drafts get built but not published?
+- [ ] CAPCOM announcer
+
+- [ ] validate config
+
 - [/] html templates (with striptags|e)
 
 - [ ] reading time assistant
 
 - [ ] add enclosures to post
-- [ ] mastodon announcer
 - [ ] weather assistant
 - [ ] playlist assistant
 
 - [ ] announcer staleness
-- [ ] builder path
-- [ ] publisher path
 
 - [ ] warn_external_resources => site assistant
 - [ ] mirror_images and archive_links => post assistants
 - [ ] assistants store yaml files with source (mkd), option to copy the source files (mkd/yaml) to build for backup
 - [ ] atom: <link rel="alternate" type="text/gemini" href="gemini://..." /> ?
-
-
-
-gemini://warmedal.se/~antenna/submit?<percent encoded URL to your feed>
-collect responses? gemini://ew.srht.site/en/2021/20210915-re-changing-old-code-is-risky.gmi
-gemini://taoetc.org/changing_old_code_is_risky/index.gmi
-gemini://geminispace.info/backlinks?gemini%3A%2F%2Ftaoetc.org%2Fchanging_old_code_is_risky%2Findex.gmi
-
-Multiple announcers in parallel => add lock to antenna?

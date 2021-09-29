@@ -4,10 +4,10 @@ Tests for ``nefelibata.builders.base``.
 from pathlib import Path
 from typing import Type
 
-import pytest
 from pytest_mock import MockerFixture
 
 from nefelibata.builders.base import Builder, Scope, get_builders
+from nefelibata.post import Post
 from nefelibata.typing import Config
 
 from ..conftest import MockEntryPoint
@@ -49,23 +49,19 @@ def test_get_builders(
     assert len(builders) == 1
     assert isinstance(builders["post_builder"], PostBuilder)
 
-    config = {
-        "builders": {
-            "invalid": {"invalid": "site_builder"},
-            "post_builder": {"plugin": "post_builder"},
-        },
-    }
-    with pytest.raises(Exception) as excinfo:
-        get_builders(root, config, Scope.POST)
-    assert (
-        str(excinfo.value)
-        == """Invalid configuration, missing "plugin": {'invalid': 'site_builder'}"""
-    )
 
-
-def test_builder_render(root: Path, config: Config):
+def test_builder_render(root: Path, config: Config) -> None:
     """
     Test the ``render`` method in ``Builder``.
     """
     builder = Builder(root, config, "https://example.com/")
     assert builder.render("test") == "test"
+
+
+def test_builder_absolute_uri(root: Path, config: Config, post: Post) -> None:
+    """
+    Test the ``absolute_uri`` method in ``Builder``.
+    """
+    builder = Builder(root, config, "https://example.com/")
+    builder.extension = ".html"
+    assert builder.absolute_uri(post) == "https://example.com/first/index.html"

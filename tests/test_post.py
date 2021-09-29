@@ -75,6 +75,7 @@ This is your first post. It should be written using Markdown.
 
 Read more about [Nefelibata](https://nefelibata.readthedocs.io/)."""
     )
+    assert post.announcers == {"antenna"}
 
     # check to file was updated with the ``date`` header
     with open(path, encoding="utf-8") as input_:
@@ -120,3 +121,12 @@ def test_get_posts(fs: FakeFilesystem, root: Path, config: Config) -> None:
     # test limited number of posts returned
     posts = get_posts(root, config, 1)
     assert len(posts) == 1
+
+
+def test_anouncers(root: Path, config: Config, post: Post) -> None:
+    """
+    Test post announcers.
+    """
+    config["announcers"] = {
+        "anntena": {"plugin": "antenna"},
+    }

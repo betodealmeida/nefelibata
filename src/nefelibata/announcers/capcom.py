@@ -1,5 +1,5 @@
 """
-An Antenna (gemini://warmedal.se/~antenna/) announcer.
+A CAPCOM (gemini://gemini.circumlunar.space/capcom/) announcer.
 """
 import logging
 import re
@@ -22,10 +22,10 @@ from nefelibata.typing import Config
 _logger = logging.getLogger(__name__)
 
 
-class AntennaAnnouncer(Announcer):
+class CAPCOMAnnouncer(Announcer):
 
     """
-    An Antenna (gemini://warmedal.se/~antenna/) announcer.
+    A CAPCOM (gemini://gemini.circumlunar.space/capcom/) announcer.
 
     This requires the Gemini builder, and assumes that the Gemlog feed is
     at ``{builder.home}/feed{builder.extension}``.
@@ -45,22 +45,22 @@ class AntennaAnnouncer(Announcer):
 
     async def announce_site(self) -> Optional[Announcement]:
         """
-        Send the link to Antenna.
+        Send the link to CAPCOM.
         """
         for builder in self.builders:
             if not builder.home.startswith("gemini://"):
-                raise Exception("Antenna announcer only works with `gemini://` builds")
+                raise Exception("CAPCOM announcer only works with `gemini://` builds")
 
             feed_url = urllib.parse.quote_plus(
                 f"{builder.home}/feed{builder.extension}",
             )
-            url = f"gemini://warmedal.se/~antenna/submit?{feed_url}"
+            url = f"gemini://gemini.circumlunar.space/capcom/submit?{feed_url}"
 
-            _logger.info("Announcing feed %s to Antenna", feed_url)
+            _logger.info("Announcing feed %s to CAPCOM", feed_url)
             await self.client.get(URL(url))
 
         return Announcement(
-            uri="gemini://warmedal.se/~antenna/",
+            uri="gemini://gemini.circumlunar.space/capcom/",
             timestamp=datetime.now(timezone.utc),
         )
 
@@ -71,9 +71,11 @@ class AntennaAnnouncer(Announcer):
         """
         Return replies to posts.
 
-        This is done by scraping Antenna and searching for "Re: " posts.
+        This is done by scraping CAPCOM and searching for "Re: " posts.
         """
-        response = await self.client.get(URL("gemini://warmedal.se/~antenna/"))
+        response = await self.client.get(
+            URL("gemini://gemini.circumlunar.space/capcom/"),
+        )
         payload = await response.read()
         content = payload.decode("utf-8")
 

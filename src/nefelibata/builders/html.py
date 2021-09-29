@@ -3,6 +3,7 @@ An HTML builder.
 """
 import logging
 from pathlib import Path
+from typing import Any
 
 import markdown
 
@@ -25,8 +26,16 @@ class HTMLBuilder(Builder):
 
     scopes = [Scope.POST, Scope.SITE]
 
-    def __init__(self, root: Path, config: Config, home: str, theme: str = "default"):
-        super().__init__(root, config, home)
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        root: Path,
+        config: Config,
+        home: str,
+        path: str = "",
+        theme: str = "default",
+        **kwargs: Any,
+    ):
+        super().__init__(root, config, home, path, **kwargs)
         self.theme = theme
         self.template_base = f"{theme}/src/"
 
@@ -37,7 +46,7 @@ class HTMLBuilder(Builder):
 
         # symlink CSS
         css_directory = self.root / "templates/builders/html" / self.theme / "src/css"
-        target = self.root / "build/html/css"
+        target = self.root / "build" / self.path / "css"
         if css_directory.exists() and not target.exists():
             target.symlink_to(css_directory, target_is_directory=True)
 
