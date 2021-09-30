@@ -3,34 +3,38 @@
 {% block title %}{{ config.title|striptags|e }}: {{ post.title }}{% endblock %}
 
 {% block content %}
-    <article class="prose">
-      <h1>{{ post.title }}</h1>
+<article class="h-entry container p-16 max-w-4xl">
+  <h1 class="p-name font-serif text-5xl">{{ post.title }}</h1>
 
-      {{ render(post.content) }}
-    </article>
+  <p class="text-sm">Published by <a class="p-author h-card" href="{{ config.author.url }}">{{ config.author.name }}</a>
+  on <time class="dt-published" datetime="{{ post.timestamp.isoformat() }}">{{ post.timestamp }}</time></p>
 
-    {% if post.tags %}
-    <h2>Tags</h2>
+  <p class="p-summary">{{ post.summary }}</p>
 
-    <ul>
+  <div class="e-content">
+    {{ render(post.content) }}
+  </div>
+
+  {% if post.tags %}
+  <h2 class="inline">Tags</h2>
+
+  <ul class="inline">
     {% for tag in sorted(post.tags) %}
-      <li><a href="{{ home }}/tags/{{ tag }}.html">{{ tag }}</a></li>
+    <li class="inline"><a href="{{ home }}/tags/{{ tag }}.html">{{ tag }}</a></li>
     {% endfor %}
-    </ul>
-    {% endif %}
+  </ul>
+  {% endif %}
 
-    {% if post.categories %}
-    <h2>Categories</h2>
+  {% if post.categories %}
+  <h2>Categories</h2>
 
-    <ul>
+  <ul>
     {% for category in sorted(post.categories) %}
-      <li><a href="{{ home }}/categories/{{ category }}.html">{{ category }}</a></li>
+    <li><a href="{{ home }}/categories/{{ category }}.html">{{ category }}</a></li>
     {% endfor %}
-    </ul>
-    {% endif %}
+  </ul>
+  {% endif %}
 
-    <h2>About</h2>
-
-    <p>Published on {{ post.timestamp }} by <a href="mailto:{{ config.author.email }}">{{ config.author.name }}</a>.</p>
+</article>
 
 {% endblock %}

@@ -167,6 +167,11 @@ class Builder:
         with open(post_path, "w", encoding="utf-8") as output:
             output.write(content)
 
+        for enclosure in post.enclosures:
+            _logger.info("Copying enclosure %s", enclosure.path)
+            target = post_directory / enclosure.path.name
+            shutil.copy(enclosure.path, target)
+
     async def process_site(self, force: bool = False) -> None:
         """
         Process the entire site.

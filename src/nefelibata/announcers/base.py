@@ -23,6 +23,7 @@ class Announcement(BaseModel):  # pylint: disable=too-few-public-methods
 
     uri: str
     timestamp: datetime
+    grace_seconds: int = 0
 
 
 class Interaction(BaseModel):  # pylint: disable=too-few-public-methods

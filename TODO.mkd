@@ -16,25 +16,23 @@
 - [X] geminiinfo announcer
 - [X] freeze announce-on
 - [X] builder path
-- [/] publisher path
+- [X] publisher path
+- [X] add enclosures to post
+- [X] CAPCOM announcer
+- [X] atom: <link rel="alternate" type="text/gemini" href="gemini://..." /> ?
+- [X] add grace period to announcers, to prevent spamming
+- [ ] remove scope from builder, move to announcer
 - [ ] mastodon announcer
 - [ ] mastodon announcer with media
-- [ ] drafts get built but not published?
-- [ ] CAPCOM announcer
-
-- [ ] validate config
-
 - [/] html templates (with striptags|e)
 
+- [ ] validate config
 - [ ] reading time assistant
-
-- [ ] add enclosures to post
 - [ ] weather assistant
 - [ ] playlist assistant
 
-- [ ] announcer staleness
+- [ ] announcer staleness (don't announce if post is older than 7 days, eg)
 
 - [ ] warn_external_resources => site assistant
 - [ ] mirror_images and archive_links => post assistants
-- [ ] assistants store yaml files with source (mkd), option to copy the source files (mkd/yaml) to build for backup
-- [ ] atom: <link rel="alternate" type="text/gemini" href="gemini://..." /> ?
+- [ ] drafts get built but not published?

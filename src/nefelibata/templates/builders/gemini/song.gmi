@@ -2,14 +2,6 @@
 
 {{ render(post.content) }}
 
-{% if post.enclosures%}
-# Enclosures
-
-{% for enclosure in post.enclosures %}
-=> {{ home }}/{{ enclosure.href }} {{ enclosure.description }}
-{% endfor %}
-
-{% endif %}
 {% if post.tags %}
 # Tags
 

@@ -82,30 +82,34 @@ async def test_builder_post(
     <link href="https://example.com/css/style.css" rel="stylesheet">
   </head>
   <body>
-    <article class="prose">
-      <h1>This is your first post</h1>
+<article class="h-entry container p-16 max-w-4xl">
+  <h1 class="p-name font-serif text-5xl">This is your first post</h1>
 
-      <h1>Welcome</h1>
+  <p class="text-sm">Published by <a class="p-author h-card" href="https://taoetc.org/">Beto Dealmeida</a>
+  on <time class="dt-published" datetime="2020-12-31T16:00:00-08:00">2020-12-31 16:00:00-08:00</time></p>
+
+  <p class="p-summary"></p>
+
+  <div class="e-content">
+    <h1>Welcome</h1>
 <p>This is your first post. It should be written using Markdown.</p>
 <p>Read more about <a href="https://nefelibata.readthedocs.io/">Nefelibata</a>.</p>
-    </article>
+  </div>
 
-    <h2>Tags</h2>
+  <h2 class="inline">Tags</h2>
 
-    <ul>
-      <li><a href="https://example.com/tags/blog.html">blog</a></li>
-      <li><a href="https://example.com/tags/welcome.html">welcome</a></li>
-    </ul>
+  <ul class="inline">
+    <li class="inline"><a href="https://example.com/tags/blog.html">blog</a></li>
+    <li class="inline"><a href="https://example.com/tags/welcome.html">welcome</a></li>
+  </ul>
 
-    <h2>Categories</h2>
+  <h2>Categories</h2>
 
-    <ul>
-      <li><a href="https://example.com/categories/stem.html">stem</a></li>
-    </ul>
+  <ul>
+    <li><a href="https://example.com/categories/stem.html">stem</a></li>
+  </ul>
 
-    <h2>About</h2>
-
-    <p>Published on 2020-12-31 16:00:00-08:00 by <a href="mailto:roberto@dealmeida.net">Beto Dealmeida</a>.</p>
+</article>
 
   </body>
 </html>"""
@@ -180,7 +184,6 @@ async def test_builder_site(
     )
     with open(assets_directory / "index.html", encoding="utf-8") as input_:
         content = input_.read()
-    print(content)
     assert (
         content
         == f"""<!doctype html>
@@ -223,8 +226,7 @@ async def test_builder_site(
         == """<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <title>道&amp;c.</title>
-    <link rel="alternate" type="text/html" href="https://example.com" />
-    <link rel="self" type="application/atom+xml" href="https://example.comatom.xml" />
+    <link rel="self" type="application/atom+xml" href="https://example.com/atom.xml" />
     <id>https://example.com/</id>
     <updated>2020-12-31T16:04:00Z</updated>
 <entry>
@@ -233,7 +235,7 @@ async def test_builder_site(
     <id>tag:example.com,2020-12-31:first/index</id>
     <updated>2020-12-31T16:04:00Z</updated>
     <summary type="html">
-      Hello, world!
+        Hello, world!
         &lt;p&gt;&lt;a href="https://example.com/first/index"&gt;Permalink&lt;/p&gt;
     </summary>
     <author>

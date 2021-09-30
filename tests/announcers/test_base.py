@@ -58,3 +58,6 @@ def test_get_announcers(
     }
     announcers = get_announcers(root, config, Scope.SITE)
     assert len(announcers) == 1
+
+    announcers = get_announcers(root, config, Scope.POST)
+    assert len(announcers) == 0

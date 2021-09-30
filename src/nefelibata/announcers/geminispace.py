@@ -4,7 +4,7 @@ A Geminispace (gemini://geminispace.info) announcer.
 import logging
 import re
 import urllib.parse
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -57,6 +57,7 @@ class GeminispaceAnnouncer(Announcer):
         return Announcement(
             uri="gemini://geminispace.info/",
             timestamp=datetime.now(timezone.utc),
+            grace_seconds=timedelta(days=365).total_seconds(),
         )
 
     async def collect_post(self, post: Post) -> Dict[str, Interaction]:

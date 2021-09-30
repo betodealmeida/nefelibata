@@ -55,22 +55,33 @@ def test_get_config(root: Path, config: Config) -> None:
     """
     config = get_config(root)
     assert config == {
+        "author": {
+            "email": "roberto@dealmeida.net",
+            "name": "Beto Dealmeida",
+            "note": "Este, sou eu",
+            "url": "https://taoetc.org/",
+        },
         "title": "道&c.",
         "subtitle": "Musings about the path and other things",
-        "author": {
-            "name": "Beto Dealmeida",
-            "url": "https://taoetc.org/",
-            "email": "roberto@dealmeida.net",
-            "note": "Este, sou eu",
-        },
         "language": "en",
         "categories": {
             "stem": {
-                "label": "STEM",
                 "description": "Science, technology, engineering, & math",
+                "label": "STEM",
                 "tags": ["blog", "programming"],
             },
         },
+        "announcers": {"announcer": {"plugin": "announcer"}},
+        "builders": {
+            "builder": {
+                "announce-on": ["announcer"],
+                "home": "https://example.com/",
+                "path": "generic",
+                "plugin": "builder",
+                "publish-to": ["publisher"],
+            },
+        },
+        "publishers": {"publisher": {"plugin": "publisher"}},
     }
 
     with pytest.raises(SystemExit) as excinfo:

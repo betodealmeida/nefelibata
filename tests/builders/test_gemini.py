@@ -10,6 +10,7 @@ from freezegun import freeze_time
 from pytest_mock import MockerFixture
 
 from nefelibata.builders.gemini import GeminiBuilder
+from nefelibata.enclosure import Enclosure
 from nefelibata.post import Post
 from nefelibata.typing import Config
 
@@ -52,6 +53,18 @@ async def test_builder_post(
     """
     _logger = mocker.patch("nefelibata.builders.base._logger")
 
+    enclosure_path = post.path.parent / "picture.jpg"
+    enclosure_path.touch()
+    post.enclosures.append(
+        Enclosure(
+            path=enclosure_path,
+            description="A photo",
+            type="image/jpeg",
+            length=666,
+            href="first/picture.jpg",
+        ),
+    )
+
     builder = GeminiBuilder(root, config, "gemini://localhost:1965")
     with freeze_time("2021-01-02T00:00:00Z"):
         await builder.process_post(post)
@@ -60,7 +73,12 @@ async def test_builder_post(
 
     # test that file was created
     assert post_path.exists()
-    _logger.info.assert_called_with("Creating %s post", "Gemini")
+    _logger.info.assert_has_calls(
+        [
+            mocker.call("Creating %s post", "Gemini"),
+            mocker.call("Copying enclosure %s", enclosure_path),
+        ],
+    )
     with open(post_path, encoding="utf-8") as input_:
         content = input_.read()
     assert (
@@ -74,6 +92,10 @@ This is your first post. It should be written using Markdown.
 Read more about Nefelibata[1].
 
 => https://nefelibata.readthedocs.io/ 1: https://nefelibata.readthedocs.io/
+
+# Enclosures
+
+=> gemini://localhost:1965/first/picture.jpg A photo
 
 # Tags
 
@@ -105,7 +127,12 @@ Published on 2020-12-31 16:00:00-08:00 by Beto Dealmeida <roberto@dealmeida.net>
     with freeze_time("2021-01-04T00:00:00Z"):
         await builder.process_post(post, force=True)
     assert post_path.stat().st_mtime > last_update
-    _logger.info.assert_called_with("Creating %s post", "Gemini")
+    _logger.info.assert_has_calls(
+        [
+            mocker.call("Creating %s post", "Gemini"),
+            mocker.call("Copying enclosure %s", enclosure_path),
+        ],
+    )
 
 
 @pytest.mark.asyncio

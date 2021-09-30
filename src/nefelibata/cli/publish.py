@@ -3,7 +3,7 @@ Publish the blog.
 """
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -117,7 +117,11 @@ async def run(  # pylint: disable=too-many-locals
     for name, announcer in announcers.items():
         if (
             name in site_announcements
-            and site_announcements[name].timestamp >= last_published
+            and (
+                site_announcements[name].timestamp
+                + timedelta(seconds=site_announcements[name].grace_seconds)
+            )
+            >= last_published
         ):
             # already announced after last published
             _logger.info("Announcer %s is up-to-date", name)

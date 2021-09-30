@@ -15,6 +15,7 @@ POST_DATA = {
     "tags": {"welcome", "blog"},
     "categories": ["stem"],
     "announcers": [],
+    "enclosures": [],
     "type": "post",
     "url": "first/index",
     "content": """# Welcome #
@@ -49,6 +50,25 @@ CONFIG = {
             "label": "STEM",
             "description": "Science, technology, engineering, & math",
             "tags": ["blog", "programming"],
+        },
+    },
+    "builders": {
+        "builder": {
+            "plugin": "builder",
+            "announce-on": ["announcer"],
+            "publish-to": ["publisher"],
+            "home": "https://example.com/",
+            "path": "generic",
+        },
+    },
+    "announcers": {
+        "announcer": {
+            "plugin": "announcer",
+        },
+    },
+    "publishers": {
+        "publisher": {
+            "plugin": "publisher",
         },
     },
 }
