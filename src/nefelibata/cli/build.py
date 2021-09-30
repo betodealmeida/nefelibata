@@ -9,8 +9,8 @@ from typing import Dict
 
 import yaml
 
-from nefelibata.announcers.base import Announcer, Interaction, get_announcers
-from nefelibata.builders.base import Scope, get_builders
+from nefelibata.announcers.base import Announcer, Interaction, Scope, get_announcers
+from nefelibata.builders.base import get_builders
 from nefelibata.constants import INTERACTIONS_FILENAME
 from nefelibata.post import Post, get_posts
 from nefelibata.utils import dict_merge, get_config, load_yaml
@@ -113,16 +113,15 @@ async def run(  # pylint: disable=too-many-locals
 
     # build posts/site
     tasks = []
+    builders = get_builders(root, config)
 
     _logger.info("Processing posts")
-    builders = get_builders(root, config, Scope.POST)
     for post in posts:
         for builder in builders.values():
             task = asyncio.create_task(builder.process_post(post, force))
             tasks.append(task)
 
     _logger.info("Processing site")
-    builders = get_builders(root, config, Scope.SITE)
     for builder in builders.values():
         task = asyncio.create_task(builder.process_site(force))
         tasks.append(task)

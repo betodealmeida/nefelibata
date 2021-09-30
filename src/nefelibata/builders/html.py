@@ -7,7 +7,7 @@ from typing import Any
 
 import markdown
 
-from nefelibata.builders.base import Builder, Scope
+from nefelibata.builders.base import Builder
 from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
@@ -23,8 +23,6 @@ class HTMLBuilder(Builder):
     label = "HTML"
     extension = ".html"
     site_templates = ["index.html", "atom.xml"]
-
-    scopes = [Scope.POST, Scope.SITE]
 
     def __init__(  # pylint: disable=too-many-arguments
         self,

@@ -21,7 +21,7 @@
 - [X] CAPCOM announcer
 - [X] atom: <link rel="alternate" type="text/gemini" href="gemini://..." /> ?
 - [X] add grace period to announcers, to prevent spamming
-- [ ] remove scope from builder, move to announcer
+- [X] remove scope from builder, move to announcer
 - [ ] mastodon announcer
 - [ ] mastodon announcer with media
 - [/] html templates (with striptags|e)

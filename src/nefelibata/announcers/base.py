@@ -3,17 +3,29 @@ Base class for announcers.
 """
 import logging
 from datetime import datetime
+from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional
 
 from pkg_resources import iter_entry_points
 from pydantic import BaseModel
 
-from nefelibata.builders.base import Builder, Scope, get_builders
+from nefelibata.builders.base import Builder, get_builders
 from nefelibata.post import Post
 from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
+
+
+class Scope(Enum):
+    """
+    The scope of a given announcer.
+
+    Announcers can process a single post, the entire site, or both.
+    """
+
+    POST = "POST"
+    SITE = "SITE"
 
 
 class Announcement(BaseModel):  # pylint: disable=too-few-public-methods
@@ -91,7 +103,7 @@ def get_announcers(
     """
     Return configured announcers.
     """
-    builders = get_builders(root, config, scope)
+    builders = get_builders(root, config)
 
     classes = {
         announcer.name: announcer.load()

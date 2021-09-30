@@ -7,7 +7,7 @@ from typing import Any
 
 from md2gemini import md2gemini
 
-from nefelibata.builders.base import Builder, Scope
+from nefelibata.builders.base import Builder
 from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
@@ -24,8 +24,6 @@ class GeminiBuilder(Builder):
     extension = ".gmi"
     template_base = ""
     site_templates = ["index.gmi", "feed.gmi"]
-
-    scopes = [Scope.POST, Scope.SITE]
 
     def __init__(  # pylint: disable=too-many-arguments
         self,

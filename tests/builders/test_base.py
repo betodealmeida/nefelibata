@@ -6,18 +6,18 @@ from typing import Type
 
 from pytest_mock import MockerFixture
 
-from nefelibata.builders.base import Builder, Scope, get_builders
+from nefelibata.builders.base import Builder, get_builders
 from nefelibata.post import Post
 from nefelibata.typing import Config
 
 from ..conftest import MockEntryPoint
 
 
-def make_dummy_builder(class_name: str, scope: Scope) -> Type[Builder]:
+def make_dummy_builder(class_name: str) -> Type[Builder]:
     """
     Make a dummy ``Builder`` derived class.
     """
-    return type(class_name, (Builder,), {"scopes": [scope]})
+    return type(class_name, (Builder,), {})
 
 
 def test_get_builders(
@@ -28,11 +28,9 @@ def test_get_builders(
     """
     Test ``get_builders``.
     """
-    SiteBuilder = make_dummy_builder("SiteBuilder", Scope.SITE)
-    PostBuilder = make_dummy_builder("PostBuilder", Scope.POST)
+    DummyBuilder = make_dummy_builder("DummyBuilder")
     entry_points = [
-        make_entry_point("site_builder", SiteBuilder),
-        make_entry_point("post_builder", PostBuilder),
+        make_entry_point("builder", DummyBuilder),
     ]
     mocker.patch(
         "nefelibata.builders.base.iter_entry_points",
@@ -41,13 +39,12 @@ def test_get_builders(
 
     config = {
         "builders": {
-            "site_builder": {"plugin": "site_builder", "home": "https://example.com/"},
-            "post_builder": {"plugin": "post_builder", "home": "https://example.com/"},
+            "builder": {"plugin": "builder", "home": "https://example.com/"},
         },
     }
-    builders = get_builders(root, config, Scope.POST)
+    builders = get_builders(root, config)
     assert len(builders) == 1
-    assert isinstance(builders["post_builder"], PostBuilder)
+    assert isinstance(builders["builder"], DummyBuilder)
 
 
 def test_builder_render(root: Path, config: Config) -> None:

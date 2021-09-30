@@ -7,8 +7,7 @@ from typing import Type
 
 from pytest_mock import MockerFixture
 
-from nefelibata.announcers.base import Announcer, get_announcers
-from nefelibata.builders.base import Scope
+from nefelibata.announcers.base import Announcer, Scope, get_announcers
 from nefelibata.typing import Config
 
 from ..conftest import MockEntryPoint

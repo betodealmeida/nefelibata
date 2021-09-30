@@ -9,8 +9,7 @@ from typing import Dict, Optional
 
 import yaml
 
-from nefelibata.announcers.base import Announcement, Announcer, get_announcers
-from nefelibata.builders.base import Scope
+from nefelibata.announcers.base import Announcement, Announcer, Scope, get_announcers
 from nefelibata.constants import ANNOUNCEMENTS_FILENAME, PUBLISHINGS_FILENAME
 from nefelibata.post import Post, get_posts
 from nefelibata.publishers.base import Publisher, Publishing, get_publishers

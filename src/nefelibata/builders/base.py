@@ -4,9 +4,8 @@ Base class for builders.
 import logging
 import shutil
 from collections import defaultdict
-from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from jinja2 import Environment, FileSystemLoader
 from pkg_resources import iter_entry_points, resource_filename, resource_listdir
@@ -16,17 +15,6 @@ from nefelibata.post import Post, get_posts
 from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
-
-
-class Scope(Enum):
-    """
-    The scope of a given builder.
-
-    Builders can process a single post, the entire site, or both.
-    """
-
-    POST = "POST"
-    SITE = "SITE"
 
 
 class Builder:
@@ -50,10 +38,6 @@ class Builder:
 
     # A list of templates that should be processed when building the site.
     site_templates: List[str] = []
-
-    # The scopes in which the builder should run, either processing a single post
-    # (``Scope.POST``), processing the whole site (``Scope.SITE``), or both.
-    scopes: List[Scope] = []
 
     def __init__(
         self, root: Path, config: Config, home: str, path: str = "", **kwargs: Any
@@ -260,10 +244,9 @@ class Builder:
 def get_builders(
     root: Path,
     config: Config,
-    scope: Optional[Scope] = None,
 ) -> Dict[str, Builder]:
     """
-    Return all the builders for a given scope.
+    Return all the builders.
     """
     classes = {
         entry_point.name: entry_point.load()
@@ -275,7 +258,6 @@ def get_builders(
         plugin = parameters["plugin"]
         class_ = classes[plugin]
 
-        if scope is None or scope in class_.scopes:
-            builders[name] = class_(root, config, **parameters)
+        builders[name] = class_(root, config, **parameters)
 
     return builders

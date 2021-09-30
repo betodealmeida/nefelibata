@@ -14,8 +14,8 @@ from aiogemini.client import Client
 from aiogemini.security import TOFUContext
 from yarl import URL
 
-from nefelibata.announcers.base import Announcement, Announcer, Interaction
-from nefelibata.builders.base import Builder, Scope
+from nefelibata.announcers.base import Announcement, Announcer, Interaction, Scope
+from nefelibata.builders.base import Builder
 from nefelibata.post import Post, get_posts
 from nefelibata.typing import Config
 
