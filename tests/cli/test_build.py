@@ -21,6 +21,10 @@ async def test_run(
     """
     Test ``run``.
     """
+    assistant = mocker.MagicMock()
+    assistant.process_post = mocker.AsyncMock()
+    assistant.process_site = mocker.AsyncMock()
+
     builder = mocker.MagicMock()
     builder.process_post = mocker.AsyncMock()
     builder.process_site = mocker.AsyncMock()
@@ -37,6 +41,10 @@ async def test_run(
         "nefelibata.cli.build.get_announcers",
         return_value={"announcer1": announcer1, "announcer2": announcer2},
     )
+    mocker.patch(
+        "nefelibata.cli.build.get_assistants",
+        return_value={"assistant": assistant},
+    )
     mocker.patch("nefelibata.cli.build.get_builders", return_value={"builder": builder})
     mocker.patch("nefelibata.cli.build.get_config")
     mocker.patch("nefelibata.cli.build.get_posts", return_value=[post])
@@ -47,6 +55,8 @@ async def test_run(
 
     await build.run(root)
 
+    assistant.process_post.assert_called_with(post, False)
+    assistant.process_site.assert_called_with(False)
     builder.process_post.assert_called_with(post, False)
     builder.process_site.assert_called_with(False)
     announcer1.collect_post.assert_called_with(post)
@@ -59,6 +69,8 @@ async def test_run(
             mocker.call("Creating `build/` directory"),
             mocker.call("Collecting interactions from posts"),
             mocker.call("Collecting interactions from site"),
+            mocker.call("Running post assistants"),
+            mocker.call("Running site assistants"),
             mocker.call("Processing posts"),
             mocker.call("Processing site"),
         ],

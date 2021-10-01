@@ -23,7 +23,7 @@
 - [X] add grace period to announcers, to prevent spamming
 - [X] remove scope from builder, move to announcer
 - [X] mastodon announcer
-- [ ] reading time assistant
+- [X] reading time assistant
 - [ ] validate config
 - [/] html templates (with striptags|e)
 - [ ] weather assistant

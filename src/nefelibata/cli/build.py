@@ -10,6 +10,7 @@ from typing import Dict
 import yaml
 
 from nefelibata.announcers.base import Announcer, Interaction, Scope, get_announcers
+from nefelibata.assistants.base import get_assistants
 from nefelibata.builders.base import get_builders
 from nefelibata.constants import INTERACTIONS_FILENAME
 from nefelibata.post import Post, get_posts
@@ -107,6 +108,24 @@ async def run(  # pylint: disable=too-many-locals
     tasks = []
     for path, interactions in post_interactions.items():
         task = asyncio.create_task(save_interactions(path.parent, interactions))
+        tasks.append(task)
+
+    await asyncio.gather(*tasks)
+
+    # run assistants
+    tasks = []
+
+    _logger.info("Running post assistants")
+    assistants = get_assistants(root, config, Scope.POST)
+    for post in posts:
+        for assistant in assistants.values():
+            task = asyncio.create_task(assistant.process_post(post, force))
+            tasks.append(task)
+
+    _logger.info("Running site assistants")
+    assistants = get_assistants(root, config, Scope.SITE)
+    for assistant in assistants.values():
+        task = asyncio.create_task(assistant.process_site(force))
         tasks.append(task)
 
     await asyncio.gather(*tasks)

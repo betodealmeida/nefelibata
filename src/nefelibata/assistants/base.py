@@ -1,11 +1,13 @@
 """
 Base class for assistants.
 """
+# pylint: disable=unused-argument
 
 import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import yaml
 from pkg_resources import iter_entry_points
 
 from nefelibata.announcers.base import Scope
@@ -24,6 +26,7 @@ class Assistant:
     files alongside the post.
     """
 
+    name = ""
     scopes: List[Scope] = []
 
     def __init__(self, root: Path, config: Config, **kwargs: Any):
@@ -31,15 +34,47 @@ class Assistant:
         self.config = config
         self.kwargs = kwargs
 
-    async def process_post(self, post: Post) -> None:
+    async def process_post(self, post: Post, force: bool = False) -> None:
         """
         Publish a post externally.
         """
+        path = post.path.parent / f"{self.name}.yaml"
+        if path.exists() and not force:
+            return
 
-    async def process_site(self) -> None:
+        metadata = await self.get_post_metadata(post)
+        if not metadata:
+            return
+
+        with open(path, "w", encoding="utf-8") as output:
+            output.write(yaml.dump(metadata))
+
+    async def get_post_metadata(self, post: Post) -> Dict[str, Any]:
+        """
+        Compute the metadata for a given post.
+        """
+        return {}
+
+    async def process_site(self, force: bool = False) -> None:
         """
         Publish a site externally.
         """
+        path = self.root / f"{self.name}.yaml"
+        if path.exists() and not force:
+            return
+
+        metadata = await self.get_site_metadata()
+        if not metadata:
+            return
+
+        with open(path, "w", encoding="utf-8") as output:
+            output.write(yaml.dump(metadata))
+
+    async def get_site_metadata(self) -> Dict[str, Any]:
+        """
+        Compute the metadata for the site.
+        """
+        return {}
 
 
 def get_assistants(
