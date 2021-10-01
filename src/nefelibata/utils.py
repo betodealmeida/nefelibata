@@ -3,7 +3,7 @@ Utility functions.
 """
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Set, Type
+from typing import Any, Dict, Optional, Set, Type
 
 import yaml
 from pydantic import BaseModel
@@ -110,3 +110,20 @@ def dict_merge(original, update):
             dict_merge(original[key], update[key])
         else:
             original[key] = update[key]
+
+
+def load_extra_metadata(post_directory: Path) -> Dict[str, Any]:
+    """
+    Load all YAML files with extra metadata for a given path.
+    """
+    extra_metadata = {}
+    for file_path in post_directory.glob("*.yaml"):
+        with open(file_path, encoding="utf-8") as input_:
+            try:
+                content = yaml.load(input_, Loader=yaml.SafeLoader)
+            except (AttributeError, yaml.parser.ParserError):
+                _logger.warning("Invalid file: %s", file_path)
+                continue
+        extra_metadata[file_path.stem] = content
+
+    return extra_metadata

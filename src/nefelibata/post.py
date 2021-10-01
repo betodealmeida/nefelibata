@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 from nefelibata.enclosure import Enclosure, get_enclosures
 from nefelibata.typing import Config
-from nefelibata.utils import split_header
+from nefelibata.utils import load_extra_metadata, split_header
 
 
 class Post(BaseModel):  # pylint: disable=too-few-public-methods
@@ -70,10 +70,13 @@ def build_post(root: Path, config: Config, path: Path) -> Post:
             parsed[header] = default
             modified = True
 
-    type_ = parsed.get("type", "post")
-
-    metadata = {k: v for k, v in parsed.items() if k not in required}
-    tags = split_header(parsed.get("keywords"))
+    metadata = {
+        k: str(make_header(decode_header(v)))
+        for k, v in parsed.items()
+        if k not in required
+    }
+    type_ = metadata.get("type", "post")
+    tags = split_header(metadata.get("keywords"))
     categories = {
         category
         for category, parameters in config.get("categories", {}).items()
@@ -91,6 +94,9 @@ def build_post(root: Path, config: Config, path: Path) -> Post:
         with open(path, "w", encoding="utf-8") as output:
             output.write(str(parsed))
 
+    # load metadata from YAML files
+    metadata.update(load_extra_metadata(path.parent))
+
     return Post(
         path=path,
         title=str(make_header(decode_header(parsed["subject"]))),
@@ -99,7 +105,7 @@ def build_post(root: Path, config: Config, path: Path) -> Post:
         tags=tags,
         categories=categories,
         announcers=announcers,
-        enclosures=get_enclosures(root, path),
+        enclosures=get_enclosures(root, path.parent),
         type=type_,
         url=str(path.relative_to(root / "posts").with_suffix("")),
         content=parsed.get_payload(decode=False),

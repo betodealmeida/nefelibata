@@ -132,7 +132,7 @@ class Builder:
             post_directory.mkdir(parents=True, exist_ok=True)
 
         if last_update and post.path.stat().st_mtime < last_update and not force:
-            _logger.info("Post %s is up-to-date, nothing to do", post_path)
+            _logger.debug("Post %s is up-to-date, nothing to do", post_path)
             return
 
         template = self.env.get_template(
@@ -222,7 +222,7 @@ class Builder:
             and all(post.path.stat().st_mtime < last_update for post in posts)
             and not force
         ):
-            _logger.info("File %s is up-to-date, nothing to do", path)
+            _logger.debug("File %s is up-to-date, nothing to do", path)
             return
 
         template = self.env.get_template(template_name)

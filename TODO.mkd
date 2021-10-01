@@ -22,12 +22,10 @@
 - [X] atom: <link rel="alternate" type="text/gemini" href="gemini://..." /> ?
 - [X] add grace period to announcers, to prevent spamming
 - [X] remove scope from builder, move to announcer
-- [ ] mastodon announcer
-- [ ] mastodon announcer with media
-- [/] html templates (with striptags|e)
-
+- [X] mastodon announcer
 - [ ] validate config
 - [ ] reading time assistant
+- [/] html templates (with striptags|e)
 - [ ] weather assistant
 - [ ] playlist assistant
 

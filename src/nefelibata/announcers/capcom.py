@@ -2,9 +2,12 @@
 A CAPCOM (gemini://gemini.circumlunar.space/capcom/) announcer.
 """
 
+import logging
 from datetime import timedelta
 
 from nefelibata.announcers.gemlog import GemlogAnnouncer
+
+_logger = logging.getLogger(__name__)
 
 
 class CAPCOMAnnouncer(GemlogAnnouncer):
@@ -20,3 +23,4 @@ class CAPCOMAnnouncer(GemlogAnnouncer):
     uri = "gemini://gemini.circumlunar.space/capcom/"
     submit_uri = "gemini://gemini.circumlunar.space/capcom/submit?"
     grace_seconds = timedelta(days=365).total_seconds()
+    logger = _logger

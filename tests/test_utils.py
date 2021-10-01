@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 
 import pytest
+import yaml
 from pydantic import BaseModel
 from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
@@ -17,6 +18,7 @@ from nefelibata.utils import (
     dict_merge,
     find_directory,
     get_config,
+    load_extra_metadata,
     load_yaml,
     setup_logging,
 )
@@ -134,3 +136,21 @@ def test_dict_merge() -> None:
     update = {"d": {"e": "f"}, "a": {"g": "h"}}
     dict_merge(original, update)
     assert original == {"a": {"b": "c", "g": "h"}, "d": {"e": "f"}}
+
+
+def test_load_extra_metadata(mocker: MockerFixture, fs: FakeFilesystem) -> None:
+    """
+    Test ``load_extra_metadata``.
+    """
+    _logger = mocker.patch("nefelibata.utils._logger")
+
+    fs.create_file("/path/to/blog/test.yaml", contents=yaml.dump(dict(a=42)))
+    fs.create_file("/path/to/blog/broken.yaml", contents="{[")
+
+    metadata = load_extra_metadata(Path("/path/to/blog"))
+    assert metadata == {"test": {"a": 42}}
+
+    _logger.warning.assert_called_with(
+        "Invalid file: %s",
+        Path("/path/to/blog/broken.yaml"),
+    )

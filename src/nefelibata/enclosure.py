@@ -98,12 +98,12 @@ mimetype_map = {
 }
 
 
-def get_enclosures(root: Path, path: Path) -> List[Enclosure]:
+def get_enclosures(root: Path, post_directory: Path) -> List[Enclosure]:
     """
     Find all enclosures in a given post.
     """
     enclosures = []
-    for file_path in path.parent.glob("**/*"):
+    for file_path in post_directory.glob("**/*"):
         mimetype, _ = mimetypes.guess_type(file_path)
         class_ = mimetype_map.get(mimetype) if mimetype else None
         if class_:

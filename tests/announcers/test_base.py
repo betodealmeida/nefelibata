@@ -3,21 +3,36 @@ Tests for ``nefelibata.announcers.base``.
 """
 
 from pathlib import Path
-from typing import Type
+from typing import List, Type
 
+import pytest
 from pytest_mock import MockerFixture
 
 from nefelibata.announcers.base import Announcer, Scope, get_announcers
+from nefelibata.post import Post
 from nefelibata.typing import Config
 
 from ..conftest import MockEntryPoint
 
 
-def make_dummy_announcer(class_name: str, scope: Scope) -> Type[Announcer]:
+def make_dummy_announcer(class_name: str, scopes: List[Scope]) -> Type[Announcer]:
     """
     Make a dummy ``Announcer`` derived class.
     """
-    return type(class_name, (Announcer,), {"scopes": [scope]})
+    return type(class_name, (Announcer,), {"scopes": scopes})
+
+
+@pytest.mark.asyncio
+async def test_announcer(root: Path, config: Config, post: Post) -> None:
+    """
+    Test the base announcer methods.
+    """
+    announcer = Announcer(root, config, [])
+
+    assert (await announcer.announce_post(post)) is None
+    assert (await announcer.announce_site()) is None
+    assert (await announcer.collect_post(post)) == {}
+    assert (await announcer.collect_site()) == {}
 
 
 def test_get_announcers(
@@ -29,7 +44,7 @@ def test_get_announcers(
     """
     Test ``get_announcers``.
     """
-    DummyAnnouncer = make_dummy_announcer("DummyAnnouncer", Scope.SITE)
+    DummyAnnouncer = make_dummy_announcer("DummyAnnouncer", [Scope.SITE])
     entry_points = [
         make_entry_point("dummy_announcer", DummyAnnouncer),
     ]

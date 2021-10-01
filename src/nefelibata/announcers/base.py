@@ -1,6 +1,7 @@
 """
 Base class for announcers.
 """
+
 import logging
 from datetime import datetime
 from enum import Enum
@@ -40,14 +41,23 @@ class Announcement(BaseModel):  # pylint: disable=too-few-public-methods
 
 class Interaction(BaseModel):  # pylint: disable=too-few-public-methods
     """
-    Model representing an interaction (comment, like, reply, etc.).
+    Model representing an interaction (like, reply, etc.).
     """
 
     id: str
+
     name: str
+    summary: Optional[str] = None
+    content: Optional[str] = None
+
+    published: Optional[datetime] = None
+    updated: Optional[datetime] = None
+
+    author: Optional[str] = None
     uri: str
+    in_reply_to: Optional[str] = None
+
     type: Literal["reply", "backlink", "like"]
-    timestamp: Optional[datetime] = None
 
 
 class Announcer:
@@ -74,25 +84,24 @@ class Announcer:
         """
         Publish a post externally.
         """
-        raise NotImplementedError("Subclasses must implement ``announce_post``")
 
     async def announce_site(self) -> Optional[Announcement]:
         """
         Publish a site externally.
         """
-        raise NotImplementedError("Subclasses must implement ``announce_site``")
 
+    # pylint: disable=unused-argument
     async def collect_post(self, post: Post) -> Dict[str, Interaction]:
         """
         Collect interactions on a post.
         """
-        raise NotImplementedError("Subclasses must implement ``collect_post``")
+        return {}
 
     async def collect_site(self) -> Dict[Path, Dict[str, Interaction]]:
         """
         Collect interactions on a site.
         """
-        raise NotImplementedError("Subclasses must implement ``collect_site``")
+        return {}
 
 
 def get_announcers(

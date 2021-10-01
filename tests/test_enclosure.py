@@ -49,7 +49,7 @@ def test_get_enclosures(mocker: MockerFixture, fs: FakeFilesystem, root: Path) -
     # create non-supported file
     (root / "posts/first/test.txt").touch()
 
-    enclosures = get_enclosures(root, path)
+    enclosures = get_enclosures(root, path.parent)
     assert len(enclosures) == 1
 
     enclosure = enclosures[0]

@@ -121,7 +121,7 @@ async def test_builder_post(
     with freeze_time("2021-01-03T00:00:00Z"):
         await builder.process_post(post)
     assert post_path.stat().st_mtime == last_update
-    _logger.info.assert_called_with("Post %s is up-to-date, nothing to do", post_path)
+    _logger.debug.assert_called_with("Post %s is up-to-date, nothing to do", post_path)
 
     # call again, forcing a rebuild
     _logger.reset_mock()
@@ -259,7 +259,7 @@ async def test_builder_site(
         await builder.process_site()
     for asset in assets:
         assert (assets_directory / asset).stat().st_mtime == last_update[asset]
-    _logger.info.assert_has_calls(
+    _logger.debug.assert_has_calls(
         [
             mocker.call(
                 "File %s is up-to-date, nothing to do",

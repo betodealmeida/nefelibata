@@ -16,7 +16,7 @@ from yarl import URL
 
 from nefelibata.announcers.base import Announcement, Announcer, Interaction, Scope
 from nefelibata.builders.base import Builder
-from nefelibata.post import Post, get_posts
+from nefelibata.post import get_posts
 from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
@@ -43,15 +43,15 @@ class GemlogAnnouncer(Announcer):
     # need to announce it on every change.
     grace_seconds = 0
 
+    # Replace with a specific logger to have better logs
+    logger = _logger
+
     def __init__(
         self, root: Path, config: Config, builders: List[Builder], **kwargs: Any
     ):
         super().__init__(root, config, builders, **kwargs)
 
         self.client = Client(TOFUContext({}))
-
-    async def announce_post(self, post: Post) -> Optional[Announcement]:
-        pass
 
     async def announce_site(self) -> Optional[Announcement]:
         """
@@ -68,7 +68,7 @@ class GemlogAnnouncer(Announcer):
             )
             url = self.submit_uri + feed_url
 
-            _logger.info("Announcing feed %s to %s", feed_url, self.name)
+            self.logger.info("Announcing feed %s to %s", feed_url, self.name)
             await self.client.get(URL(url))
 
         return Announcement(
@@ -76,9 +76,6 @@ class GemlogAnnouncer(Announcer):
             timestamp=datetime.now(timezone.utc),
             grace_seconds=self.grace_seconds,
         )
-
-    async def collect_post(self, post: Post) -> Dict[str, Interaction]:
-        return {}
 
     async def collect_site(self) -> Dict[Path, Dict[str, Interaction]]:
         """
