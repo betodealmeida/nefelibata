@@ -23,13 +23,13 @@
 - [X] add grace period to announcers, to prevent spamming
 - [X] remove scope from builder, move to announcer
 - [X] mastodon announcer
-- [ ] validate config
 - [ ] reading time assistant
+- [ ] validate config
 - [/] html templates (with striptags|e)
 - [ ] weather assistant
 - [ ] playlist assistant
 
-- [ ] announcer staleness (don't announce if post is older than 7 days, eg)
+- [ ] announcer staleness (don't collect if post is older than 7 days, eg)
 
 - [ ] warn_external_resources => site assistant
 - [ ] mirror_images and archive_links => post assistants
