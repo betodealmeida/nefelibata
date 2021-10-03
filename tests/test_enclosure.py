@@ -40,20 +40,25 @@ def test_get_enclosures(mocker: MockerFixture, fs: FakeFilesystem, root: Path) -
     MP3.return_value.get.side_effect = metadata.get
     MP3.return_value.info.length = 123.0
 
+    piexif = mocker.patch("nefelibata.enclosure.piexif")
+    piexif.ImageIFD.ImageDescription = 270
+    piexif.load.return_value = {"0th": {270: "This is a nice photo"}}
+
     fs.create_dir(root / "posts/first")
     path = root / "posts/first/index.mkd"
 
-    # create MP3 file
+    # create supported files
     (root / "posts/first/song.mp3").touch()
+    (root / "posts/first/photo.jpg").touch()
+    (root / "posts/first/logo.png").touch()
 
     # create non-supported file
     (root / "posts/first/test.txt").touch()
 
     enclosures = get_enclosures(root, path.parent)
-    assert len(enclosures) == 1
+    assert len(enclosures) == 3
 
-    enclosure = enclosures[0]
-    assert enclosure.dict() == {
+    assert enclosures[0].dict() == {
         "path": Path("/path/to/blog/posts/first/song.mp3"),
         "description": '"A title" (2m3s) by An artist (An album, 2021)',
         "type": "audio/mpeg",
@@ -65,4 +70,20 @@ def test_get_enclosures(mocker: MockerFixture, fs: FakeFilesystem, root: Path) -
         "year": 2021,
         "duration": 123.0,
         "track": 0,
+    }
+
+    assert enclosures[1].dict() == {
+        "description": "This is a nice photo",
+        "href": "first/photo.jpg",
+        "length": 0,
+        "path": Path("/path/to/blog/posts/first/photo.jpg"),
+        "type": "image/jpeg",
+    }
+
+    assert enclosures[2].dict() == {
+        "description": "No description",
+        "href": "first/logo.png",
+        "length": 0,
+        "path": Path("/path/to/blog/posts/first/logo.png"),
+        "type": "image/png",
     }

@@ -153,7 +153,8 @@ class Builder:
 
         for enclosure in post.enclosures:
             _logger.info("Copying enclosure %s", enclosure.path)
-            target = post_directory / enclosure.path.name
+            target = post_directory / enclosure.path.relative_to(post.path.parent)
+            target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(enclosure.path, target)
 
     async def process_site(self, force: bool = False) -> None:

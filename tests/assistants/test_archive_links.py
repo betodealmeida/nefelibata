@@ -22,7 +22,7 @@ async def test_assistant(
     post: Post,
 ) -> None:
     """
-    Test ``get_memento``.
+    Test the assistant.
     """
     # disable sleep
     mocker.patch("nefelibata.assistants.archive_links.SLEEP", timedelta(seconds=0))

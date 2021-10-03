@@ -1,6 +1,8 @@
 """
 A Nefelibata post (and associated functions).
 """
+
+import asyncio
 import operator
 from datetime import datetime
 from email.header import decode_header, make_header
@@ -9,7 +11,7 @@ from email.utils import formatdate, parsedate_to_datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
-from pydantic import BaseModel
+from pydantic import BaseModel, PrivateAttr
 
 from nefelibata.config import Config
 from nefelibata.enclosure import Enclosure, get_enclosures
@@ -48,6 +50,9 @@ class Post(BaseModel):  # pylint: disable=too-few-public-methods
 
     # the Markdown contents of the file
     content: str
+
+    # add a lock to manipulate the post file
+    _lock: asyncio.Lock = PrivateAttr(default_factory=asyncio.Lock)
 
 
 def build_post(root: Path, config: Config, path: Path) -> Post:

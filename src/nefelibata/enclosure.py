@@ -5,8 +5,9 @@ Enclosures for media associated with posts.
 import mimetypes
 import urllib.parse
 from pathlib import Path
-from typing import List, Union
+from typing import Dict, List, Type, Union
 
+import piexif
 from mutagen.mp3 import MP3
 from pydantic import BaseModel
 
@@ -93,8 +94,45 @@ class MP3Enclosure(Enclosure):
         )
 
 
-mimetype_map = {
+class ImageEnclosure(Enclosure):
+    """
+    An image.
+    """
+
+    path: Path
+    description: str
+    type: str
+    length: int
+    href: str
+
+    @classmethod
+    def from_path(cls, root: Path, path: Path) -> "ImageEnclosure":
+        """
+        Build an enclosure from a path to an image.
+        """
+        mimetype, _ = mimetypes.guess_type(path)
+        length = path.stat().st_size
+        href = urllib.parse.quote(str(path.relative_to(root / "posts")))
+
+        if mimetype == "image/jpeg":
+            exif = piexif.load(str(path))
+            description = exif["0th"][piexif.ImageIFD.ImageDescription]
+        else:
+            description = "No description"
+
+        return cls(
+            path=path,
+            description=description,
+            type=mimetype,
+            length=length,
+            href=href,
+        )
+
+
+mimetype_map: Dict[str, Type[Enclosure]] = {
     "audio/mpeg": MP3Enclosure,
+    "image/jpeg": ImageEnclosure,
+    "image/png": ImageEnclosure,
 }
 
 

@@ -6,6 +6,7 @@ Tests for ``nefelibata.post``.
 from datetime import datetime, timezone
 from pathlib import Path
 
+import pytest
 from freezegun import freeze_time
 from pyfakefs.fake_filesystem import FakeFilesystem
 
@@ -15,7 +16,8 @@ from nefelibata.post import Post, build_post, get_posts
 from .fakes import POST_CONTENT, POST_DATA
 
 
-def test_post() -> None:
+@pytest.mark.asyncio
+async def test_post() -> None:
     """
     Test the ``Post`` model.
     """
@@ -42,7 +44,8 @@ Read more about [Nefelibata](https://nefelibata.readthedocs.io/)."""
     )
 
 
-def test_build_post(fs: FakeFilesystem, root: Path, config: Config) -> None:
+@pytest.mark.asyncio
+async def test_build_post(fs: FakeFilesystem, root: Path, config: Config) -> None:
     """
     Test ``build_post``.
     """
@@ -102,7 +105,8 @@ Read more about [Nefelibata](https://nefelibata.readthedocs.io/)."""
     assert path.stat().st_mtime == last_update
 
 
-def test_get_posts(fs: FakeFilesystem, root: Path, config: Config) -> None:
+@pytest.mark.asyncio
+async def test_get_posts(fs: FakeFilesystem, root: Path, config: Config) -> None:
     """
     Test ``get_posts``.
     """

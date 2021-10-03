@@ -29,7 +29,7 @@
 - [X] playlist assistant
 - [X] archive links (post) assistant
 - [X] migrate to marko
-- [ ] mirror images (post) assistant
+- [X] mirror images (post) assistant
 - [ ] warn on external resources (site) assistant
 - [ ] announcer staleness (don't collect if post is older than 7 days, eg)
 - [/] html templates (with striptags|e)
