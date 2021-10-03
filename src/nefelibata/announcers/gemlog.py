@@ -16,8 +16,8 @@ from yarl import URL
 
 from nefelibata.announcers.base import Announcement, Announcer, Interaction, Scope
 from nefelibata.builders.base import Builder
+from nefelibata.config import Config
 from nefelibata.post import get_posts
-from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
 

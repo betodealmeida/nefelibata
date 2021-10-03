@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 
 from nefelibata.assistants.reading_time import ReadingTimeAssistant
+from nefelibata.config import Config
 from nefelibata.post import Post
-from nefelibata.typing import Config
 
 
 @pytest.mark.asyncio

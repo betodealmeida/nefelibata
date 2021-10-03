@@ -15,8 +15,8 @@ from yarl import URL
 from nefelibata.announcers.antenna import AntennaAnnouncer
 from nefelibata.announcers.base import Interaction
 from nefelibata.builders.base import Builder
+from nefelibata.config import Config
 from nefelibata.post import Post
-from nefelibata.typing import Config
 
 
 @pytest.mark.asyncio

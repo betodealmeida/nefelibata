@@ -12,8 +12,8 @@ from pytest_mock import MockerFixture
 
 from nefelibata.announcers.base import Scope
 from nefelibata.assistants.base import Assistant, get_assistants
+from nefelibata.config import AssistantModel, Config
 from nefelibata.post import Post
-from nefelibata.typing import Config
 
 from ..conftest import MockEntryPoint
 
@@ -105,7 +105,7 @@ async def test_assistant_dummy(root: Path, config: Config, post: Post) -> None:
 
     with freeze_time("2021-01-03T00:00:00Z"):
         await assistant.process_post(post, force=True)
-        await assistant.process_site()
+        await assistant.process_site(force=True)
     assert (post.path.parent / "dummy.yaml").stat().st_mtime == datetime(
         2021,
         1,
@@ -142,12 +142,12 @@ def test_get_assistants(
         return_value=entry_points,
     )
 
-    config = {
-        "assistants": {
-            "dummy_assistant": {
+    config.assistants = {
+        "dummy_assistant": AssistantModel(
+            **{
                 "plugin": "dummy_assistant",
-            },
-        },
+            }
+        ),
     }
     assistants = get_assistants(root, config, Scope.SITE)
     assert len(assistants) == 1

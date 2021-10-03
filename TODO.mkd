@@ -24,12 +24,12 @@
 - [X] remove scope from builder, move to announcer
 - [X] mastodon announcer
 - [X] reading time assistant
-- [ ] validate config
-- [/] html templates (with striptags|e)
+- [X] validate config
+- [ ] announcer staleness (don't collect if post is older than 7 days, eg)
 - [ ] weather assistant
 - [ ] playlist assistant
+- [/] html templates (with striptags|e)
 
-- [ ] announcer staleness (don't collect if post is older than 7 days, eg)
 
 - [ ] warn_external_resources => site assistant
 - [ ] mirror_images and archive_links => post assistants

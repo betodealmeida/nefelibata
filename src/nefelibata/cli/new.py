@@ -33,7 +33,7 @@ async def run(root: Path, title: str, type_: str = "post") -> None:
     if type_ != "post":
         config = get_config(root)
         try:
-            extra_headers = config["templates"][type_]
+            extra_headers = config.templates[type_]
         except KeyError as ex:
             raise Exception(f"Invalid post type: {type_}") from ex
 

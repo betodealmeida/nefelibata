@@ -15,9 +15,9 @@ import yaml
 from freezegun import freeze_time
 from pyfakefs.fake_filesystem import FakeFilesystem
 
+from nefelibata.config import Config
 from nefelibata.constants import CONFIG_FILENAME
 from nefelibata.post import Post, build_post
-from nefelibata.typing import Config
 from nefelibata.utils import get_project_root
 
 from .fakes import CONFIG, POST_CONTENT
@@ -75,7 +75,7 @@ def config(fs: FakeFilesystem, root: Path) -> Iterator[Config]:
     """
     fs.create_file(root / CONFIG_FILENAME, contents=yaml.dump(CONFIG))
 
-    yield CONFIG.copy()
+    yield Config(**CONFIG)
 
 
 @pytest.fixture

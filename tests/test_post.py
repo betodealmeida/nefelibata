@@ -9,8 +9,8 @@ from pathlib import Path
 from freezegun import freeze_time
 from pyfakefs.fake_filesystem import FakeFilesystem
 
+from nefelibata.config import AnnouncerModel, Config
 from nefelibata.post import Post, build_post, get_posts
-from nefelibata.typing import Config
 
 from .fakes import POST_CONTENT, POST_DATA
 
@@ -52,7 +52,7 @@ def test_build_post(fs: FakeFilesystem, root: Path, config: Config) -> None:
     with freeze_time("2021-01-01T00:00:00Z"):
         fs.create_file(path, contents=POST_CONTENT)
 
-    config["announcers"] = {"antenna": {"plugin": "antenna"}}
+    config.announcers = {"antenna": AnnouncerModel(plugin="antenna")}
 
     post = build_post(root, config, path)
 
@@ -121,12 +121,3 @@ def test_get_posts(fs: FakeFilesystem, root: Path, config: Config) -> None:
     # test limited number of posts returned
     posts = get_posts(root, config, 1)
     assert len(posts) == 1
-
-
-def test_anouncers(root: Path, config: Config, post: Post) -> None:
-    """
-    Test post announcers.
-    """
-    config["announcers"] = {
-        "anntena": {"plugin": "antenna"},
-    }

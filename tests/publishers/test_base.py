@@ -10,8 +10,8 @@ from freezegun import freeze_time
 from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
 
+from nefelibata.config import BuilderModel, Config, PublisherModel
 from nefelibata.publishers.base import Publisher, get_publishers
-from nefelibata.typing import Config
 
 from ..conftest import MockEntryPoint
 
@@ -20,6 +20,7 @@ def test_get_publishers(
     mocker: MockerFixture,
     make_entry_point: Type[MockEntryPoint],
     root: Path,
+    config: Config,
 ) -> None:
     """
     Test ``get_publishers``.
@@ -43,16 +44,17 @@ def test_get_publishers(
         return_value=entry_points,
     )
 
-    config = {
-        "publishers": {"dummy": {"plugin": "dummy_publisher"}},
-        "builders": {
-            "site_builder": {
+    config.publishers = {"dummy": PublisherModel(plugin="dummy_publisher")}
+    config.builders = {
+        "site_builder": BuilderModel(
+            **{
                 "plugin": "site_builder",
+                "announce-on": [],
                 "publish-to": ["dummy"],
                 "home": "https://example.com/",
                 "path": "site",
-            },
-        },
+            }
+        ),
     }
     publishers = get_publishers(root, config)
     assert len(publishers) == 1

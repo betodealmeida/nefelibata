@@ -7,8 +7,8 @@ from ftplib import FTP, FTP_TLS, error_perm
 from pathlib import Path
 from typing import Any, Optional
 
+from nefelibata.config import Config
 from nefelibata.publishers.base import Publisher, Publishing
-from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
 

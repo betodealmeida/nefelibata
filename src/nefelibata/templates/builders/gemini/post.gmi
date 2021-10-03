@@ -22,7 +22,7 @@
 # Categories
 
 {% for category in sorted(post.categories) %}
-=> {{ home }}/categories/{{ category }}.gmi {{ config['categories'][category]['label'] }}
+=> {{ home }}/categories/{{ category }}.gmi {{ config.categories[category].label }}
 {% endfor %}
 
 {% endif %}

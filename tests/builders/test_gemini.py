@@ -10,9 +10,9 @@ from freezegun import freeze_time
 from pytest_mock import MockerFixture
 
 from nefelibata.builders.gemini import GeminiBuilder
+from nefelibata.config import Config, SocialModel
 from nefelibata.enclosure import Enclosure
 from nefelibata.post import Post
-from nefelibata.typing import Config
 
 
 @pytest.mark.asyncio
@@ -148,7 +148,7 @@ async def test_builder_site(
     _logger = mocker.patch("nefelibata.builders.base._logger")
     mocker.patch("nefelibata.builders.base.get_posts", return_value=[post])
 
-    config["social"] = [{"title": "Mastodon", "url": "https://2c.taoetc.org/@beto"}]
+    config.social = [SocialModel(title="Mastodon", url="https://2c.taoetc.org/@beto")]
     builder = GeminiBuilder(root, config, "gemini://localhost:1965")
     with freeze_time("2021-01-02T00:00:00Z"):
         await builder.process_site()

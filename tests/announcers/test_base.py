@@ -9,8 +9,8 @@ import pytest
 from pytest_mock import MockerFixture
 
 from nefelibata.announcers.base import Announcer, Scope, get_announcers
+from nefelibata.config import AnnouncerModel, BuilderModel, Config
 from nefelibata.post import Post
-from nefelibata.typing import Config
 
 from ..conftest import MockEntryPoint
 
@@ -56,19 +56,23 @@ def test_get_announcers(
         "nefelibata.announcers.base.get_builders",
     )
 
-    config = {
-        "builders": {
-            "site_builder": {
+    config.builders = {
+        "site_builder": BuilderModel(
+            **{
                 "plugin": "site_builder",
-                "home": "https://example.com/",
                 "announce-on": ["dummy_announcer"],
-            },
-        },
-        "announcers": {
-            "dummy_announcer": {
+                "publish-to": [],
+                "home": "https://example.com/",
+                "path": "generic",
+            }
+        ),
+    }
+    config.announcers = {
+        "dummy_announcer": AnnouncerModel(
+            **{
                 "plugin": "dummy_announcer",
-            },
-        },
+            }
+        ),
     }
     announcers = get_announcers(root, config, Scope.SITE)
     assert len(announcers) == 1

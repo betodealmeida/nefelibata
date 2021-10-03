@@ -13,9 +13,9 @@ from pytest_mock import MockerFixture
 from nefelibata.announcers.base import Interaction
 from nefelibata.announcers.mastodon import MastodonAnnouncer
 from nefelibata.builders.base import Builder
+from nefelibata.config import Config
 from nefelibata.enclosure import Enclosure
 from nefelibata.post import Post
-from nefelibata.typing import Config
 
 
 @pytest.mark.asyncio

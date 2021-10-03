@@ -9,7 +9,7 @@ from typing import Any, Dict, Iterator, Optional
 from pkg_resources import iter_entry_points
 from pydantic import BaseModel
 
-from nefelibata.typing import Config
+from nefelibata.config import Config
 
 
 class Publishing(BaseModel):  # pylint: disable=too-few-public-methods
@@ -89,14 +89,13 @@ def get_publishers(root: Path, config: Config) -> Dict[str, Publisher]:
     }
 
     publishers = {}
-    for builder_name, builder_parameters in config["builders"].items():
-        for publisher_name in builder_parameters["publish-to"]:
-            publisher_parameters = config["publishers"][publisher_name]
-            plugin = publisher_parameters["plugin"]
-            class_ = classes[plugin]
-            path = builder_parameters["path"]
+    for builder_name, builder_config in config.builders.items():
+        for publisher_name in builder_config.publish_to:
+            publisher_config = config.publishers[publisher_name]
+            class_ = classes[publisher_config.plugin]
+            path = builder_config.path
 
             name = f"{builder_name} => {publisher_name}"
-            publishers[name] = class_(root, config, path, **publisher_parameters)
+            publishers[name] = class_(root, config, path, **publisher_config.dict())
 
     return publishers

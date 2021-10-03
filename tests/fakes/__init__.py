@@ -45,6 +45,9 @@ CONFIG = {
         "note": "Este, sou eu",
     },
     "language": "en",
+    "social": [
+        {"title": "My page", "url": "https://example.com/user"},
+    ],
     "categories": {
         "stem": {
             "label": "STEM",
@@ -52,6 +55,7 @@ CONFIG = {
             "tags": ["blog", "programming"],
         },
     },
+    "templates": {"short": []},
     "builders": {
         "builder": {
             "plugin": "builder",
@@ -59,6 +63,11 @@ CONFIG = {
             "publish-to": ["publisher"],
             "home": "https://example.com/",
             "path": "generic",
+        },
+    },
+    "assistants": {
+        "assistant": {
+            "plugin": "assistant",
         },
     },
     "announcers": {

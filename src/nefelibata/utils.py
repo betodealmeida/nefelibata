@@ -9,8 +9,8 @@ import yaml
 from pydantic import BaseModel
 from rich.logging import RichHandler
 
+from nefelibata.config import Config
 from nefelibata.constants import CONFIG_FILENAME
-from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ def get_config(root: Path) -> Config:
         raise SystemExit("No configuration found!")
 
     with open(path, encoding="utf-8") as input_:
-        config: Config = yaml.full_load(input_)
+        config = Config(**yaml.full_load(input_))
 
     return config
 

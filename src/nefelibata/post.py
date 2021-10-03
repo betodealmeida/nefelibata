@@ -11,8 +11,8 @@ from typing import Any, Dict, List, Optional, Set
 
 from pydantic import BaseModel
 
+from nefelibata.config import Config
 from nefelibata.enclosure import Enclosure, get_enclosures
-from nefelibata.typing import Config
 from nefelibata.utils import load_extra_metadata, split_header
 
 
@@ -78,15 +78,15 @@ def build_post(root: Path, config: Config, path: Path) -> Post:
     type_ = metadata.get("type", "post")
     tags = split_header(metadata.get("keywords"))
     categories = {
-        category
-        for category, parameters in config.get("categories", {}).items()
-        if tags & set(parameters["tags"])
+        category_name
+        for category_name, category_config in config.categories.items()
+        if tags & set(category_config.tags)
     }
 
     if "announce-on" in metadata:
         announcers = split_header(metadata.get("announce-on"))
     else:
-        announcers = set(config.get("announcers", {}))
+        announcers = set(config.announcers)
         parsed["announce-on"] = ", ".join(announcers)
         modified = True
 

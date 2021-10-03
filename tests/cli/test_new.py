@@ -7,7 +7,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from nefelibata.cli import new
-from nefelibata.typing import Config
+from nefelibata.config import Config
 
 
 @pytest.mark.asyncio
@@ -60,7 +60,7 @@ async def test_run_with_type(
     Test creating a new post with a valid type.
     """
     monkeypatch.setenv("EDITOR", "")
-    config["templates"] = {
+    config.templates = {
         "book": ["title", "author"],
     }
     mocker.patch("nefelibata.cli.new.get_config", return_value=config)

@@ -10,8 +10,8 @@ from mastodon import Mastodon, MastodonNotFoundError
 
 from nefelibata.announcers.base import Announcement, Announcer, Interaction, Scope
 from nefelibata.builders.base import Builder
+from nefelibata.config import Config
 from nefelibata.post import Post
-from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ class MastodonAnnouncer(Announcer):
             )
             media_ids.append(media_dict)
 
-        language = post.metadata.get("language") or self.config.get("language")
+        language = post.metadata.get("language") or self.config.language
         summary = post.metadata.get("summary") or post.title
         urls = " | ".join(
             f"{builder.home}/{post.url}{builder.extension}" for builder in self.builders

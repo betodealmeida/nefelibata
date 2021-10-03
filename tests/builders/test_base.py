@@ -7,8 +7,8 @@ from typing import Type
 from pytest_mock import MockerFixture
 
 from nefelibata.builders.base import Builder, get_builders
+from nefelibata.config import BuilderModel, Config
 from nefelibata.post import Post
-from nefelibata.typing import Config
 
 from ..conftest import MockEntryPoint
 
@@ -24,6 +24,7 @@ def test_get_builders(
     mocker: MockerFixture,
     make_entry_point: Type[MockEntryPoint],
     root: Path,
+    config: Config,
 ) -> None:
     """
     Test ``get_builders``.
@@ -37,10 +38,16 @@ def test_get_builders(
         return_value=entry_points,
     )
 
-    config = {
-        "builders": {
-            "builder": {"plugin": "builder", "home": "https://example.com/"},
-        },
+    config.builders = {
+        "builder": BuilderModel(
+            **{
+                "plugin": "builder",
+                "announce-on": [],
+                "publish-to": [],
+                "home": "https://example.com/",
+                "path": "generic",
+            }
+        ),
     }
     builders = get_builders(root, config)
     assert len(builders) == 1

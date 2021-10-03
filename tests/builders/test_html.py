@@ -11,8 +11,8 @@ from pytest_mock import MockerFixture
 
 from nefelibata import __version__
 from nefelibata.builders.html import HTMLBuilder
+from nefelibata.config import Config, SocialModel
 from nefelibata.post import Post
-from nefelibata.typing import Config
 
 
 @pytest.mark.asyncio
@@ -145,7 +145,7 @@ async def test_builder_site(
     _logger = mocker.patch("nefelibata.builders.base._logger")
     mocker.patch("nefelibata.builders.base.get_posts", return_value=[post])
 
-    config["social"] = [{"title": "Mastodon", "url": "https://2c.taoetc.org/@beto"}]
+    config.social = [SocialModel(title="Mastodon", url="https://2c.taoetc.org/@beto")]
     builder = HTMLBuilder(root, config, "https://example.com/")
     with freeze_time("2021-01-02T00:00:00Z"):
         await builder.process_site()

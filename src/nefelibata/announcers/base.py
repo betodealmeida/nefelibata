@@ -12,8 +12,8 @@ from pkg_resources import iter_entry_points
 from pydantic import BaseModel
 
 from nefelibata.builders.base import Builder, get_builders
+from nefelibata.config import Config
 from nefelibata.post import Post
-from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
 
@@ -120,18 +120,19 @@ def get_announcers(
     }
 
     announcers = {}
-    for name, parameters in config["announcers"].items():
-        plugin = parameters["plugin"]
-        class_ = classes[plugin]
+    for announcer_name, announcer_config in config.announcers.items():
+        class_ = classes[announcer_config.plugin]
 
         # find all builders that the announcer should handle
         announcer_builders = [
             builders[builder_name]
-            for builder_name, builder_parameters in config["builders"].items()
-            if name in builder_parameters["announce-on"]
+            for builder_name, builder_config in config.builders.items()
+            if announcer_name in builder_config.announce_on
         ]
 
         if scope is None or scope in class_.scopes:
-            announcers[name] = class_(root, config, announcer_builders, **parameters)
+            announcers[announcer_name] = class_(
+                root, config, announcer_builders, **announcer_config.dict()
+            )
 
     return announcers

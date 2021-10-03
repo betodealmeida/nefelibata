@@ -13,7 +13,7 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
 
 from nefelibata.announcers.base import Interaction
-from nefelibata.typing import Config
+from nefelibata.config import Config
 from nefelibata.utils import (
     dict_merge,
     find_directory,
@@ -56,7 +56,7 @@ def test_get_config(root: Path, config: Config) -> None:
     Test ``get_config``.
     """
     config = get_config(root)
-    assert config == {
+    assert config.dict() == {
         "author": {
             "email": "roberto@dealmeida.net",
             "name": "Beto Dealmeida",
@@ -74,16 +74,19 @@ def test_get_config(root: Path, config: Config) -> None:
             },
         },
         "announcers": {"announcer": {"plugin": "announcer"}},
+        "assistants": {"assistant": {"plugin": "assistant"}},
         "builders": {
             "builder": {
-                "announce-on": ["announcer"],
+                "announce_on": ["announcer"],
                 "home": "https://example.com/",
                 "path": "generic",
                 "plugin": "builder",
-                "publish-to": ["publisher"],
+                "publish_to": ["publisher"],
             },
         },
         "publishers": {"publisher": {"plugin": "publisher"}},
+        "social": [{"title": "My page", "url": "https://example.com/user"}],
+        "templates": {"short": []},
     }
 
     with pytest.raises(SystemExit) as excinfo:

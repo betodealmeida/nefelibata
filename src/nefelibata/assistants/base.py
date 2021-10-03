@@ -11,8 +11,8 @@ import yaml
 from pkg_resources import iter_entry_points
 
 from nefelibata.announcers.base import Scope
+from nefelibata.config import Config
 from nefelibata.post import Post
-from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
 
@@ -91,11 +91,10 @@ def get_assistants(
     }
 
     assistants = {}
-    for name, parameters in config["assistants"].items():
-        plugin = parameters["plugin"]
-        class_ = classes[plugin]
+    for assistant_name, assistant_config in config.assistants.items():
+        class_ = classes[assistant_config.plugin]
 
         if scope is None or scope in class_.scopes:
-            assistants[name] = class_(root, config, **parameters)
+            assistants[assistant_name] = class_(root, config, **assistant_config.dict())
 
     return assistants

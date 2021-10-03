@@ -8,7 +8,7 @@ from typing import Any
 from md2gemini import md2gemini
 
 from nefelibata.builders.base import Builder
-from nefelibata.typing import Config
+from nefelibata.config import Config
 
 _logger = logging.getLogger(__name__)
 

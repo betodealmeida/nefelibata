@@ -11,9 +11,9 @@ from pytest_mock import MockerFixture
 
 from nefelibata.announcers.base import Announcement
 from nefelibata.cli import publish
+from nefelibata.config import Config
 from nefelibata.post import Post
 from nefelibata.publishers.base import Publishing
-from nefelibata.typing import Config
 
 
 @pytest.mark.asyncio

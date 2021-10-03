@@ -11,8 +11,8 @@ from jinja2 import Environment, FileSystemLoader
 from pkg_resources import iter_entry_points, resource_filename, resource_listdir
 
 from nefelibata import __version__
+from nefelibata.config import Config
 from nefelibata.post import Post, get_posts
-from nefelibata.typing import Config
 
 _logger = logging.getLogger(__name__)
 
@@ -193,8 +193,8 @@ class Builder:
                 / "categories"
                 / (category + self.extension)
             )
-            title = self.config["categories"][category]["label"]
-            subtitle = self.config["categories"][category]["description"]
+            title = self.config.categories[category].label
+            subtitle = self.config.categories[category].description
             self._build_index(
                 path,
                 template_name,
@@ -254,10 +254,9 @@ def get_builders(
     }
 
     builders = {}
-    for name, parameters in config["builders"].items():
-        plugin = parameters["plugin"]
-        class_ = classes[plugin]
+    for builder_name, builder_config in config.builders.items():
+        class_ = classes[builder_config.plugin]
 
-        builders[name] = class_(root, config, **parameters)
+        builders[builder_name] = class_(root, config, **builder_config.dict())
 
     return builders

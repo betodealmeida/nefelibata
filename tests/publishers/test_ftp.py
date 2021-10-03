@@ -11,8 +11,8 @@ from freezegun import freeze_time
 from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
 
+from nefelibata.config import Config
 from nefelibata.publishers.ftp import FTPPublisher
-from nefelibata.typing import Config
 
 
 @pytest.mark.asyncio
