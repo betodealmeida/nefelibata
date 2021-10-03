@@ -27,8 +27,9 @@
 - [X] validate config
 - [X] weather assistant
 - [X] playlist assistant
-- [ ] warn on external resources (site) assistant
+- [X] archive links (post) assistant
+- [/] migrate to marko
 - [ ] mirror images (post) assistant
-- [ ] archive links (post) assistant
+- [ ] warn on external resources (site) assistant
 - [ ] announcer staleness (don't collect if post is older than 7 days, eg)
 - [/] html templates (with striptags|e)
