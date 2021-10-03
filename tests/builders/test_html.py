@@ -94,6 +94,7 @@ async def test_builder_post(
     <h1>Welcome</h1>
 <p>This is your first post. It should be written using Markdown.</p>
 <p>Read more about <a href="https://nefelibata.readthedocs.io/">Nefelibata</a>.</p>
+
   </div>
 
   <h2 class="inline">Tags</h2>
@@ -247,6 +248,7 @@ async def test_builder_site(
         &lt;h1&gt;Welcome&lt;/h1&gt;
 &lt;p&gt;This is your first post. It should be written using Markdown.&lt;/p&gt;
 &lt;p&gt;Read more about &lt;a href=&#34;https://nefelibata.readthedocs.io/&#34;&gt;Nefelibata&lt;/a&gt;.&lt;/p&gt;
+
         &lt;p&gt;&lt;a href="https://example.com/first/index"&gt;Permalink&lt;/p&gt;
     </content>
 </entry>

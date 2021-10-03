@@ -28,7 +28,7 @@
 - [X] weather assistant
 - [X] playlist assistant
 - [X] archive links (post) assistant
-- [/] migrate to marko
+- [X] migrate to marko
 - [ ] mirror images (post) assistant
 - [ ] warn on external resources (site) assistant
 - [ ] announcer staleness (don't collect if post is older than 7 days, eg)
