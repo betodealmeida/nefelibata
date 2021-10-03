@@ -14,7 +14,7 @@ from nefelibata.post import Post
 @pytest.mark.asyncio
 async def test_assistant(root: Path, config: Config, post: Post) -> None:
     """
-    Test the base assistant methods.
+    Test the assistant.
     """
     assistant = ReadingTimeAssistant(root, config)
 

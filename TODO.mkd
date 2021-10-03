@@ -25,9 +25,9 @@
 - [X] mastodon announcer
 - [X] reading time assistant
 - [X] validate config
-- [ ] announcer staleness (don't collect if post is older than 7 days, eg)
-- [ ] weather assistant
+- [X] weather assistant
 - [ ] playlist assistant
+- [ ] announcer staleness (don't collect if post is older than 7 days, eg)
 - [/] html templates (with striptags|e)
 
 
