@@ -26,11 +26,9 @@
 - [X] reading time assistant
 - [X] validate config
 - [X] weather assistant
-- [ ] playlist assistant
+- [X] playlist assistant
+- [ ] warn on external resources (site) assistant
+- [ ] mirror images (post) assistant
+- [ ] archive links (post) assistant
 - [ ] announcer staleness (don't collect if post is older than 7 days, eg)
 - [/] html templates (with striptags|e)
-
-
-- [ ] warn_external_resources => site assistant
-- [ ] mirror_images and archive_links => post assistants
-- [ ] drafts get built but not published?
