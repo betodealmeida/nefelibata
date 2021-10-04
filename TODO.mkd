@@ -30,6 +30,7 @@
 - [X] archive links (post) assistant
 - [X] migrate to marko
 - [X] mirror images (post) assistant
+- [X] html templates (with striptags|e)
+- [X] S3 publisher
 - [ ] warn on external resources (site) assistant
 - [ ] announcer staleness (don't collect if post is older than 7 days, eg)
-- [/] html templates (with striptags|e)

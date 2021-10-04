@@ -50,7 +50,7 @@ class S3Publisher(Publisher):
     ) -> Optional[Publishing]:
         build = self.root / "build" / self.path
 
-        modified_files = sorted(self.find_modified_files(force, since))
+        modified_files = list(self.find_modified_files(force, since))
 
         for path in modified_files:
             key = str(path.relative_to(build))
@@ -73,5 +73,6 @@ class S3Publisher(Publisher):
         _logger.info("Uploading %s to %s in S3", path, self.bucket)
         try:
             self.client.upload_file(str(path), self.bucket, key, ExtraArgs=extra_args)
-        except ClientError:
+        except ClientError as ex:
             _logger.exception("An error occurred")
+            raise ex
