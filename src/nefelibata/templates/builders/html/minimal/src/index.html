@@ -6,12 +6,12 @@
       <h1>{{ config.title }}: {{ config.subtitle }}</h1>
 
       {% if posts %}
-      <h2>Posts</h2>
+      <h2 class="h-feed">Posts</h2>
 
       <ul>
       {% for post in posts %}
       {% set reading_time = '(%s min read)' % post.metadata.reading_time.total_minutes if post.metadata.reading_time and post.metadata.reading_time.total_minutes > 2 else '' %}
-        <li><a href="{{ home }}/{{ post.url }}.html">{{ post.title }}</a> {{ reading_time }}</li>
+        <li class="h-entry"><a class="p-name" href="{{ home }}/{{ post.url }}.html">{{ post.title }}</a> {{ reading_time }}</li>
       {% endfor %}
       </ul>
       {% else %}

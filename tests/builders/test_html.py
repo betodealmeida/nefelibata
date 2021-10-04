@@ -110,14 +110,14 @@ async def test_builder_post(
         <h2>Tags</h2>
 
         <ul>
-          <li><a href="https://example.com/tags/blog.html">blog</a></li>
-          <li><a href="https://example.com/tags/welcome.html">welcome</a></li>
+          <li><a class="p-category" href="https://example.com/tags/blog.html">blog</a></li>
+          <li><a class="p-category" href="https://example.com/tags/welcome.html">welcome</a></li>
         </ul>
 
         <h2>Categories</h2>
 
         <ul>
-          <li><a href="https://example.com/categories/stem.html">STEM</a></li>
+          <li><a class="p-category" href="https://example.com/categories/stem.html">STEM</a></li>
         </ul>
 
       </article>
@@ -218,10 +218,10 @@ async def test_builder_site(
     <main>
       <h1>道&amp;c.: Musings about the path and other things</h1>
 
-      <h2>Posts</h2>
+      <h2 class="h-feed">Posts</h2>
 
       <ul>
-        <li><a href="https://example.com/first/index.html">This is your first post</a> </li>
+        <li class="h-entry"><a class="p-name" href="https://example.com/first/index.html">This is your first post</a> </li>
       </ul>
 
       <h2>Links</h2>

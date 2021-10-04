@@ -46,7 +46,7 @@
 
         <ul>
           {% for tag in sorted(post.tags) %}
-          <li><a href="{{ home }}/tags/{{ tag }}.html">{{ tag }}</a></li>
+          <li><a class="p-category" href="{{ home }}/tags/{{ tag }}.html">{{ tag }}</a></li>
           {% endfor %}
         </ul>
         {% endif %}
@@ -56,7 +56,7 @@
 
         <ul>
           {% for category in sorted(post.categories) %}
-          <li><a href="{{ home }}/categories/{{ category }}.html">{{ config.categories[category].label }}</a></li>
+          <li><a class="p-category" href="{{ home }}/categories/{{ category }}.html">{{ config.categories[category].label }}</a></li>
           {% endfor %}
         </ul>
         {% endif %}
