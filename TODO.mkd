@@ -32,5 +32,6 @@
 - [X] mirror images (post) assistant
 - [X] html templates (with striptags|e)
 - [X] S3 publisher
+- [ ] add OG metadata (reading from post.metadata.meta?)
 - [ ] warn on external resources (site) assistant
 - [ ] announcer staleness (don't collect if post is older than 7 days, eg)

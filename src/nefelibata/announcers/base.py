@@ -1,6 +1,7 @@
 """
 Base class for announcers.
 """
+# pylint: disable=too-few-public-methods
 
 import logging
 from datetime import datetime
@@ -29,7 +30,7 @@ class Scope(Enum):
     SITE = "SITE"
 
 
-class Announcement(BaseModel):  # pylint: disable=too-few-public-methods
+class Announcement(BaseModel):
     """
     Model representing an announcement.
     """
@@ -39,7 +40,18 @@ class Announcement(BaseModel):  # pylint: disable=too-few-public-methods
     grace_seconds: int = 0
 
 
-class Interaction(BaseModel):  # pylint: disable=too-few-public-methods
+class Author(BaseModel):
+    """
+    Model representing the author of an interaction.
+    """
+
+    name: str
+    uri: str
+    avatar: Optional[str] = None
+    note: Optional[str] = None
+
+
+class Interaction(BaseModel):
     """
     Model representing an interaction (like, reply, etc.).
     """
@@ -53,7 +65,7 @@ class Interaction(BaseModel):  # pylint: disable=too-few-public-methods
     published: Optional[datetime] = None
     updated: Optional[datetime] = None
 
-    author: Optional[str] = None
+    author: Optional[Author] = None
     uri: str
     in_reply_to: Optional[str] = None
 

@@ -10,7 +10,7 @@ import pytest
 from mastodon import MastodonNotFoundError
 from pytest_mock import MockerFixture
 
-from nefelibata.announcers.base import Interaction
+from nefelibata.announcers.base import Author, Interaction
 from nefelibata.announcers.mastodon import MastodonAnnouncer
 from nefelibata.builders.base import Builder
 from nefelibata.config import Config
@@ -160,7 +160,12 @@ async def test_announcer_collect(
                 "url": "https://example.com/2",
                 "content": "This is a reply",
                 "created_at": datetime(2021, 1, 1),
-                "account": {"url": "https://user.example.com/"},
+                "account": {
+                    "display_name": "Alice Doe",
+                    "url": "https://alice.example.com/",
+                    "avatar": "https://alice.example.com/profile.gif",
+                    "note": "Best friends with Bob and Charlie",
+                },
                 "in_reply_to_id": 1,
             },
         ],
@@ -192,7 +197,12 @@ async def test_announcer_collect(
             content="This is a reply",
             published=datetime(2021, 1, 1, 0, 0),
             updated=None,
-            author="https://user.example.com/",
+            author=Author(
+                name="Alice Doe",
+                uri="https://alice.example.com/",
+                avatar="https://alice.example.com/profile.gif",
+                note="Best friends with Bob and Charlie",
+            ),
             uri="https://example.com/2",
             in_reply_to="https://example.com/1",
             type="reply",

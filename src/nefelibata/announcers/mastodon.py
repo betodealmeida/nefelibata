@@ -8,7 +8,13 @@ from typing import Any, Dict, List, Optional
 
 from mastodon import Mastodon, MastodonNotFoundError
 
-from nefelibata.announcers.base import Announcement, Announcer, Interaction, Scope
+from nefelibata.announcers.base import (
+    Announcement,
+    Announcer,
+    Author,
+    Interaction,
+    Scope,
+)
 from nefelibata.builders.base import Builder
 from nefelibata.config import Config
 from nefelibata.post import Post
@@ -121,7 +127,12 @@ class MastodonAnnouncer(Announcer):
                     content=descendant["content"],
                     published=descendant["created_at"],
                     updated=None,
-                    author=descendant["account"]["url"],
+                    author=Author(
+                        name=descendant["account"]["display_name"],
+                        uri=descendant["account"]["url"],
+                        avatar=descendant["account"]["avatar"],
+                        note=descendant["account"]["note"],
+                    ),
                     uri=descendant["url"],
                     in_reply_to=id_map[descendant["in_reply_to_id"]],
                     type="reply",
