@@ -73,44 +73,54 @@ async def test_builder_post(
     <meta name="generator" content="Nefelibata {__version__}">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="Musings about the path and other things">
 
     <title>道&amp;c.: This is your first post</title>
 
     <link rel="canonical" href="https://example.com" />
     <link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml" />
+    <link rel="stylesheet" href="https://example.com/css/marx.min.css" />
   </head>
   <body>
-    <article class="h-entry">
-      <h1 class="p-name">This is your first post</h1>
+    <main>
+      <nav>
+        <ul>
+          <li><a href="https://example.com">Main index</a></li>
+        </ul>
+      </nav>
 
-      <p>Published by <a class="p-author h-card" href="https://taoetc.org/">Beto Dealmeida</a>
-      on <time class="dt-published" datetime="2020-12-31T16:00:00-08:00">2020-12-31 16:00:00-08:00</time></p>
+      <article class="h-entry">
+        <h1 class="p-name">This is your first post</h1>
 
-      <p class="p-summary"></p>
+        <p>Published by <a class="p-author h-card" href="https://taoetc.org/">Beto Dealmeida</a>
+        on <time class="dt-published" datetime="2020-12-31T16:00:00-08:00">2020-12-31 16:00:00-08:00</time></p>
 
-      <div class="e-content">
-        <h1>Welcome</h1>
+        <p class="p-summary"></p>
+
+        <div class="e-content">
+          <h1>Welcome</h1>
 <p>This is your first post. It should be written using Markdown.</p>
 <p>Read more about <a href="https://nefelibata.readthedocs.io/">Nefelibata</a>.</p>
 
-      </div>
+        </div>
 
 
-      <h2>Tags</h2>
+        <h2>Tags</h2>
 
-      <ul>
-        <li><a href="https://example.com/tags/blog.html">blog</a></li>
-        <li><a href="https://example.com/tags/welcome.html">welcome</a></li>
-      </ul>
+        <ul>
+          <li><a href="https://example.com/tags/blog.html">blog</a></li>
+          <li><a href="https://example.com/tags/welcome.html">welcome</a></li>
+        </ul>
 
-      <h2>Categories</h2>
+        <h2>Categories</h2>
 
-      <ul>
-        <li><a href="https://example.com/categories/stem.html">STEM</a></li>
-      </ul>
+        <ul>
+          <li><a href="https://example.com/categories/stem.html">STEM</a></li>
+        </ul>
 
-    </article>
+      </article>
+    </main>
   </body>
 </html>"""
     )
@@ -193,31 +203,35 @@ async def test_builder_site(
     <meta name="generator" content="Nefelibata {__version__}">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="Musings about the path and other things">
 
     <title>道&amp;c.: Musings about the path and other things</title>
 
     <link rel="canonical" href="https://example.com" />
     <link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml" />
+    <link rel="stylesheet" href="https://example.com/css/marx.min.css" />
   </head>
   <body>
-    <h1>道&amp;c.: Musings about the path and other things</h1>
+    <main>
+      <h1>道&amp;c.: Musings about the path and other things</h1>
 
-    <h2>Posts</h2>
+      <h2>Posts</h2>
 
-    <ul>
-      <li><a href="https://example.com/first/index.html">This is your first post</a> </li>
-    </ul>
+      <ul>
+        <li><a href="https://example.com/first/index.html">This is your first post</a> </li>
+      </ul>
 
-    <h2>Links</h2>
+      <h2>Links</h2>
 
-    <ul>
-      <li><a href="https://2c.taoetc.org/@beto">Mastodon</a></li>
-    </ul>
+      <ul>
+        <li><a href="https://2c.taoetc.org/@beto">Mastodon</a></li>
+      </ul>
 
-    <footer>
-      <p>Crafted with ❤️ using <a href="https://nefelibata.readthedocs.io/">Nefelibata</a>.</p>
-    </footer>
+      <footer>
+        <p>Crafted with ❤️ using <a href="https://nefelibata.readthedocs.io/">Nefelibata</a>.</p>
+      </footer>
+    </main>
   </body>
 </html>"""
     )

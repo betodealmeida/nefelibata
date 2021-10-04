@@ -28,7 +28,15 @@
 
         <ul>
           {% for enclosure in post.enclosures %}
+          {% if enclosure.type == 'audio/mpeg' %}
+          <li>
+            <audio controls src="{{ home }}/{{ enclosure.href }}">
+              <a href="{{ home }}/{{ enclosure.href }}">{{ enclosure.description }}</a>
+            </audio>
+          </li>
+          {% else %}
           <li><a href="{{ home }}/{{ enclosure.href }}">{{ enclosure.description }}</a></li>
+          {% endif %}
           {% endfor %}
         </ul>
         {% endif %}
