@@ -3,6 +3,12 @@
 {% block title %}{{ config.title }}: {{ post.title }}{% endblock %}
 
 {% block content %}
+      <nav>
+        <ul>
+          <li><a href="{{ home }}">Main index</a></li>
+        </ul>
+      </nav>
+
       <article class="h-entry">
         <h1 class="p-name">{{ post.title }}</h1>
 
