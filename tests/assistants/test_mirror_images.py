@@ -52,7 +52,7 @@ I have 2 images:
 
     async def modify_replacements(  # pylint: disable=too-many-arguments, unused-argument
         session: ClientSession,
-        uri: str,
+        url: str,
         title: str,
         post: Post,
         mirror: Path,

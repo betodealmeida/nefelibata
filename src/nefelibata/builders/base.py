@@ -91,9 +91,9 @@ class Builder:
         if not categories_directory.exists():
             categories_directory.mkdir()
 
-    def absolute_uri(self, post: Post) -> str:
+    def absolute_url(self, post: Post) -> str:
         """
-        Return the absolute URI for a post.
+        Return the absolute URL for a post.
         """
         return f"{self.home}/{post.url}{self.extension}"
 

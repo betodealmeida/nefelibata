@@ -35,7 +35,7 @@ class Announcement(BaseModel):
     Model representing an announcement.
     """
 
-    uri: str
+    url: str
     timestamp: datetime
     grace_seconds: int = 0
 
@@ -46,7 +46,7 @@ class Author(BaseModel):
     """
 
     name: str
-    uri: str
+    url: str
     avatar: Optional[str] = None
     note: Optional[str] = None
 
@@ -66,7 +66,7 @@ class Interaction(BaseModel):
     updated: Optional[datetime] = None
 
     author: Optional[Author] = None
-    uri: str
+    url: str
     in_reply_to: Optional[str] = None
 
     type: Literal["reply", "backlink", "like"]

@@ -55,7 +55,7 @@ class GeminispaceAnnouncer(Announcer):
             await self.client.get(URL(url))
 
         return Announcement(
-            uri="gemini://geminispace.info/",
+            url="gemini://geminispace.info/",
             timestamp=datetime.now(timezone.utc),
             grace_seconds=timedelta(days=365).total_seconds(),
         )
@@ -72,10 +72,10 @@ class GeminispaceAnnouncer(Announcer):
                     "Geminispace announcer only works with `gemini://` builds",
                 )
 
-            post_url = urllib.parse.quote_plus(builder.absolute_uri(post))
-            uri = f"gemini://geminispace.info/backlinks?{post_url}"
+            post_url = urllib.parse.quote_plus(builder.absolute_url(post))
+            url = f"gemini://geminispace.info/backlinks?{post_url}"
 
-            response = await self.client.get(URL(uri))
+            response = await self.client.get(URL(url))
             payload = await response.read()
             content = payload.decode("utf-8")
 
@@ -84,13 +84,13 @@ class GeminispaceAnnouncer(Announcer):
                 if line.startswith("###"):
                     state = 1 if "cross-capsule backlinks" in line else 2
                 if state == 1 and line.startswith("=>"):
-                    _, uri, name = re.split(r"\s+", line, 2)
+                    _, url, name = re.split(r"\s+", line, 2)
 
-                    id_ = f"backlink,{uri}"
+                    id_ = f"backlink,{url}"
                     interactions[id_] = Interaction(
                         id=id_,
                         name=name,
-                        uri=uri,
+                        url=url,
                         type="backlink",
                     )
 

@@ -50,14 +50,14 @@ class ArchiveLinksAssistant(Assistant):
         saved_links = {}
 
         async with ClientSession() as session:
-            for uri in extract_links(post.content):
-                _logger.info("Saving URI %s", uri)
-                save_uri = f"https://web.archive.org/save/{uri}"
+            for url in extract_links(post.content):
+                _logger.info("Saving URL %s", url)
+                save_url = f"https://web.archive.org/save/{url}"
                 async with lock:
-                    async with session.get(save_uri) as response:
+                    async with session.get(save_url) as response:
                         for rel, params in response.links.items():
                             if rel == "memento":
-                                saved_links[uri] = str(params["url"])
+                                saved_links[url] = str(params["url"])
                     await asyncio.sleep(SLEEP.total_seconds())
 
         return saved_links

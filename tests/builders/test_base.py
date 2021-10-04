@@ -62,10 +62,10 @@ def test_builder_render(root: Path, config: Config) -> None:
     assert builder.render("test") == "test"
 
 
-def test_builder_absolute_uri(root: Path, config: Config, post: Post) -> None:
+def test_builder_absolute_url(root: Path, config: Config, post: Post) -> None:
     """
-    Test the ``absolute_uri`` method in ``Builder``.
+    Test the ``absolute_url`` method in ``Builder``.
     """
     builder = Builder(root, config, "https://example.com/")
     builder.extension = ".html"
-    assert builder.absolute_uri(post) == "https://example.com/first/index.html"
+    assert builder.absolute_url(post) == "https://example.com/first/index.html"

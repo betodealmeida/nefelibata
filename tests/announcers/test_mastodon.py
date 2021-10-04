@@ -64,7 +64,7 @@ async def test_announcer_announce(
 
     announcement = await announcer.announce_post(post)
     assert announcement.dict() == {
-        "uri": "https://example.com/1",
+        "url": "https://example.com/1",
         "timestamp": datetime(2021, 1, 1, 0, 0, tzinfo=timezone.utc),
         "grace_seconds": 0,
     }
@@ -181,10 +181,10 @@ async def test_announcer_collect(
 
     post.metadata["announcements"] = {
         "mastodon": {
-            "uri": "https://example.com/1",
+            "url": "https://example.com/1",
         },
         "something": {
-            "uri": "https://foo.example.com/",
+            "url": "https://foo.example.com/",
         },
     }
 
@@ -199,11 +199,11 @@ async def test_announcer_collect(
             updated=None,
             author=Author(
                 name="Alice Doe",
-                uri="https://alice.example.com/",
+                url="https://alice.example.com/",
                 avatar="https://alice.example.com/profile.gif",
                 note="Best friends with Bob and Charlie",
             ),
-            uri="https://example.com/2",
+            url="https://example.com/2",
             in_reply_to="https://example.com/1",
             type="reply",
         ),
@@ -236,7 +236,7 @@ async def test_announcer_collect_not_found(
 
     post.metadata["announcements"] = {
         "mastodon": {
-            "uri": "https://example.com/1",
+            "url": "https://example.com/1",
         },
     }
 

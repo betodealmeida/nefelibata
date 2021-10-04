@@ -19,6 +19,6 @@ class AntennaAnnouncer(GemlogAnnouncer):
     """
 
     name = "Antenna"
-    uri = "gemini://warmedal.se/~antenna/"
-    submit_uri = "gemini://warmedal.se/~antenna/submit?"
+    url = "gemini://warmedal.se/~antenna/"
+    submit_url = "gemini://warmedal.se/~antenna/submit?"
     logger = _logger

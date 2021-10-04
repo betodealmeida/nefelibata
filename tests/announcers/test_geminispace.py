@@ -43,7 +43,7 @@ async def test_announcer_announce(
     with freeze_time("2021-01-01T00:00:00Z"):
         announcement = await announcer.announce_site()
     assert announcement.dict() == {
-        "uri": "gemini://geminispace.info/",
+        "url": "gemini://geminispace.info/",
         "timestamp": datetime(2021, 1, 1, 0, 0, tzinfo=timezone.utc),
         "grace_seconds": 31536000,
     }
@@ -92,14 +92,14 @@ async def test_announcer_collect(
         "backlink,gemini://example.com/reply.gmi": Interaction(
             id="backlink,gemini://example.com/reply.gmi",
             name="Re: This is your first post",
-            uri="gemini://example.com/reply.gmi",
+            url="gemini://example.com/reply.gmi",
             type="backlink",
             timestamp=None,
         ),
         "backlink,gemini://example.com/another-reply.gmi": Interaction(
             id="backlink,gemini://example.com/another-reply.gmi",
             name="Re: This is your first post",
-            uri="gemini://example.com/another-reply.gmi",
+            url="gemini://example.com/another-reply.gmi",
             type="backlink",
             timestamp=None,
         ),

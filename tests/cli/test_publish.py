@@ -40,7 +40,7 @@ async def test_run(
         side_effect=[
             None,
             Announcement(
-                uri="https://host1.example.com/",
+                url="https://host1.example.com/",
                 timestamp=datetime(2021, 1, 1),
             ),
         ],
@@ -48,7 +48,7 @@ async def test_run(
     announcer.announce_site = mocker.AsyncMock(
         side_effect=[
             Announcement(
-                uri="https://host2.example.com/",
+                url="https://host2.example.com/",
                 timestamp=datetime(2021, 1, 2),
             ),
             None,

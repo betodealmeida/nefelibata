@@ -36,8 +36,8 @@ class GemlogAnnouncer(Announcer):
     # Replace these with values from the place where you want to announce the
     # feed.
     name = ""
-    uri = "gemini://example.com/"
-    submit_uri = "gemini://example.com/submit?"
+    url = "gemini://example.com/"
+    submit_url = "gemini://example.com/submit?"
     # Set up an expiration to prevent the announcement to made too frequently;
     # eg, for CAPCOM we only need announce the feed once, while for Antenna we
     # need to announce it on every change.
@@ -66,13 +66,13 @@ class GemlogAnnouncer(Announcer):
             feed_url = urllib.parse.quote_plus(
                 f"{builder.home}/feed{builder.extension}",
             )
-            url = self.submit_uri + feed_url
+            url = self.submit_url + feed_url
 
             self.logger.info("Announcing feed %s to %s", feed_url, self.name)
             await self.client.get(URL(url))
 
         return Announcement(
-            uri=self.uri,
+            url=self.url,
             timestamp=datetime.now(timezone.utc),
             grace_seconds=self.grace_seconds,
         )
@@ -83,7 +83,7 @@ class GemlogAnnouncer(Announcer):
 
         This is done by scraping the capsule and searching for "Re: " posts.
         """
-        response = await self.client.get(URL(self.uri))
+        response = await self.client.get(URL(self.url))
         payload = await response.read()
         content = payload.decode("utf-8")
 
@@ -94,26 +94,26 @@ class GemlogAnnouncer(Announcer):
             if not line.startswith("=>"):
                 continue
 
-            _, uri, name = re.split(r"\s+", line, 2)
+            _, url, name = re.split(r"\s+", line, 2)
             for post in posts:
                 reply = f"Re: {post.title}"
-                if reply in name and await self._link_in_post(post.url, uri):
-                    id_ = f"reply,{uri}"
+                if reply in name and await self._link_in_post(post.url, url):
+                    id_ = f"reply,{url}"
                     interactions[post.path][id_] = Interaction(
                         id=id_,
                         name=name,
-                        uri=uri,
+                        url=url,
                         type="reply",
                     )
 
         return interactions
 
-    async def _link_in_post(self, post_url: str, uri: str) -> bool:
+    async def _link_in_post(self, post_url: str, url: str) -> bool:
         """
-        Check that a given URI actually links to the post URL.
+        Check that a given URL actually links to the post URL.
         """
         try:
-            response = await self.client.get(URL(uri))
+            response = await self.client.get(URL(url))
         except ssl.SSLCertVerificationError:
             return True
 

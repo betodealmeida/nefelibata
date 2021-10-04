@@ -94,7 +94,7 @@ class MastodonAnnouncer(Announcer):
         )
 
         return Announcement(
-            uri=toot_dict.url,
+            url=toot_dict.url,
             timestamp=toot_dict.created_at,
         )
 
@@ -103,25 +103,25 @@ class MastodonAnnouncer(Announcer):
 
         announcements = post.metadata.get("announcements", {})
         for announcement in announcements.values():
-            if not announcement["uri"].startswith(self.base_url):
+            if not announcement["url"].startswith(self.base_url):
                 continue
 
-            uri = announcement["uri"]
-            id_ = int(uri.rstrip("/").rsplit("/", 1)[1])
+            url = announcement["url"]
+            id_ = int(url.rstrip("/").rsplit("/", 1)[1])
             try:
                 context = self.client.status_context(id_)
             except MastodonNotFoundError:
-                _logger.warning("Toot %s not found", uri)
+                _logger.warning("Toot %s not found", url)
                 continue
 
-            # map from instance ID to URI
-            id_map = {id_: uri}
+            # map from instance ID to URL
+            id_map = {id_: url}
 
             for descendant in context["descendants"]:
-                id_ = descendant["uri"]
+                id_ = descendant["url"]
                 id_map[descendant["id"]] = id_
                 interactions[str(id_)] = Interaction(
-                    id=id_,
+                    id=descendant["uri"],
                     name=descendant["url"],
                     summary=None,
                     content=descendant["content"],
@@ -129,11 +129,11 @@ class MastodonAnnouncer(Announcer):
                     updated=None,
                     author=Author(
                         name=descendant["account"]["display_name"],
-                        uri=descendant["account"]["url"],
+                        url=descendant["account"]["url"],
                         avatar=descendant["account"]["avatar"],
                         note=descendant["account"]["note"],
                     ),
-                    uri=descendant["url"],
+                    url=descendant["url"],
                     in_reply_to=id_map[descendant["in_reply_to_id"]],
                     type="reply",
                 )

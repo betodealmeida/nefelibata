@@ -108,7 +108,7 @@ reply,gemini://ew.srht.site/en/2021/20210915-re-changing-old-code-is-risky.gmi:
   name: '2021-09-15 ~ew''s FlightLog: Re: Changing old code is risky'
   timestamp: null
   type: reply
-  uri: gemini://ew.srht.site/en/2021/20210915-re-changing-old-code-is-risky.gmi
+  url: gemini://ew.srht.site/en/2021/20210915-re-changing-old-code-is-risky.gmi
     """,
     )
     assert load_yaml(Path("/path/to/blog/existing.yaml"), Interaction) == {
@@ -118,7 +118,7 @@ reply,gemini://ew.srht.site/en/2021/20210915-re-changing-old-code-is-risky.gmi:
         ): Interaction(
             id="reply,gemini://ew.srht.site/en/2021/20210915-re-changing-old-code-is-risky.gmi",
             name="2021-09-15 ~ew's FlightLog: Re: Changing old code is risky",
-            uri="gemini://ew.srht.site/en/2021/20210915-re-changing-old-code-is-risky.gmi",
+            url="gemini://ew.srht.site/en/2021/20210915-re-changing-old-code-is-risky.gmi",
             type="reply",
             timestamp=None,
         ),

@@ -40,38 +40,38 @@ def extract_images(content: str) -> Iterator[Tuple[str, str]]:
             queue.extend(element.children)
 
 
-def is_local(uri: str) -> bool:
+def is_local(url: str) -> bool:
     """
     Return true if the image is local.
 
-    For now we return true if the URI is relative.
+    For now we return true if the URL is relative.
     """
-    return "://" not in uri
+    return "://" not in url
 
 
-async def get_resource_extension(session: ClientSession, uri: str) -> str:
+async def get_resource_extension(session: ClientSession, url: str) -> str:
     """
     Return the extension of a remote image.
     """
-    async with session.head(uri) as response:
+    async with session.head(url) as response:
         content_type = response.headers["content-type"]
 
     extension = mimetypes.guess_extension(content_type)
     return extension or ""
 
 
-def get_filename(uri: str, extension: str) -> str:
+def get_filename(url: str, extension: str) -> str:
     """
     Compute the filename for a given resource.
     """
     md5 = hashlib.md5()
-    md5.update(uri.encode("utf-8"))
+    md5.update(url.encode("utf-8"))
     return f"{md5.hexdigest()}{extension}"
 
 
-def add_exif(buf: BytesIO, uri: str, title: str) -> BytesIO:
+def add_exif(buf: BytesIO, url: str, title: str) -> BytesIO:
     """
-    Store the URI in the EXIF data.
+    Store the URL in the EXIF data.
     """
     buf.seek(0)
     image = Image.open(buf)
@@ -79,10 +79,10 @@ def add_exif(buf: BytesIO, uri: str, title: str) -> BytesIO:
     exif = (
         piexif.load(image.info["exif"]) if "exif" in image.info else defaultdict(dict)
     )
-    exif["0th"][piexif.ImageIFD.Copyright] = uri
+    exif["0th"][piexif.ImageIFD.Copyright] = url
     exif["0th"][piexif.ImageIFD.ImageDescription] = title
 
-    _logger.info("Adding original URI and title to the EXIF data")
+    _logger.info("Adding original URL and title to the EXIF data")
     buf = BytesIO()
     image.save(buf, "jpeg", exif=piexif.dump(exif))
 
@@ -91,7 +91,7 @@ def add_exif(buf: BytesIO, uri: str, title: str) -> BytesIO:
 
 async def download_image(  # pylint: disable=too-many-arguments
     session: ClientSession,
-    uri: str,
+    url: str,
     title: str,
     post: Post,
     directory: Path,
@@ -100,26 +100,26 @@ async def download_image(  # pylint: disable=too-many-arguments
     """
     Download an image.
     """
-    extension = await get_resource_extension(session, uri)
-    filename = get_filename(uri, extension)
+    extension = await get_resource_extension(session, url)
+    filename = get_filename(url, extension)
     target = directory / filename
 
     if target.exists():
         _logger.debug("Image already mirrorred")
         return
 
-    replacements[uri] = str(target.relative_to(post.path.parent))
+    replacements[url] = str(target.relative_to(post.path.parent))
 
-    _logger.info("Downloading image from %s", uri)
+    _logger.info("Downloading image from %s", url)
     buf = BytesIO()
-    async with session.get(uri) as response:
+    async with session.get(url) as response:
         async for chunk in response.content.iter_chunked(  # pragma: no cover
             CHUNK_SIZE,
         ):
             buf.write(chunk)
 
     if extension in {".jpeg", ".jpg"}:
-        buf = add_exif(buf, uri, title)
+        buf = add_exif(buf, url, title)
 
     with open(target, "wb") as output:
         output.write(buf.getvalue())
@@ -142,12 +142,12 @@ class MirrorImagesAssistant(Assistant):
         replacements: Dict[str, str] = {}
         tasks = []
         async with ClientSession() as session:
-            for uri, title in extract_images(post.content):
-                if is_local(uri):
+            for url, title in extract_images(post.content):
+                if is_local(url):
                     continue
 
                 task = asyncio.create_task(
-                    download_image(session, uri, title, post, mirror, replacements),
+                    download_image(session, url, title, post, mirror, replacements),
                 )
                 tasks.append(task)
 

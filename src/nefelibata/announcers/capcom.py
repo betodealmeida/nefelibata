@@ -20,7 +20,7 @@ class CAPCOMAnnouncer(GemlogAnnouncer):
     """
 
     name = "CAPCOM"
-    uri = "gemini://gemini.circumlunar.space/capcom/"
-    submit_uri = "gemini://gemini.circumlunar.space/capcom/submit?"
+    url = "gemini://gemini.circumlunar.space/capcom/"
+    submit_url = "gemini://gemini.circumlunar.space/capcom/submit?"
     grace_seconds = timedelta(days=365).total_seconds()
     logger = _logger
