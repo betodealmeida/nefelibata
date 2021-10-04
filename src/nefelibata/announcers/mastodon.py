@@ -73,7 +73,7 @@ class MastodonAnnouncer(Announcer):
 
         language = post.metadata.get("language") or self.config.language
         summary = post.metadata.get("summary") or post.title
-        urls = " | ".join(
+        urls = "\n".join(
             f"{builder.home}/{post.url}{builder.extension}" for builder in self.builders
         )
         status = f"{summary}\n\n{urls}"

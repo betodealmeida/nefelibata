@@ -77,7 +77,8 @@ async def test_announcer_announce(
     Mastodon.return_value.status_post.assert_called_with(
         status="""Hello, world!
 
-gemini://example.com/first/index.gmi | https://example.com/first/index.html""",
+gemini://example.com/first/index.gmi
+https://example.com/first/index.html""",
         visibility="public",
         media_ids=[Mastodon.return_value.media_post.return_value],
         language="en",
