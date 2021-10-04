@@ -30,7 +30,7 @@ class HTMLBuilder(Builder):
         config: Config,
         home: str,
         path: str = "",
-        theme: str = "default",
+        theme: str = "minimal",
         **kwargs: Any,
     ):
         super().__init__(root, config, home, path, **kwargs)

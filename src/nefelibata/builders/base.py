@@ -7,7 +7,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pkg_resources import iter_entry_points, resource_filename, resource_listdir
 
 from nefelibata import __version__
@@ -112,6 +112,7 @@ class Builder:
             loader=FileSystemLoader(str(self.root / "templates/builders" / self.name)),
             lstrip_blocks=True,
             trim_blocks=True,
+            autoescape=select_autoescape(["html", "xml"]),
         )
 
     async def process_post(self, post: Post, force: bool = False) -> None:

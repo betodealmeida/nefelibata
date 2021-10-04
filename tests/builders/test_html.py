@@ -20,7 +20,7 @@ async def test_builder_setup(root: Path, config: Config) -> None:
     """
     Test that templates and build directory are created.
     """
-    template_directory = root / "templates/builders/html/default/src"
+    template_directory = root / "templates/builders/html/minimal/src"
     build_directory = root / "build/html"
     assert not template_directory.exists()
     assert not build_directory.exists()
@@ -70,7 +70,7 @@ async def test_builder_post(
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name=generator content="Nefelibata {__version__}">
+    <meta name="generator" content="Nefelibata {__version__}">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Musings about the path and other things">
@@ -79,39 +79,38 @@ async def test_builder_post(
 
     <link rel="canonical" href="https://example.com" />
     <link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml" />
-    <link href="https://example.com/css/style.css" rel="stylesheet">
   </head>
   <body>
-<article class="h-entry container p-16 max-w-4xl">
-  <h1 class="p-name font-serif text-5xl">This is your first post</h1>
+    <article class="h-entry">
+      <h1 class="p-name">This is your first post</h1>
 
-  <p class="text-sm">Published by <a class="p-author h-card" href="https://taoetc.org/">Beto Dealmeida</a>
-  on <time class="dt-published" datetime="2020-12-31T16:00:00-08:00">2020-12-31 16:00:00-08:00</time></p>
+      <p>Published by <a class="p-author h-card" href="https://taoetc.org/">Beto Dealmeida</a>
+      on <time class="dt-published" datetime="2020-12-31T16:00:00-08:00">2020-12-31 16:00:00-08:00</time></p>
 
-  <p class="p-summary"></p>
+      <p class="p-summary"></p>
 
-  <div class="e-content">
-    <h1>Welcome</h1>
+      <div class="e-content">
+        <h1>Welcome</h1>
 <p>This is your first post. It should be written using Markdown.</p>
 <p>Read more about <a href="https://nefelibata.readthedocs.io/">Nefelibata</a>.</p>
 
-  </div>
+      </div>
 
-  <h2 class="inline">Tags</h2>
 
-  <ul class="inline">
-    <li class="inline"><a href="https://example.com/tags/blog.html">blog</a></li>
-    <li class="inline"><a href="https://example.com/tags/welcome.html">welcome</a></li>
-  </ul>
+      <h2>Tags</h2>
 
-  <h2>Categories</h2>
+      <ul>
+        <li><a href="https://example.com/tags/blog.html">blog</a></li>
+        <li><a href="https://example.com/tags/welcome.html">welcome</a></li>
+      </ul>
 
-  <ul>
-    <li><a href="https://example.com/categories/stem.html">stem</a></li>
-  </ul>
+      <h2>Categories</h2>
 
-</article>
+      <ul>
+        <li><a href="https://example.com/categories/stem.html">STEM</a></li>
+      </ul>
 
+    </article>
   </body>
 </html>"""
     )
@@ -191,24 +190,23 @@ async def test_builder_site(
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name=generator content="Nefelibata {__version__}">
+    <meta name="generator" content="Nefelibata {__version__}">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Musings about the path and other things">
 
-    <title>道&c.: Musings about the path and other things</title>
+    <title>道&amp;c.: Musings about the path and other things</title>
 
     <link rel="canonical" href="https://example.com" />
     <link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml" />
-    <link href="https://example.com/css/style.css" rel="stylesheet">
   </head>
   <body>
-    <h1>道&c.: Musings about the path and other things</h1>
+    <h1>道&amp;c.: Musings about the path and other things</h1>
 
     <h2>Posts</h2>
 
     <ul>
-      <li><a href="https://example.com/first/index.html">This is your first post</a></li>
+      <li><a href="https://example.com/first/index.html">This is your first post</a> </li>
     </ul>
 
     <h2>Links</h2>
@@ -217,6 +215,9 @@ async def test_builder_site(
       <li><a href="https://2c.taoetc.org/@beto">Mastodon</a></li>
     </ul>
 
+    <footer>
+      <p>Crafted with ❤️ using <a href="https://nefelibata.readthedocs.io/">Nefelibata</a>.</p>
+    </footer>
   </body>
 </html>"""
     )
@@ -232,12 +233,12 @@ async def test_builder_site(
     <updated>2020-12-31T16:04:00Z</updated>
 <entry>
     <title>This is your first post</title>
-    <link rel="alternate" type="text/html" href="https://example.com/first/index" />
-    <id>tag:example.com,2020-12-31:first/index</id>
+    <link rel="alternate" type="text/html" href="https://example.com/first/index.html" />
+    <id>tag:example.com,2020-12-31:first/index.html</id>
     <updated>2020-12-31T16:04:00Z</updated>
     <summary type="html">
         Hello, world!
-        &lt;p&gt;&lt;a href="https://example.com/first/index"&gt;Permalink&lt;/p&gt;
+        &lt;p&gt;&lt;a href="https://example.com/first/index.html"&gt;Permalink&lt;/p&gt;
     </summary>
     <author>
         <name>Beto Dealmeida</name>
@@ -249,7 +250,7 @@ async def test_builder_site(
 &lt;p&gt;This is your first post. It should be written using Markdown.&lt;/p&gt;
 &lt;p&gt;Read more about &lt;a href=&#34;https://nefelibata.readthedocs.io/&#34;&gt;Nefelibata&lt;/a&gt;.&lt;/p&gt;
 
-        &lt;p&gt;&lt;a href="https://example.com/first/index"&gt;Permalink&lt;/p&gt;
+        &lt;p&gt;&lt;a href="https://example.com/first/index.html"&gt;Permalink&lt;/p&gt;
     </content>
 </entry>
 </feed>"""

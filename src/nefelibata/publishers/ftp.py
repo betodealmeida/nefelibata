@@ -55,13 +55,9 @@ class FTPPublisher(Publisher):
                 ftp.cwd(self.basedir)
             pwd = basedir = Path(ftp.pwd())
 
-            # get files that need to be published
-            modified_files = list(self.find_modified_files(force, since))
+            # get files that need to be published, sorted to minimize ``CWD`` calls
+            modified_files = sorted(self.find_modified_files(force, since))
 
-            # sort files to minimize ``CWD`` calls
-            modified_files = sorted(modified_files)
-
-            updated = False
             for path in modified_files:
                 relative_directory = path.relative_to(build).parent
                 if relative_directory != pwd.relative_to(basedir):
@@ -78,9 +74,8 @@ class FTPPublisher(Publisher):
                 _logger.info("Uploading %s", path)
                 with open(path, "rb") as input_:
                     ftp.storbinary(f"STOR {path.name}", input_)
-                updated = True
 
-        if updated:
+        if modified_files:
             return Publishing(timestamp=datetime.now(timezone.utc))
 
         return None
