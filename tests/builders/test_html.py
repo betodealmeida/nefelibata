@@ -78,7 +78,7 @@ async def test_builder_post(
 
     <title>道&amp;c.: This is your first post</title>
 
-    <link rel="canonical" href="https://example.com" />
+    <link rel="canonical" href="https://example.com/" />
     <link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml" />
     <link rel="stylesheet" href="https://example.com/css/awsm_theme_big-stone.min.css" media="(prefers-color-scheme: dark)">
     <link rel="stylesheet" href="https://example.com/css/awsm_theme_pearl-lusta.min.css" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)">
@@ -87,7 +87,7 @@ async def test_builder_post(
     <main>
       <nav>
         <ul>
-          <li><a href="https://example.com">Main index</a></li>
+          <li><a href="https://example.com/">Main index</a></li>
         </ul>
       </nav>
 
@@ -209,7 +209,7 @@ async def test_builder_site(
 
     <title>道&amp;c.: Musings about the path and other things</title>
 
-    <link rel="canonical" href="https://example.com" />
+    <link rel="canonical" href="https://example.com/" />
     <link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml" />
     <link rel="stylesheet" href="https://example.com/css/awsm_theme_big-stone.min.css" media="(prefers-color-scheme: dark)">
     <link rel="stylesheet" href="https://example.com/css/awsm_theme_pearl-lusta.min.css" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)">

@@ -5,5 +5,5 @@
 
 {% endif %}
 {% for post in posts %}
-=> {{ home }}/{{ post.url }}.gmi {{ post.timestamp.date() }} — {{ post.title }}
+=> {{ home / post.url }}.gmi {{ post.timestamp.date() }} — {{ post.title }}
 {% endfor %}

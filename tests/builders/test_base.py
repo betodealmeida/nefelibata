@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Type
 
 from pytest_mock import MockerFixture
+from yarl import URL
 
 from nefelibata.builders.base import Builder, get_builders
 from nefelibata.config import BuilderModel, Config
@@ -68,4 +69,4 @@ def test_builder_absolute_url(root: Path, config: Config, post: Post) -> None:
     """
     builder = Builder(root, config, "https://example.com/")
     builder.extension = ".html"
-    assert builder.absolute_url(post) == "https://example.com/first/index.html"
+    assert builder.absolute_url(post) == URL("https://example.com/first/index.html")

@@ -8,7 +8,7 @@
 
       <ul>
       {% for post in posts %}
-        <li><a href="{{ home }}/{{ post.url }}.html">{{ post.title }}</a></li>
+        <li><a href="{{ home / post.url }}.html">{{ post.title }}</a></li>
       {% endfor %}
       </ul>
 {% endblock %}

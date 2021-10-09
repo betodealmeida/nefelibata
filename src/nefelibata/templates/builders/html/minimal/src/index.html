@@ -11,7 +11,7 @@
       <ul>
       {% for post in posts %}
       {% set reading_time = '(%s min read)' % post.metadata.reading_time.total_minutes if post.metadata.reading_time and post.metadata.reading_time.total_minutes > 2 else '' %}
-        <li class="h-entry"><a class="p-name" href="{{ home }}/{{ post.url }}.html">{{ post.title }}</a> {{ reading_time }}</li>
+        <li class="h-entry"><a class="p-name" href="{{ home / post.url }}.html">{{ post.title }}</a> {{ reading_time }}</li>
       {% endfor %}
       </ul>
       {% else %}

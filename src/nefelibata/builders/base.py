@@ -9,6 +9,7 @@ from typing import Any, Dict, List
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pkg_resources import iter_entry_points, resource_filename, resource_listdir
+from yarl import URL
 
 from nefelibata import __version__
 from nefelibata.config import Config
@@ -45,7 +46,7 @@ class Builder:
         self.root = root
         self.config = config
         self.path = path or self.name
-        self.home = home.rstrip("/")
+        self.home = URL(home)
         self.kwargs = kwargs
 
         self.env = self.get_environment()
@@ -91,11 +92,11 @@ class Builder:
         if not categories_directory.exists():
             categories_directory.mkdir()
 
-    def absolute_url(self, post: Post) -> str:
+    def absolute_url(self, post: Post) -> URL:
         """
         Return the absolute URL for a post.
         """
-        return f"{self.home}/{post.url}{self.extension}"
+        return self.home / f"{post.url}{self.extension}"
 
     @staticmethod
     def render(content: str) -> str:

@@ -6,7 +6,7 @@
 # Enclosures
 
 {% for enclosure in post.enclosures %}
-=> {{ home }}/{{ enclosure.href }} {{ enclosure.description }}
+=> {{ home / enclosure.href }} {{ enclosure.description }}
 {% endfor %}
 
 {% endif %}
@@ -14,7 +14,7 @@
 # Tags
 
 {% for tag in sorted(post.tags) %}
-=> {{ home }}/tags/{{ tag }}.gmi {{ tag }}
+=> {{ home / 'tags' / tag }}.gmi {{ tag }}
 {% endfor %}
 
 {% endif %}
@@ -22,7 +22,7 @@
 # Categories
 
 {% for category in sorted(post.categories) %}
-=> {{ home }}/categories/{{ category }}.gmi {{ config.categories[category].label }}
+=> {{ home / 'categories' / category }}.gmi {{ config.categories[category].label }}
 {% endfor %}
 
 {% endif %}

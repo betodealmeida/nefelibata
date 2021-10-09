@@ -32,11 +32,13 @@
 - [X] mirror images (post) assistant
 - [X] html templates (with striptags|e)
 - [X] S3 publisher
-- [ ] webmention announcer
+- [X] rename URI to URL
+- [/] webmention announcer
 - [ ] Twitter announcer/assistant (for card)
 - [ ] add OG metadata (reading from post.metadata.meta?)
 - [ ] music player
 - [ ] display replies
 - [ ] warn on external resources (site) assistant
 - [ ] announcer staleness (don't collect if post is older than 7 days, eg)
+- [?] use yarl
 - [?] NeoCities publisher

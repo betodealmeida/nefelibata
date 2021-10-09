@@ -2,12 +2,15 @@
 Utility functions.
 """
 import logging
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, Optional, Set, Type
+from typing import Any, Dict, Iterator, Optional, Set, Type
 
+import marko
 import yaml
 from pydantic import BaseModel
 from rich.logging import RichHandler
+from yarl import URL
 
 from nefelibata.config import Config
 from nefelibata.constants import CONFIG_FILENAME
@@ -90,11 +93,41 @@ def load_yaml(path: Path, class_: Type[BaseModel]) -> Dict[str, BaseModel]:
     with open(path, encoding="utf-8") as input_:
         try:
             content = yaml.load(input_, Loader=yaml.SafeLoader)
-            return {name: class_(**parameters) for name, parameters in content.items()}
-        except (AttributeError, yaml.parser.ParserError):
+        except (AttributeError, yaml.parser.ParserError) as ex:
             _logger.warning("Invalid YAML file: %s", path)
+            raise ex
 
-    return {}
+    return {name: class_(**parameters) for name, parameters in content.items()}
+
+
+@contextmanager
+def update_yaml(path: Path) -> Iterator[Dict[Any, Any]]:
+    """
+    Open or create a YAML file, and save back if modified.
+    """
+    if path.exists():
+        with open(path, encoding="utf-8") as input_:
+            original = input_.read()
+            try:
+                content = yaml.load(original, Loader=yaml.SafeLoader)
+            except (
+                AttributeError,
+                yaml.parser.ParserError,
+                yaml.constructor.ConstructorError,
+            ) as ex:
+                _logger.warning("Invalid YAML file: %s", path)
+                raise ex
+    else:
+        original = ""
+        content = {}
+
+    try:
+        yield content
+    finally:
+        current = yaml.dump(content)
+        if current != original:
+            with open(path, "w", encoding="utf-8") as output:
+                output.write(current)
 
 
 def dict_merge(original, update):
@@ -127,3 +160,18 @@ def load_extra_metadata(post_directory: Path) -> Dict[str, Any]:
         extra_metadata[file_path.stem] = content
 
     return extra_metadata
+
+
+def extract_links(content: str) -> Iterator[URL]:
+    """
+    Extract all links from a Markdown document.
+    """
+    tree = marko.parse(content)
+    queue = [tree]
+    while queue:
+        element = queue.pop()
+
+        if isinstance(element, marko.inline.Link):
+            yield URL(element.dest)
+        elif hasattr(element, "children"):
+            queue.extend(element.children)

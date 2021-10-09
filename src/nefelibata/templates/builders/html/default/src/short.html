@@ -20,7 +20,7 @@
 
 	<ul class="inline">
 		{% for tag in sorted(post.tags) %}
-		<li class="inline"><a href="{{ home }}/tags/{{ tag }}.html">{{ tag }}</a></li>
+		<li class="inline"><a href="{{ home / 'tags' / tag }}.html">{{ tag }}</a></li>
 		{% endfor %}
 	</ul>
 	{% endif %}
@@ -30,7 +30,7 @@
 
 	<ul>
 		{% for category in sorted(post.categories) %}
-		<li><a href="{{ home }}/categories/{{ category }}.html">{{ category }}</a></li>
+		<li><a href="{{ home / 'categories' / category }}.html">{{ category }}</a></li>
 		{% endfor %}
 	</ul>
 	{% endif %}

@@ -9,7 +9,7 @@ import pytest
 from pytest_mock import MockerFixture
 from yarl import URL
 
-from nefelibata.assistants.archive_links import ArchiveLinksAssistant, extract_links
+from nefelibata.assistants.archive_links import ArchiveLinksAssistant
 from nefelibata.config import Config
 from nefelibata.post import Post
 
@@ -86,18 +86,3 @@ async def test_assistant(
             "https://nefelibata.readthedocs.io/"
         ),
     }
-
-
-def test_extract_links() -> None:
-    """
-    Test ``extract_links``.
-    """
-
-    assert list(extract_links("No links here, move along")) == []
-
-    content = """
-This is a long document with [links](https://foo.example.com/).
-
-And another: https://bar.example.com/
-    """
-    assert list(extract_links(content)) == ["https://foo.example.com/"]

@@ -43,12 +43,12 @@ class GeminispaceAnnouncer(Announcer):
         Add capsule to Geminispace.
         """
         for builder in self.builders:
-            if not builder.home.startswith("gemini://"):
+            if builder.home.scheme != "gemini":
                 raise Exception(
                     "Geminispace announcer only works with `gemini://` builds",
                 )
 
-            capsule_url = urllib.parse.quote_plus(builder.home)
+            capsule_url = urllib.parse.quote_plus(str(builder.home))
             url = f"gemini://geminispace.info/add-seed?{capsule_url}"
 
             _logger.info("Announcing capsule %s to Geminispace", capsule_url)
@@ -67,12 +67,12 @@ class GeminispaceAnnouncer(Announcer):
         interactions: Dict[str, Interaction] = {}
 
         for builder in self.builders:
-            if not builder.home.startswith("gemini://"):
+            if builder.home.scheme != "gemini":
                 raise Exception(
                     "Geminispace announcer only works with `gemini://` builds",
                 )
 
-            post_url = urllib.parse.quote_plus(builder.absolute_url(post))
+            post_url = urllib.parse.quote_plus(str(builder.absolute_url(post)))
             url = f"gemini://geminispace.info/backlinks?{post_url}"
 
             response = await self.client.get(URL(url))

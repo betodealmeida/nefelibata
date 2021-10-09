@@ -11,16 +11,19 @@ import yaml
 from pydantic import BaseModel
 from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
+from yarl import URL
 
 from nefelibata.announcers.base import Interaction
 from nefelibata.config import Config
 from nefelibata.utils import (
     dict_merge,
+    extract_links,
     find_directory,
     get_config,
     load_extra_metadata,
     load_yaml,
     setup_logging,
+    update_yaml,
 )
 
 
@@ -127,7 +130,8 @@ reply,gemini://ew.srht.site/en/2021/20210915-re-changing-old-code-is-risky.gmi:
     path = Path("/path/to/blog/invalid.yaml")
     fs.create_file(path, contents="[1,2,3")
     _logger = mocker.patch("nefelibata.utils._logger")
-    assert load_yaml(path, BaseModel) == {}
+    with pytest.raises(yaml.parser.ParserError):
+        load_yaml(path, BaseModel)
     assert _logger.warning.called_with("Invalid YAML file: %s", path)
 
 
@@ -156,4 +160,52 @@ def test_load_extra_metadata(mocker: MockerFixture, fs: FakeFilesystem) -> None:
     _logger.warning.assert_called_with(
         "Invalid file: %s",
         Path("/path/to/blog/broken.yaml"),
+    )
+
+
+def test_extract_links() -> None:
+    """
+    Test ``extract_links``.
+    """
+    assert list(extract_links("No links here, move along")) == []
+
+    content = """
+This is a long document with [links](https://foo.example.com/).
+
+And another: https://bar.example.com/
+    """
+    assert list(extract_links(content)) == [URL("https://foo.example.com/")]
+
+
+def test_update_yaml(fs: FakeFilesystem) -> None:
+    """
+    Test ``update_yaml``.
+    """
+    path = Path("/path/to/blog/test.yaml")
+    fs.create_dir(path.parent)
+
+    # create new file
+    with update_yaml(path) as config:
+        config["foo"] = "bar"
+
+    # check contents
+    with update_yaml(path) as config:
+        assert config["foo"] == "bar"
+
+    # test error
+    with open(path, "w", encoding="utf-8") as output:
+        output.write("{{ test }}")
+    with pytest.raises(yaml.constructor.ConstructorError) as excinfo:
+        with update_yaml(path) as config:
+            pass
+    assert (
+        str(excinfo.value)
+        == """while constructing a mapping
+  in "<unicode string>", line 1, column 1:
+    {{ test }}
+    ^
+found unhashable key
+  in "<unicode string>", line 1, column 2:
+    {{ test }}
+     ^"""
     )

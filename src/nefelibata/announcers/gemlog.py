@@ -58,7 +58,7 @@ class GemlogAnnouncer(Announcer):
         Send the link.
         """
         for builder in self.builders:
-            if not builder.home.startswith("gemini://"):
+            if builder.home.scheme != "gemini":
                 raise Exception(
                     f"{self.name} announcer only works with `gemini://` builds",
                 )
