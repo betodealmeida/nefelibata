@@ -23,7 +23,7 @@
 
       <ul>
       {% for link in config.social %}
-        <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+        <li><a href="{{ link.url }}" rel="me">{{ link.title }}</a></li>
       {% endfor %}
       </ul>
       {% endif %}

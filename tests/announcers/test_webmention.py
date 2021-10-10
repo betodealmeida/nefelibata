@@ -3,6 +3,7 @@ Tests for ``nefelibata.announcers.mastodon``.
 """
 # pylint: disable=invalid-name, redefined-outer-name
 
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -10,6 +11,7 @@ import yaml
 from pytest_mock import MockerFixture
 from yarl import URL
 
+from nefelibata.announcers.base import Author, Interaction
 from nefelibata.announcers.webmention import (
     Webmention,
     WebmentionAnnouncer,
@@ -285,4 +287,114 @@ async def test_announcer_announce(
             "target": "https://nefelibata.readthedocs.io/",
             "location": None,
         },
+    }
+
+
+@pytest.mark.asyncio
+async def test_announcer_collect(
+    mocker: MockerFixture,
+    root: Path,
+    config: Config,
+    post: Post,
+) -> None:
+    """
+    Test collecting posts.
+    """
+    gemini_builder = Builder(root, config, "gemini://example.com/", "gemini")
+    gemini_builder.extension = ".gmi"
+    html_builder = Builder(root, config, "https://example.com/", "www")
+    html_builder.extension = ".html"
+
+    mocker.patch("nefelibata.announcers.webmention.ClientResponseError", Exception)
+    get = mocker.patch("nefelibata.assistants.archive_links.ClientSession.get")
+    get_response = get.return_value.__aenter__.return_value
+    get_response.raise_for_status = mocker.MagicMock()
+    get_response.raise_for_status.side_effect = [
+        Exception("Gemini not supported"),
+        None,
+        Exception("Gemini not supported"),
+        None,
+    ]
+
+    announcer = WebmentionAnnouncer(
+        root,
+        config,
+        builders=[gemini_builder, html_builder],
+    )
+
+    get_response.json = mocker.AsyncMock(return_value={"children": []})
+    interactions = await announcer.collect_post(post)
+    assert interactions == {}
+
+    entries = [
+        {
+            "type": "entry",
+            "wm-id": 1,
+            "wm-source": "https://alice.example.com/posts/one",
+            "name": "This is the title",
+            "summary": {"value": "This is the summary"},
+            "content": {"text": "This is the post content."},
+            "published": "2021-01-01T00:00:00Z",
+            "author": {
+                "name": "Alice Doe",
+                "url": "https://alice.example.com/",
+                "photo": "https://alice.example.com/photo.jpg",
+                "note": "My name is Alice",
+            },
+            "wm-property": "in-reply-to",
+        },
+        {
+            "type": "entry",
+            "wm-id": 2,
+            "wm-source": "https://bob.example.com/posts/two",
+            "summary": {"value": "This is the summary"},
+            "content": {"text": "This is the post content."},
+            "published": "2021-01-01T00:00:00Z",
+            "author": {
+                "name": "Bob Doe",
+                "url": "https://bob.example.com/",
+                "photo": "https://bob.example.com/photo.jpg",
+            },
+            "wm-property": "like-of",
+        },
+        {"type": "invalid"},
+    ]
+
+    get_response.json = mocker.AsyncMock(return_value={"children": entries})
+    interactions = await announcer.collect_post(post)
+    assert interactions == {
+        1: Interaction(
+            id="1",
+            name="This is the title",
+            summary="This is the summary",
+            content="This is the post content.",
+            published=datetime(2021, 1, 1, 0, 0, tzinfo=timezone.utc),
+            updated=None,
+            author=Author(
+                name="Alice Doe",
+                url="https://alice.example.com/",
+                avatar="https://alice.example.com/photo.jpg",
+                note="My name is Alice",
+            ),
+            url="https://alice.example.com/posts/one",
+            in_reply_to=None,
+            type="reply",
+        ),
+        2: Interaction(
+            id="2",
+            name="https://bob.example.com/posts/two",
+            summary="This is the summary",
+            content="This is the post content.",
+            published=datetime(2021, 1, 1, 0, 0, tzinfo=timezone.utc),
+            updated=None,
+            author=Author(
+                name="Bob Doe",
+                url="https://bob.example.com/",
+                avatar="https://bob.example.com/photo.jpg",
+                note="",
+            ),
+            url="https://bob.example.com/posts/two",
+            in_reply_to=None,
+            type="like",
+        ),
     }

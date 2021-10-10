@@ -3,18 +3,28 @@ An announcer for webmentions.
 """
 
 import logging
-from typing import Literal, Optional
+from datetime import datetime, timezone
+from typing import Dict, Literal, Optional
 
+import dateutil.parser
 from aiohttp import ClientResponseError, ClientSession
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 from yarl import URL
 
-from nefelibata.announcers.base import Announcement, Announcer
+from nefelibata.announcers.base import Announcement, Announcer, Author, Interaction
 from nefelibata.post import Post
 from nefelibata.utils import extract_links, update_yaml
 
 _logger = logging.getLogger(__name__)
+
+
+# map from wm-property to ``Interaction.type``
+INTERACTION_TYPES = {
+    "in-reply-to": "reply",
+    "mention-of": "mention",
+    "like-of": "like",
+}
 
 
 class Webmention(BaseModel):
@@ -133,5 +143,55 @@ class WebmentionAnnouncer(Announcer):
                                 )
                             ).dict()
 
-        # don't return anything, so we check queued webmentions on every publish
-        return None
+        if any(webmention["status"] == "queue" for webmention in webmentions.values()):
+            # return nothing so we can check queued webmentions on next publish
+            return None
+
+        return Announcement(
+            url=post.url,
+            timestamp=datetime.now(timezone.utc),
+        )
+
+    async def collect_post(self, post: Post) -> Dict[str, Interaction]:
+        interactions: Dict[str, Interaction] = {}
+
+        async with ClientSession() as session:
+            for builder in self.builders:
+                target = builder.absolute_url(post)
+                payload = {"target": target}
+
+                async with session.get(
+                    "https://webmention.io/api/mentions.jf2",
+                    data=payload,
+                ) as response:
+                    try:
+                        response.raise_for_status()
+                    except ClientResponseError:
+                        _logger.error("Error fetching webmentions")
+                        continue
+
+                    payload = await response.json()
+
+                for entry in payload["children"]:
+                    if entry["type"] != "entry":
+                        continue
+
+                    interactions[entry["wm-id"]] = Interaction(
+                        id=entry["wm-id"],
+                        name=entry.get("name", entry["wm-source"]),
+                        summary=entry["summary"]["value"],
+                        content=entry["content"]["text"],
+                        published=dateutil.parser.parse(entry["published"]),
+                        updated=None,
+                        author=Author(
+                            name=entry["author"]["name"],
+                            url=entry["author"]["url"],
+                            avatar=entry["author"]["photo"],
+                            note=entry["author"].get("note", ""),
+                        ),
+                        url=entry["wm-source"],
+                        in_reply_to_id=None,
+                        type=INTERACTION_TYPES[entry["wm-property"]],
+                    )
+
+        return interactions

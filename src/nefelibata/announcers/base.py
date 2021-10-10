@@ -69,7 +69,7 @@ class Interaction(BaseModel):
     url: str
     in_reply_to: Optional[str] = None
 
-    type: Literal["reply", "backlink", "like"]
+    type: Literal["reply", "mention", "backlink", "like"]
 
 
 class Announcer:
