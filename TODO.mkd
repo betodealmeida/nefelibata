@@ -33,9 +33,9 @@
 - [X] html templates (with striptags|e)
 - [X] S3 publisher
 - [X] rename URI to URL
-- [/] webmention announcer
+- [X] webmention announcer
+- [/] fix multi line blockquotes
 - [/] use yarl (post?)
-- [ ] fix multi line blockquotes
 - [ ] Twitter announcer/assistant (for card)
 - [ ] add OG metadata (reading from post.metadata.meta?)
 - [ ] music player

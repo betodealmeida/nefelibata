@@ -8,10 +8,11 @@ from pathlib import Path
 
 import pytest
 import yaml
+from freezegun import freeze_time
 from pytest_mock import MockerFixture
 from yarl import URL
 
-from nefelibata.announcers.base import Author, Interaction
+from nefelibata.announcers.base import Announcement, Author, Interaction
 from nefelibata.announcers.webmention import (
     Webmention,
     WebmentionAnnouncer,
@@ -269,7 +270,13 @@ async def test_announcer_announce(
         update_webmention,
     )
 
-    announcement = await announcer.announce_post(post)
+    with freeze_time("2021-01-01T00:00:00Z"):
+        announcement = await announcer.announce_post(post)
+    assert announcement == Announcement(
+        url="first/index",
+        timestamp=datetime(2021, 1, 1, tzinfo=timezone.utc),
+        grace_seconds=0,
+    )
 
     path = post.path.parent / "webmentions.yaml"
     with open(path, encoding="utf-8") as input_:
