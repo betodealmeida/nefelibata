@@ -3,8 +3,7 @@ An announcer for webmentions.
 """
 
 import logging
-from pathlib import Path
-from typing import Any, List, Literal, Optional
+from typing import Literal, Optional
 
 from aiohttp import ClientResponseError, ClientSession
 from bs4 import BeautifulSoup
@@ -12,8 +11,6 @@ from pydantic import BaseModel
 from yarl import URL
 
 from nefelibata.announcers.base import Announcement, Announcer
-from nefelibata.builders.base import Builder
-from nefelibata.config import Config
 from nefelibata.post import Post
 from nefelibata.utils import extract_links, update_yaml
 
@@ -25,10 +22,10 @@ class Webmention(BaseModel):
     A webmention.
     """
 
-    source: URL
-    target: URL
+    source: str
+    target: str
     status: Literal["success", "queue", "invalid", "error"]
-    location: Optional[URL] = None
+    location: Optional[str] = None
 
 
 async def get_webmention_endpoint(session: ClientSession, target: URL) -> Optional[URL]:
@@ -38,9 +35,9 @@ async def get_webmention_endpoint(session: ClientSession, target: URL) -> Option
     async with session.head(target) as response:
         for rel, params in response.links.items():
             if rel == "webmention":
-                return URL(params["url"])
+                return target.join(URL(params["url"]))
 
-        if "text/html" not in response.headers.get("Content-Type", ""):
+        if "text/html" not in response.headers.get("content-type", ""):
             return None
 
     async with session.get(target) as response:
@@ -49,7 +46,7 @@ async def get_webmention_endpoint(session: ClientSession, target: URL) -> Option
     soup = BeautifulSoup(html, "html.parser")
     link = soup.find(rel="webmention")
     if link:
-        return target.join(URL(link))
+        return target.join(URL(link["href"]))
 
     return None
 
@@ -65,7 +62,7 @@ async def send_webmention(
     endpoint = await get_webmention_endpoint(session, target)
     if not endpoint:
         _logger.info("No endpoint found")
-        return Webmention(source=source, target=target, status="invalid")
+        return Webmention(source=str(source), target=str(target), status="invalid")
 
     payload = {"source": source, "target": target}
     async with session.post(endpoint, data=payload) as response:
@@ -73,23 +70,23 @@ async def send_webmention(
             response.raise_for_status()
         except ClientResponseError:
             _logger.error("Error sending webmention")
-            return Webmention(source=source, target=target, status="error")
+            return Webmention(source=str(source), target=str(target), status="error")
 
         if response.status == 201:
             return Webmention(
-                source=source,
-                target=target,
+                source=str(source),
+                target=str(target),
                 status="queue",
-                location=response.headers["Location"],
+                location=response.headers["location"],
             )
 
-    return Webmention(source=source, target=target, status="success")
+    return Webmention(source=str(source), target=str(target), status="success")
 
 
 async def update_webmention(
+    session: ClientSession,
     source: URL,
     target: URL,
-    session: ClientSession,
     location: URL,
 ) -> Webmention:
     """
@@ -98,7 +95,7 @@ async def update_webmention(
     async with session.get(location) as response:
         status = "success" if response.ok else "queue"
 
-    return Webmention(source=source, target=target, status=status)
+    return Webmention(source=str(source), target=str(target), status=status)
 
 
 class WebmentionAnnouncer(Announcer):
@@ -106,18 +103,6 @@ class WebmentionAnnouncer(Announcer):
     """
     An announcer for Webmention (https://indieweb.org/Webmention).
     """
-
-    def __init__(
-        self,
-        root: Path,
-        config: Config,
-        builders: List[Builder],
-        endpoint: URL,
-        **kwargs: Any,
-    ):
-        super().__init__(root, config, builders, **kwargs)
-
-        self.endpoint = endpoint
 
     async def announce_post(self, post: Post) -> Optional[Announcement]:
         path = post.path.parent / "webmentions.yaml"
@@ -127,9 +112,10 @@ class WebmentionAnnouncer(Announcer):
                 for target in extract_links(post.content):
                     for builder in self.builders:
                         source = builder.absolute_url(post)
+                        key = str(source)
 
-                        if source not in webmentions:
-                            webmentions[str(source)] = (
+                        if key not in webmentions:
+                            webmentions[key] = (
                                 await send_webmention(
                                     session,
                                     source,
@@ -137,14 +123,15 @@ class WebmentionAnnouncer(Announcer):
                                 )
                             ).dict()
 
-                        elif webmentions[source]["status"] == "queue":
-                            webmentions[str(source)] = (
+                        elif webmentions[key]["status"] == "queue":
+                            webmentions[key] = (
                                 await update_webmention(
                                     session,
                                     source,
                                     target,
-                                    webmentions[source]["location"],
+                                    webmentions[key]["location"],
                                 )
                             ).dict()
 
+        # don't return anything, so we check queued webmentions on every publish
         return None

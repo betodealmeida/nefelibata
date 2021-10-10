@@ -187,9 +187,10 @@ async def test_builder_site(
     )
     with open(assets_directory / "index.gmi", encoding="utf-8") as input_:
         content = input_.read()
+    space = " "
     assert (
         content
-        == """# 道&c.: Musings about the path and other things
+        == f"""# 道&c.: Musings about the path and other things
 
 This is the Gemini capsule of Beto Dealmeida.
 
@@ -199,7 +200,7 @@ This is the Gemini capsule of Beto Dealmeida.
 
 ## Posts
 
-=> gemini://localhost:1965/first/index.gmi 2020-12-31 16:00:00-08:00 — This is your first post
+=> gemini://localhost:1965/first/index.gmi 2020-12-31 16:00:00-08:00 — This is your first post{space}
 
 ## Links
 
