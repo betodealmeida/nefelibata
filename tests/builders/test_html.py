@@ -82,6 +82,7 @@ async def test_builder_post(
     <link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml" />
     <link rel="stylesheet" href="https://example.com/css/awsm_theme_big-stone.min.css" media="(prefers-color-scheme: dark)">
     <link rel="stylesheet" href="https://example.com/css/awsm_theme_pearl-lusta.min.css" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)">
+    <link rel="stylesheet" href="https://example.com/css/custom.css">
     <link href="https://webmention.io/example.com/webmention" rel="webmention" />
   </head>
   <body>
@@ -214,6 +215,7 @@ async def test_builder_site(
     <link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml" />
     <link rel="stylesheet" href="https://example.com/css/awsm_theme_big-stone.min.css" media="(prefers-color-scheme: dark)">
     <link rel="stylesheet" href="https://example.com/css/awsm_theme_pearl-lusta.min.css" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)">
+    <link rel="stylesheet" href="https://example.com/css/custom.css">
     <link href="https://webmention.io/example.com/webmention" rel="webmention" />
   </head>
   <body>

@@ -225,7 +225,7 @@ class WebmentionAnnouncer(Announcer):
                     interactions[entry["wm-id"]] = Interaction(
                         id=entry["wm-id"],
                         name=entry.get("name", entry["wm-source"]),
-                        summary=entry["summary"]["value"],
+                        summary=entry.get("summary", {}).get("value"),
                         content=entry["content"]["text"],
                         published=dateutil.parser.parse(entry["published"]),
                         updated=None,
