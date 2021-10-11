@@ -81,7 +81,7 @@ def test_get_enclosures(mocker: MockerFixture, fs: FakeFilesystem, root: Path) -
     }
 
     assert enclosures[2].dict() == {
-        "description": "No description",
+        "description": "Image logo.png",
         "href": "first/logo.png",
         "length": 0,
         "path": Path("/path/to/blog/posts/first/logo.png"),

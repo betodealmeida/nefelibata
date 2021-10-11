@@ -93,6 +93,14 @@ async def test_get_webmention_endpoint(mocker: MockerFixture) -> None:
     )
     assert endpoint is None
 
+    # gemini target
+    head_response.links = {}
+    endpoint = await get_webmention_endpoint(
+        session,
+        URL("gemini://example.com/post/hello.gmi"),
+    )
+    assert endpoint is None
+
 
 @pytest.mark.asyncio
 async def test_send_webmention(mocker: MockerFixture) -> None:
@@ -243,17 +251,17 @@ async def test_announcer_announce(
     with open(path, encoding="utf-8") as input_:
         webmentions = yaml.load(input_, Loader=yaml.SafeLoader)
     assert webmentions == {
-        "gemini://example.com/first/index.gmi": {
+        "gemini://example.com/first/index.gmi => https://nefelibata.readthedocs.io/": {
             "location": None,
             "source": "gemini://example.com/first/index.html",
             "status": "invalid",
             "target": "https://nefelibata.readthedocs.io/",
         },
-        "https://example.com/first/index.html": {
+        "https://example.com/first/index.html => https://nefelibata.readthedocs.io/": {
+            "location": "https://bob.example.com/webmention.php?id=42",
             "source": "https://example.com/first/index.html",
             "status": "queue",
             "target": "https://nefelibata.readthedocs.io/",
-            "location": "https://bob.example.com/webmention.php?id=42",
         },
     }
 
@@ -282,17 +290,17 @@ async def test_announcer_announce(
     with open(path, encoding="utf-8") as input_:
         webmentions = yaml.load(input_, Loader=yaml.SafeLoader)
     assert webmentions == {
-        "gemini://example.com/first/index.gmi": {
+        "gemini://example.com/first/index.gmi => https://nefelibata.readthedocs.io/": {
             "location": None,
             "source": "gemini://example.com/first/index.html",
             "status": "invalid",
             "target": "https://nefelibata.readthedocs.io/",
         },
-        "https://example.com/first/index.html": {
+        "https://example.com/first/index.html => https://nefelibata.readthedocs.io/": {
+            "location": None,
             "source": "https://example.com/first/index.html",
             "status": "success",
             "target": "https://nefelibata.readthedocs.io/",
-            "location": None,
         },
     }
 

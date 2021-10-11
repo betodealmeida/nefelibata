@@ -86,3 +86,10 @@ async def test_assistant(
             "https://nefelibata.readthedocs.io/"
         ),
     }
+
+    mocker.patch(
+        "nefelibata.assistants.archive_links.extract_links",
+        return_value=[URL("gemini://example.com/")],
+    )
+    response = await assistant.get_post_metadata(post)
+    assert response == {}

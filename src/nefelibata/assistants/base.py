@@ -36,7 +36,7 @@ class Assistant:
 
     async def process_post(self, post: Post, force: bool = False) -> None:
         """
-        Publish a post externally.
+        Pre-process a post before it's built.
         """
         path = post.path.parent / f"{self.name}.yaml"
         if path.exists() and not force:
@@ -57,7 +57,7 @@ class Assistant:
 
     async def process_site(self, force: bool = False) -> None:
         """
-        Publish a site externally.
+        Pre-process a site before it's built.
         """
         path = self.root / f"{self.name}.yaml"
         if path.exists() and not force:

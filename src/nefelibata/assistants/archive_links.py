@@ -36,6 +36,9 @@ class ArchiveLinksAssistant(Assistant):
 
         async with ClientSession() as session:
             for url in extract_links(post.content):
+                if url.scheme not in {"http", "https"}:
+                    continue
+
                 _logger.info("Saving URL %s", url)
                 save_url = f"https://web.archive.org/save/{url}"
                 async with lock:

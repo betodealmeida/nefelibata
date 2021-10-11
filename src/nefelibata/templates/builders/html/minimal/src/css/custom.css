@@ -1,0 +1,11 @@
+@media (prefers-color-scheme: dark) {
+  img {
+    mix-blend-mode: screen;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  img {
+    mix-blend-mode: multiply;
+  }
+}

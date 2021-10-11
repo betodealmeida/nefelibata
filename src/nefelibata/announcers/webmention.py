@@ -2,9 +2,10 @@
 An announcer for webmentions.
 """
 
+import asyncio
 import logging
 from datetime import datetime, timezone
-from typing import Dict, Literal, Optional
+from typing import Dict, Literal, Optional, TypedDict
 
 import dateutil.parser
 from aiohttp import ClientResponseError, ClientSession
@@ -12,7 +13,13 @@ from bs4 import BeautifulSoup
 from pydantic import BaseModel
 from yarl import URL
 
-from nefelibata.announcers.base import Announcement, Announcer, Author, Interaction
+from nefelibata.announcers.base import (
+    Announcement,
+    Announcer,
+    Author,
+    Interaction,
+    Scope,
+)
 from nefelibata.post import Post
 from nefelibata.utils import extract_links, update_yaml
 
@@ -38,13 +45,27 @@ class Webmention(BaseModel):
     location: Optional[str] = None
 
 
+class WebmentionType(TypedDict, total=False):
+    """
+    Type for ``Webmention.dict()``.
+    """
+
+    source: str
+    target: str
+    status: Literal["success", "queue", "invalid", "error"]
+    location: str
+
+
 async def get_webmention_endpoint(session: ClientSession, target: URL) -> Optional[URL]:
     """
     Given a target URL, find the webmention endpoint, if any.
     """
+    if target.scheme not in {"http", "https"}:
+        return None
+
     async with session.head(target) as response:
         for rel, params in response.links.items():
-            if rel == "webmention":
+            if "webmention" in rel.split(" "):
                 return target.join(URL(params["url"]))
 
         if "text/html" not in response.headers.get("content-type", ""):
@@ -54,7 +75,7 @@ async def get_webmention_endpoint(session: ClientSession, target: URL) -> Option
         html = await response.text()
 
     soup = BeautifulSoup(html, "html.parser")
-    link = soup.find(rel="webmention")
+    link = soup.find(rel="webmention", href=True)
     if link:
         return target.join(URL(link["href"]))
 
@@ -72,15 +93,24 @@ async def send_webmention(
     endpoint = await get_webmention_endpoint(session, target)
     if not endpoint:
         _logger.info("No endpoint found")
-        return Webmention(source=str(source), target=str(target), status="invalid")
+        return Webmention(
+            source=str(source),
+            target=str(target),
+            status="invalid",
+        )
 
+    _logger.info("Sending webmention to %s", endpoint)
     payload = {"source": source, "target": target}
     async with session.post(endpoint, data=payload) as response:
         try:
             response.raise_for_status()
         except ClientResponseError:
             _logger.error("Error sending webmention")
-            return Webmention(source=str(source), target=str(target), status="error")
+            return Webmention(
+                source=str(source),
+                target=str(target),
+                status="error",
+            )
 
         if response.status == 201:
             return Webmention(
@@ -90,7 +120,11 @@ async def send_webmention(
                 location=response.headers["location"],
             )
 
-    return Webmention(source=str(source), target=str(target), status="success")
+    return Webmention(
+        source=str(source),
+        target=str(target),
+        status="success",
+    )
 
 
 async def update_webmention(
@@ -105,7 +139,30 @@ async def update_webmention(
     async with session.get(location) as response:
         status = "success" if response.ok else "queue"
 
-    return Webmention(source=str(source), target=str(target), status=status)
+    return Webmention(
+        source=str(source),
+        target=str(target),
+        status=status,
+    )
+
+
+async def collect_webmentions(
+    session: ClientSession,
+    source: URL,
+    target: URL,
+    webmentions: Dict[str, WebmentionType],
+) -> None:
+    """
+    Helper function to collect webmentions.
+    """
+    key = f"{source} => {target}"
+    if key not in webmentions:
+        webmention = await send_webmention(session, source, target)
+        webmentions[key] = webmention.dict()
+    elif webmentions[key]["status"] == "queue":
+        location = webmentions[key]["location"]
+        webmention = await update_webmention(session, source, target, location)
+        webmentions[key] = webmention.dict()
 
 
 class WebmentionAnnouncer(Announcer):
@@ -114,34 +171,23 @@ class WebmentionAnnouncer(Announcer):
     An announcer for Webmention (https://indieweb.org/Webmention).
     """
 
+    scopes = [Scope.POST]
+
     async def announce_post(self, post: Post) -> Optional[Announcement]:
         path = post.path.parent / "webmentions.yaml"
 
+        tasks = []
         with update_yaml(path) as webmentions:
             async with ClientSession() as session:
                 for target in extract_links(post.content):
                     for builder in self.builders:
                         source = builder.absolute_url(post)
-                        key = str(source)
+                        task = asyncio.create_task(
+                            collect_webmentions(session, source, target, webmentions),
+                        )
+                        tasks.append(task)
 
-                        if key not in webmentions:
-                            webmentions[key] = (
-                                await send_webmention(
-                                    session,
-                                    source,
-                                    target,
-                                )
-                            ).dict()
-
-                        elif webmentions[key]["status"] == "queue":
-                            webmentions[key] = (
-                                await update_webmention(
-                                    session,
-                                    source,
-                                    target,
-                                    webmentions[key]["location"],
-                                )
-                            ).dict()
+                await asyncio.gather(*tasks)
 
         if any(webmention["status"] == "queue" for webmention in webmentions.values()):
             # return nothing so we can check queued webmentions on next publish

@@ -34,8 +34,10 @@
 - [X] S3 publisher
 - [X] rename URI to URL
 - [X] webmention announcer
+- [/] dither assistant
 - [/] fix multi line blockquotes
 - [/] use yarl (post?)
+- [ ] hcard
 - [ ] Twitter announcer/assistant (for card)
 - [ ] add OG metadata (reading from post.metadata.meta?)
 - [ ] music player
