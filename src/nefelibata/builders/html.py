@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from marko import Markdown
+import marko
 
 from nefelibata.builders.base import Builder
 from nefelibata.config import Config
@@ -50,5 +50,5 @@ class HTMLBuilder(Builder):
 
     @staticmethod
     def render(content: str) -> str:
-        markdown = Markdown(extensions=["codehilite"])
+        markdown = marko.Markdown(extensions=["codehilite"])
         return markdown.convert(content)

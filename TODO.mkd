@@ -34,8 +34,8 @@
 - [X] S3 publisher
 - [X] rename URI to URL
 - [X] webmention announcer
+- [X] fix multi line blockquotes
 - [/] dither assistant
-- [/] fix multi line blockquotes
 - [/] use yarl (post?)
 - [ ] hcard
 - [ ] Twitter announcer/assistant (for card)

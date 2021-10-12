@@ -169,7 +169,7 @@ def extract_links(content: str) -> Iterator[URL]:
     tree = marko.parse(content)
     queue = [tree]
     while queue:
-        element = queue.pop()
+        element = queue.pop(0)
 
         if isinstance(element, marko.inline.Link):
             yield URL(element.dest)

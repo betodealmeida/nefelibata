@@ -7,9 +7,10 @@ from typing import Any, Dict
 
 import pytest
 from freezegun import freeze_time
+from marko import Markdown
 from pytest_mock import MockerFixture
 
-from nefelibata.builders.gemini import GeminiBuilder
+from nefelibata.builders.gemini import GeminiBuilder, GeminiRenderer
 from nefelibata.config import Config, SocialModel
 from nefelibata.enclosure import Enclosure
 from nefelibata.post import Post
@@ -89,9 +90,9 @@ async def test_builder_post(
 
 This is your first post. It should be written using Markdown.
 
-Read more about Nefelibata[1].
+Read more about Nefelibata.
 
-=> https://nefelibata.readthedocs.io/ 1: https://nefelibata.readthedocs.io/
+=> https://nefelibata.readthedocs.io/ Nefelibata
 
 # Enclosures
 
@@ -274,4 +275,74 @@ Crafted with ❤️ using Nefelibata
                 Path("/path/to/blog/build/gemini/categories/stem.gmi"),
             ),
         ],
+    )
+
+
+def test_gemini_renderer() -> None:
+    """
+    Test ``GeminiRenderer``.
+    """
+    double_space = "  "
+
+    gemini = Markdown(renderer=GeminiRenderer)
+    assert (
+        gemini.convert(
+            f"""
+# Header 1
+
+## Header 2
+
+### Header 3
+
+#### Header 4
+
+- Mercury
+- Gemini
+  - Apollo
+
+> This is{double_space}
+> A multiline{double_space}
+> blockquote{double_space}
+
+*This* is a **paragraph**. With `code`.
+
+This is an [inline link](https://example.com/). This is [another](https://example.org/).
+
+```
+This is some code.
+```
+
+End.
+""",
+        )
+        == f"""
+# Header 1
+
+## Header 2
+
+### Header 3
+
+### Header 4
+
+* Mercury
+* Gemini
+* Apollo
+
+> This is
+> A multiline
+> blockquote{double_space}
+
+This is a paragraph. With code.
+
+This is an inline link. This is another.
+
+=> https://example.com/ inline link
+=> https://example.org/ another
+
+```
+This is some code.
+```
+
+End.
+"""
     )
