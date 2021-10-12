@@ -1,6 +1,8 @@
 """
 A builder for Gemini (https://gemini.circumlunar.space/).
 """
+# pylint: disable=unused-argument, no-self-use
+
 import logging
 from pathlib import Path
 from typing import Any, Iterator
@@ -22,7 +24,7 @@ def extract_links(paragraph) -> Iterator[marko.inline.Link]:
     while queue:
         element = queue.pop(0)
 
-        if isinstance(element, marko.inline.Link):
+        if isinstance(element, (marko.inline.Link, marko.inline.AutoLink)):
             yield element
         elif hasattr(element, "children"):
             queue.extend(element.children)
@@ -50,13 +52,23 @@ class GeminiRenderer(Renderer):
             paragraph
             + "\n"
             + "\n".join(self.render_paragraph_link(link) for link in links)
+            + "\n"
         )
 
     def render_paragraph_link(self, element) -> str:
         """
         Render links after a paragraph.
         """
+        if element.title:
+            return f"=> {element.dest} {element.title}"
+
         return f"=> {element.dest} {self.render_children(element)}"
+
+    def render_link_ref_def(self, element) -> str:
+        """
+        Render a link reference definition.
+        """
+        return ""
 
     def render_list(self, element) -> str:
         """
@@ -83,7 +95,7 @@ class GeminiRenderer(Renderer):
         """
         Render code inside triple backticks.
         """
-        return "\n```\n" + self.render_children(element) + "```\n"
+        return "```\n" + self.render_children(element) + "```\n"
 
     def render_heading(self, element) -> str:
         """
@@ -96,8 +108,16 @@ class GeminiRenderer(Renderer):
 
     render_setext_heading = render_heading
 
-    @staticmethod
-    def render_blank_line(element) -> str:  # pylint: disable=unused-argument
+    def render_image(self, element) -> str:
+        """
+        Render an image.
+        """
+        if element.title:
+            return f"=> {element.dest} {element.title}"
+
+        return f"=> {element.dest} {self.render_children(element)}"
+
+    def render_blank_line(self, element) -> str:
         """
         Render a blank line.
         """
@@ -105,8 +125,7 @@ class GeminiRenderer(Renderer):
 
     render_line_break = render_blank_line
 
-    @staticmethod
-    def render_raw_text(element) -> str:
+    def render_raw_text(self, element) -> str:
         """
         Render raw text.
         """
@@ -145,4 +164,4 @@ class GeminiBuilder(Builder):
 
     def render(self, content: str) -> str:
         gemini = marko.Markdown(renderer=GeminiRenderer)
-        return gemini.convert(content)
+        return gemini.convert(content).strip()
