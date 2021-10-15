@@ -12,10 +12,12 @@
 
     <link rel="canonical" href="{{ home }}" />
     <link rel="alternate" type="application/atom+xml" href="{{ home / 'atom.xml' }}" />
+    <link rel="webmention" href="https://webmention.io/{{ home.host }}/webmention" />
+    <link rel="me" href="mailto:{{ config.author.email }}" />
+
     <link rel="stylesheet" href="{{ home / 'css/awsm_theme_big-stone.min.css' }}" media="(prefers-color-scheme: dark)">
     <link rel="stylesheet" href="{{ home / 'css/awsm_theme_pearl-lusta.min.css' }}" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)">
     <link rel="stylesheet" href="{{ home / 'css/custom.css' }}">
-    <link href="https://webmention.io/{{ home.host }}/webmention" rel="webmention" />
   </head>
   <body>
     <main>
