@@ -20,8 +20,8 @@ from nefelibata.announcers.base import (
     Interaction,
     Scope,
 )
-from nefelibata.post import Post
-from nefelibata.utils import extract_links, update_yaml
+from nefelibata.post import Post, extract_links
+from nefelibata.utils import update_yaml
 
 _logger = logging.getLogger(__name__)
 
@@ -179,7 +179,7 @@ class WebmentionAnnouncer(Announcer):
         tasks = []
         with update_yaml(path) as webmentions:
             async with ClientSession() as session:
-                for target in extract_links(post.content):
+                for target in extract_links(post):
                     for builder in self.builders:
                         source = builder.absolute_url(post)
                         task = asyncio.create_task(

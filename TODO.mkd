@@ -35,11 +35,13 @@
 - [X] rename URI to URL
 - [X] webmention announcer
 - [X] fix multi line blockquotes
+- [X] calendar assistant for RSVP events
 - [/] dither assistant
 - [/] use yarl (post?)
-- [ ] hcard
-- [ ] Twitter announcer/assistant (for card)
+- [ ] single post actions
+- [ ] hcard (photo and index)
 - [ ] add OG metadata (reading from post.metadata.meta?)
+- [ ] Twitter announcer/assistant (for card)
 - [ ] music player
 - [ ] display replies
 - [ ] warn on external resources (site) assistant

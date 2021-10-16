@@ -9,7 +9,7 @@
   <p class="text-sm">Published by <a class="p-author h-card" href="{{ config.author.url }}">{{ config.author.name }}</a>
   on <time class="dt-published" datetime="{{ post.timestamp.isoformat() }}">{{ post.timestamp }}</time></p>
 
-  <p class="p-summary">{{ post.summary }}</p>
+  <p class="p-summary"><small>{{ post.metadata.summary }}</small></p>
 
   <div class="e-content">
     {{ render(post.content) }}

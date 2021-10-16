@@ -80,10 +80,12 @@ async def test_builder_post(
 
     <link rel="canonical" href="https://example.com/" />
     <link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml" />
+    <link rel="webmention" href="https://webmention.io/example.com/webmention" />
+    <link rel="me" href="mailto:roberto@dealmeida.net" />
+
     <link rel="stylesheet" href="https://example.com/css/awsm_theme_big-stone.min.css" media="(prefers-color-scheme: dark)">
     <link rel="stylesheet" href="https://example.com/css/awsm_theme_pearl-lusta.min.css" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)">
     <link rel="stylesheet" href="https://example.com/css/custom.css">
-    <link href="https://webmention.io/example.com/webmention" rel="webmention" />
   </head>
   <body>
     <main>
@@ -99,7 +101,7 @@ async def test_builder_post(
         <p>Published by <a class="p-author h-card" href="https://taoetc.org/">Beto Dealmeida</a>
         on <time class="dt-published" datetime="2020-12-31T16:00:00-08:00">2020-12-31 16:00:00-08:00</time></p>
 
-        <p class="p-summary"></p>
+        <p class="p-summary"><small>Hello, world!</small></p>
 
         <div class="e-content">
           <h1>Welcome</h1>
@@ -213,10 +215,12 @@ async def test_builder_site(
 
     <link rel="canonical" href="https://example.com/" />
     <link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml" />
+    <link rel="webmention" href="https://webmention.io/example.com/webmention" />
+    <link rel="me" href="mailto:roberto@dealmeida.net" />
+
     <link rel="stylesheet" href="https://example.com/css/awsm_theme_big-stone.min.css" media="(prefers-color-scheme: dark)">
     <link rel="stylesheet" href="https://example.com/css/awsm_theme_pearl-lusta.min.css" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)">
     <link rel="stylesheet" href="https://example.com/css/custom.css">
-    <link href="https://webmention.io/example.com/webmention" rel="webmention" />
   </head>
   <body>
     <main>

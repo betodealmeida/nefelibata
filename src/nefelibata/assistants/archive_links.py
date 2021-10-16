@@ -11,8 +11,7 @@ from aiohttp import ClientSession
 
 from nefelibata.announcers.base import Scope
 from nefelibata.assistants.base import Assistant
-from nefelibata.post import Post
-from nefelibata.utils import extract_links
+from nefelibata.post import Post, extract_links
 
 _logger = logging.getLogger(__name__)
 
@@ -35,7 +34,7 @@ class ArchiveLinksAssistant(Assistant):
         saved_links = {}
 
         async with ClientSession() as session:
-            for url in extract_links(post.content):
+            for url in extract_links(post):
                 if url.scheme not in {"http", "https"}:
                     continue
 

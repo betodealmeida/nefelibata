@@ -6,11 +6,9 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, Iterator, Optional, Set, Type
 
-import marko
 import yaml
 from pydantic import BaseModel
 from rich.logging import RichHandler
-from yarl import URL
 
 from nefelibata.config import Config
 from nefelibata.constants import CONFIG_FILENAME
@@ -160,18 +158,3 @@ def load_extra_metadata(post_directory: Path) -> Dict[str, Any]:
         extra_metadata[file_path.stem] = content
 
     return extra_metadata
-
-
-def extract_links(content: str) -> Iterator[URL]:
-    """
-    Extract all links from a Markdown document.
-    """
-    tree = marko.parse(content)
-    queue = [tree]
-    while queue:
-        element = queue.pop(0)
-
-        if isinstance(element, marko.inline.Link):
-            yield URL(element.dest)
-        elif hasattr(element, "children"):
-            queue.extend(element.children)

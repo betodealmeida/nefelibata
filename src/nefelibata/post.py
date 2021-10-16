@@ -9,9 +9,11 @@ from email.header import decode_header, make_header
 from email.parser import Parser
 from email.utils import formatdate, parsedate_to_datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, Iterator, List, Optional, Set
 
+import marko
 from pydantic import BaseModel, PrivateAttr
+from yarl import URL
 
 from nefelibata.config import Config
 from nefelibata.enclosure import Enclosure, get_enclosures
@@ -130,3 +132,24 @@ def get_posts(root: Path, config: Config, count: Optional[int] = None) -> List[P
         reverse=True,
     )
     return posts[:count]  # a[:None] == a
+
+
+def extract_links(post: Post) -> Iterator[URL]:
+    """
+    Extract all links from a post.
+
+    This includes links in the content, as well as metadata.
+    """
+    for key, value in post.metadata.items():
+        if key.endswith("-url"):
+            yield URL(value)
+
+    tree = marko.parse(post.content)
+    queue = [tree]
+    while queue:
+        element = queue.pop(0)
+
+        if isinstance(element, marko.inline.Link):
+            yield URL(element.dest)
+        elif hasattr(element, "children"):
+            queue.extend(element.children)

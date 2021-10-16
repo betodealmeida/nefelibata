@@ -9,9 +9,10 @@ from pathlib import Path
 import pytest
 from freezegun import freeze_time
 from pyfakefs.fake_filesystem import FakeFilesystem
+from yarl import URL
 
 from nefelibata.config import AnnouncerModel, Config
-from nefelibata.post import Post, build_post, get_posts
+from nefelibata.post import Post, build_post, extract_links, get_posts
 
 from .fakes import POST_CONTENT, POST_DATA
 
@@ -125,3 +126,16 @@ async def test_get_posts(fs: FakeFilesystem, root: Path, config: Config) -> None
     # test limited number of posts returned
     posts = get_posts(root, config, 1)
     assert len(posts) == 1
+
+
+def test_extract_links(post: Post) -> None:
+    """
+    Test ``extract_links``.
+    """
+    assert list(extract_links(post)) == [URL("https://nefelibata.readthedocs.io/")]
+
+    post.metadata["test-url"] = "https://example.com/"
+    assert list(extract_links(post)) == [
+        URL("https://example.com/"),
+        URL("https://nefelibata.readthedocs.io/"),
+    ]

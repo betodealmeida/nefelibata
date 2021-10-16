@@ -11,13 +11,11 @@ import yaml
 from pydantic import BaseModel
 from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
-from yarl import URL
 
 from nefelibata.announcers.base import Interaction
 from nefelibata.config import Config
 from nefelibata.utils import (
     dict_merge,
-    extract_links,
     find_directory,
     get_config,
     load_extra_metadata,
@@ -161,20 +159,6 @@ def test_load_extra_metadata(mocker: MockerFixture, fs: FakeFilesystem) -> None:
         "Invalid file: %s",
         Path("/path/to/blog/broken.yaml"),
     )
-
-
-def test_extract_links() -> None:
-    """
-    Test ``extract_links``.
-    """
-    assert list(extract_links("No links here, move along")) == []
-
-    content = """
-This is a long document with [links](https://foo.example.com/).
-
-And another: https://bar.example.com/
-    """
-    assert list(extract_links(content)) == [URL("https://foo.example.com/")]
 
 
 def test_update_yaml(fs: FakeFilesystem) -> None:
