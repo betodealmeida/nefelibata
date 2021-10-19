@@ -36,9 +36,9 @@
 - [X] webmention announcer
 - [X] fix multi line blockquotes
 - [X] calendar assistant for RSVP events
+- [/] single post actions
 - [/] dither assistant
 - [/] use yarl (post?)
-- [ ] single post actions
 - [ ] hcard (photo and index)
 - [ ] add OG metadata (reading from post.metadata.meta?)
 - [ ] Twitter announcer/assistant (for card)

@@ -130,7 +130,6 @@ class RSVPCalendarAssistant(Assistant):
 
         url = post.metadata["rsvp-url"]
         event = await fetch_event(URL(url))
-        print(event)
         if event:
             update_calendar(self.client, self.calendar, event)
 
