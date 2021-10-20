@@ -34,17 +34,19 @@ class ArchiveLinksAssistant(Assistant):
         saved_links = {}
 
         async with ClientSession() as session:
-            for url in extract_links(post):
+            for i, url in enumerate(extract_links(post)):
                 if url.scheme not in {"http", "https"}:
                     continue
 
                 _logger.info("Saving URL %s", url)
                 save_url = f"https://web.archive.org/save/{url}"
                 async with lock:
+                    if i > 0:
+                        await asyncio.sleep(SLEEP.total_seconds())
+
                     async with session.get(save_url) as response:
                         for rel, params in response.links.items():
                             if rel == "memento":
                                 saved_links[str(url)] = str(params["url"])
-                    await asyncio.sleep(SLEEP.total_seconds())
 
         return saved_links

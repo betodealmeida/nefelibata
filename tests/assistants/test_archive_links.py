@@ -93,3 +93,29 @@ async def test_assistant(
     )
     response = await assistant.get_post_metadata(post)
     assert response == {}
+
+
+@pytest.mark.asyncio
+async def test_sleep(
+    mocker: MockerFixture,
+    root: Path,
+    config: Config,
+    post: Post,
+) -> None:
+    """
+    Test that we ``sleep`` between URLs.
+    """
+    get = mocker.patch("nefelibata.assistants.archive_links.ClientSession.get")
+    get.return_value.__aenter__.return_value.links = {}
+
+    sleep = mocker.patch("nefelibata.assistants.archive_links.asyncio.sleep")
+
+    mocker.patch(
+        "nefelibata.assistants.archive_links.extract_links",
+        return_value=[URL("https://example.com/foo"), URL("https://example.com/bar")],
+    )
+
+    assistant = ArchiveLinksAssistant(root, config)
+    await assistant.get_post_metadata(post)
+
+    sleep.assert_called_with(12.0)
