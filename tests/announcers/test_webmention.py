@@ -321,7 +321,7 @@ async def test_announcer_collect(
     html_builder.extension = ".html"
 
     mocker.patch("nefelibata.announcers.webmention.ClientResponseError", Exception)
-    get = mocker.patch("nefelibata.assistants.archive_links.ClientSession.get")
+    get = mocker.patch("nefelibata.announcers.webmention.ClientSession.get")
     get_response = get.return_value.__aenter__.return_value
     get_response.raise_for_status = mocker.MagicMock()
     get_response.raise_for_status.side_effect = [

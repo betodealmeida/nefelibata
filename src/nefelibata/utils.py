@@ -1,14 +1,18 @@
 """
 Utility functions.
 """
+import asyncio
 import logging
 from contextlib import contextmanager
+from datetime import timedelta
 from pathlib import Path
-from typing import Any, Dict, Iterator, Optional, Set, Type
+from typing import Any, Dict, Iterator, List, Optional, Set, Type
 
 import yaml
+from aiohttp import ClientSession
 from pydantic import BaseModel
 from rich.logging import RichHandler
+from yarl import URL
 
 from nefelibata.config import Config
 from nefelibata.constants import CONFIG_FILENAME
@@ -158,3 +162,34 @@ def load_extra_metadata(post_directory: Path) -> Dict[str, Any]:
         extra_metadata[file_path.stem] = content
 
     return extra_metadata
+
+
+# API is restricted to 5 requests per minute, see
+# https://rationalwiki.org/wiki/Internet_Archive#Restrictions
+lock = asyncio.Lock()
+SLEEP = timedelta(seconds=12)
+
+
+async def archive_urls(urls: List[URL]) -> Dict[URL, URL]:
+    """
+    Save a list of URLs in https://archive.org/.
+    """
+    saved_urls = {}
+
+    async with ClientSession() as session:
+        for i, url in enumerate(urls):
+            if url.scheme not in {"http", "https"}:
+                continue
+
+            _logger.info("Saving URL %s", url)
+            save_url = f"https://web.archive.org/save/{url}"
+            async with lock:
+                if i > 0:
+                    await asyncio.sleep(SLEEP.total_seconds())
+
+                async with session.get(save_url) as response:
+                    for rel, params in response.links.items():
+                        if rel == "memento":
+                            saved_urls[url] = params["url"]
+
+    return saved_urls

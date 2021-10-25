@@ -39,6 +39,7 @@
 - [/] single post actions
 - [/] dither assistant
 - [/] use yarl (post?)
+- [/] archive links should archive post and site as well!
 - [ ] hcard (photo and index)
 - [ ] add OG metadata (reading from post.metadata.meta?)
 - [ ] Twitter announcer/assistant (for card)

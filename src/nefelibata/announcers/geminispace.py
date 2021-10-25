@@ -35,9 +35,6 @@ class GeminispaceAnnouncer(Announcer):
 
         self.client = Client(TOFUContext({}))
 
-    async def announce_post(self, post: Post) -> Optional[Announcement]:
-        pass
-
     async def announce_site(self) -> Optional[Announcement]:
         """
         Add capsule to Geminispace.
@@ -95,6 +92,3 @@ class GeminispaceAnnouncer(Announcer):
                     )
 
         return interactions
-
-    async def collect_site(self) -> Dict[Path, Dict[str, Interaction]]:
-        return {}

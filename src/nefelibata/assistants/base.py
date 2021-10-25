@@ -1,7 +1,7 @@
 """
 Base class for assistants.
 """
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument, no-self-use
 
 import logging
 from pathlib import Path

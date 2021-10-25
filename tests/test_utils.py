@@ -11,10 +11,12 @@ import yaml
 from pydantic import BaseModel
 from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
+from yarl import URL
 
 from nefelibata.announcers.base import Interaction
 from nefelibata.config import Config
 from nefelibata.utils import (
+    archive_urls,
     dict_merge,
     find_directory,
     get_config,
@@ -193,3 +195,90 @@ found unhashable key
     {{ test }}
      ^"""
     )
+
+
+@pytest.mark.asyncio
+async def test_archive_urls(mocker: MockerFixture) -> None:
+    """
+    Test ``archive_urls``.
+    """
+    links = {
+        "original": {
+            "rel": "original",
+            "url": URL("https://nefelibata.readthedocs.io/"),
+        },
+        "timemap": {
+            "rel": "timemap",
+            "type": "application/link-format",
+            "url": URL(
+                "https://web.archive.org/web/timemap/link/https://nefelibata.readthedocs.io/",
+            ),
+        },
+        "timegate": {
+            "rel": "timegate",
+            "url": URL(
+                "https://web.archive.org/web/https://nefelibata.readthedocs.io/",
+            ),
+        },
+        "first memento": {
+            "rel": "first memento",
+            "datetime": "Sun, 05 Aug 2018 06:22:28 GMT",
+            "url": URL(
+                "https://web.archive.org/web/20180805062228/http://nefelibata.readthedocs.io/",
+            ),
+        },
+        "prev memento": {
+            "rel": "prev memento",
+            "datetime": "Tue, 29 Jun 2021 01:15:06 GMT",
+            "url": URL(
+                "https://web.archive.org/web/20210629011506/https://nefelibata.readthedocs.io/",
+            ),
+        },
+        "memento": {
+            "rel": "memento",
+            "datetime": "Sun, 03 Oct 2021 15:46:02 GMT",
+            "url": URL(
+                "https://web.archive.org/web/20211003154602/https://nefelibata.readthedocs.io/",
+            ),
+        },
+        "last memento": {
+            "rel": "last memento",
+            "datetime": "Sun, 03 Oct 2021 15:46:02 GMT",
+            "url": URL(
+                "https://web.archive.org/web/20211003154602/https://nefelibata.readthedocs.io/",
+            ),
+        },
+    }
+    get = mocker.patch("nefelibata.utils.ClientSession.get")
+    get.return_value.__aenter__.return_value.links = links
+
+    saved_urls = await archive_urls(
+        [
+            URL("https://nefelibata.readthedocs.io/"),
+            URL("gemini://taoetc.org/"),
+        ],
+    )
+    assert saved_urls == {
+        URL("https://nefelibata.readthedocs.io/"): URL(
+            "https://web.archive.org/web/20211003154602/https://nefelibata.readthedocs.io/",
+        ),
+    }
+
+
+@pytest.mark.asyncio
+async def test_sleep(
+    mocker: MockerFixture,
+) -> None:
+    """
+    Test that we ``sleep`` between URLs.
+    """
+    get = mocker.patch("nefelibata.utils.ClientSession.get")
+    get.return_value.__aenter__.return_value.links = {}
+
+    sleep = mocker.patch("nefelibata.utils.asyncio.sleep")
+
+    await archive_urls(
+        [URL("https://example.com/foo"), URL("https://example.com/bar")],
+    )
+
+    sleep.assert_called_with(12.0)

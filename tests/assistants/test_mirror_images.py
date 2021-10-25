@@ -204,7 +204,7 @@ async def test_download_image(mocker: MockerFixture, post: Post) -> None:
         mirror,
         replacements,
     )
-    _logger.debug.assert_called_with("Image already mirrorred")
+    _logger.debug.assert_called_with("Image already mirrored")
 
     # no EXIF
     session.head.return_value.__aenter__.return_value.headers = {

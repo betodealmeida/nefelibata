@@ -105,7 +105,7 @@ async def download_image(  # pylint: disable=too-many-arguments
     target = directory / filename
 
     if target.exists():
-        _logger.debug("Image already mirrorred")
+        _logger.debug("Image already mirrored")
         return
 
     replacements[url] = str(target.relative_to(post.path.parent))
