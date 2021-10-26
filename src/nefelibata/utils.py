@@ -164,16 +164,17 @@ def load_extra_metadata(post_directory: Path) -> Dict[str, Any]:
     return extra_metadata
 
 
-# API is restricted to 5 requests per minute, see
-# https://rationalwiki.org/wiki/Internet_Archive#Restrictions
-lock = asyncio.Lock()
-SLEEP = timedelta(seconds=12)
-
-
-async def archive_urls(urls: List[URL]) -> Dict[URL, URL]:
+async def archive_urls(
+    urls: List[URL],
+    sleep: timedelta = timedelta(seconds=12),
+) -> Dict[URL, URL]:
     """
     Save a list of URLs in https://archive.org/.
     """
+    # API is restricted to 5 requests per minute, see
+    # https://rationalwiki.org/wiki/Internet_Archive#Restrictions
+    lock = asyncio.Lock()
+
     saved_urls = {}
 
     async with ClientSession() as session:
@@ -185,7 +186,7 @@ async def archive_urls(urls: List[URL]) -> Dict[URL, URL]:
             save_url = f"https://web.archive.org/save/{url}"
             async with lock:
                 if i > 0:
-                    await asyncio.sleep(SLEEP.total_seconds())
+                    await asyncio.sleep(sleep.total_seconds())
 
                 async with session.get(save_url) as response:
                     for rel, params in response.links.items():
