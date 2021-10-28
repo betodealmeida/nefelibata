@@ -38,7 +38,7 @@ async def test_run(
     # error if running again
     with pytest.raises(IOError) as excinfo:
         await init.run(root)
-    assert str(excinfo.value) == "Directory /path/to/blog/posts already exists!"
+    assert str(excinfo.value) == "File /path/to/blog/nefelibata.yaml already exists!"
 
     # forcing an overwrite works, but fails for some reason with pyfakefs
     # await init.run(root, force=True)

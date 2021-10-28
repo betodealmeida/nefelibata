@@ -18,7 +18,7 @@ async def run(root: Path, force: bool = False) -> None:
     """
     Create a new blog skeleton.
     """
-    resources = resource_listdir("nefelibata", "templates/skeleton")
+    resources = sorted(resource_listdir("nefelibata", "templates/skeleton"))
     for resource in resources:
         origin = Path(
             resource_filename(
