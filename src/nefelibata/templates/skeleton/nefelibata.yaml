@@ -24,6 +24,9 @@ categories:
       - python
       - electronics
       - arduino
+      - raspberrypi
+      - network
+      - computer
       - science
       - blog
       - internet
@@ -39,6 +42,100 @@ categories:
       - fawm
       - 5090
 
+templates:
+  like:
+    - url
+    - title
+  rsvp:
+    - url
+    - name
+    - answer
+  short: []
+  song:
+    - url
+    - title
+    - artist
+    - album
+    - year
+
 builders:
-  - plugin: gemini
-    home: gemini://localhost:1965
+  gemini:
+    plugin: gemini
+    announce-on:
+      - antenna
+      - capcom
+      - geminispace
+      - mastodon
+    publish-to:
+      - vsftp
+    home: gemini://taoetc.org/
+    path: gemini
+  html:
+    plugin: html
+    announce-on:
+      - archive_blog
+      - mastodon
+      - webmention
+    publish-to:
+      - s3
+    home: https://blog.taoetc.org/
+    path: www
+    theme: minimal
+
+assistants:
+  archive_links:
+    plugin: archive_links
+  current_weather:
+    plugin: current_weather
+  mirror_images:
+    plugin: mirror_images
+  news:
+    plugin: news
+    api_key: SECRET
+    country: us
+  playlist:
+    plugin: playlist
+    base_url: https://blog.taoetc.org/
+  reading_time:
+    plugin: reading_time
+  rsvp_calendar:
+    plugin: rsvp_calendar
+    url: https://caldav.example.com/
+    username: user@example.com
+    password: PASSWORD
+    calendar: Personal
+
+announcers:
+  antenna:
+    plugin: antenna
+  archive_blog:
+    plugin: archive_blog
+  capcom:
+    plugin: capcom
+  geminispace:
+    plugin: geminispace
+  mastodon:
+    plugin: mastodon
+    access_token: SECRET
+    base_url: https://2c.taoetc.org/
+  webmention:
+    plugin: webmention
+
+publishers:
+  vsftp:
+    plugin: ftp
+    hostname: taoetc.org
+    username: user
+    password: PASSWORD
+    basedir: ftp/upload/
+    use_tls: true
+  s3:
+    plugin: s3
+    access_key_id: KEY
+    secret_access_key: SECRET
+    bucket: blog.taoetc.org
+  neocities:
+    plugin: neocities
+    api_key: KEY
+    #username: user
+    #password: PASSWORD
