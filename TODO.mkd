@@ -36,10 +36,10 @@
 - [X] webmention announcer
 - [X] fix multi line blockquotes
 - [X] calendar assistant for RSVP events
+- [X] archive links should archive post and site as well!
 - [/] single post actions
 - [/] dither assistant
 - [/] use yarl (post?)
-- [/] archive links should archive post and site as well!
 - [ ] hcard (photo and index)
 - [ ] add OG metadata (reading from post.metadata.meta?)
 - [ ] Twitter announcer/assistant (for card)
