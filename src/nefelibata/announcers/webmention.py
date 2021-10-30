@@ -72,7 +72,10 @@ async def get_webmention_endpoint(session: ClientSession, target: URL) -> Option
             return None
 
     async with session.get(target) as response:
-        html = await response.text()
+        try:
+            html = await response.text()
+        except UnicodeDecodeError:
+            return None
 
     soup = BeautifulSoup(html, "html.parser")
     link = soup.find(rel="webmention", href=True)

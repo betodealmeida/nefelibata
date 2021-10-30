@@ -103,6 +103,29 @@ async def test_get_webmention_endpoint(mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
+async def test_get_webmention_endpoint_unicode_error(mocker: MockerFixture) -> None:
+    """
+    Test ``get_webmention_endpoint`` when response is not text.
+    """
+    session = mocker.MagicMock()
+    head_response = session.head.return_value.__aenter__.return_value
+    head_response.headers = {
+        "content-type": "text/html",
+    }
+    head_response.links = {}
+    mocker.patch("nefelibata.announcers.webmention.UnicodeDecodeError", Exception)
+    get_response = session.get.return_value.__aenter__.return_value
+    get_response.text = mocker.AsyncMock()
+    get_response.text.side_effect = Exception()
+
+    endpoint = await get_webmention_endpoint(
+        session,
+        URL("https://example.com/post/hello.php"),
+    )
+    assert endpoint is None
+
+
+@pytest.mark.asyncio
 async def test_send_webmention(mocker: MockerFixture) -> None:
     """
     Test ``send_webmention``.
