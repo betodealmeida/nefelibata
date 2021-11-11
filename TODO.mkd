@@ -37,6 +37,7 @@
 - [X] fix multi line blockquotes
 - [X] calendar assistant for RSVP events
 - [X] archive links should archive post and site as well!
+- [ ] templates in Atom feed
 - [/] single post actions
 - [/] dither assistant
 - [/] use yarl (post?)
