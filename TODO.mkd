@@ -37,10 +37,11 @@
 - [X] fix multi line blockquotes
 - [X] calendar assistant for RSVP events
 - [X] archive links should archive post and site as well!
-- [ ] templates in Atom feed
+- [ ] nncp publisher
 - [/] single post actions
 - [/] dither assistant
 - [/] use yarl (post?)
+- [?] templates in Atom feed
 - [ ] hcard (photo and index)
 - [ ] add OG metadata (reading from post.metadata.meta?)
 - [ ] Twitter announcer/assistant (for card)
