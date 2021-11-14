@@ -2,6 +2,7 @@
 A publisher that calls external commands.
 """
 import logging
+import os
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -25,13 +26,13 @@ class CommandPublisher(Publisher):
         config: Config,
         path: str,
         post_commands: List[str],
-        blog_commands: List[str],
+        site_commands: List[str],
         **kwargs: Any,
     ):
         super().__init__(root, config, path, **kwargs)
 
         self.post_commands = post_commands
-        self.blog_commands = blog_commands
+        self.site_commands = site_commands
 
     async def publish(
         self,
@@ -44,6 +45,7 @@ class CommandPublisher(Publisher):
         if not modified_files:
             return None
 
+        os.chdir(build)
         for path in modified_files:
             for command in self.post_commands:
                 subprocess.run(
@@ -53,7 +55,7 @@ class CommandPublisher(Publisher):
                     env={"path": path.relative_to(build)},
                 )
 
-        for command in self.blog_commands:
+        for command in self.site_commands:
             subprocess.run(command, shell=True, check=True)
 
         return Publishing(timestamp=datetime.now(timezone.utc))

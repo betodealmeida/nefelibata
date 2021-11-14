@@ -59,37 +59,49 @@ async def test_publish(
                 "touch $path",
                 shell=True,
                 check=True,
-                env={'path': Path("one/index.html"),}
+                env={
+                    "path": Path("one/index.html"),
+                },
             ),
             mocker.call(
                 "cp $path dir/",
                 shell=True,
                 check=True,
-                env={'path': Path("one/index.html"),}
+                env={
+                    "path": Path("one/index.html"),
+                },
             ),
             mocker.call(
                 "touch $path",
                 shell=True,
                 check=True,
-                env={'path': Path("one/photo.jpg"),}
+                env={
+                    "path": Path("one/photo.jpg"),
+                },
             ),
             mocker.call(
                 "cp $path dir/",
                 shell=True,
                 check=True,
-                env={'path': Path("one/photo.jpg"),}
+                env={
+                    "path": Path("one/photo.jpg"),
+                },
             ),
             mocker.call(
                 "touch $path",
                 shell=True,
                 check=True,
-                env={'path': Path("one/blob"),}
+                env={
+                    "path": Path("one/blob"),
+                },
             ),
             mocker.call(
                 "cp $path dir/",
                 shell=True,
                 check=True,
-                env={'path': Path("one/blob"),}
+                env={
+                    "path": Path("one/blob"),
+                },
             ),
             mocker.call(
                 "notify.py",
@@ -98,6 +110,7 @@ async def test_publish(
             ),
         ],
     )
+
 
 @pytest.mark.asyncio
 async def test_publish_no_modified_files(
@@ -115,7 +128,7 @@ async def test_publish_no_modified_files(
     )
     mocker.patch("nefelibata.publishers.command.subprocess")
 
-    publisher = S3Publisher(
+    publisher = CommandPublisher(
         root,
         config,
         "generic",
@@ -126,4 +139,3 @@ async def test_publish_no_modified_files(
     with freeze_time("2021-01-01T00:00:00Z"):
         publishing = await publisher.publish()
     assert publishing is None
-
