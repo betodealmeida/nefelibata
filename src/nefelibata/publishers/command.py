@@ -48,6 +48,7 @@ class CommandPublisher(Publisher):
         os.chdir(build)
         for path in modified_files:
             for command in self.post_commands:
+                _logger.info("Running command %s on file %s", command, path)
                 subprocess.run(
                     command,
                     shell=True,
@@ -56,6 +57,7 @@ class CommandPublisher(Publisher):
                 )
 
         for command in self.site_commands:
+            _logger.info("Running command %s", command)
             subprocess.run(command, shell=True, check=True)
 
         return Publishing(timestamp=datetime.now(timezone.utc))
