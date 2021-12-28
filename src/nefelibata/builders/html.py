@@ -37,8 +37,6 @@ class HTMLBuilder(Builder):
         self.theme = theme
         self.template_base = f"{theme}/src/"
 
-        self.setup()
-
     def setup(self) -> None:
         super().setup()
 
