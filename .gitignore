@@ -53,3 +53,5 @@ node_modules
 .venv*/
 .conda*/
 venv
+
+.python-version
