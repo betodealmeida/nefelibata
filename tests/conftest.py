@@ -1,10 +1,5 @@
 """
-    Dummy conftest.py for nefelibata.
-
-    If you don't know what this is for, just leave it empty.
-    Read more about conftest.py under:
-    - https://docs.pytest.org/en/stable/fixture.html
-    - https://docs.pytest.org/en/stable/writing_plugins.html
+Fixtures for nefelibata.
 """
 # pylint: disable=invalid-name, redefined-outer-name, unused-argument
 from pathlib import Path
