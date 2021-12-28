@@ -25,7 +25,9 @@ async def test_builder_setup(root: Path, config: Config) -> None:
     assert not template_directory.exists()
     assert not build_directory.exists()
 
-    HTMLBuilder(root, config, "https://example.com/")
+    builder = HTMLBuilder(root, config, "https://example.com/")
+    builder.setup()
+
     last_update: Dict[Any, Any] = {}
     assert template_directory.exists()
     for file in ("index.html", "atom.xml", "post.html"):
@@ -54,6 +56,11 @@ async def test_builder_post(
     _logger = mocker.patch("nefelibata.builders.base._logger")
 
     builder = HTMLBuilder(root, config, "https://example.com/")
+    builder.setup()
+
+    # call twice to check that it won't fail (shouldn't overwrite)
+    builder.setup()
+
     with freeze_time("2021-01-02T00:00:00Z"):
         await builder.process_post(post)
 
@@ -162,6 +169,8 @@ async def test_builder_site(
 
     config.social = [SocialModel(title="Mastodon", url="https://2c.taoetc.org/@beto")]
     builder = HTMLBuilder(root, config, "https://example.com/")
+    builder.setup()
+
     with freeze_time("2021-01-02T00:00:00Z"):
         await builder.process_site()
 
