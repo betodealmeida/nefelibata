@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>{{ config.title }}</title>
+    {% for builder in config.builders.values() %}
+    {% if builder.plugin == 'html' %}
+    <link rel="alternate" type="text/html" href="{{ builder.home }}" />
+    {% elif builder.plugin == 'gemini' %}
+    <link rel="alternate" type="text/gemini" href="{{ builder.home }}" />
+    {% endif %}
+    {% endfor %}
+    <link rel="self" type="application/atom+xml" href="{{ home / 'atom.xml' }}" />
+    <id>{{ home }}</id>
+{% for post in posts %}
+{% if loop.first %}
+    <updated>{{ post.timestamp.strftime('%Y-%m-%dT%H:%I:%SZ') }}</updated>
+{% endif %}
+<entry>
+    <title>{{ post.title }}</title>
+    <link rel="alternate" type="text/html" href="{{ home / post.url }}.html" />
+    {% for enclosure in post.enclosures %}
+    <link rel="enclosure" type="{{ enclosure.type }}" length="{{ enclosure.length }}"
+        href="{{ home / enclosure.href }}"/>
+    {% endfor %}
+    <id>tag:{{ home.host }},{{ post.timestamp.strftime('%Y-%m-%d') }}:{{ post.url }}.html</id>
+    <updated>{{ post.timestamp.strftime('%Y-%m-%dT%H:%I:%SZ') }}</updated>
+    <summary type="html">
+        {{ post.metadata.summary }}
+        &lt;p&gt;&lt;a href="{{ home / post.url }}.html"&gt;Permalink&lt;/p&gt;
+    </summary>
+    <author>
+        <name>{{ config.author.name }}</name>
+        <email>{{ config.author.email }}</email>
+    </author>
+    {% for category in sorted(post.categories) %}
+    <category term="{{ category }}" />
+    {% endfor %}
+    <content type="html">
+        {{ render(post.content) }}
+        &lt;p&gt;&lt;a href="{{ home / post.url }}.html"&gt;Permalink&lt;/p&gt;
+    </content>
+</entry>
+{% endfor %}
+</feed>

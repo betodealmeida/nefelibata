@@ -1,0 +1,65 @@
+{% extends "minimal/src/base.html" %}
+
+{% block title %}{{ config.title }}: {{ post.title }}{% endblock %}
+
+{% block content %}
+      <nav>
+        <ul>
+          <li><a href="{{ home }}">Main index</a></li>
+        </ul>
+      </nav>
+
+      <article class="h-entry">
+        <h1 class="p-name">{{ post.title }}</h1>
+
+        <p>Published by <a class="p-author h-card" href="{{ config.author.url }}">{{ config.author.name }}</a>
+        on <time class="dt-published" datetime="{{ post.timestamp.isoformat() }}">{{ post.timestamp }}</time></p>
+
+        <p class="p-summary"><small>{{ post.metadata.summary }}</small></p>
+
+        <div class="e-content">
+          {% autoescape false %}
+          {{ render(post.content) }}
+          {% endautoescape %}
+        </div>
+
+        {% if post.enclosures%}
+        <h2>Enclosures</h2>
+
+        <ul>
+          {% for enclosure in post.enclosures %}
+          {% if enclosure.type == 'audio/mpeg' %}
+          <li>
+            <audio controls src="{{ home / enclosure.href }}">
+              <a href="{{ home / enclosure.href }}">{{ enclosure.description }}</a>
+            </audio>
+          </li>
+          {% else %}
+          <li><a href="{{ home / enclosure.href }}">{{ enclosure.description }}</a></li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if post.tags %}
+        <h2>Tags</h2>
+
+        <ul>
+          {% for tag in sorted(post.tags) %}
+          <li><a class="p-category" href="{{ home / 'tags' / tag }}.html">{{ tag }}</a></li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if post.categories %}
+        <h2>Categories</h2>
+
+        <ul>
+          {% for category in sorted(post.categories) %}
+          <li><a class="p-category" href="{{ home / 'categories' / category }}.html">{{ config.categories[category].label }}</a></li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+      </article>
+{% endblock %}

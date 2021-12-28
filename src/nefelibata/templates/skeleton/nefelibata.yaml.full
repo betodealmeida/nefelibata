@@ -1,0 +1,257 @@
+# Configuration file for nefelibata
+#
+# This file is copied from the one used in https://blog.taoetc.org/ and
+# gemini://taoetc.org, with secrets removed.
+
+# Basic information about the site.
+title: 道&c.
+subtitle: Musings about the path and other things
+
+# Basic information about the main author.
+author:
+  name: Beto Dealmeida
+  url: https://taoetc.org/
+  email: roberto@dealmeida.net
+  note: Este, sou eu
+
+# Default language. This can be overriden on a per-post basis, eg:
+#
+#     Subject: Olá, mundo!
+#     language: pt
+#
+#     Olá, mundo!
+#
+language: en
+
+# External links.
+social:
+  - title: Code
+    url: https://github.com/betodealmeida
+  - title: Music
+    url: https://thefishermenandthepriestess.com
+  - title: Mastodon
+    url: https://2c.taoetc.org/@beto
+
+# Posts can have arbitrary tags, and are grouped into well defined categories based on
+# the tags. Some posts might not fall into any categories.
+categories:
+  stem:
+    label: STEM
+    description: Science, technology, engineering, & math
+    tags:
+      - programming
+      - python
+      - electronics
+      - arduino
+      - raspberrypi
+      - network
+      - computer
+      - science
+      - blog
+      - internet
+      - engineering
+      - tech
+      - web
+  music:
+    label: Music
+    description: All things music
+    tags:
+      - music
+      - song
+      - fawm
+      - 5090
+
+# You can define your own templates for posts. Here in the configuration you should add
+# the keys expected by the template. Eg, a "like" post expects an URL and a title. You can
+# then create a "like" post:
+#
+#     $ nb new -t like "An interesting page"
+#
+# This will create a new post that looks like this:
+#
+#     Subject: An interesting page
+#     summary:
+#     keywords:
+#     type: like
+#     like-url:
+#     like-title:
+#
+# When building the post nefelibata will look for a template called "like.html" (HTML) or
+# "like.gmi" (Gemtext). These templates can leverage the custom keys, eg:
+#
+#     <p><class="p-summary">
+#         Liked:
+#         <a class="u-like-of" href="{{ post.metadata['like-url'] }}">
+#             {{ post.metadata['like-title'] }}
+#         </a>
+#     </p>
+#
+templates:
+  like:
+    - url
+    - title
+  rsvp:
+    - url
+    - name
+    - answer
+  short: []
+  song:
+    - url
+    - title
+    - artist
+    - album
+    - year
+
+# Nefelibata uses "builders" to build the site from the Markdown files. Currently two
+# builders are supported: "gemini" and "html". Each one can be announced on different
+# places and published to different locations.
+builders:
+  gemini:
+    plugin: gemini
+    home: gemini://taoetc.org/
+
+    # Announcers are defined below.
+    announce-on:
+      - antenna
+      - capcom
+      - geminispace
+      - mastodon
+
+    # Where should the built site we published to.
+    publish-to:
+      - vsftp
+
+    # The generated files will be created in build/gemini/.
+    path: gemini
+
+  html:
+    plugin: html
+    home: https://blog.taoetc.org/
+
+    # Announcers are defined below.
+    announce-on:
+      - archive_blog
+      - mastodon
+      - webmention
+
+    # Where should the built site we published to.
+    publish-to:
+      - nncp
+      - s3
+
+    # The generated files will be created in build/www/.
+    path: www
+
+    # The HTML builder supports different themes. Currently only the "minimal" theme is
+    # fully implemented. You can create a custom theme in the directory
+    # templates/builders/html and reference it here.
+    theme: minimal
+
+# Assistants process posts at the beginning of the build process. They do different things
+# like compute the reading time for a post, or call Archive.org to save all the links in a
+# given post.
+assistants:
+  # Use Archive.org to save any external links.
+  archive_links:
+    plugin: archive_links
+
+  # Fetch the current weather. Location is determined by your IP address, so it won't work
+  # behind a VPN.
+  current_weather:
+    plugin: current_weather
+
+  # Make a local copy of all external images in a blog post, replacing the external links
+  # with local ones.
+  mirror_images:
+    plugin: mirror_images
+
+  # Fetch a random news headline.
+  # See https://blog.taoetc.org/the_other_side_of_the_newspaper_clipping/index.html.
+  news:
+    plugin: news
+    api_key: SECRET
+    country: us
+
+  # Generate a playlist (.pls) of any MP3 files in the post.
+  playlist:
+    plugin: playlist
+    base_url: https://blog.taoetc.org/
+
+  # Compute the reading time for a given post.
+  reading_time:
+    plugin: reading_time
+
+  # If the post has an RSVP to an event, add it to a calendar.
+  rsvp_calendar:
+    plugin: rsvp_calendar
+    url: https://box.example.com/cloud/remote.php/dav/calendars/user@example.com/
+    username: user@example.com
+    password: PASSWORD
+    calendar: Personal
+
+# Announcers implement POSSE (Publish (on your) Own Site, Syndicate Elsewhere, see
+# https://indieweb.org/POSSE). They will post on external websites, linking back to the
+# canonical post. They also collect interactions that happen on these external websites,
+# storing them locally with the post so they can be preserved.
+announcers:
+  # Antenna is a Gemini aggregator. When using this plugin the aggregator will be
+  # notified every time there's a new post in your capsule. This should only be used with
+  # the Gemini builder.
+  antenna:
+    plugin: antenna
+
+  # This announcer will call the Archive.org API so that the post and the whole site are
+  # saved.
+  archive_blog:
+    plugin: archive_blog
+
+  # CAPCOM is another Gemini aggregator. Use only with the Gemini builder.
+  capcom:
+    plugin: capcom
+
+  # This announcer adds the Gemini capsule to the Geminispace search engine, and collects
+  # backlinks to any posts.
+  geminispace:
+    plugin: geminispace
+
+  # Post to Mastodon, linking back to the canonical post. Also collect interactions so
+  # they can be displayed with the post.
+  mastodon:
+    plugin: mastodon
+    # Create an application at https://{instance}/settings/applications/ with access to
+    # the scopes ``read:statuses`` and ``write:statuses``.
+    access_token: TOKEN
+    base_url: https://mastodon.example.com/
+
+  # The webmention announcer will ping any links that support webmention, and use
+  # https://webmention.io/ to collect any pings to your site (see the ``base.html``
+  # template). This should only be used with the HTML builder.
+  webmention:
+    plugin: webmention
+
+# Publishers will upload the built site to some location where they can be served.
+publishers:
+  # Publish to an FTP server.
+  vsftp:
+    plugin: ftp
+    hostname: ftp.example.com
+    username: vsftp
+    password: PASSWORD
+    basedir: ftp/upload/  # directory in the FTP server
+    use_tls: true
+  # Publish to an S3 bucket.
+  s3:
+    plugin: s3
+    access_key_id: KEY
+    secret_access_key: SECRET
+    bucket: blog.example.com
+  # Run a command on each modified file, and an additional final command. This can be used
+  # for many different setups to send the modified files to a remote location. In this
+  # example NNCP (http://www.nncpgo.org/) is used to send the files to a remote host (see
+  # https://blog.taoetc.org/how_to_publish_a_static_site_over_nncp/index.html).
+  nncp:
+    plugin: command
+    post_commands:
+      - '/home/user/.local/bin/nncp-file -nice P -quiet -cfg /home/user/.local/etc/nncp.hjson "$path" solarpi:"$path"'
+    site_commands:
+      - 'echo | /home/user/.local/bin/nncp-exec -nice N -quiet -cfg /home/user/.local/etc/nncp.hjson solarpi sync'

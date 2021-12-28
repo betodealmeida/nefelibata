@@ -1,0 +1,7 @@
+# {{ post.title }}
+
+{{ render(post.content) }}
+
+Updated on {{ post.timestamp }} by {{ config.author.name }} <{{ config.author.email }}>.
+
+=> {{ home }} Go back to the main index

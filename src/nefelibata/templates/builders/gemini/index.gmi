@@ -1,0 +1,28 @@
+# {{ config.title }}: {{ config.subtitle }}
+
+This is the Gemini capsule of {{ config.author.name }}.
+
+=> {{ config.author.url }} Website
+=> mailto://{{ config.author.email }} Email address
+=> {{ home / 'feed.gmi' }} Gemlog
+{% if posts %}
+
+## Posts
+
+{% for post in posts %}
+{% set reading_time = '(%s min read)' % post.metadata.reading_time.total_minutes if post.metadata.reading_time and post.metadata.reading_time.total_minutes > 2 else '' %}
+=> {{ home / post.url }}.gmi {{ post.timestamp }} — {{ post.title }} {{ reading_time }}
+{% endfor %}
+{% endif %}
+{% if config.social %}
+
+## Links
+
+{% for link in config.social %}
+=> {{ link.url }} {{ link.title }}
+{% endfor %}
+{% endif %}
+
+Crafted with ❤️ using Nefelibata
+
+=> https://nefelibata.readthedocs.io/ Nefelibata

@@ -1,0 +1,34 @@
+{% extends "minimal/src/base.html" %}
+
+{% block title %}{{ config.title }}: {{ config.subtitle }}{% endblock %}
+
+{% block content %}
+      <h1>{{ config.title }}: {{ config.subtitle }}</h1>
+
+      {% if posts %}
+      <h2 class="h-feed">Posts</h2>
+
+      <ul>
+      {% for post in posts %}
+      {% set reading_time = '(%s min read)' % post.metadata.reading_time.total_minutes if post.metadata.reading_time and post.metadata.reading_time.total_minutes > 2 else '' %}
+        <li class="h-entry"><a class="p-name" href="{{ home / post.url }}.html">{{ post.title }}</a> {{ reading_time }}</li>
+      {% endfor %}
+      </ul>
+      {% else %}
+      <p>No posts have been published yet!</p>
+      {% endif %}
+
+      {% if config.social %}
+      <h2>Links</h2>
+
+      <ul>
+      {% for link in config.social %}
+        <li><a href="{{ link.url }}" rel="me">{{ link.title }}</a></li>
+      {% endfor %}
+      </ul>
+      {% endif %}
+
+      <footer>
+        <p>Crafted with ❤️ using <a href="https://nefelibata.readthedocs.io/">Nefelibata</a>.</p>
+      </footer>
+{% endblock %}

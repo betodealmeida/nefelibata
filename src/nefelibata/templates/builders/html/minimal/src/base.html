@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="{{ config.language }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Nefelibata {{ __version__ }}">
+    <meta name="robots" content="index, follow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="{{ config.subtitle }}">
+
+    <title>{% block title %}{% endblock %}</title>
+
+    <link rel="canonical" href="{{ home }}" />
+    <link rel="alternate" type="application/atom+xml" href="{{ home / 'atom.xml' }}" />
+    <link rel="webmention" href="https://webmention.io/{{ home.host }}/webmention" />
+    <link rel="me" href="mailto:{{ config.author.email }}" />
+
+    <link rel="stylesheet" href="{{ home / 'css/awsm_theme_big-stone.min.css' }}" media="(prefers-color-scheme: dark)">
+    <link rel="stylesheet" href="{{ home / 'css/awsm_theme_pearl-lusta.min.css' }}" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)">
+    <link rel="stylesheet" href="{{ home / 'css/custom.css' }}">
+  </head>
+  <body>
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

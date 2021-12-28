@@ -1,0 +1,75 @@
+# Simple configuration to get started.
+#
+# This file is the minimum configuration needed to get started. It build both an HTML
+# blog and a Gemini capsule, but doesn't publish them anywhere.
+#
+# For a complete, real-life, example see ``nefelibata.yaml.full``.
+
+title: My blog
+subtitle: Posts about life
+
+author:
+  name: John Doe
+  url: https://jdoe.example.com/
+  email: jdoe@example.com
+  note: Just a person
+
+language: en
+
+social:
+  - title: Twitter
+    url: https://twitter.com/jdoe
+  - title: Mastodon
+    url: https://mastodon.social/@jdoe
+
+categories:
+  internet:
+    label: Internet
+    description: My thoughts about the internet
+    tags:
+      - blog
+      - web
+
+templates: {}
+
+builders:
+  gemini:
+    plugin: gemini
+    home: gemini://example.com/
+    announce-on:
+      - antenna
+      - capcom
+      - geminispace
+    publish-to: []
+    path: gemini
+  html:
+    plugin: html
+    home: https://jdoe.example.com/
+    announce-on:
+      - archive_blog
+      - webmention
+    publish-to: []
+    path: www
+    theme: minimal
+
+assistants:
+  archive_links:
+    plugin: archive_links
+  mirror_images:
+    plugin: mirror_images
+  reading_time:
+    plugin: reading_time
+
+announcers:
+  antenna:
+    plugin: antenna
+  archive_blog:
+    plugin: archive_blog
+  capcom:
+    plugin: capcom
+  geminispace:
+    plugin: geminispace
+  webmention:
+    plugin: webmention
+
+publishers: {}

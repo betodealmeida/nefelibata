@@ -1,0 +1,14 @@
+{% extends "minimal/src/base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+      <h1>{{ title }}</h1>
+      {% if subtitle %}<h2>{{ subtitle }}</h2>{% endif %}
+
+      <ul>
+      {% for post in posts %}
+        <li><a href="{{ home / post.url }}.html">{{ post.title }}</a></li>
+      {% endfor %}
+      </ul>
+{% endblock %}
