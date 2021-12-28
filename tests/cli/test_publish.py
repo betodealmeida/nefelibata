@@ -1,62 +1,91 @@
+"""
+Test ``nefelibata.cli.publish``.
+"""
+# pylint: disable=unused-argument
+
+from datetime import datetime
 from pathlib import Path
-from unittest.mock import call
-from unittest.mock import MagicMock
 
 import pytest
+from pytest_mock import MockerFixture
 
-from nefelibata.cli.publish import run
+from nefelibata.announcers.base import Announcement
+from nefelibata.cli import publish
+from nefelibata.config import Config
 from nefelibata.post import Post
-
-__author__ = "Beto Dealmeida"
-__copyright__ = "Beto Dealmeida"
-__license__ = "mit"
+from nefelibata.publishers.base import Publishing
 
 
-config = {
-    "theme": "test-theme",
-    "announce-on": ["announcer1", "announcer2"],
-}
-
-
-def test_run(mocker, fs):
-    root = Path("/path/to/blog")
-    fs.create_dir(root)
-
-    # create a couple posts
-    fs.create_file(root / "posts/one/index.mkd")
-    fs.create_dir(root / "posts/two")
-    with open(root / "posts/two/index.mkd", "w") as fp:
-        fp.write("subject: Hello!\nannounce-on: announcer1\n")
-    post1 = Post(root, root / "posts/one/index.mkd")
-    post2 = Post(root, root / "posts/two/index.mkd")
-    mocker.patch(
-        "nefelibata.cli.publish.get_posts",
-        return_value=[post1, post2],
+@pytest.mark.asyncio
+async def test_run(
+    mocker: MockerFixture,
+    root: Path,
+    config: Config,
+    post: Post,
+) -> None:
+    """
+    Test ``publish``.
+    """
+    publisher = mocker.MagicMock()
+    publisher.publish = mocker.AsyncMock(
+        side_effect=[
+            Publishing(timestamp=datetime(2021, 1, 1)),
+            None,
+            Publishing(timestamp=datetime(2021, 1, 3)),
+        ],
     )
 
-    # mock config
-    mocker.patch("nefelibata.cli.publish.get_config", return_value=config)
-
-    # mock publishers
-    Publisher1 = MagicMock()
-    Publisher2 = MagicMock()
-    mocker.patch(
-        "nefelibata.cli.publish.get_publishers",
-        return_value=[Publisher1, Publisher2],
+    announcer = mocker.MagicMock()
+    announcer.announce_post = mocker.AsyncMock(
+        side_effect=[
+            None,
+            Announcement(
+                url="https://host1.example.com/",
+                timestamp=datetime(2021, 1, 1),
+            ),
+        ],
+    )
+    announcer.announce_site = mocker.AsyncMock(
+        side_effect=[
+            Announcement(
+                url="https://host2.example.com/",
+                timestamp=datetime(2021, 1, 2),
+            ),
+            None,
+        ],
     )
 
-    # mock announcers
-    Announcer1 = MagicMock()
-    Announcer1.match.side_effect = [True, False]
-    Announcer2 = MagicMock()
     mocker.patch(
         "nefelibata.cli.publish.get_announcers",
-        return_value=[Announcer1, Announcer2],
+        return_value={"announcer": announcer},
+    )
+    mocker.patch(
+        "nefelibata.cli.publish.get_publishers",
+        return_value={"publisher": publisher},
     )
 
-    run(root)
+    # On the first publish we should announce site and post.
+    await publish.run(root)
+    publisher.publish.assert_called_with(None, False)
+    announcer.announce_site.assert_called_with()
+    announcer.announce_post.assert_called()
 
-    Publisher1.publish.assert_called_with(False)
-    Publisher2.publish.assert_called_with(False)
-    Announcer1.update_links.assert_has_calls([call(post1)])
-    Announcer2.update_links.assert_has_calls([call(post1), call(post2)])
+    # Publish again, should have a ``since`` value. Because ``publish``
+    # returns ``None`` the second time we shouldn't announce the site.
+    # And because the first time ``publish_post`` returned ``None``,
+    # it should try again now and be called.
+    announcer.announce_site.reset_mock()
+    announcer.announce_post.reset_mock()
+    await publish.run(root)
+    publisher.publish.assert_called_with(datetime(2021, 1, 1), False)
+    announcer.announce_site.assert_not_called()
+    announcer.announce_post.assert_called()
+
+    # Publish again. This time ``publish`` returns a new data, so we
+    # expect to call ``publish_site``. Because the post was already
+    # published last time it shouldn't be announced this time.
+    announcer.announce_post.reset_mock()
+    await publish.run(root)
+    publisher.publish.assert_called_with(datetime(2021, 1, 1), False)
+    announcer.announce_site.assert_called_with()
+    announcer.announce_post.assert_not_called()

@@ -1,226 +1,141 @@
-# -*- coding: utf-8 -*-
-from datetime import datetime
-from datetime import timezone
+"""
+Tests for ``nefelibata.post``.
+"""
+# pylint: disable=invalid-name, unused-argument
+
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
-from dateutil.parser._parser import ParserError
 from freezegun import freeze_time
+from pyfakefs.fake_filesystem import FakeFilesystem
+from yarl import URL
 
-from nefelibata.post import get_posts
+from nefelibata.config import AnnouncerModel, Config
+from nefelibata.post import Post, build_post, extract_links, get_posts
 
-__author__ = "Beto Dealmeida"
-__copyright__ = "Beto Dealmeida"
-__license__ = "mit"
+from .fakes import POST_CONTENT, POST_DATA
 
 
-def test_post(mock_post):
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: This is your first post
-        keywords: welcome, blog
-        summary: Hello, world!
+@pytest.mark.asyncio
+async def test_post() -> None:
+    """
+    Test the ``Post`` model.
+    """
+    post = Post(**POST_DATA)
 
-        # Welcome #
-
-        This is your first post. It should be written using Markdown.
-        """,
-        )
-
+    assert post.path == Path("/path/to/blog/posts/first/index.mkd")
     assert post.title == "This is your first post"
-    assert post.summary == "Hello, world!"
-    assert post.date.astimezone(timezone.utc) == datetime(
-        2020,
-        1,
-        1,
-        0,
-        0,
-        0,
-        tzinfo=timezone.utc,
-    )
-    assert post.url == "first/index.html"
-    assert post.up_to_date is False
-
-
-def test_post_no_summary(mock_post):
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: This is your first post
-        keywords: welcome, blog
-        summary:
-
-        # Welcome #
-
-        This is your first post. It should be written using Markdown.
-        """,
-        )
-
-    # uses first paragraph
-    assert (
-        post.summary == "This is your first post. It should be written using Markdown."
-    )
-
-
-def test_post_no_summary_truncated(mock_post):
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: This is your first post
-        keywords: welcome, blog
-        summary:
-
-        # Welcome #
-
-        This is your first post. It should be written using Markdown. The first paragraph
-        is very long — indeed, it's longer than 140 characters. Which is what a Tweet used
-        to be, but notw it's 280.
-        """,
-        )
-
-    # uses first paragraph
-    assert (
-        post.summary
-        == "This is your first post. It should be written using Markdown. The first paragraph is very long — indeed, it's longer than 140 characters. W\u2026"
-    )
-
-
-def test_post_no_summary_no_html(mock_post):
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: This is your first post
-        keywords: welcome, blog
-        summary:
-
-        # $Witticism #
-        """,
-        )
-
-    # uses first paragraph
-    assert post.summary == "No summary."
-
-
-def test_post_with_date(mock_post):
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: This is your first post
-        keywords: welcome, blog
-        summary: Hello, world!
-        date: Wed, 1 Jan 2020 12:00:00 -0800
-
-        # $Witticism #
-        """,
-        )
-
-    assert post.date.astimezone(timezone.utc) == datetime(
-        2020,
-        1,
-        1,
-        20,
-        0,
-        0,
-        tzinfo=timezone.utc,
-    )
-
-
-def test_post_without_date(mock_post):
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: This is your first post
-        keywords: welcome, blog
-        summary: Hello, world!
-
-        # $Witticism #
-        """,
-        )
-
-    del post.parsed["date"]
-    with pytest.raises(Exception):
-        post.date
-
-
-def test_post_subject_from_h1(mock_post):
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject:
-        keywords: welcome, blog
-        summary: Hello, world!
-
-        # $Witticism #
-        """,
-        )
-
-    assert post.title == "$Witticism"
-
-
-def test_post_subject_from_filename(mock_post):
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject:
-        keywords: welcome, blog
-        summary: Hello, world!
-
-        Just a one-line witticism.
-        """,
-        )
-
-    assert post.title == "first"
-
-
-def test_get_posts(fs):
-    root = Path("/path/to/blog")
-    fs.create_dir(root / "/posts")
-    fs.create_dir(root / "posts/one")
-    fs.create_dir(root / "posts/two")
-
-    fs.create_file(root / "posts/one/index.mkd")
-    fs.create_file(root / "posts/two/index.mkd")
-
-    posts = get_posts(root)
-    assert len(posts) == 2
-    assert posts[0].file_path == Path(root / "posts/two/index.mkd")
-    assert posts[1].file_path == Path(root / "posts/one/index.mkd")
-
-
-def test_get_posts_limited(fs):
-    root = Path("/path/to/blog")
-    fs.create_dir(root / "/posts")
-    fs.create_dir(root / "posts/one")
-    fs.create_dir(root / "posts/two")
-
-    fs.create_file(root / "posts/one/index.mkd")
-    fs.create_file(root / "posts/two/index.mkd")
-
-    posts = get_posts(root, 1)
-    assert len(posts) == 1
-    assert posts[0].file_path == Path(root / "posts/two/index.mkd")
-
-
-def test_enclosure(mock_post, fs):
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: This is your first post
-        keywords: welcome, blog
-        summary: Hello, world!
-
-        # Welcome #
-
-        This is your first post. It should be written using Markdown.
-        """,
-        )
-
-    assert post.enclosure is None
-
-    fs.create_file(post.file_path.parent / "song.mp3")
-    assert post.enclosure == {
-        "type": "audio/mpeg",
-        "length": "0",
-        "href": "first/song.mp3",
+    assert post.timestamp == datetime(2021, 1, 1, 0, 0, tzinfo=timezone.utc)
+    assert post.metadata == {
+        "keywords": "welcome, blog",
+        "summary": "Hello, world!",
     }
+    assert post.tags == {"welcome", "blog"}
+    assert post.categories == {"stem"}
+    assert post.type == "post"
+    assert post.url == "first/index"
+    assert (
+        post.content
+        == """# Welcome #
+
+This is your first post. It should be written using Markdown.
+
+Read more about [Nefelibata](https://nefelibata.readthedocs.io/)."""
+    )
+
+
+@pytest.mark.asyncio
+async def test_build_post(fs: FakeFilesystem, root: Path, config: Config) -> None:
+    """
+    Test ``build_post``.
+    """
+    path = Path(root / "posts/first/index.mkd")
+
+    # create post
+    with freeze_time("2021-01-01T00:00:00Z"):
+        fs.create_file(path, contents=POST_CONTENT)
+
+    config.announcers = {"antenna": AnnouncerModel(plugin="antenna")}
+
+    post = build_post(root, config, path)
+
+    assert post.path == path
+    assert post.title == "This is your first post"
+    assert post.timestamp == datetime(2021, 1, 1, 0, 0, tzinfo=timezone.utc)
+    assert post.metadata == {
+        "keywords": "welcome, blog",
+        "summary": "Hello, world!",
+    }
+    assert post.tags == {"welcome", "blog"}
+    assert post.categories == {"stem"}
+    assert post.type == "post"
+    assert post.url == "first/index"
+    assert (
+        post.content
+        == """# Welcome #
+
+This is your first post. It should be written using Markdown.
+
+Read more about [Nefelibata](https://nefelibata.readthedocs.io/)."""
+    )
+    assert post.announcers == {"antenna"}
+
+    # check to file was updated with the ``date`` header
+    with open(path, encoding="utf-8") as input_:
+        content = input_.read()
+    assert (
+        content
+        == """subject: This is your first post
+keywords: welcome, blog
+summary: Hello, world!
+date: Thu, 31 Dec 2020 16:00:00 -0800
+announce-on: antenna
+
+# Welcome #
+
+This is your first post. It should be written using Markdown.
+
+Read more about [Nefelibata](https://nefelibata.readthedocs.io/)."""
+    )
+
+    # build again, and test that the file wasn't modified since it
+    # already has all the required headers
+    last_update = path.stat().st_mtime
+    build_post(root, config, path)
+    assert path.stat().st_mtime == last_update
+
+
+@pytest.mark.asyncio
+async def test_get_posts(fs: FakeFilesystem, root: Path, config: Config) -> None:
+    """
+    Test ``get_posts``.
+    """
+    with freeze_time("2021-01-01T00:00:00Z"):
+        fs.create_dir(root / "posts/one")
+        fs.create_file(root / "posts/one/index.mkd")
+    with freeze_time("2021-01-02T00:00:00Z"):
+        fs.create_dir(root / "posts/two")
+        fs.create_file(root / "posts/two/index.mkd")
+
+    posts = get_posts(root, config)
+    assert len(posts) == 2
+    assert posts[0].path == Path(root / "posts/two/index.mkd")
+    assert posts[1].path == Path(root / "posts/one/index.mkd")
+
+    # test limited number of posts returned
+    posts = get_posts(root, config, 1)
+    assert len(posts) == 1
+
+
+def test_extract_links(post: Post) -> None:
+    """
+    Test ``extract_links``.
+    """
+    assert list(extract_links(post)) == [URL("https://nefelibata.readthedocs.io/")]
+
+    post.metadata["test-url"] = "https://example.com/"
+    assert list(extract_links(post)) == [
+        URL("https://example.com/"),
+        URL("https://nefelibata.readthedocs.io/"),
+    ]

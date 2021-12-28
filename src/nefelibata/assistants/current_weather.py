@@ -1,38 +1,49 @@
+"""
+Assistant for fetching the current weather.
+"""
+
 import logging
-from datetime import datetime
-from datetime import timedelta
-from datetime import timezone
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any, Dict
 
-import requests
+from aiohttp import ClientSession
 
-from nefelibata.assistants import Assistant
-from nefelibata.assistants import Scope
+from nefelibata.announcers.base import Scope
+from nefelibata.assistants.base import Assistant
+from nefelibata.config import Config
 from nefelibata.post import Post
-from nefelibata.utils import json_storage
 
 _logger = logging.getLogger(__name__)
 
 
-MAX_AGE = timedelta(days=1)
+DEFAULT_MAX_AGE = timedelta(days=1)
 
 
 class CurrentWeatherAssistant(Assistant):
+    """
+    An assistant for fetching the current weather.
+    """
 
+    name = "current_weather"
     scopes = [Scope.POST]
 
-    def process_post(self, post: Post, force: bool = False) -> None:
-        post_directory = post.file_path.parent
-        storage = post_directory / "weather.json"
-        if storage.exists() and not force:
-            return
+    def __init__(
+        self,
+        root: Path,
+        config: Config,
+        max_age: timedelta = DEFAULT_MAX_AGE,
+        **kwargs: Any
+    ):
+        super().__init__(root, config, **kwargs)
 
-        post_age = datetime.now(tz=timezone.utc) - post.date
-        if post_age > MAX_AGE:
-            return
+        self.max_age = max_age
 
-        with json_storage(storage) as weather:
-            response = requests.get("https://wttr.in/?format=j1&m")
-            weather.update(response.json())
+    async def get_post_metadata(self, post: Post) -> Dict[str, Any]:
+        if datetime.now(tz=timezone.utc) - post.timestamp > self.max_age:
+            return {}
 
-        # touch file to ensure it rebuilds with the weather info
-        post.file_path.touch()
+        async with ClientSession() as session:
+            _logger.info("Fetching current weather information")
+            async with session.get("https://wttr.in/?format=j1&m") as response:
+                return await response.json()

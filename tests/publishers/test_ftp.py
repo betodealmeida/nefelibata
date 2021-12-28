@@ -1,195 +1,201 @@
-from datetime import datetime
-from datetime import timezone
+"""
+Tests for ``nefelibata.publishers.ftp``.
+"""
+# pylint: disable=invalid-name
+import ftplib
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from unittest.mock import call
-from unittest.mock import MagicMock
 
 import pytest
 from freezegun import freeze_time
+from pyfakefs.fake_filesystem import FakeFilesystem
+from pytest_mock import MockerFixture
 
+from nefelibata.config import Config
 from nefelibata.publishers.ftp import FTPPublisher
 
-__author__ = "Beto Dealmeida"
-__copyright__ = "Beto Dealmeida"
-__license__ = "mit"
 
+@pytest.mark.asyncio
+async def test_publish(
+    mocker: MockerFixture,
+    fs: FakeFilesystem,
+    root: Path,
+    config: Config,
+) -> None:
+    """
+    Test ``publish``.
+    """
+    FTP = mocker.patch("nefelibata.publishers.ftp.FTP")
+    ftp = FTP.return_value.__enter__.return_value
+    mocker.patch.object(
+        FTPPublisher,
+        "find_modified_files",
+        return_value=iter([root / "build/generic/one"]),
+    )
 
-config: Dict[str, Any] = {}
-
-
-def test_publish(fs, mocker):
-    root = Path("/path/to/blog")
-    fs.create_dir(root)
+    fs.create_file(root / "build/generic/one", contents="Hello, world!")
 
     publisher = FTPPublisher(
         root,
         config,
-        host="ftp.example.com",
-        username="anonymous",
-        password="test",
-        basedir="public",
+        "generic",
+        "ftp.example.com",
+        "username",
+        "password",
     )
 
-    with freeze_time("2020-01-01T00:00:00Z"):
-        fs.create_file(root / "last_published")
+    await publisher.publish()
 
-    # create 2 posts, 1 of them up-to-date
-    fs.create_dir(root / "build")
-    with freeze_time("2019-12-31T00:00:00Z"):
-        fs.create_dir(root / "build/one")
-        fs.create_file(root / "build/one/index.mkd")
-        fs.create_file(root / "build/one/index.html")
-    with freeze_time("2020-01-02T00:00:00Z"):
-        fs.create_dir(root / "build/two")
-        fs.create_file(root / "build/two/index.mkd")
-        fs.create_file(root / "build/two/index.html")
-
-    mock_ftp = MagicMock()
-    mock_ftp.return_value.__enter__.return_value.pwd.return_value = "/home/public"
-    mocker.patch("nefelibata.publishers.ftp.FTP", mock_ftp)
-    mocker.patch(
-        "nefelibata.publishers.ftp.open",
-        side_effect=lambda filename, mode: filename,
-    )
-    with freeze_time("2020-01-03T00:00:00Z"):
-        publisher.publish()
-
-    mock_ftp.assert_called_with("ftp.example.com", "anonymous", "test")
-    mock_ftp.return_value.__enter__.return_value.cwd.assert_has_calls(
-        [call("public"), call("two")],
-    )
-
-    mtime = (root / "last_published").stat().st_mtime
-    assert (
-        datetime.fromtimestamp(mtime).astimezone(timezone.utc).isoformat()
-        == "2020-01-03T00:00:00+00:00"
-    )
+    FTP.assert_called_with("ftp.example.com", "username", "password")
+    ftp.pwd.assert_called_with()
+    ftp.storbinary.assert_called()  # second argument is an internal object
 
 
-def test_publish_no_last_published(fs, mocker):
-    root = Path("/path/to/blog")
-    fs.create_dir(root)
+@pytest.mark.asyncio
+async def test_publish_last_published(
+    mocker: MockerFixture,
+    fs: FakeFilesystem,
+    root: Path,
+    config: Config,
+) -> None:
+    """
+    Test publishing when ``last_published`` is present.
+    """
+    FTP = mocker.patch("nefelibata.publishers.ftp.FTP")
+    ftp = FTP.return_value.__enter__.return_value
+
+    with freeze_time("2021-01-01T00:00:00Z"):
+        fs.create_file(root / "build/generic/one", contents="Hello, world!")
 
     publisher = FTPPublisher(
         root,
         config,
-        host="ftp.example.com",
-        username="anonymous",
-        password="test",
-        basedir="public",
+        "generic",
+        "ftp.example.com",
+        "username",
+        "password",
     )
 
-    # create 2 posts, 1 of them up-to-date
-    fs.create_dir(root / "build")
-    with freeze_time("2019-12-31T00:00:00Z"):
-        fs.create_dir(root / "build/one")
-        fs.create_file(root / "build/one/index.mkd")
-        fs.create_file(root / "build/one/index.html")
-    with freeze_time("2020-01-02T00:00:00Z"):
-        fs.create_dir(root / "build/two")
-        fs.create_file(root / "build/two/index.mkd")
-        fs.create_file(root / "build/two/index.html")
+    await publisher.publish(since=datetime(2021, 1, 2, tzinfo=timezone.utc))
 
-    mock_ftp = MagicMock()
-    mock_ftp.return_value.__enter__.return_value.pwd.return_value = "/home/public"
-    mocker.patch("nefelibata.publishers.ftp.FTP", mock_ftp)
-    mocker.patch(
-        "nefelibata.publishers.ftp.open",
-        side_effect=lambda filename, mode: filename,
-    )
-    with freeze_time("2020-01-03T00:00:00Z"):
-        publisher.publish()
+    ftp.storbinary.assert_not_called()
 
-    mock_ftp.return_value.__enter__.return_value.cwd.assert_has_calls(
-        [call("public"), call("one"), call("/home/public"), call("two")],
-    )
+    await publisher.publish(force=True)
 
-    mtime = (root / "last_published").stat().st_mtime
-    assert (
-        datetime.fromtimestamp(mtime).astimezone(timezone.utc).isoformat()
-        == "2020-01-03T00:00:00+00:00"
+    ftp.storbinary.assert_called()
+
+
+@pytest.mark.asyncio
+async def test_publish_tls(
+    mocker: MockerFixture,
+    fs: FakeFilesystem,
+    root: Path,
+    config: Config,
+) -> None:
+    """
+    Test ``publish`` with TLS.
+    """
+    FTP_TLS = mocker.patch("nefelibata.publishers.ftp.FTP_TLS")
+    ftp = FTP_TLS.return_value.__enter__.return_value
+    mocker.patch.object(
+        FTPPublisher,
+        "find_modified_files",
+        return_value=iter([root / "build/generic/one"]),
     )
 
-
-def test_publish_no_basedir(fs, mocker):
-    root = Path("/path/to/blog")
-    fs.create_dir(root)
+    fs.create_file(root / "build/generic/one", contents="Hello, world!")
 
     publisher = FTPPublisher(
         root,
         config,
-        host="ftp.example.com",
-        username="anonymous",
-        password="test",
+        "generic",
+        "ftp.example.com",
+        "username",
+        "password",
+        use_tls=True,
     )
 
-    with freeze_time("2020-01-01T00:00:00Z"):
-        fs.create_file(root / "last_published")
+    await publisher.publish()
 
-    # create 2 posts, 1 of them up-to-date
-    fs.create_dir(root / "build")
-    with freeze_time("2019-12-31T00:00:00Z"):
-        fs.create_dir(root / "build/one")
-        fs.create_file(root / "build/one/index.mkd")
-        fs.create_file(root / "build/one/index.html")
-    with freeze_time("2020-01-02T00:00:00Z"):
-        fs.create_dir(root / "build/two")
-        fs.create_file(root / "build/two/index.mkd")
-        fs.create_file(root / "build/two/index.html")
+    ftp.prot_p.assert_called()
 
-    mock_ftp = MagicMock()
-    mock_ftp.return_value.__enter__.return_value.pwd.return_value = "/"
-    mocker.patch("nefelibata.publishers.ftp.FTP", mock_ftp)
-    mocker.patch(
-        "nefelibata.publishers.ftp.open",
-        side_effect=lambda filename, mode: filename,
+
+@pytest.mark.asyncio
+async def test_publish_with_basedir(
+    mocker: MockerFixture,
+    fs: FakeFilesystem,
+    root: Path,
+    config: Config,
+) -> None:
+    """
+    Test ``publish`` when a base directory is specified.
+    """
+    FTP = mocker.patch("nefelibata.publishers.ftp.FTP")
+    ftp = FTP.return_value.__enter__.return_value
+    ftp.pwd.return_value = "/ftp/upload"
+    mocker.patch.object(
+        FTPPublisher,
+        "find_modified_files",
+        return_value=iter(
+            [root / "build/generic/subdir1/one", root / "build/generic/subdir2/two"],
+        ),
     )
-    with freeze_time("2020-01-03T00:00:00Z"):
-        publisher.publish()
 
-    mock_ftp.return_value.__enter__.return_value.cwd.assert_has_calls([call("two")])
-
-
-def test_publish_create_dir(fs, mocker):
-    root = Path("/path/to/blog")
-    fs.create_dir(root)
+    fs.create_file(root / "build/generic/subdir1/one", contents="Hello, world!")
+    fs.create_file(root / "build/generic/subdir2/two", contents="Goodbye, world!")
 
     publisher = FTPPublisher(
         root,
         config,
-        host="ftp.example.com",
-        username="anonymous",
-        password="test",
+        "generic",
+        "ftp.example.com",
+        "username",
+        "password",
+        "ftp/upload",
     )
 
-    with freeze_time("2020-01-01T00:00:00Z"):
-        fs.create_file(root / "last_published")
+    await publisher.publish()
 
-    # create 2 posts, 1 of them up-to-date
-    fs.create_dir(root / "build")
-    with freeze_time("2019-12-31T00:00:00Z"):
-        fs.create_dir(root / "build/one")
-        fs.create_file(root / "build/one/index.mkd")
-        fs.create_file(root / "build/one/index.html")
-    with freeze_time("2020-01-02T00:00:00Z"):
-        fs.create_dir(root / "build/two")
-        fs.create_file(root / "build/two/index.mkd")
-        fs.create_file(root / "build/two/index.html")
-
-    mock_ftp = MagicMock()
-    mock_ftp.return_value.__enter__.return_value.pwd.return_value = "/"
-    mock_ftp.return_value.__enter__.return_value.cwd.side_effect = [
-        Exception("Directory doesn't exist!"),
-        True,
-    ]
-    mocker.patch("nefelibata.publishers.ftp.FTP", mock_ftp)
-    mocker.patch(
-        "nefelibata.publishers.ftp.open",
-        side_effect=lambda filename, mode: filename,
+    ftp.cwd.assert_has_calls(
+        [
+            mocker.call("ftp/upload"),
+            mocker.call("subdir1"),
+            mocker.call("/ftp/upload"),
+            mocker.call("subdir2"),
+        ],
     )
-    with freeze_time("2020-01-03T00:00:00Z"):
-        publisher.publish()
 
-    mock_ftp.return_value.__enter__.return_value.mkd.assert_called_with("two")
+
+@pytest.mark.asyncio
+async def test_publish_create_directory(
+    mocker: MockerFixture,
+    fs: FakeFilesystem,
+    root: Path,
+    config: Config,
+) -> None:
+    """
+    Test ``publish`` when the directories need to be created.
+    """
+    FTP = mocker.patch("nefelibata.publishers.ftp.FTP")
+    ftp = FTP.return_value.__enter__.return_value
+    ftp.cwd.side_effect = [ftplib.error_perm, ""]
+    mocker.patch.object(
+        FTPPublisher,
+        "find_modified_files",
+        return_value=iter([root / "build/generic/subdir1/one"]),
+    )
+
+    fs.create_file(root / "build/generic/subdir1/one", contents="Hello, world!")
+
+    publisher = FTPPublisher(
+        root,
+        config,
+        "generic",
+        "ftp.example.com",
+        "username",
+        "password",
+    )
+
+    await publisher.publish()
+
+    ftp.mkd.assert_called_with("subdir1")

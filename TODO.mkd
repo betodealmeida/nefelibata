@@ -1,92 +1,52 @@
-# Done #
-
-- [x] archive pages
-- [x] add warning on external resources
-- [x] category pages
-- [x] mirror images
-- [x] atom feed
-- [x] upload to S3 only when changed
-- [x] Twitter announcer
-- [x] FAWM announcer
-- [x] display comments
-- [x] show link to comment
-- [x] update requirements.txt
-- [x] improve build linking
-- [x] FB announcer
-- [x] WT.Social announcer
-- [x] Mastodon announcer
-- [x] Medium announcer
-- [x] microformats
-- [x] linkbacks
-- [x] make timestamp an ISO string instead of float
-- [x] move mirror images to assistant
-- [x] check external resources as assistant
-- [x] check CSS for external resources
-- [x] builders
-- [x] do not pass root/config when initializing Post
-- [x] rename feed to Atom
-- [x] unit test coverage
-- [x] logger names
-- [x] https://indiewebify.me/
-- [x] add footer with link to project
-- [x] Chrome performance
-- [x] honor --force when building categories
-- [x] consolidate entry points __init__
-- [x] center footer on mobile (.footer { text-align: center; })
-- [x] fix contrast post subtitle (summary)
-- [x] Medium collect
-- [x] use track number to sort playlist
-- [x] Neocities publisher
-- [x] requirements.txt
-- [x] fix indienews link when no explicit announce
-- [x] convert relative link to absolute when publishing to Medium
-- [x] per post language
-- [x] new release
-- [x] documentation
-- [x] cassette tape audio player
-- [x] make playlist assistant a builder
-- [x] when mirroring images, add original URL as exif
-- [x] post types: likes, notes, songs? allow custom themes to be specified
-- [x] store weather (curl wttr.in/?format=j1)
-- [x] template snippets for books or other things? music? like, RSVP
-- [x] replace `post_directory.parent` with `root / posts` to allow for nested sub directories
-- [x] archive assistant should ignore archive.org links
-
-# TODO #
-
-## Performance ##
-
-- [ ] parallelize build/publish
-- [ ] avoid parsing HTML for each plugin
-- [ ] lxml parser for BeautifulSoup?
-
-## Announcers ##
-
-- [ ] multiple announcers of the same type? (eg, 2 mastodon)
-- [ ] Reddit announcer
-- [ ] Soundcloud announcer
-- [ ] Instagram announcer
-
-## Publishers ##
-
-- [ ] gemini://
-
-## Comments ##
-
-- [ ] standardize all comments as webmentions
-- [ ] threaded comments
-- [ ] use bleach to clean HTML
-
-## Other ##
-
-- [ ] categories
-- [ ] new theme
-- [ ] search (build index and search using JS)
-- [ ] check that `force` is being used in all relevant plugins
-- [ ] Medium image upload ("Go Deep" post, eg)
-- [ ] RSS club
-- [ ] style webmentioned links: https://www.ctrl.blog/media/hero/webmention.svg
-- [ ] mirror youtube videos in addition to images
-- [ ] PESOS?
-- [ ] self archive.org using wget?
-- [ ] split twitter card into assistant/builder
+- [X] async build
+- [X] cancel build
+- [X] agnostic build system (Gemini, HTML)
+- [X] only build if needed
+- [X] remove url from config (HTML concept)
+- [X] feed.gmi
+- [X] post.gmi with metadata (back, date, author)
+- [X] tags
+- [X] base URL in gemini
+- [X] categories
+- [X] nb init: copy templates based on configured builders
+- [X] nb new
+- [X] nb publish
+- [X] html builder with atom
+- [X] antenna announcer
+- [X] geminiinfo announcer
+- [X] freeze announce-on
+- [X] builder path
+- [X] publisher path
+- [X] add enclosures to post
+- [X] CAPCOM announcer
+- [X] atom: <link rel="alternate" type="text/gemini" href="gemini://..." /> ?
+- [X] add grace period to announcers, to prevent spamming
+- [X] remove scope from builder, move to announcer
+- [X] mastodon announcer
+- [X] reading time assistant
+- [X] validate config
+- [X] weather assistant
+- [X] playlist assistant
+- [X] archive links (post) assistant
+- [X] migrate to marko
+- [X] mirror images (post) assistant
+- [X] html templates (with striptags|e)
+- [X] S3 publisher
+- [X] rename URI to URL
+- [X] webmention announcer
+- [X] fix multi line blockquotes
+- [X] calendar assistant for RSVP events
+- [X] archive links should archive post and site as well!
+- [ ] nncp publisher
+- [/] single post actions
+- [/] dither assistant
+- [/] use yarl (post?)
+- [?] templates in Atom feed
+- [ ] hcard (photo and index)
+- [ ] add OG metadata (reading from post.metadata.meta?)
+- [ ] Twitter announcer/assistant (for card)
+- [ ] music player
+- [ ] display replies
+- [ ] warn on external resources (site) assistant
+- [ ] announcer staleness (don't collect if post is older than 7 days, eg)
+- [?] NeoCities publisher

@@ -1,35 +1,43 @@
+"""
+Assistant for computing reading time.
+"""
+
 import math
+from typing import Any, Dict
 
-from bs4 import BeautifulSoup
-
-from nefelibata.assistants import Assistant
-from nefelibata.assistants import Scope
+from nefelibata.announcers.base import Scope
+from nefelibata.assistants.base import Assistant
 from nefelibata.post import Post
-from nefelibata.utils import modify_html
-
-THRESHOLD_MINUTES = 2
 
 
 class ReadingTimeAssistant(Assistant):
+    """
+    An assistant for computing post reading time.
 
+    This is based on a formula supposedly used by Medium:
+
+        https://www.quora.com/How-does-Medium-determine-an-article%E2%80%99s-estimated-read-time/answer/Alan-Hamlett
+    """
+
+    name = "reading_time"
     scopes = [Scope.POST]
 
-    def process_post(self, post: Post, force: bool = False) -> None:
-        # Use formula from Medium (https://www.quora.com/How-does-Medium-determine-an-article%E2%80%99s-estimated-read-time/answer/Alan-Hamlett)
-        soup = BeautifulSoup(post.render(self.config), "html.parser")
-        num_images = len(soup.find_all("img"))
-        num_words = len(soup.text.split(" "))
+    async def get_post_metadata(self, post: Post) -> Dict[str, Any]:
+        num_images = len(
+            [
+                enclosure
+                for enclosure in post.enclosures
+                if enclosure.type.startswith("image")
+            ],
+        )
+        num_words = len(post.content.split(" "))
         image_weight = max(13 - num_images, 3)
         seconds = num_words / 265 * 60 + image_weight * num_images
         minutes = math.ceil(seconds / 60)
 
-        if minutes < THRESHOLD_MINUTES:
-            return
-
-        with modify_html(post.file_path.with_suffix(".html")) as soup:
-            el = soup.find(id="post-reading-time")
-            if el:
-                span = soup.new_tag("span")
-                span.string = f"Approximate reading time: {minutes} minutes"
-                el.clear()
-                el.append(span)
+        return {
+            "words": num_words,
+            "images": num_images,
+            "total_seconds": seconds,
+            "total_minutes": minutes,
+        }

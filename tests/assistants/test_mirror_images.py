@@ -1,324 +1,223 @@
-from datetime import datetime
-from datetime import timezone
-from io import BytesIO
+"""
+Tests for ``nefelibata.assistants.mirror_images``.
+"""
+# pylint: disable=invalid-name, redefined-outer-name
+
 from pathlib import Path
-from typing import Any
 from typing import Dict
 
-import piexif
-from freezegun import freeze_time
-from PIL import Image
+import pytest
+from aiohttp import ClientSession
+from pytest_mock import MockerFixture
 
-from nefelibata.assistants.mirror_images import get_resource_extension
-from nefelibata.assistants.mirror_images import MirrorImagesAssistant
-from nefelibata.builders.post import PostBuilder
-
-__author__ = "Beto Dealmeida"
-__copyright__ = "Beto Dealmeida"
-__license__ = "mit"
-
-
-config: Dict[str, Any] = {
-    "url": "https://example.com/",
-    "language": "en",
-    "theme": "test-theme",
-    "webmention": {"endpoint": "https://webmention.io/example.com/webmention"},
-}
+from nefelibata.assistants.mirror_images import (
+    MirrorImagesAssistant,
+    add_exif,
+    download_image,
+    extract_images,
+    get_filename,
+    get_resource_extension,
+    is_local,
+)
+from nefelibata.config import Config
+from nefelibata.post import Post
 
 
-def test_process_post(mock_post, mocker, requests_mock):
-    root = Path("/path/to/blog")
-
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: Hello, World!
-        keywords: test
-        summary: My first post
-
-        Hi, there!
-
-        This is an external image:
-
-        ![alt text](https://example.com/images/icon48.png "Logo Title Text 1")
-        """,
-        )
-    PostBuilder(root, config).process_post(post)
+@pytest.mark.asyncio
+async def test_assistant(
+    mocker: MockerFixture,
+    root: Path,
+    config: Config,
+    post: Post,
+) -> None:
+    """
+    Test the assistant.
+    """
+    mocker.patch(
+        "nefelibata.assistants.mirror_images.download_image",
+        return_value=mocker.AsyncMock(),
+    )
 
     assistant = MirrorImagesAssistant(root, config)
 
+    post.content = """
+I have 2 images:
+
+- ![First image](https://example.com/photo.jpg)
+- ![Second image](img/logo.png)
+    """
+
+    await assistant.process_post(post)
+    await assistant.process_post(post)
+
+    async def modify_replacements(  # pylint: disable=too-many-arguments, unused-argument
+        session: ClientSession,
+        url: str,
+        title: str,
+        post: Post,
+        mirror: Path,
+        replacements: Dict[str, str],
+    ) -> None:
+        """
+        A dummy function to modify ``replacements``.
+        """
+        replacements["hello"] = "world"
+
     mocker.patch(
-        "nefelibata.assistants.mirror_images.get_resource_extension",
-        return_value=".png",
-    )
-    requests_mock.get(
-        "https://example.com/images/icon48.png",
-        text="image-content",
+        "nefelibata.assistants.mirror_images.download_image",
+        modify_replacements,
     )
 
-    assistant.process_post(post)
+    await assistant.process_post(post)
 
-    with open(post.file_path.with_suffix(".html")) as fp:
-        contents = fp.read()
 
+def test_extract_images() -> None:
+    """
+    Test ``extract_images``.
+    """
+
+    assert list(extract_images("No images here, move along")) == []
+
+    content = """
+This is a long document with ![A title](https://example.com/photo.jpg).
+    """
+    assert list(extract_images(content)) == [
+        ("https://example.com/photo.jpg", "A title"),
+    ]
+
+
+def test_is_local() -> None:
+    """
+    Test ``is_local``.
+    """
+    assert not is_local("https://example.com/photo.jpg")
+    assert is_local("img/logo.png")
+
+
+@pytest.mark.asyncio
+async def test_get_resource_extension(mocker: MockerFixture) -> None:
+    """
+    Test ``get_resource_extension``.
+    """
+    session = mocker.MagicMock()
+    session.head.return_value.__aenter__.return_value.headers = {
+        "content-type": "image/jpeg",
+    }
+
+    extension = await get_resource_extension(session, "https://example.com/photo.jpg")
+    assert extension == ".jpg"
+
+
+def test_get_filename() -> None:
+    """
+    Test ``get_filename``.
+    """
     assert (
-        contents
-        == """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta content="article" property="og:type"/>
-<meta content="Post title" property="og:title"/>
-<meta content="This is the post description" property="og:description"/>
-<link href="https://webmention.io/example.com/webmention" rel="webmention"/>
-<link href="https://external.example.com/css/basic.css" rel="stylesheet"/>
-<link href="/css/style.css" rel="stylesheet"/>
-</head>
-<body>
-<p>Hi, there!</p>
-<p>This is an external image:</p>
-<p><img alt="alt text" src="img/40ae98e74569d5ca87eec869e592053d.png" title="Logo Title Text 1"/></p>
-</body>
-</html>"""
-    )
-
-    with open(
-        post.file_path.parent / "img/40ae98e74569d5ca87eec869e592053d.png",
-    ) as fp:
-        assert fp.read() == "image-content"
-
-
-def test_process_post_directory_exists(mock_post, mocker, requests_mock, fs):
-    root = Path("/path/to/blog")
-
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: Hello, World!
-        keywords: test
-        summary: My first post
-
-        Hi, there!
-
-        This is an external image:
-
-        ![alt text](https://example.com/images/icon48.png "Logo Title Text 1")
-        """,
-        )
-    PostBuilder(root, config).process_post(post)
-
-    fs.create_dir(post.file_path.parent / "img")
-
-    assistant = MirrorImagesAssistant(root, config)
-
-    mocker.patch(
-        "nefelibata.assistants.mirror_images.get_resource_extension",
-        return_value=".png",
-    )
-    requests_mock.get(
-        "https://example.com/images/icon48.png",
-        text="image-content",
-    )
-
-    assistant.process_post(post)
-
-    with open(post.file_path.with_suffix(".html")) as fp:
-        contents = fp.read()
-
-    assert (
-        contents
-        == """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta content="article" property="og:type"/>
-<meta content="Post title" property="og:title"/>
-<meta content="This is the post description" property="og:description"/>
-<link href="https://webmention.io/example.com/webmention" rel="webmention"/>
-<link href="https://external.example.com/css/basic.css" rel="stylesheet"/>
-<link href="/css/style.css" rel="stylesheet"/>
-</head>
-<body>
-<p>Hi, there!</p>
-<p>This is an external image:</p>
-<p><img alt="alt text" src="img/40ae98e74569d5ca87eec869e592053d.png" title="Logo Title Text 1"/></p>
-</body>
-</html>"""
-    )
-
-    with open(
-        post.file_path.parent / "img/40ae98e74569d5ca87eec869e592053d.png",
-    ) as fp:
-        assert fp.read() == "image-content"
-
-
-def test_process_post_image_exists(mock_post, mocker, fs):
-    root = Path("/path/to/blog")
-
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: Hello, World!
-        keywords: test
-        summary: My first post
-
-        Hi, there!
-
-        This is an external image:
-
-        ![alt text](https://example.com/images/icon48.png "Logo Title Text 1")
-        """,
-        )
-    PostBuilder(root, config).process_post(post)
-
-    fs.create_file(post.file_path.parent / "img/40ae98e74569d5ca87eec869e592053d.png")
-
-    assistant = MirrorImagesAssistant(root, config)
-
-    mocker.patch(
-        "nefelibata.assistants.mirror_images.get_resource_extension",
-        return_value=".png",
-    )
-
-    assistant.process_post(post)
-
-    with open(post.file_path.with_suffix(".html")) as fp:
-        contents = fp.read()
-
-    assert (
-        contents
-        == """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta content="article" property="og:type"/>
-<meta content="Post title" property="og:title"/>
-<meta content="This is the post description" property="og:description"/>
-<link href="https://webmention.io/example.com/webmention" rel="webmention"/>
-<link href="https://external.example.com/css/basic.css" rel="stylesheet"/>
-<link href="/css/style.css" rel="stylesheet"/>
-</head>
-<body>
-<p>Hi, there!</p>
-<p>This is an external image:</p>
-<p><img alt="alt text" src="img/40ae98e74569d5ca87eec869e592053d.png" title="Logo Title Text 1"/></p>
-</body>
-</html>"""
+        get_filename("https://example.com/photo.jpg", ".jpg")
+        == "39c18449612764d8d87663444426c037.jpg"
     )
 
 
-def test_get_resource_extension(requests_mock):
-    requests_mock.head(
-        "https://example.com/image",
-        headers={"content-type": "image/jpeg"},
-    )
-    assert get_resource_extension("https://example.com/image") == ".jpg"
+def test_add_exif(mocker: MockerFixture) -> None:
+    """
+    Test ``add_exif``.
+    """
+    BytesIO = mocker.patch("nefelibata.assistants.mirror_images.BytesIO")
+    Image = mocker.patch("nefelibata.assistants.mirror_images.Image")
+    piexif = mocker.patch("nefelibata.assistants.mirror_images.piexif")
 
-
-def test_process_site(mock_post, mocker, requests_mock, fs):
-    root = Path("/path/to/blog")
-
-    fs.create_dir(root / "build")
-    with open(root / "build/about.html", "w") as fp:
-        fp.write('<img src="https://example.com/images/icon48.png" />')
-
-    assistant = MirrorImagesAssistant(root, config)
-
-    mocker.patch(
-        "nefelibata.assistants.mirror_images.get_resource_extension",
-        return_value=".png",
-    )
-    requests_mock.get(
-        "https://example.com/images/icon48.png",
-        text="image-content",
-    )
-
-    assistant.process_site()
-
-    with open(root / "build/about.html") as fp:
-        contents = fp.read()
-
-    assert contents == '<img src="img/40ae98e74569d5ca87eec869e592053d.png"/>'
-
-
-def test_process_post_not_modified(mock_post, mocker, requests_mock):
-    root = Path("/path/to/blog")
-
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: Hello, World!
-        keywords: test
-        summary: My first post
-
-        Hi, there!
-
-        This is an local image:
-
-        ![alt text](icon48.png "Logo Title Text 1")
-        """,
-        )
-        PostBuilder(root, config).process_post(post)
-
-    assistant = MirrorImagesAssistant(root, config)
-
-    assistant.process_post(post)
-
-    # file shouldn't have been touched
-    assert (
-        datetime.fromtimestamp(
-            post.file_path.with_suffix(".html").stat().st_mtime,
-        ).astimezone(timezone.utc)
-        == datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)
-    )
-
-
-def test_exif(mock_post, mocker, requests_mock):
-    root = Path("/path/to/blog")
-
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: Hello, World!
-        keywords: test
-        summary: My first post
-
-        Hi, there!
-
-        This is an external image:
-
-        ![alt text](https://example.com/images/image.jpg "Logo Title Text 1")
-        """,
-        )
-    PostBuilder(root, config).process_post(post)
-
-    assistant = MirrorImagesAssistant(root, config)
-
-    mocker.patch(
-        "nefelibata.assistants.mirror_images.get_resource_extension",
-        return_value=".jpg",
-    )
-
-    # create 1x1 jpeg
-    im = Image.new("RGB", (1, 1), color="black")
     buf = BytesIO()
-    im.save(buf, format="JPEG")
-    content = buf.getvalue()
-    requests_mock.get(
-        "https://example.com/images/image.jpg",
-        content=content,
-        headers={"Content-Type": "image/jpeg"},
+    add_exif(buf, "https://example.com/photo.jpg", "A title")
+
+    piexif.dump.assert_called_with(
+        {
+            "0th": {
+                piexif.ImageIFD.Copyright: "https://example.com/photo.jpg",
+                piexif.ImageIFD.ImageDescription: "A title",
+            },
+        },
+    )
+    Image.open.return_value.save.assert_called_with(
+        BytesIO.return_value,
+        "jpeg",
+        exif=piexif.dump.return_value,
     )
 
-    assistant.process_post(post)
 
-    # Image.open can take a Path, but not a fake_fs Path
-    im = Image.open(
-        str(post.file_path.parent / "img/dcd819cdc3ca4b41c3e83ed160c92254.jpg"),
-    )
-    exif = piexif.load(im.info["exif"])
+@pytest.mark.asyncio
+async def test_download_image(mocker: MockerFixture, post: Post) -> None:
+    """
+    Test ``download_image``.
+    """
+    # mock network calls
+    session = mocker.MagicMock()
+    session.head.return_value.__aenter__.return_value.headers = {
+        "content-type": "image/jpeg",
+    }
+    response = session.get.return_value.__aenter__.return_value = mocker.MagicMock()
+    response.content.iter_chunked.return_value.__aiter__.return_value = [
+        b"hello",
+        b" ",
+        b"world",
+    ]
 
-    assert (
-        exif["0th"][piexif.ImageIFD.ImageDescription]
-        == b"https://example.com/images/image.jpg"
+    # mock image manipulation
+    add_exif = mocker.patch("nefelibata.assistants.mirror_images.add_exif")
+    add_exif.return_value.getvalue.return_value = b"Hello"
+    BytesIO = mocker.patch("nefelibata.assistants.mirror_images.BytesIO")
+
+    _logger = mocker.patch("nefelibata.assistants.mirror_images._logger")
+
+    mirror = post.path.parent / "img"
+    mirror.mkdir()
+    replacements: Dict[str, str] = {}
+
+    # simple call
+    await download_image(
+        session,
+        "https://example.com/photo.jpg",
+        "A title",
+        post,
+        mirror,
+        replacements,
     )
+    assert (mirror / "39c18449612764d8d87663444426c037.jpg").exists()
+    add_exif.assert_called_with(
+        BytesIO.return_value,
+        "https://example.com/photo.jpg",
+        "A title",
+    )
+    assert replacements == {
+        "https://example.com/photo.jpg": "img/39c18449612764d8d87663444426c037.jpg",
+    }
+    _logger.info.assert_called_with(
+        "Downloading image from %s",
+        "https://example.com/photo.jpg",
+    )
+
+    # call again
+    await download_image(
+        session,
+        "https://example.com/photo.jpg",
+        "A title",
+        post,
+        mirror,
+        replacements,
+    )
+    _logger.debug.assert_called_with("Image already mirrored")
+
+    # no EXIF
+    session.head.return_value.__aenter__.return_value.headers = {
+        "content-type": "image/png",
+    }
+    BytesIO.return_value.getvalue.return_value = b"Hello"
+    add_exif.reset_mock()
+    await download_image(
+        session,
+        "https://example.com/logo.png",
+        "A title",
+        post,
+        mirror,
+        replacements,
+    )
+    add_exif.assert_not_called()
