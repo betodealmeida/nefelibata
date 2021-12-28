@@ -1,237 +1,246 @@
+"""
+An announcer for webmentions.
+"""
+
+import asyncio
 import logging
-import re
-import urllib.parse
-from pathlib import Path
-from typing import Any
-from typing import cast
-from typing import Dict
-from typing import List
-from typing import Optional
+from datetime import datetime, timezone
+from typing import Dict, Literal, Optional, TypedDict
 
 import dateutil.parser
-import requests
+from aiohttp import ClientResponseError, ClientSession
 from bs4 import BeautifulSoup
+from pydantic import BaseModel
+from yarl import URL
 
-from nefelibata.announcers import Announcer
-from nefelibata.announcers import Comment
-from nefelibata.announcers import Response
-from nefelibata.announcers import User
-from nefelibata.post import Post
-from nefelibata.utils import json_storage
+from nefelibata.announcers.base import (
+    Announcement,
+    Announcer,
+    Author,
+    Interaction,
+    Scope,
+)
+from nefelibata.post import Post, extract_links
+from nefelibata.utils import update_yaml
 
 _logger = logging.getLogger(__name__)
 
 
-# languages supported by IndieNews
-SUPPORTED_LANGUAGES = ["en", "sv", "de", "fr", "nl", "ru"]
+# map from wm-property to ``Interaction.type``
+INTERACTION_TYPES = {
+    "in-reply-to": "reply",
+    "mention-of": "mention",
+    "like-of": "like",
+}
 
-# URL to send users to comment on posts via webmention
-COMMENT_URL = "https://commentpara.de/"
+
+class Webmention(BaseModel):
+    """
+    A webmention.
+    """
+
+    source: str
+    target: str
+    status: Literal["success", "queue", "invalid", "error"]
+    location: Optional[str] = None
 
 
-def get_webmention_endpoint(url) -> Optional[str]:
-    # start with a HEAD request
-    response = requests.head(url)
-    if "Link" in response.headers:
-        header = response.headers["Link"]
-        links = requests.utils.parse_header_links(header)
-        for link in links:
-            if link["rel"] == "webmention":
-                return cast(str, urllib.parse.urljoin(url, link["url"]))
-    elif "text/html" not in response.headers.get("Content-Type", ""):
+class WebmentionType(TypedDict, total=False):
+    """
+    Type for ``Webmention.dict()``.
+    """
+
+    source: str
+    target: str
+    status: Literal["success", "queue", "invalid", "error"]
+    location: str
+
+
+async def get_webmention_endpoint(session: ClientSession, target: URL) -> Optional[URL]:
+    """
+    Given a target URL, find the webmention endpoint, if any.
+    """
+    if target.scheme not in {"http", "https"}:
         return None
 
-    response = requests.get(url)
-    html = response.content
+    async with session.head(target) as response:
+        for rel, params in response.links.items():
+            if "webmention" in rel.split(" "):
+                return target.join(URL(params["url"]))
+
+        if "text/html" not in response.headers.get("content-type", ""):
+            return None
+
+    async with session.get(target) as response:
+        try:
+            html = await response.text()
+        except UnicodeDecodeError:
+            return None
+
     soup = BeautifulSoup(html, "html.parser")
-    link = soup.find(rel="webmention")
+    link = soup.find(rel="webmention", href=True)
     if link:
-        return cast(str, urllib.parse.urljoin(url, link["href"]))
+        return target.join(URL(link["href"]))
 
     return None
 
 
-def get_response_from_child(child: Dict[str, Any], target: str) -> Response:
-    # for the source, let's try to find a name, else fall back to URL
-    source = child.get("name") or child.get("url") or "Unknown"
+async def send_webmention(
+    session: ClientSession,
+    source: URL,
+    target: URL,
+) -> Webmention:
+    """
+    Send a webmention to a target.
+    """
+    endpoint = await get_webmention_endpoint(session, target)
+    if not endpoint:
+        _logger.info("No endpoint found")
+        return Webmention(
+            source=str(source),
+            target=str(target),
+            status="invalid",
+        )
 
-    url = child.get("wm-source") or child.get("url") or "#"
-    id_ = f'webmention:{child["wm-id"]}'
+    _logger.info("Sending webmention to %s", endpoint)
+    payload = {"source": source, "target": target}
+    async with session.post(endpoint, data=payload) as response:
+        try:
+            response.raise_for_status()
+        except ClientResponseError:
+            _logger.error("Error sending webmention")
+            return Webmention(
+                source=str(source),
+                target=str(target),
+                status="error",
+            )
 
-    # for timestamp we fall back to when the response was received
-    timestamp = child.get("published") or child["wm-received"]
-    timestamp = dateutil.parser.parse(timestamp).isoformat()
+        if response.status == 201:
+            return Webmention(
+                source=str(source),
+                target=str(target),
+                status="queue",
+                location=response.headers["location"],
+            )
 
-    user: User = {
-        "name": child["author"]["name"],
-        "image": child["author"]["photo"],
-        "url": child["author"]["url"],
-    }
-
-    if "content" in child:
-        text = child["content"].get("text", "")
-        html = child["content"].get("html", "")
-        summary = summarize(html or text, target)
-    else:
-        text = html = summary = ""
-
-    comment: Comment = {"text": text, "summary": summary, "html": html}
-
-    return {
-        "source": source,
-        "url": url,
-        "id": id_,
-        "timestamp": timestamp,
-        "user": user,
-        "comment": comment,
-    }
+    return Webmention(
+        source=str(source),
+        target=str(target),
+        status="success",
+    )
 
 
-def summarize(text: str, target: Optional[str] = None) -> str:
-    soup = BeautifulSoup(text, "html.parser")
+async def update_webmention(
+    session: ClientSession,
+    source: URL,
+    target: URL,
+    location: URL,
+) -> Webmention:
+    """
+    Update the status on a queued webmention.
+    """
+    async with session.get(location) as response:
+        status = "success" if response.ok else "queue"
 
-    # search for a paragraph containing the link
-    if target:
-        anchor = soup.find("a", href=target)
-        if anchor:
-            p = anchor.find_parent("p")
-            if p:
-                # what should we do with really long paragraphs? is that
-                # even a problem?
-                return str(p.get_text())
+    return Webmention(
+        source=str(source),
+        target=str(target),
+        status=status,
+    )
 
-    # return the first line
-    text = soup.get_text()
-    lines = text.split("\n")
 
-    return lines[0]
+async def collect_webmentions(
+    session: ClientSession,
+    source: URL,
+    target: URL,
+    webmentions: Dict[str, WebmentionType],
+) -> None:
+    """
+    Helper function to collect webmentions.
+    """
+    key = f"{source} => {target}"
+    if key not in webmentions:
+        webmention = await send_webmention(session, source, target)
+        webmentions[key] = webmention.dict()
+    elif webmentions[key]["status"] == "queue":
+        location = webmentions[key]["location"]
+        webmention = await update_webmention(session, source, target, location)
+        webmentions[key] = webmention.dict()
 
 
 class WebmentionAnnouncer(Announcer):
 
-    id = "webmention"
-    name = "Webmention"
-    url_header = "webmention-url"
+    """
+    An announcer for Webmention (https://indieweb.org/Webmention).
+    """
 
-    def __init__(
-        self,
-        root: Path,
-        config: Dict[str, Any],
-        endpoint: str,
-    ):
-        super().__init__(root, config)
+    scopes = [Scope.POST]
 
-        self.endpoint = endpoint  # used only in template
+    async def announce_post(self, post: Post) -> Optional[Announcement]:
+        path = post.path.parent / "webmentions.yaml"
 
-    def should_announce(self, post: Post) -> bool:
-        # Since the plugin can announce to multiple places, and new places can be added
-        # after a post has been published, we always try to find new links to which we
-        # should send mentions.
-        return True
-
-    def announce(self, post: Post) -> str:
-        _logger.info("Discovering links supporting webmention...")
-
-        # store successful mentions and their responses in a JSON file
-        post_directory = post.file_path.parent
-        storage = post_directory / "webmentions.json"
-        with json_storage(storage) as webmentions:
-            source = urllib.parse.urljoin(self.config["url"], post.url)
-
-            soup = BeautifulSoup(post.render(self.config), "html.parser")
-            for el in soup.find_all("a", href=re.compile("http")):
-                target = el.attrs.get("href")
-                if target not in webmentions:
-                    webmentions[target] = self._send_mention(source, target)
-                elif (
-                    webmentions[target]["success"]
-                    and isinstance(webmentions[target]["content"], dict)
-                    and webmentions[target]["content"].get("status") == "queued"
-                ):
-                    webmentions[target] = self._update_webmention(webmentions[target])
-
-            keywords = [
-                keyword.strip()
-                for keyword in post.parsed.get("keywords", "").split(",")
-            ]
-            if "indieweb" in keywords or "indienews" in keywords:
-                language = post.parsed.get("language") or self.config["language"]
-                if language not in SUPPORTED_LANGUAGES:
-                    _logger.error(
-                        f'Currently IndieNews supports only the following languages: {", ".join(SUPPORTED_LANGUAGES)}',
-                    )
-                else:
-                    target = f"https://news.indieweb.org/{language}"
-                    if target not in webmentions:
-                        webmentions[target] = self._send_mention(source, target)
-                    elif (
-                        webmentions[target]["success"]
-                        and isinstance(webmentions[target]["content"], dict)
-                        and webmentions[target]["content"].get("status") == "queued"
-                    ):
-                        webmentions[target] = self._update_webmention(
-                            webmentions[target],
+        tasks = []
+        with update_yaml(path) as webmentions:
+            async with ClientSession() as session:
+                for target in extract_links(post):
+                    for builder in self.builders:
+                        source = builder.absolute_url(post)
+                        task = asyncio.create_task(
+                            collect_webmentions(session, source, target, webmentions),
                         )
+                        tasks.append(task)
 
-        _logger.info("Success!")
+                await asyncio.gather(*tasks)
 
-        return COMMENT_URL
+        if any(webmention["status"] == "queue" for webmention in webmentions.values()):
+            # return nothing so we can check queued webmentions on next publish
+            return None
 
-    def _send_mention(self, source: str, target: str) -> Dict[str, Any]:
-        _logger.info(f"Checking {target}")
+        return Announcement(
+            url=post.url,
+            timestamp=datetime.now(timezone.utc),
+        )
 
-        endpoint = get_webmention_endpoint(target)
-        if not endpoint:
-            _logger.info("No endpoint found")
-            return {"success": False}
+    async def collect_post(self, post: Post) -> Dict[str, Interaction]:
+        interactions: Dict[str, Interaction] = {}
 
-        _logger.info(f"Sending mention to {endpoint}")
-        payload = {
-            "source": source,
-            "target": target,
-        }
-        response = requests.post(endpoint, data=payload)
-        webmention: Dict[str, Any] = {"success": response.ok}
-        if response.ok:
-            try:
-                webmention["content"] = response.json()
-            except ValueError:
-                webmention["content"] = response.text
+        async with ClientSession() as session:
+            for builder in self.builders:
+                target = builder.absolute_url(post)
+                payload = {"target": target}
 
-        return webmention
+                async with session.get(
+                    "https://webmention.io/api/mentions.jf2",
+                    data=payload,
+                ) as response:
+                    try:
+                        response.raise_for_status()
+                    except ClientResponseError:
+                        _logger.error("Error fetching webmentions")
+                        continue
 
-    def _update_webmention(self, webmention: Dict[str, Any]) -> Dict[str, Any]:
-        _logger.info("Found queued webmention response, checking for update")
+                    payload = await response.json()
 
-        location = webmention["content"]["location"]
-        try:
-            response = requests.get(location)
-        except Exception:
-            return webmention
+                for entry in payload["children"]:
+                    if entry["type"] != "entry":
+                        continue
 
-        if response.ok:
-            try:
-                webmention["content"] = response.json()
-            except ValueError:
-                webmention["content"] = response.text
+                    interactions[entry["wm-id"]] = Interaction(
+                        id=entry["wm-id"],
+                        name=entry.get("name", entry["wm-source"]),
+                        summary=entry.get("summary", {}).get("value"),
+                        content=entry["content"]["text"],
+                        published=dateutil.parser.parse(entry["published"]),
+                        updated=None,
+                        author=Author(
+                            name=entry["author"]["name"],
+                            url=entry["author"]["url"],
+                            avatar=entry["author"]["photo"],
+                            note=entry["author"].get("note", ""),
+                        ),
+                        url=entry["wm-source"],
+                        in_reply_to_id=None,
+                        type=INTERACTION_TYPES[entry["wm-property"]],
+                    )
 
-        return webmention
-
-    def collect(self, post: Post) -> List[Response]:
-        _logger.info("Collecting webmentions")
-
-        target = urllib.parse.urljoin(self.config["url"], post.url)
-        url = "https://webmention.io/api/mentions.jf2"
-        payload = {"target": target}
-        response = requests.get(url, params=payload)
-        try:
-            response.raise_for_status()
-        except Exception:
-            _logger.exception(f"Failed to load webmentions for {target}")
-            return []
-
-        feed = response.json()
-
-        _logger.info("Success!")
-
-        return [get_response_from_child(child, target) for child in feed["children"]]
+        return interactions

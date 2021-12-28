@@ -1,37 +1,45 @@
-# -*- coding: utf-8 -*-
+"""
+Create a new blog skeleton.
+"""
 import logging
 import os
 import shutil
 from pathlib import Path
 
-from pkg_resources import resource_filename
-from pkg_resources import resource_listdir
+from pkg_resources import resource_filename, resource_listdir
 
-__author__ = "Beto Dealmeida"
-__copyright__ = "Beto Dealmeida"
-__license__ = "mit"
-
+from nefelibata.builders.base import get_builders
+from nefelibata.utils import get_config
 
 _logger = logging.getLogger(__name__)
 
 
-def run(root: Path) -> None:
-    """Create initial structure for weblog."""
-    resources = resource_listdir("nefelibata", "skeleton")
-
+async def run(root: Path, force: bool = False) -> None:
+    """
+    Create a new blog skeleton.
+    """
+    resources = sorted(resource_listdir("nefelibata", "templates/skeleton"))
     for resource in resources:
         origin = Path(
-            resource_filename("nefelibata", os.path.join("skeleton", resource)),
+            resource_filename(
+                "nefelibata",
+                os.path.join("templates/skeleton", resource),
+            ),
         )
         target = root / resource
-
-        # good guy Greg does not overwrite existing files
-        if target.exists():
+        if target.exists() and not force:
             resource_type = "Directory" if origin.is_dir() else "File"
             raise IOError(f"{resource_type} {target} already exists!")
         if origin.is_dir():
-            shutil.copytree(origin, target)
+            target.mkdir(parents=True, exist_ok=True)
+            shutil.copytree(origin, target, dirs_exist_ok=True)
         else:
+            target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(origin, target)
 
-    _logger.info("Weblog created!")
+    # create templates
+    config = get_config(root)
+    for builder in get_builders(root, config).values():
+        builder.setup()
+
+    _logger.info("Blog created!")

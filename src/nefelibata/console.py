@@ -1,89 +1,79 @@
-# -*- coding: utf-8 -*-
 """
-Nefelibata weblog engine.
+Nefelibata blog engine.
 
 Usage:
-  nb init [ROOT_DIR] [--loglevel=INFO]
+  nb init [ROOT_DIR] [-f] [--loglevel=INFO]
   nb new POST [ROOT_DIR] [-t TYPE] [--loglevel=INFO]
-  nb build [ROOT_DIR] [-f] [-s POST_DIR] [--no-collect] [--loglevel=INFO]
-  nb preview [-p PORT] [ROOT_DIR] [--loglevel=INFO]
-  nb publish [ROOT_DIR] [-f] [-s POST_DIR] [--loglevel=INFO]
+  nb build [ROOT_DIR] [-f] [--loglevel=INFO]
+  nb publish [ROOT_DIR] [-f] [--loglevel=INFO]
 
 Actions:
-  init              Create a new weblog skeleton.
+  init              Create a new blog skeleton.
   new               Create a new post.
-  build             Build weblog from Markdown and social media interactions.
-  preview           Run SimpleHTTPServer.
-  publish           Publish weblog to configured locations and announce new posts.
+  build             Build blog from Markdown files and online interactions.
+  publish           Publish weblog to configured locations.
 
 Options:
   -h --help         Show this screen.
   --version         Show version.
-  -f --force        Force build/publishing of up-to-date resources.
-  -s POST_DIR       Build/publish a single post by specifying its directory
-  --no-collect      Do not collect replies when building.
+  -f --force        Force operation (eg, building up-to-date resources).
   -t TYPE           Custom template to use on the post. [default: post]
-  -p PORT           Port to run the web server for preview. [default: 8000]
   --loglevel=LEVEL  Level for logging. [default: INFO]
 
 Released under the MIT license.
 (c) 2013 Beto Dealmeida <roberto@dealmeida.net>
-
 """
+import asyncio
+import logging
 import os
 from pathlib import Path
-from typing import Optional
 
 from docopt import docopt
 
 from nefelibata import __version__
-from nefelibata.cli import build
-from nefelibata.cli import init
-from nefelibata.cli import new
-from nefelibata.cli import preview
-from nefelibata.cli import publish
-from nefelibata.post import Post
-from nefelibata.utils import find_directory
-from nefelibata.utils import setup_logging
+from nefelibata.cli import build, init, new, publish
+from nefelibata.utils import find_directory, setup_logging
 
-__author__ = "Beto Dealmeida"
-__copyright__ = "Beto Dealmeida"
-__license__ = "mit"
+_logger = logging.getLogger(__name__)
 
 
-def main() -> None:
-    """Main entry point allowing external calls"""
+async def main() -> None:
+    """
+    Dispatch command.
+    """
     arguments = docopt(__doc__, version=__version__)
 
     setup_logging(arguments["--loglevel"])
 
     if arguments["ROOT_DIR"] is None:
-        if arguments["init"]:
-            root = Path(".")
-        else:
-            root = find_directory(Path(os.getcwd()))
+        root = find_directory(Path(os.getcwd()))
     else:
         root = Path(arguments["ROOT_DIR"])
 
-    post: Optional[Post]
-    if arguments["-s"] is None:
-        post = None
-    elif arguments["-s"].endswith("index.mkd"):
-        post = Post(root, Path(arguments["-s"]).resolve())
-    else:
-        post = Post(root, Path(arguments["-s"]).resolve() / "index.mkd")
+    try:
+        if arguments["init"]:
+            await init.run(root, arguments["--force"])
+        elif arguments["new"]:
+            await new.run(root, arguments["POST"], arguments["-t"])
+        elif arguments["build"]:
+            await build.run(root, arguments["--force"])
+        elif arguments["publish"]:
+            await publish.run(root, arguments["--force"])
+    except asyncio.CancelledError:
+        _logger.info("Canceled")
 
-    if arguments["init"]:
-        init.run(root)
-    elif arguments["new"]:
-        new.run(root, arguments["POST"], arguments["-t"])
-    elif arguments["build"]:
-        build.run(root, post, arguments["--force"], not arguments["--no-collect"])
-    elif arguments["preview"]:
-        preview.run(root, int(arguments["-p"]))
-    elif arguments["publish"]:
-        publish.run(root, post, arguments["--force"])
+
+def run() -> None:
+    """
+    Run Nefelibata.
+
+    This is also an entry point for the CLI.
+    """
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        _logger.info("Stopping Nefelibata")
 
 
 if __name__ == "__main__":
-    main()
+    run()

@@ -1,130 +1,155 @@
-import logging
+"""
+A Nefelibata post (and associated functions).
+"""
+
+import asyncio
+import operator
 from datetime import datetime
-from email.header import decode_header
-from email.header import make_header
+from email.header import decode_header, make_header
 from email.parser import Parser
-from email.utils import formatdate
-from email.utils import parsedate_to_datetime
+from email.utils import formatdate, parsedate_to_datetime
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
+from typing import Any, Dict, Iterator, List, Optional, Set
 
-import markdown  # type: ignore
-from bs4 import BeautifulSoup
-from jinja2 import Environment
-from jinja2 import FileSystemLoader
+import marko
+from pydantic import BaseModel, PrivateAttr
+from yarl import URL
 
-from nefelibata.utils import EnclosureType
-from nefelibata.utils import get_enclosure
-
-_logger = logging.getLogger(__name__)
+from nefelibata.config import Config
+from nefelibata.enclosure import Enclosure, get_enclosures
+from nefelibata.utils import load_extra_metadata, split_header
 
 
-class Post:
-    def __init__(self, root: Path, file_path: Path):
-        self.root = root
-        self.file_path = file_path
+class Post(BaseModel):  # pylint: disable=too-few-public-methods
+    """
+    Model representing a post.
+    """
 
-        with open(file_path) as fp:
-            self.parsed = Parser().parse(fp)
+    # path to the post
+    path: Path
 
-        self.markdown = self.parsed.get_payload(decode=False)
-        self.html: str = markdown.markdown(
-            self.markdown,
-            extensions=["codehilite"],
-            output_format="html",
-        )
-        self.update_metadata()
+    # the title of the post, stored in the "subject" header
+    title: str
 
-    def render(self, config: Dict[str, Any]) -> str:
-        post_type = self.parsed.get("type")
-        if not post_type:
-            return self.html
+    # post creation timestamp, stored in the "date" header
+    timestamp: datetime
 
-        env = Environment(
-            loader=FileSystemLoader(
-                str(self.root / "templates" / config["theme"] / "posts"),
-            ),
-        )
-        template = env.get_template(f"{post_type}.html")
-        return str(template.render(post=self))
+    # all the headers from the post
+    metadata: Dict[str, Any]
 
-    @property
-    def enclosure(self) -> Optional[EnclosureType]:
-        return get_enclosure(self.root, self.file_path)
+    # special metadata
+    tags: Set[str]
+    categories: Set[str]
+    announcers: Set[str]
 
-    @property
-    def title(self) -> str:
-        return str(make_header(decode_header(self.parsed["subject"])))
+    enclosures: List[Enclosure]
 
-    @property
-    def summary(self) -> str:
-        if self.parsed["summary"]:
-            return str(make_header(decode_header(self.parsed["summary"])))
+    # a custom type will use a custom template
+    type: str
 
-        soup = BeautifulSoup(self.html, "html.parser")
-        if soup.p:
-            summary: str = soup.p.text.replace("\n", " ")
-            if len(summary) > 140:
-                summary = summary[:139] + "\u2026"
-            return summary
+    # relative URL to the post, without any extensions, eg ``first/index``
+    url: str
 
-        return "No summary."
+    # the Markdown contents of the file
+    content: str
 
-    @property
-    def date(self) -> datetime:
-        if not self.parsed["date"]:
-            raise Exception(f"Missing date on file {self.file_path}")
-        return parsedate_to_datetime(self.parsed["date"])
+    # add a lock to manipulate the post file
+    _lock: asyncio.Lock = PrivateAttr(default_factory=asyncio.Lock)
 
-    @property
-    def url(self) -> str:
-        return str(
-            self.file_path.relative_to(self.root / "posts").with_suffix(".html"),
-        )
 
-    @property
-    def up_to_date(self) -> bool:
-        html = self.file_path.with_suffix(".html")
-        return html.exists() and html.stat().st_mtime >= self.file_path.stat().st_mtime
+def build_post(root: Path, config: Config, path: Path) -> Post:
+    """
+    Build a post from a file path.
 
-    def update_metadata(self) -> None:
-        """Automatically generate date and subject headers."""
-        modified = False
+    Each post is stored in a file as an email.
+    """
+    with open(path, encoding="utf-8") as input_:
+        parsed = Parser().parse(input_)
 
-        if not self.parsed.get("date"):
-            date = self.file_path.stat().st_mtime
-            self.parsed["date"] = formatdate(date, localtime=True)
+    # set default for missing values
+    required = {
+        "subject": "No subject found",
+        "date": formatdate(path.stat().st_mtime, localtime=True),
+    }
+    modified = False
+    for header, default in required.items():
+        if header not in parsed:
+            parsed[header] = default
             modified = True
 
-        if not self.parsed.get("subject"):
-            # try to find an H1 tag or use the filename
-            soup = BeautifulSoup(self.html, "html.parser")
-            del self.parsed["subject"]  # needed to overwrite
-            if soup.h1:
-                self.parsed["subject"] = soup.h1.text
-            else:
-                # use directory name
-                self.parsed["subject"] = str(self.file_path.parent.name)
-            modified = True
+    metadata = {
+        k: str(make_header(decode_header(v)))
+        for k, v in parsed.items()
+        if k not in required
+    }
+    type_ = metadata.get("type", "post")
+    tags = split_header(metadata.get("keywords"))
+    categories = {
+        category_name
+        for category_name, category_config in config.categories.items()
+        if tags & set(category_config.tags)
+    }
 
-        if modified:
-            self.save()
+    if "announce-on" in metadata:
+        announcers = split_header(metadata.get("announce-on"))
+    else:
+        announcers = set(config.announcers)
+        parsed["announce-on"] = ", ".join(announcers)
+        modified = True
 
-    def save(self) -> None:
-        """Save post back."""
-        with open(self.file_path, "w") as fp:
-            fp.write(str(self.parsed))
+    if modified:
+        with open(path, "w", encoding="utf-8") as output:
+            output.write(str(parsed))
+
+    # load metadata from YAML files
+    metadata.update(load_extra_metadata(path.parent))
+
+    return Post(
+        path=path,
+        title=str(make_header(decode_header(parsed["subject"]))),
+        timestamp=parsedate_to_datetime(parsed["date"]),
+        metadata=metadata,
+        tags=tags,
+        categories=categories,
+        announcers=announcers,
+        enclosures=get_enclosures(root, path.parent),
+        type=type_,
+        url=str(path.relative_to(root / "posts").with_suffix("")),
+        content=parsed.get_payload(decode=False),
+    )
 
 
-def get_posts(root: Path, n: Optional[int] = None) -> List[Post]:
-    """Return list of posts for a given root directory."""
-    file_paths = list((root / "posts").glob("**/*.mkd"))
-    file_paths.sort(key=lambda file_path: file_path.stat().st_mtime, reverse=True)
+def get_posts(root: Path, config: Config, count: Optional[int] = None) -> List[Post]:
+    """
+    Return all the posts.
 
-    if n is not None:
-        file_paths = file_paths[:n]
+    Posts are sorted by timestamp in descending order.
+    """
+    paths = list((root / "posts").glob("**/*.mkd"))
+    posts = sorted(
+        (build_post(root, config, path) for path in paths),
+        key=operator.attrgetter("timestamp"),
+        reverse=True,
+    )
+    return posts[:count]  # a[:None] == a
 
-    return [Post(root, file_path) for file_path in file_paths]
+
+def extract_links(post: Post) -> Iterator[URL]:
+    """
+    Extract all links from a post.
+
+    This includes links in the content, as well as metadata.
+    """
+    for key, value in post.metadata.items():
+        if key.endswith("-url"):
+            yield URL(value)
+
+    tree = marko.parse(post.content)
+    queue = [tree]
+    while queue:
+        element = queue.pop(0)
+
+        if isinstance(element, marko.inline.Link):
+            yield URL(element.dest)
+        elif hasattr(element, "children"):
+            queue.extend(element.children)

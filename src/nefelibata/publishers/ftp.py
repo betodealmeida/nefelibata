@@ -1,53 +1,63 @@
+"""
+An FTP publisher.
+"""
 import logging
-from ftplib import FTP
+from datetime import datetime, timezone
+from ftplib import FTP, FTP_TLS, error_perm
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import Optional
+from typing import Any, Optional
 
-import requests
-
-from nefelibata.publishers import Publisher
+from nefelibata.config import Config
+from nefelibata.publishers.base import Publisher, Publishing
 
 _logger = logging.getLogger(__name__)
 
 
 class FTPPublisher(Publisher):
 
-    """A publisher that uploads the weblog to FTP."""
+    """
+    A publisher that uploads the blog to an FTP server.
+    """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         root: Path,
-        config: Dict[str, Any],
-        host: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        basedir: Optional[str] = None,
+        config: Config,
+        path: str,
+        hostname: str,
+        username: str = "",
+        password: str = "",
+        basedir: str = "",
+        use_tls: bool = False,
+        **kwargs: Any,
     ):
-        super().__init__(root, config)
+        super().__init__(root, config, path, **kwargs)
 
-        self.host = host
-        self.username = username or ""
-        self.password = password or ""
+        self.hostname = hostname
+        self.username = username
+        self.password = password
         self.basedir = basedir
+        self.use_tls = use_tls
 
-    def publish(self, force: bool = False) -> None:
-        # store file with the last time weblog was published
-        last_published_file = self.root / "last_published"
-        if last_published_file.exists():
-            last_published = last_published_file.stat().st_mtime
-        else:
-            last_published = 0
+    async def publish(
+        self,
+        since: Optional[datetime] = None,
+        force: bool = False,
+    ) -> Optional[Publishing]:
+        build = self.root / "build" / self.path
 
-        build = self.root / "build"
-        with FTP(self.host, self.username, self.password) as ftp:
+        FTPClass = FTP_TLS if self.use_tls else FTP
+        with FTPClass(self.hostname, self.username, self.password) as ftp:
+            if self.use_tls:
+                ftp.prot_p()  # pylint: disable=no-member
+
             if self.basedir:
                 ftp.cwd(self.basedir)
             pwd = basedir = Path(ftp.pwd())
 
-            # sort files to prevent unneeded calls to CWD
-            modified_files = sorted(self.find_modified_files(force, last_published))
+            # get files that need to be published, sorted to minimize ``CWD`` calls
+            modified_files = sorted(self.find_modified_files(force, since))
+
             for path in modified_files:
                 relative_directory = path.relative_to(build).parent
                 if relative_directory != pwd.relative_to(basedir):
@@ -56,14 +66,16 @@ class FTPPublisher(Publisher):
                     for directory in relative_directory.parts:
                         try:
                             ftp.cwd(directory)
-                        except Exception:
+                        except error_perm:
                             ftp.mkd(directory)
                             ftp.cwd(directory)
                     pwd = basedir / relative_directory
 
-                _logger.info(f"Uploading {path}")
-                with open(path, "rb") as fp:
-                    ftp.storbinary(f"STOR {path.name}", fp)
+                _logger.info("Uploading %s", path)
+                with open(path, "rb") as input_:
+                    ftp.storbinary(f"STOR {path.name}", input_)
 
-        # update last published
-        last_published_file.touch()
+        if modified_files:
+            return Publishing(timestamp=datetime.now(timezone.utc))
+
+        return None

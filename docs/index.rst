@@ -2,25 +2,26 @@
 nefelibata
 ==========
 
-A weblog engine focusing on **data ownership** and **persistence**.
+This is the documentation of **nefelibata**.
 
-How is it different?
-====================
+.. note::
 
-Nefelibata (Portuguese for "one who walks on clouds") is an `IndieWeb <https://indieweb.org/>`_ static website generator written in `Python <https://www.python.org/>`_ 3 that focus on preserving your content. In order to achieve that goal, it works similarly to common static website generators, with the following design decisions:
+    This is the main page of your project's `Sphinx`_ documentation.
+    It is formatted in `reStructuredText`_. Add additional pages
+    by creating rst-files in ``docs`` and adding them to the `toctree`_ below.
+    Use then `references`_ in order to link them from this page, e.g.
+    :ref:`authors` and :ref:`changes`.
 
-- Each post is a separate directory. The actual post is written in `Markdown <https://www.markdownguide.org/>`_ and stored as an `email message <https://tools.ietf.org/html/rfc5322.html>`_, and each post can have its own images, CSS, Javascript and other files.
-- Posts are converted into HTML, and the resulting weblog is composed of **only static files**. There are no databases, and all extra data is stored in JSON files.
-- External images are locally mirrored when the weblog is built, and the link is altered to point to the local resource. The engine **will warn you** if the generated HTML has any external resources (CSS, for example).
-- External links are saved to the `Wayback Machine <https://archive.org/web/>`_, and links are annotated with the archived link and date of archival, allowing readers to follow the original links even if they change in the future.
-- The weblog can be **published** to different locations, using a plugin architecture. Currently, nefelibata supports publishing to `Amazon S3 <https://aws.amazon.com/s3/>`_, `Neocities <https://neocities.org/>`_, FTP, and `IPFS <https://ipfs.io/>`_.
+    It is also possible to refer to the documentation of other Python packages
+    with the `Python domain syntax`_. By default you can reference the
+    documentation of `Sphinx`_, `Python`_, `NumPy`_, `SciPy`_, `matplotlib`_,
+    `Pandas`_, `Scikit-Learn`_. You can add more by extending the
+    ``intersphinx_mapping`` in your Sphinx's ``conf.py``.
 
-The IndieWeb
-============
+    The pretty useful extension `autodoc`_ is activated by default and lets
+    you include documentation from docstrings. Docstrings can be written in
+    `Google style`_ (recommended!), `NumPy style`_ and `classical style`_.
 
-Nefelibata acknowledges that most interactions occur in social networks like Twitter or Mastodon. The engine can be configured with global or per-post **announcers** that will post to social networks linking back to the content, so that people can comment and discuss posts outside of the weblog, a concept called `POSSE <https://indieweb.org/POSSE>`_ (Publish on your Own Site, Syndicate Elsewhere) in the IndieWeb.
-
-When the weblog is rebuilt, the announcers will collect any replies and store them locally, so that the comments are displayed in the weblog with your post. A post can be announced to multiple social networks, and the comments will be aggregated and preserved.
 
 Contents
 ========
@@ -28,11 +29,7 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   Getting Started <getting_started>
-   Configuration <configuration>
-   Usage <usage>
-   Customization <customization>
-   Development <development>
+   Overview <readme>
    License <license>
    Authors <authors>
    Changelog <changelog>

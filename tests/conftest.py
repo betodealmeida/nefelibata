@@ -1,62 +1,92 @@
-# -*- coding: utf-8 -*-
 """
     Dummy conftest.py for nefelibata.
 
     If you don't know what this is for, just leave it empty.
     Read more about conftest.py under:
-    https://pytest.org/latest/plugins.html
+    - https://docs.pytest.org/en/stable/fixture.html
+    - https://docs.pytest.org/en/stable/writing_plugins.html
 """
-import textwrap
+# pylint: disable=invalid-name, redefined-outer-name, unused-argument
 from pathlib import Path
-from unittest.mock import MagicMock
+from typing import Any, Callable, Iterator, Type
 
 import pytest
+import yaml
+from freezegun import freeze_time
+from pyfakefs.fake_filesystem import FakeFilesystem
 
-from nefelibata.post import Post
+from nefelibata.config import Config
+from nefelibata.constants import CONFIG_FILENAME
+from nefelibata.post import Post, build_post
+from nefelibata.utils import get_project_root
+
+from .fakes import CONFIG, POST_CONTENT
+
+
+class MockEntryPoint:  # pylint: disable=too-few-public-methods
+    """
+    A class for mocking entry points.
+    """
+
+    def __init__(self, name: str, class_: Callable[..., Any]):
+        self.name = name
+        self.class_ = class_
+
+    def load(self) -> Callable[..., Any]:
+        """
+        Return the class.
+        """
+        return self.class_
 
 
 @pytest.fixture
-def mock_post(fs):
-    def build_post(markdown: str) -> Post:
+def make_entry_point() -> Type[MockEntryPoint]:
+    """
+    Fixture for a helper function to mock entry points.
+    """
+    return MockEntryPoint
 
-        root = Path("/path/to/blog")
+
+@pytest.fixture
+def root(fs: FakeFilesystem) -> Iterator[Path]:
+    """
+    Create the blog root directory.
+    """
+    # Add the templates to the fake filesystem, so builders can load them
+    # during tests. The actual path depends if we're running in development
+    # mode (``src/``) or installed (``site-packages``).
+    root = get_project_root()
+    locations = ("src/nefelibata/templates", "site-packages/nefelibata/templates")
+    for location in locations:
         try:
-            fs.create_dir(root)
-        except FileExistsError:
+            fs.add_real_directory(root / location)
+        except FileNotFoundError:
             pass
-        try:
-            fs.create_dir(root / "templates/test-theme")
-        except FileExistsError:
-            pass
-        with open(root / "templates/test-theme/post.html", "w") as fp:
-            fp.write(
-                """
-<!DOCTYPE html><html lang="en">
-<head>
-<meta content="article" property="og:type"/>
-<meta content="Post title" property="og:title"/>
-<meta content="This is the post description" property="og:description"/>
-<link href="{{ config.webmention.endpoint }}" rel="webmention" />
-<link href="https://external.example.com/css/basic.css" rel="stylesheet">
-<link href="/css/style.css" rel="stylesheet">
-{% for stylesheet in stylesheets %}
-<link href="{{ stylesheet }}" rel="stylesheet">
-{% endfor %}
-</head>
-<body>
-{{ post.render(config) }}
-</body>
-</html>""",
-            )
-        fs.create_file(root / "build/css/style.css")
 
-        file_path = Path("/path/to/blog/posts/first/index.mkd")
-        fs.create_file(file_path)
+    root = Path("/path/to/blog")
+    fs.create_dir(root)
+    yield root
 
-        contents = textwrap.dedent(markdown).strip()
-        with open(file_path, "w") as fp:
-            fp.write(contents)
 
-        return Post(root, file_path)
+@pytest.fixture
+def config(fs: FakeFilesystem, root: Path) -> Iterator[Config]:
+    """
+    Create configuration file.
+    """
+    fs.create_file(root / CONFIG_FILENAME, contents=yaml.dump(CONFIG))
 
-    yield build_post
+    yield Config(**CONFIG)
+
+
+@pytest.fixture
+def post(fs: FakeFilesystem, root: Path, config: Config) -> Iterator[Post]:
+    """
+    Create a post.
+    """
+    post_directory = root / "posts/first"
+    post_path = post_directory / "index.mkd"
+    with freeze_time("2021-01-01T00:00:00Z"):
+        fs.create_file(post_path, contents=POST_CONTENT)
+        post = build_post(root, config, post_path)
+
+    yield post

@@ -1,378 +1,147 @@
-import os
-from datetime import datetime
-from datetime import timezone
+"""
+Tests for ``nefelibata.publishers.s3``.
+"""
+# pylint: disable=invalid-name
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from unittest import mock
 
+import pytest
 from botocore.exceptions import ClientError
 from freezegun import freeze_time
+from pyfakefs.fake_filesystem import FakeFilesystem
+from pytest_mock import MockerFixture
 
+from nefelibata.config import Config
 from nefelibata.publishers.s3 import S3Publisher
 
-__author__ = "Beto Dealmeida"
-__copyright__ = "Beto Dealmeida"
-__license__ = "mit"
 
-
-config: Dict[str, Any] = {}
-
-
-def test_create_bucket():
-    root = Path("/path/to/blog")
-
-    publisher = S3Publisher(
-        root,
-        config,
-        bucket="blog.example.com",
-        AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
-        AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
-        region="us-east-1",
-    )
-
-    with mock.patch("nefelibata.publishers.s3.boto3.client") as mock_boto3_client:
-        success = publisher._create_bucket()
-
-    assert success
-    mock_boto3_client.return_value.create_bucket.assert_called_with(
-        Bucket="blog.example.com",
-        CreateBucketConfiguration={"LocationConstraint": "us-east-1"},
-        ACL="public-read",
-    )
-
-
-def test_create_bucket_error():
-    root = Path("/path/to/blog")
-
-    publisher = S3Publisher(
-        root,
-        config,
-        bucket="blog.example.com",
-        AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
-        AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
-        region="us-east-1",
-    )
-
-    with mock.patch("nefelibata.publishers.s3.boto3.client") as mock_boto3_client:
-        mock_boto3_client.return_value.create_bucket.side_effect = ClientError(
-            operation_name="create_bucket",
-            error_response={"Error": {"Code": "42", "Message": "Some error"}},
-        )
-        success = publisher._create_bucket()
-
-    assert not success
-
-
-def test_upload_file():
-    root = Path("/path/to/blog")
-
-    publisher = S3Publisher(
-        root,
-        config,
-        bucket="blog.example.com",
-        AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
-        AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
-        region="us-east-1",
-    )
-
-    file_path = key = "foo/bar.jpg"
-    with mock.patch("nefelibata.publishers.s3.boto3.client") as mock_boto3_client:
-        success = publisher._upload_file(file_path, key)
-
-    assert success
-    mock_boto3_client.return_value.upload_file.assert_called_with(
-        "foo/bar.jpg",
-        "blog.example.com",
-        "foo/bar.jpg",
-        ExtraArgs={"ACL": "public-read", "ContentType": "image/jpeg"},
-    )
-
-
-def test_upload_file_no_mimetype():
-    root = Path("/path/to/blog")
-
-    publisher = S3Publisher(
-        root,
-        config,
-        bucket="blog.example.com",
-        AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
-        AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
-        region="us-east-1",
-    )
-
-    file_path = key = "foo/bar"
-    with mock.patch("nefelibata.publishers.s3.boto3.client") as mock_boto3_client:
-        success = publisher._upload_file(file_path, key)
-
-    assert success
-    mock_boto3_client.return_value.upload_file.assert_called_with(
-        "foo/bar",
-        "blog.example.com",
-        "foo/bar",
-        ExtraArgs={"ACL": "public-read"},
-    )
-
-
-def test_upload_file_error():
-    root = Path("/path/to/blog")
-
-    publisher = S3Publisher(
-        root,
-        config,
-        bucket="blog.example.com",
-        AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
-        AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
-        region="us-east-1",
-    )
-
-    file_path = key = "foo/bar"
-    with mock.patch("nefelibata.publishers.s3.boto3.client") as mock_boto3_client:
-        mock_boto3_client.return_value.upload_file.side_effect = ClientError(
-            operation_name="upload_file",
-            error_response={"Error": {"Code": "42", "Message": "Some error"}},
-        )
-        success = publisher._upload_file(file_path, key)
-
-    assert not success
-
-
-def test_configure_website():
-    root = Path("/path/to/blog")
-
-    publisher = S3Publisher(
-        root,
-        config,
-        bucket="blog.example.com",
-        AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
-        AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
-        region="us-east-1",
-    )
-
-    with mock.patch("nefelibata.publishers.s3.boto3.client") as mock_boto3_client:
-        publisher._configure_website()
-
-    mock_boto3_client.return_value.put_bucket_website.assert_called_with(
-        Bucket="blog.example.com",
-        WebsiteConfiguration={"IndexDocument": {"Suffix": "index.html"}},
-    )
-
-
-def test_configure_route53():
-    root = Path("/path/to/blog")
-
-    publisher = S3Publisher(
-        root,
-        config,
-        bucket="blog.example.com",
-        AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
-        AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
-        region="us-east-1",
-    )
-
-    with mock.patch("nefelibata.publishers.s3.boto3.client") as mock_boto3_client:
-        mock_boto3_client.return_value.list_hosted_zones.return_value = {
-            "HostedZones": [
-                {"Name": "foobar.com", "Id": "2"},
-                {"Name": "example.com.", "Id": "1"},
+@pytest.mark.asyncio
+async def test_publish(
+    mocker: MockerFixture,
+    fs: FakeFilesystem,
+    root: Path,
+    config: Config,
+) -> None:
+    """
+    Test ``publish``.
+    """
+    mocker.patch.object(
+        S3Publisher,
+        "find_modified_files",
+        return_value=iter(
+            [
+                root / "build/generic/one/index.html",
+                root / "build/generic/one/photo.jpg",
+                root / "build/generic/one/blob",
             ],
-        }
-        publisher._configure_route53("blog.example.com.")
-
-    mock_boto3_client.return_value.change_resource_record_sets.assert_called_with(
-        HostedZoneId="1",
-        ChangeBatch={
-            "Changes": [
-                {
-                    "Action": "UPSERT",
-                    "ResourceRecordSet": {
-                        "Name": "blog.example.com",
-                        "Type": "CNAME",
-                        "SetIdentifier": "nefelibata",
-                        "Region": "us-east-1",
-                        "TTL": 600,
-                        "ResourceRecords": [
-                            {
-                                "Value": "blog.example.com.s3-website-us-east-1.amazonaws.com",
-                            },
-                        ],
-                    },
-                },
-            ],
-        },
+        ),
     )
+    boto3 = mocker.patch("nefelibata.publishers.s3.boto3")
 
-
-def test_configure_route53_no_zone():
-    root = Path("/path/to/blog")
+    fs.create_file(root / "build/generic/one", contents="Hello, world!")
 
     publisher = S3Publisher(
         root,
         config,
-        bucket="blog.example.com",
-        AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
-        AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
-        region="us-east-1",
+        "generic",
+        "KEY",
+        "SECRET",
+        "example.com",
     )
 
-    with mock.patch("nefelibata.publishers.s3.boto3.client") as mock_boto3_client:
-        mock_boto3_client.return_value.list_hosted_zones.return_value = {
-            "HostedZones": [
-                {"Name": "foobar.com", "Id": "2"},
-                {"Name": "foobaz.com.", "Id": "1"},
-            ],
-        }
-        publisher._configure_route53("blog.example.com.")
-
-    mock_boto3_client.return_value.change_resource_record_sets.assert_not_called()
-
-
-def test_publish(fs):
-    root = Path("/path/to/blog")
-    fs.create_dir(root)
-
-    publisher = S3Publisher(
-        root,
-        config,
-        bucket="blog.example.com",
-        AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
-        AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
-        configure_website=True,
-        configure_route53="blog.example.com.",
-        region="us-east-1",
-    )
-
-    with freeze_time("2020-01-01T00:00:00Z"):
-        fs.create_file(root / "last_published")
-
-    # create 2 posts, 1 of them up-to-date
-    fs.create_dir(root / "build")
-    with freeze_time("2019-12-31T00:00:00Z"):
-        fs.create_dir(root / "build/one")
-        fs.create_file(root / "build/one/index.html")
-    with freeze_time("2020-01-02T00:00:00Z"):
-        fs.create_dir(root / "build/two")
-        fs.create_file(root / "build/two/index.html")
-
-    with freeze_time("2020-01-03T00:00:00Z"):
-        with mock.patch("nefelibata.publishers.s3.boto3.client") as mock_boto3_client:
-            mock_boto3_client.return_value.list_hosted_zones.return_value = {
-                "HostedZones": [
-                    {"Name": "foobar.com", "Id": "2"},
-                    {"Name": "example.com.", "Id": "1"},
-                ],
-            }
-            publisher.publish()
-
-    mock_boto3_client.return_value.upload_file.assert_called_once_with(
-        "/path/to/blog/build/two/index.html",
-        "blog.example.com",
-        "two/index.html",
-        ExtraArgs={"ACL": "public-read", "ContentType": "text/html"},
-    )
-    mtime = (root / "last_published").stat().st_mtime
-    assert (
-        datetime.fromtimestamp(mtime).astimezone(timezone.utc).isoformat()
-        == "2020-01-03T00:00:00+00:00"
-    )
-
-
-def test_publish_no_last_published(fs):
-    root = Path("/path/to/blog")
-    fs.create_dir(root)
-
-    publisher = S3Publisher(
-        root,
-        config,
-        bucket="blog.example.com",
-        AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
-        AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
-        region="us-east-1",
-    )
-
-    # create 2 posts
-    fs.create_dir(root / "build")
-    with freeze_time("2019-12-31T00:00:00Z"):
-        fs.create_dir(root / "build/one")
-        fs.create_file(root / "build/one/index.html")
-    with freeze_time("2020-01-02T00:00:00Z"):
-        fs.create_dir(root / "build/two")
-        fs.create_file(root / "build/two/index.html")
-
-    with freeze_time("2020-01-03T00:00:00Z"):
-        with mock.patch("nefelibata.publishers.s3.boto3.client") as mock_boto3_client:
-            publisher.publish()
-
-    mock_boto3_client.return_value.upload_file.assert_has_calls(
+    with freeze_time("2021-01-01T00:00:00Z"):
+        publishing = await publisher.publish()
+    assert publishing.dict() == {
+        "timestamp": datetime(2021, 1, 1, 0, 0, tzinfo=timezone.utc),
+    }
+    boto3.client.return_value.upload_file.assert_has_calls(
         [
-            mock.call(
-                "/path/to/blog/build/two/index.html",
-                "blog.example.com",
-                "two/index.html",
-                ExtraArgs={"ACL": "public-read", "ContentType": "text/html"},
-            ),
-            mock.call(
-                "/path/to/blog/build/one/index.html",
-                "blog.example.com",
+            mocker.call(
+                "/path/to/blog/build/generic/one/index.html",
+                "example.com",
                 "one/index.html",
                 ExtraArgs={"ACL": "public-read", "ContentType": "text/html"},
             ),
-        ],
-    )
-    mtime = (root / "last_published").stat().st_mtime
-    assert (
-        datetime.fromtimestamp(mtime).astimezone(timezone.utc).isoformat()
-        == "2020-01-03T00:00:00+00:00"
-    )
-
-
-def test_publish_broken_symlink(fs):
-    root = Path("/path/to/blog")
-    fs.create_dir(root)
-
-    publisher = S3Publisher(
-        root,
-        config,
-        bucket="blog.example.com",
-        AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID",
-        AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY",
-        region="us-east-1",
-    )
-
-    # create 2 posts
-    fs.create_dir(root / "build")
-    with freeze_time("2019-12-31T00:00:00Z"):
-        fs.create_dir(root / "build/one")
-        fs.create_file(root / "build/one/index.html")
-    with freeze_time("2020-01-02T00:00:00Z"):
-        fs.create_dir(root / "build/two")
-        fs.create_file(root / "build/two/index.html")
-
-    os.symlink(root / "posts/non-existent", root / "build/three")
-
-    with freeze_time("2020-01-03T00:00:00Z"):
-        with mock.patch("nefelibata.publishers.s3.boto3.client") as mock_boto3_client:
-            publisher.publish()
-
-    mock_boto3_client.return_value.upload_file.assert_has_calls(
-        [
-            mock.call(
-                "/path/to/blog/build/two/index.html",
-                "blog.example.com",
-                "two/index.html",
-                ExtraArgs={"ACL": "public-read", "ContentType": "text/html"},
+            mocker.call(
+                "/path/to/blog/build/generic/one/photo.jpg",
+                "example.com",
+                "one/photo.jpg",
+                ExtraArgs={"ACL": "public-read", "ContentType": "image/jpeg"},
             ),
-            mock.call(
-                "/path/to/blog/build/one/index.html",
-                "blog.example.com",
-                "one/index.html",
-                ExtraArgs={"ACL": "public-read", "ContentType": "text/html"},
+            mocker.call(
+                "/path/to/blog/build/generic/one/blob",
+                "example.com",
+                "one/blob",
+                ExtraArgs={"ACL": "public-read"},
             ),
         ],
     )
 
-    mtime = (root / "last_published").stat().st_mtime
-    assert (
-        datetime.fromtimestamp(mtime).astimezone(timezone.utc).isoformat()
-        == "2020-01-03T00:00:00+00:00"
+
+@pytest.mark.asyncio
+async def test_publish_no_modified_files(
+    mocker: MockerFixture,
+    root: Path,
+    config: Config,
+) -> None:
+    """
+    Test ``publish`` when no files have been modified.
+    """
+    mocker.patch.object(
+        S3Publisher,
+        "find_modified_files",
+        return_value=iter([]),
     )
+    mocker.patch("nefelibata.publishers.s3.boto3")
+
+    publisher = S3Publisher(
+        root,
+        config,
+        "generic",
+        "KEY",
+        "SECRET",
+        "example.com",
+    )
+
+    with freeze_time("2021-01-01T00:00:00Z"):
+        publishing = await publisher.publish()
+    assert publishing is None
+
+
+@pytest.mark.asyncio
+async def test_publish_error(
+    mocker: MockerFixture,
+    root: Path,
+    config: Config,
+) -> None:
+    """
+    Test ``publish`` when an error occurs.
+    """
+    mocker.patch.object(
+        S3Publisher,
+        "find_modified_files",
+        return_value=iter([root / "build/generic/one/index.html"]),
+    )
+    boto3 = mocker.patch("nefelibata.publishers.s3.boto3")
+    boto3.client.return_value.upload_file.side_effect = ClientError(
+        operation_name="upload_file",
+        error_response={"Error": {"Code": 42, "Message": "A wild exception appears!"}},
+    )
+    _logger = mocker.patch("nefelibata.publishers.s3._logger")
+
+    publisher = S3Publisher(
+        root,
+        config,
+        "generic",
+        "KEY",
+        "SECRET",
+        "example.com",
+    )
+
+    with pytest.raises(ClientError) as excinfo:
+        await publisher.publish()
+    assert str(excinfo.value) == (
+        "An error occurred (42) when calling the upload_file operation: "
+        "A wild exception appears!"
+    )
+    _logger.exception.assert_called_with("An error occurred")

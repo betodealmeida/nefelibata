@@ -1,263 +1,215 @@
+"""
+Tests for ``nefelibata.console``.
+"""
+import asyncio
 from pathlib import Path
-from unittest.mock import MagicMock
 
-from freezegun import freeze_time
+import pytest
+from pytest_mock import MockerFixture
 
-from nefelibata.console import main
-
-__author__ = "Beto Dealmeida"
-__copyright__ = "Beto Dealmeida"
-__license__ = "mit"
+from nefelibata import console
 
 
-def test_console_init(mocker):
-    arguments = {
-        "--loglevel": "debug",
-        "init": True,
-        "new": False,
-        "build": False,
-        "preview": False,
-        "publish": False,
-        "ROOT_DIR": None,
-        "-s": None,
-    }
-    mocker.patch("nefelibata.console.docopt", return_value=arguments)
+@pytest.mark.asyncio
+async def test_main_init(mocker: MockerFixture) -> None:
+    """
+    Test ``main`` with the "init" action.
+    """
+    init = mocker.patch("nefelibata.console.init")
+    init.run = mocker.AsyncMock()
 
-    mock_init = MagicMock()
-    mocker.patch("nefelibata.console.init", mock_init)
-
-    main()
-
-    mock_init.run.assert_called_with(Path("."))
-
-
-def test_console_init_with_directory(mocker):
-    arguments = {
-        "--loglevel": "debug",
-        "init": True,
-        "new": False,
-        "build": False,
-        "preview": False,
-        "publish": False,
-        "ROOT_DIR": "/path/to/blog",
-        "-s": None,
-    }
-    mocker.patch("nefelibata.console.docopt", return_value=arguments)
-
-    mock_init = MagicMock()
-    mocker.patch("nefelibata.console.init", mock_init)
-
-    main()
-
-    mock_init.run.assert_called_with(Path("/path/to/blog"))
+    mocker.patch(
+        "nefelibata.console.docopt",
+        return_value={
+            "--loglevel": "debug",
+            "init": True,
+            "new": False,
+            "build": False,
+            "publish": False,
+            "ROOT_DIR": "/path/to/blog",
+            "--force": False,
+        },
+    )
+    await console.main()
+    init.run.assert_called_with(Path("/path/to/blog"), False)
 
 
-def test_console_new(mocker):
-    arguments = {
-        "--loglevel": "debug",
-        "init": False,
-        "new": True,
-        "build": False,
-        "preview": False,
-        "publish": False,
-        "ROOT_DIR": None,
-        "-s": None,
-        "-t": "post",
-        "POST": "Hello, world!",
-    }
-    mocker.patch("nefelibata.console.docopt", return_value=arguments)
+@pytest.mark.asyncio
+async def test_main_new(mocker: MockerFixture) -> None:
+    """
+    Test ``main`` with the "new" action.
+    """
+    new = mocker.patch("nefelibata.console.new")
+    new.run = mocker.AsyncMock()
 
-    mock_new = MagicMock()
-    mocker.patch("nefelibata.console.new", mock_new)
+    mocker.patch(
+        "nefelibata.console.docopt",
+        return_value={
+            "--loglevel": "debug",
+            "init": False,
+            "new": True,
+            "build": False,
+            "publish": False,
+            "ROOT_DIR": "/path/to/blog",
+            "POST": "A like",
+            "-t": "like",
+            "--force": False,
+        },
+    )
+    await console.main()
+    new.run.assert_called_with(Path("/path/to/blog"), "A like", "like")
+
+
+@pytest.mark.asyncio
+async def test_main_build(mocker: MockerFixture) -> None:
+    """
+    Test ``main`` with the "build" action.
+    """
+    build = mocker.patch("nefelibata.console.build")
+    build.run = mocker.AsyncMock()
+
+    mocker.patch(
+        "nefelibata.console.docopt",
+        return_value={
+            "--loglevel": "debug",
+            "init": False,
+            "new": False,
+            "build": True,
+            "publish": False,
+            "ROOT_DIR": "/path/to/blog",
+            "--force": False,
+        },
+    )
+    await console.main()
+    build.run.assert_called_with(Path("/path/to/blog"), False)
+
+    mocker.patch(
+        "nefelibata.console.docopt",
+        return_value={
+            "--loglevel": "debug",
+            "init": False,
+            "new": False,
+            "build": True,
+            "publish": False,
+            "ROOT_DIR": "/path/to/blog",
+            "--force": True,
+        },
+    )
+    await console.main()
+    build.run.assert_called_with(Path("/path/to/blog"), True)
+
+    mocker.patch(
+        "nefelibata.console.docopt",
+        return_value={
+            "--loglevel": "debug",
+            "init": False,
+            "new": False,
+            "build": True,
+            "publish": False,
+            "ROOT_DIR": None,
+            "--force": True,
+        },
+    )
     mocker.patch(
         "nefelibata.console.find_directory",
         return_value=Path("/path/to/blog"),
     )
-
-    main()
-
-    mock_new.run.assert_called_with(Path("/path/to/blog"), "Hello, world!", "post")
+    await console.main()
+    build.run.assert_called_with(Path("/path/to/blog"), True)
 
 
-def test_console_build(mocker):
-    arguments = {
-        "--loglevel": "debug",
-        "init": False,
-        "new": False,
-        "build": True,
-        "preview": False,
-        "publish": False,
-        "ROOT_DIR": None,
-        "-s": None,
-        "--force": True,
-        "--no-collect": True,
-    }
-    mocker.patch("nefelibata.console.docopt", return_value=arguments)
+@pytest.mark.asyncio
+async def test_main_publish(mocker: MockerFixture) -> None:
+    """
+    Test ``main`` with the "publish" action.
+    """
+    publish = mocker.patch("nefelibata.console.publish")
+    publish.run = mocker.AsyncMock()
 
-    mock_build = MagicMock()
-    mocker.patch("nefelibata.console.build", mock_build)
     mocker.patch(
-        "nefelibata.console.find_directory",
-        return_value=Path("/path/to/blog"),
+        "nefelibata.console.docopt",
+        return_value={
+            "--loglevel": "debug",
+            "init": False,
+            "new": False,
+            "build": False,
+            "publish": True,
+            "ROOT_DIR": "/path/to/blog",
+            "POST": "A like",
+            "-t": "like",
+            "--force": False,
+        },
     )
-
-    main()
-
-    mock_build.run.assert_called_with(Path("/path/to/blog"), None, True, False)
+    await console.main()
+    publish.run.assert_called_with(Path("/path/to/blog"), False)
 
 
-def test_console_build_single_post(mocker, mock_post):
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: This is your first post
-        keywords: welcome, blog
-        summary: Hello, world!
-
-        # Welcome #
-
-        This is your first post. It should be written using Markdown.
-        """,
-        )
-
-    mocker.patch("nefelibata.console.Post", return_value=post)
-
-    arguments = {
-        "--loglevel": "debug",
-        "init": False,
-        "new": False,
-        "build": True,
-        "preview": False,
-        "publish": False,
-        "ROOT_DIR": None,
-        "-s": "/path/to/blog/posts/first",
-        "--force": True,
-        "--no-collect": True,
-    }
-    mocker.patch("nefelibata.console.docopt", return_value=arguments)
-
-    mock_build = MagicMock()
-    mocker.patch("nefelibata.console.build", mock_build)
+@pytest.mark.asyncio
+async def test_main_no_action(mocker: MockerFixture) -> None:
+    """
+    Test ``main`` without any actions -- should not happen.
+    """
     mocker.patch(
-        "nefelibata.console.find_directory",
-        return_value=Path("/path/to/blog"),
+        "nefelibata.console.docopt",
+        return_value={
+            "--loglevel": "debug",
+            "init": False,
+            "new": False,
+            "build": False,
+            "publish": False,
+            "ROOT_DIR": "/path/to/blog",
+            "--force": False,
+        },
     )
-
-    main()
-
-    mock_build.run.assert_called_with(Path("/path/to/blog"), post, True, False)
+    await console.main()
 
 
-def test_console_preview(mocker):
-    arguments = {
-        "--loglevel": "debug",
-        "init": False,
-        "new": False,
-        "build": False,
-        "preview": True,
-        "publish": False,
-        "ROOT_DIR": None,
-        "-s": None,
-        "-p": 8001,
-    }
-    mocker.patch("nefelibata.console.docopt", return_value=arguments)
+@pytest.mark.asyncio
+async def test_main_canceled(mocker: MockerFixture) -> None:
+    """
+    Test canceling the ``main`` coroutine.
+    """
+    build = mocker.patch("nefelibata.console.build")
+    build.run = mocker.AsyncMock(side_effect=asyncio.CancelledError("Canceled"))
+    _logger = mocker.patch("nefelibata.console._logger")
 
-    mock_preview = MagicMock()
-    mocker.patch("nefelibata.console.preview", mock_preview)
     mocker.patch(
-        "nefelibata.console.find_directory",
-        return_value=Path("/path/to/blog"),
+        "nefelibata.console.docopt",
+        return_value={
+            "--loglevel": "debug",
+            "init": False,
+            "new": False,
+            "build": True,
+            "publish": False,
+            "ROOT_DIR": "/path/to/blog",
+            "--force": False,
+        },
     )
+    await console.main()
 
-    main()
-
-    mock_preview.run.assert_called_with(Path("/path/to/blog"), 8001)
-
-
-def test_console_publish(mocker):
-    arguments = {
-        "--loglevel": "debug",
-        "init": False,
-        "new": False,
-        "build": False,
-        "preview": False,
-        "publish": True,
-        "ROOT_DIR": None,
-        "-s": None,
-        "--force": True,
-    }
-    mocker.patch("nefelibata.console.docopt", return_value=arguments)
-
-    mock_publish = MagicMock()
-    mocker.patch("nefelibata.console.publish", mock_publish)
-    mocker.patch(
-        "nefelibata.console.find_directory",
-        return_value=Path("/path/to/blog"),
-    )
-
-    main()
-
-    mock_publish.run.assert_called_with(Path("/path/to/blog"), None, True)
+    _logger.info.assert_called_with("Canceled")
 
 
-def test_console_publish_single_post(mocker, mock_post):
-    with freeze_time("2020-01-01T00:00:00Z"):
-        post = mock_post(
-            """
-        subject: This is your first post
-        keywords: welcome, blog
-        summary: Hello, world!
+def test_run(mocker: MockerFixture) -> None:
+    """
+    Test ``run``.
+    """
+    main = mocker.AsyncMock()
+    mocker.patch("nefelibata.console.main", main)
 
-        # Welcome #
+    console.run()
 
-        This is your first post. It should be written using Markdown.
-        """,
-        )
-
-    mocker.patch("nefelibata.console.Post", return_value=post)
-
-    arguments = {
-        "--loglevel": "debug",
-        "init": False,
-        "new": False,
-        "build": False,
-        "preview": False,
-        "publish": True,
-        "ROOT_DIR": None,
-        "-s": "/path/to/blog/posts/first/index.mkd",
-        "--force": True,
-    }
-    mocker.patch("nefelibata.console.docopt", return_value=arguments)
-
-    mock_publish = MagicMock()
-    mocker.patch("nefelibata.console.publish", mock_publish)
-    mocker.patch(
-        "nefelibata.console.find_directory",
-        return_value=Path("/path/to/blog"),
-    )
-
-    main()
-
-    mock_publish.run.assert_called_with(Path("/path/to/blog"), post, True)
+    main.assert_called()
 
 
-def test_console_bogus(mocker):
-    arguments = {
-        "--loglevel": "debug",
-        "init": False,
-        "new": False,
-        "build": False,
-        "preview": False,
-        "publish": False,
-        "ROOT_DIR": None,
-        "-s": None,
-    }
-    mocker.patch("nefelibata.console.docopt", return_value=arguments)
-    mocker.patch(
-        "nefelibata.console.find_directory",
-        return_value=Path("/path/to/blog"),
-    )
+def test_interrupt(mocker: MockerFixture) -> None:
+    """
+    Test that ``CTRL-C`` stops the CLI.
+    """
+    main = mocker.AsyncMock(side_effect=KeyboardInterrupt())
+    mocker.patch("nefelibata.console.main", main)
+    _logger = mocker.patch("nefelibata.console._logger")
 
-    main()
+    console.run()
 
-    assert True
+    _logger.info.assert_called_with("Stopping Nefelibata")

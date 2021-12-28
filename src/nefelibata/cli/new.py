@@ -1,53 +1,50 @@
-# -*- coding: utf-8 -*-
+"""
+Build the blog.
+"""
 import logging
 import os
 from pathlib import Path
 from subprocess import call
 
-from nefelibata.utils import get_config
-from nefelibata.utils import sanitize
+from werkzeug.utils import secure_filename
 
-__author__ = "Beto Dealmeida"
-__copyright__ = "Beto Dealmeida"
-__license__ = "mit"
+from nefelibata.utils import get_config
 
 _logger = logging.getLogger(__name__)
 
 
-def run(root: Path, directory: str, type: str = "post") -> None:
-    """Create a new post and open editor."""
+async def run(root: Path, title: str, type_: str = "post") -> None:
+    """
+    Create a new post and open editor.
+    """
     _logger.info("Creating new directory")
-    title = directory
-    directory = sanitize(directory)
+
+    directory = secure_filename(title).lower()
     target = root / "posts" / directory
     if target.exists():
         raise IOError("Directory already exists!")
-    target.mkdir()
-    os.chdir(target)
-
-    _logger.info("Adding resource files")
-    resources = ["css", "js", "img"]
-    for resource in resources:
-        (target / resource).mkdir()
+    target.mkdir(parents=True)
 
     headers = {
         "subject": title,
         "summary": "",
         "keywords": "",
     }
-    if type != "post":
+    if type_ != "post":
         config = get_config(root)
         try:
-            extra_headers = config["templates"][type]
-        except KeyError:
-            raise Exception(f"Invalid post type: {type}")
-        headers["type"] = type
-        headers.update({f"{type}-{key}": "" for key in extra_headers})
-    new_post = "\n".join(f"{key}: {value}" for key, value in headers.items()) + "\n\n\n"
+            extra_headers = config.templates[type_]
+        except KeyError as ex:
+            raise Exception(f"Invalid post type: {type_}") from ex
+
+        headers["type"] = type_
+        headers.update({f"{type_}-{key}": "" for key in extra_headers})
 
     filepath = target / "index.mkd"
-    with open(filepath, "w") as fp:
-        fp.write(new_post)
+    with open(filepath, "w", encoding="utf-8") as output:
+        for key, value in headers.items():
+            output.write(f"{key}: {value}\n")
+        output.write("\n\n")
 
     editor = os.environ.get("EDITOR")
     if not editor:

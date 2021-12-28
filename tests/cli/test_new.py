@@ -1,112 +1,97 @@
+"""
+Test ``nefelibata.cli.new``.
+"""
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
+from pytest_mock import MockerFixture
 
-from nefelibata.cli.new import run
-
-__author__ = "Beto Dealmeida"
-__copyright__ = "Beto Dealmeida"
-__license__ = "mit"
+from nefelibata.cli import new
+from nefelibata.config import Config
 
 
-def test_run(monkeypatch, fs):
+@pytest.mark.asyncio
+async def test_run(
+    monkeypatch: pytest.MonkeyPatch,
+    root: Path,
+) -> None:
+    """
+    Test ``new``.
+    """
     monkeypatch.setenv("EDITOR", "")
 
-    root = Path("/path/to/blog")
-    fs.create_dir(root / "posts")
-    directory = "first_post"
+    await new.run(root, "A new post")
 
-    run(root, directory)
-
-    for resource in ["css", "js", "img", "index.mkd"]:
-        assert (root / "posts" / directory / resource).exists()
-
-
-def test_run_no_overwrite(monkeypatch, fs):
-    monkeypatch.setenv("EDITOR", "")
-
-    root = Path("/path/to/blog")
-    fs.create_dir(root / "posts")
-    directory = "first_post"
-    fs.create_dir(root / "posts" / directory)
+    filepath = root / "posts/a_new_post/index.mkd"
+    with open(filepath, encoding="utf-8") as input_:
+        content = input_.read()
+    assert content == "subject: A new post\nsummary: \nkeywords: \n\n\n"
 
     with pytest.raises(IOError) as excinfo:
-        run(root, directory)
-
+        await new.run(root, "A new post")
     assert str(excinfo.value) == "Directory already exists!"
 
 
-def test_run_call_editor(mocker, monkeypatch, fs):
+@pytest.mark.asyncio
+async def test_run_with_editor(
+    monkeypatch: pytest.MonkeyPatch,
+    mocker: MockerFixture,
+    root: Path,
+) -> None:
+    """
+    Test that the editor will be called if set.
+    """
     monkeypatch.setenv("EDITOR", "vim")
-    mock_call = MagicMock()
-    mocker.patch("nefelibata.cli.new.call", mock_call)
+    call = mocker.patch("nefelibata.cli.new.call")
 
-    root = Path("/path/to/blog")
-    fs.create_dir(root / "posts")
-    directory = "first_post"
+    await new.run(root, "A new post")
 
-    run(root, directory)
-
-    mock_call.assert_called_with(["vim", root / "posts" / directory / "index.mkd"])
+    call.assert_called_with(["vim", root / "posts/a_new_post/index.mkd"])
 
 
-def test_custom_template(monkeypatch, fs):
+@pytest.mark.asyncio
+async def test_run_with_type(
+    monkeypatch: pytest.MonkeyPatch,
+    mocker: MockerFixture,
+    root: Path,
+    config: Config,
+) -> None:
+    """
+    Test creating a new post with a valid type.
+    """
     monkeypatch.setenv("EDITOR", "")
+    config.templates = {
+        "book": ["title", "author"],
+    }
+    mocker.patch("nefelibata.cli.new.get_config", return_value=config)
 
-    root = Path("/path/to/blog")
-    fs.create_dir(root / "posts")
-    directory = "first_post"
+    await new.run(root, "A book I liked", "book")
 
-    with open(root / "nefelibata.yaml", "w") as fp:
-        fp.write(
-            """
-author:
-    name: John Doe
-    profile_picture: https://example.com/picture.jpg
-
-templates:
-    book:
-        - title
-        - rating
-            """,
-        )
-
-    run(root, directory, "book")
-
-    with open(root / "posts" / directory / "index.mkd") as fp:
-        content = fp.read()
-
+    filepath = root / "posts/a_book_i_liked/index.mkd"
+    with open(filepath, encoding="utf-8") as input_:
+        content = input_.read()
     assert content == (
-        """subject: first_post
-summary: 
-keywords: 
-type: book
-book-title: 
-book-rating: 
-
-
-"""  # noqa: W291
+        "subject: A book I liked\n"
+        "summary: \n"
+        "keywords: \n"
+        "type: book\n"
+        "book-title: \n"
+        "book-author: \n"
+        "\n\n"
     )
 
 
-def test_invalid_template(monkeypatch, fs):
+@pytest.mark.asyncio
+async def test_run_with_invalid_type(
+    monkeypatch: pytest.MonkeyPatch,
+    root: Path,
+    config: Config,  # pylint: disable=unused-argument
+) -> None:
+    """
+    Test creating a new post with an invalid type.
+    """
     monkeypatch.setenv("EDITOR", "")
 
-    root = Path("/path/to/blog")
-    fs.create_dir(root / "posts")
-    directory = "first_post"
-
-    with open(root / "nefelibata.yaml", "w") as fp:
-        fp.write(
-            """
-author:
-    name: John Doe
-    profile_picture: https://example.com/picture.jpg
-            """,
-        )
-
     with pytest.raises(Exception) as excinfo:
-        run(root, directory, "book")
-
+        await new.run(root, "A book I liked", "book")
     assert str(excinfo.value) == "Invalid post type: book"

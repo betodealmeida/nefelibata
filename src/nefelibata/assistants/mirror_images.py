@@ -1,81 +1,168 @@
+"""
+Assistant for mirrorring images locally.
+"""
+
+import asyncio
 import hashlib
+import logging
 import mimetypes
-import re
 from collections import defaultdict
 from io import BytesIO
 from pathlib import Path
+from typing import Dict, Iterator, Tuple
 
+import marko
 import piexif
-import requests
-from bs4 import BeautifulSoup
+from aiohttp import ClientSession
 from PIL import Image
 
-from nefelibata.assistants import Assistant
-from nefelibata.assistants import Scope
+from nefelibata.announcers.base import Scope
+from nefelibata.assistants.base import Assistant
 from nefelibata.post import Post
-from nefelibata.utils import modify_html
 
+_logger = logging.getLogger(__name__)
 
 CHUNK_SIZE = 2048
 
 
-def get_resource_extension(url: str) -> str:
-    response = requests.head(url)
-    content_type = response.headers["content-type"]
+def extract_images(content: str) -> Iterator[Tuple[str, str]]:
+    """
+    Extract all images from a Markdown document.
+    """
+    tree = marko.parse(content)
+    queue = [tree]
+    while queue:
+        element = queue.pop()
+
+        if isinstance(element, marko.inline.Image):
+            yield element.dest, element.children[0].children
+        elif hasattr(element, "children"):
+            queue.extend(element.children)
+
+
+def is_local(url: str) -> bool:
+    """
+    Return true if the image is local.
+
+    For now we return true if the URL is relative.
+    """
+    return "://" not in url
+
+
+async def get_resource_extension(session: ClientSession, url: str) -> str:
+    """
+    Return the extension of a remote image.
+    """
+    async with session.head(url) as response:
+        content_type = response.headers["content-type"]
+
     extension = mimetypes.guess_extension(content_type)
     return extension or ""
 
 
+def get_filename(url: str, extension: str) -> str:
+    """
+    Compute the filename for a given resource.
+    """
+    md5 = hashlib.md5()
+    md5.update(url.encode("utf-8"))
+    return f"{md5.hexdigest()}{extension}"
+
+
+def add_exif(buf: BytesIO, url: str, title: str) -> BytesIO:
+    """
+    Store the URL in the EXIF data.
+    """
+    buf.seek(0)
+    image = Image.open(buf)
+
+    exif = (
+        piexif.load(image.info["exif"]) if "exif" in image.info else defaultdict(dict)
+    )
+    exif["0th"][piexif.ImageIFD.Copyright] = url
+    exif["0th"][piexif.ImageIFD.ImageDescription] = title
+
+    _logger.info("Adding original URL and title to the EXIF data")
+    buf = BytesIO()
+    image.save(buf, "jpeg", exif=piexif.dump(exif))
+
+    return buf
+
+
+async def download_image(  # pylint: disable=too-many-arguments
+    session: ClientSession,
+    url: str,
+    title: str,
+    post: Post,
+    directory: Path,
+    replacements: Dict[str, str],
+) -> None:
+    """
+    Download an image.
+    """
+    extension = await get_resource_extension(session, url)
+    filename = get_filename(url, extension)
+    target = directory / filename
+
+    if target.exists():
+        _logger.debug("Image already mirrored")
+        return
+
+    replacements[url] = str(target.relative_to(post.path.parent))
+
+    _logger.info("Downloading image from %s", url)
+    buf = BytesIO()
+    async with session.get(url) as response:
+        async for chunk in response.content.iter_chunked(  # pragma: no cover
+            CHUNK_SIZE,
+        ):
+            buf.write(chunk)
+
+    if extension in {".jpeg", ".jpg"}:
+        buf = add_exif(buf, url, title)
+
+    with open(target, "wb") as output:
+        output.write(buf.getvalue())
+
+
 class MirrorImagesAssistant(Assistant):
+    """
+    Assistant for mirrorring images locally.
+    """
 
-    scopes = [Scope.POST, Scope.SITE]
+    name = "mirror_images"
+    scopes = [Scope.POST]
 
-    def process_post(self, post: Post, force: bool = False) -> None:
-        self._process_file(post.file_path.with_suffix(".html"))
-
-    def process_site(self, force: bool = False) -> None:
-        for path in (self.root / "build").glob("*.html"):
-            self._process_file(path)
-
-    def _process_file(self, file_path: Path) -> None:
-        mirror = file_path.parent / "img"
+    async def process_post(self, post: Post, force: bool = False) -> None:
+        # create directory for images
+        mirror = post.path.parent / "img"
         if not mirror.exists():
             mirror.mkdir()
 
-        soup: BeautifulSoup
-        with modify_html(file_path) as soup:
-            external_images = soup.find_all("img", src=re.compile("http"))
-            for image in external_images:
-                url = image.attrs["src"]
-
-                extension = get_resource_extension(url).lower()
-                m = hashlib.md5()
-                m.update(url.encode("utf-8"))
-                filename = f"{m.hexdigest()}{extension}"
-                local = mirror / filename
-                image.attrs["src"] = "img/%s" % local.name
-
-                if local.exists():
+        replacements: Dict[str, str] = {}
+        tasks = []
+        async with ClientSession() as session:
+            for url, title in extract_images(post.content):
+                if is_local(url):
                     continue
 
-                # download and store locally
-                buf = BytesIO()
-                response = requests.get(url, stream=True)
-                for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
-                    buf.write(chunk)
+                task = asyncio.create_task(
+                    download_image(session, url, title, post, mirror, replacements),
+                )
+                tasks.append(task)
 
-                # store original URL in EXIF
-                if extension in [".jpeg", ".jpg"]:
-                    buf.seek(0)
-                    im = Image.open(buf)
-                    exif = (
-                        piexif.load(im.info["exif"])
-                        if "exif" in im.info
-                        else defaultdict(dict)
-                    )
-                    exif["0th"][piexif.ImageIFD.ImageDescription] = url
-                    buf = BytesIO()
-                    im.save(buf, "jpeg", exif=piexif.dump(exif))
+            await asyncio.gather(*tasks)
 
-                with open(local, "wb") as outp:
-                    outp.write(buf.getvalue())
+        if not replacements:
+            return
+
+        _logger.info("Updating images in file %s", post.path)
+        async with post._lock:  # pylint: disable=protected-access
+            with open(post.path, encoding="utf-8") as input_:
+                content = input_.read()
+
+            for original, new in replacements.items():
+                content = content.replace(original, new)
+
+            with open(post.path, "w", encoding="utf-8") as output:
+                output.write(content)
