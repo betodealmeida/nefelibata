@@ -5,7 +5,7 @@ Assistant for fetching the current weather.
 import logging
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 from aiohttp import ClientSession
 
@@ -46,4 +46,5 @@ class CurrentWeatherAssistant(Assistant):
         async with ClientSession() as session:
             _logger.info("Fetching current weather information")
             async with session.get("https://wttr.in/?format=j1&m") as response:
-                return await response.json()
+                payload = await response.json()
+                return cast(Dict[str, Any], payload)

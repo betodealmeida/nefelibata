@@ -4,6 +4,7 @@ Tests for ``nefelibata.post``.
 # pylint: disable=invalid-name, unused-argument
 
 from datetime import datetime, timezone
+from email.utils import formatdate
 from pathlib import Path
 
 import pytest
@@ -55,6 +56,7 @@ async def test_build_post(fs: FakeFilesystem, root: Path, config: Config) -> Non
     # create post
     with freeze_time("2021-01-01T00:00:00Z"):
         fs.create_file(path, contents=POST_CONTENT)
+        local_date = formatdate(1609459200.0, localtime=True)
 
     config.announcers = {"antenna": AnnouncerModel(plugin="antenna")}
 
@@ -86,10 +88,10 @@ Read more about [Nefelibata](https://nefelibata.readthedocs.io/)."""
         content = input_.read()
     assert (
         content
-        == """subject: This is your first post
+        == f"""subject: This is your first post
 keywords: welcome, blog
 summary: Hello, world!
-date: Thu, 31 Dec 2020 16:00:00 -0800
+date: {local_date}
 announce-on: antenna
 
 # Welcome #

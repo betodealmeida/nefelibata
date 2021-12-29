@@ -106,7 +106,7 @@ async def test_builder_post(
         <h1 class="p-name">This is your first post</h1>
 
         <p>Published by <a class="p-author h-card" href="https://taoetc.org/">Beto Dealmeida</a>
-        on <time class="dt-published" datetime="2020-12-31T16:00:00-08:00">2020-12-31 16:00:00-08:00</time></p>
+        on <time class="dt-published" datetime="2021-01-01T00:00:00+00:00">2021-01-01 00:00:00+00:00</time></p>
 
         <p class="p-summary"><small>Hello, world!</small></p>
 
@@ -263,12 +263,12 @@ async def test_builder_site(
     <title>道&amp;c.</title>
     <link rel="self" type="application/atom+xml" href="https://example.com/atom.xml" />
     <id>https://example.com/</id>
-    <updated>2020-12-31T16:04:00Z</updated>
+    <updated>2021-01-01T00:00:00+00:00</updated>
 <entry>
     <title>This is your first post</title>
     <link rel="alternate" type="text/html" href="https://example.com/first/index.html" />
-    <id>tag:example.com,2020-12-31:first/index.html</id>
-    <updated>2020-12-31T16:04:00Z</updated>
+    <id>tag:example.com,2021-01-01:first/index.html</id>
+    <updated>2021-01-01T00:00:00+00:00</updated>
     <summary type="html">
         Hello, world!
         &lt;p&gt;&lt;a href="https://example.com/first/index.html"&gt;Permalink&lt;/p&gt;

@@ -109,7 +109,7 @@ Read more about Nefelibata.
 
 # About
 
-Published on 2020-12-31 16:00:00-08:00 by Beto Dealmeida <roberto@dealmeida.net>.
+Published on 2021-01-01 00:00:00+00:00 by Beto Dealmeida <roberto@dealmeida.net>.
 
 => gemini://localhost:1965 Go back to the main index"""
     )
@@ -201,7 +201,7 @@ This is the Gemini capsule of Beto Dealmeida.
 
 ## Posts
 
-=> gemini://localhost:1965/first/index.gmi 2020-12-31 16:00:00-08:00 — This is your first post{space}
+=> gemini://localhost:1965/first/index.gmi 2021-01-01 00:00:00+00:00 — This is your first post{space}
 
 ## Links
 
@@ -217,7 +217,7 @@ Crafted with ❤️ using Nefelibata
         content
         == """# 道&c.
 
-=> gemini://localhost:1965/first/index.gmi 2020-12-31 — This is your first post
+=> gemini://localhost:1965/first/index.gmi 2021-01-01 — This is your first post
 """
     )
 

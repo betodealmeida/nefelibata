@@ -4,7 +4,7 @@ A Nefelibata post (and associated functions).
 
 import asyncio
 import operator
-from datetime import datetime
+from datetime import datetime, timezone
 from email.header import decode_header, make_header
 from email.parser import Parser
 from email.utils import formatdate, parsedate_to_datetime
@@ -57,7 +57,11 @@ class Post(BaseModel):  # pylint: disable=too-few-public-methods
     _lock: asyncio.Lock = PrivateAttr(default_factory=asyncio.Lock)
 
 
-def build_post(root: Path, config: Config, path: Path) -> Post:
+def build_post(  # pylint: disable=too-many-locals
+    root: Path,
+    config: Config,
+    path: Path,
+) -> Post:
     """
     Build a post from a file path.
 
@@ -104,10 +108,16 @@ def build_post(root: Path, config: Config, path: Path) -> Post:
     # load metadata from YAML files
     metadata.update(load_extra_metadata(path.parent))
 
+    timestamp = (
+        parsedate_to_datetime(parsed["date"])
+        .replace(microsecond=0)
+        .astimezone(timezone.utc)
+    )
+
     return Post(
         path=path,
         title=str(make_header(decode_header(parsed["subject"]))),
-        timestamp=parsedate_to_datetime(parsed["date"]),
+        timestamp=timestamp,
         metadata=metadata,
         tags=tags,
         categories=categories,

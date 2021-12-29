@@ -49,4 +49,4 @@ class HTMLBuilder(Builder):
     @staticmethod
     def render(content: str) -> str:
         markdown = marko.Markdown(extensions=["codehilite"])
-        return markdown.convert(content)
+        return str(markdown.convert(content))
