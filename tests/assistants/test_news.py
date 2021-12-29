@@ -2,7 +2,6 @@
 Tests for ``nefelibata.assistants.news``.
 """
 
-import random
 from pathlib import Path
 
 import pytest
@@ -24,7 +23,9 @@ async def test_assistant(
     """
     Test the assistant.
     """
-    random.seed(42)
+    # for some reason random.see() is not working in CI
+    random = mocker.patch("nefelibata.assistants.news.random")
+    random.choice = lambda l: l[0]
 
     get = mocker.patch("nefelibata.assistants.news.ClientSession.get")
     get.return_value.__aenter__.return_value.json.return_value = {
