@@ -5,7 +5,7 @@ A builder for Gemini (https://gemini.circumlunar.space/).
 
 import logging
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterator, cast
 
 import marko
 from marko.renderer import Renderer
@@ -35,6 +35,14 @@ class GeminiRenderer(Renderer):
     """
     Render Markdown to Gemtext.
     """
+
+    def render_children(self, element) -> str:
+        """
+        Render children.
+
+        Dummy method to help with type annotations.
+        """
+        return cast(str, super().render_children(element))
 
     def render_paragraph(self, element) -> str:
         """
@@ -103,7 +111,7 @@ class GeminiRenderer(Renderer):
 
         The maximum level is 3.
         """
-        level = min(element.level, 3)
+        level: int = min(element.level, 3)
         return "#" * level + " " + self.render_children(element) + "\n"
 
     render_setext_heading = render_heading
@@ -129,7 +137,7 @@ class GeminiRenderer(Renderer):
         """
         Render raw text.
         """
-        return element.children
+        return str(element.children)
 
     render_code_span = render_raw_text
     render_literal = render_raw_text
@@ -164,4 +172,4 @@ class GeminiBuilder(Builder):
 
     def render(self, content: str) -> str:
         gemini = marko.Markdown(renderer=GeminiRenderer)
-        return gemini.convert(content).strip()
+        return str(gemini.convert(content).strip())

@@ -12,7 +12,7 @@
     <id>{{ home }}</id>
 {% for post in posts %}
 {% if loop.first %}
-    <updated>{{ post.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ') }}</updated>
+    <updated>{{ post.timestamp.replace(microsecond=0).isoformat() }}</updated>
 {% endif %}
 <entry>
     <title>{{ post.title }}</title>
@@ -22,7 +22,7 @@
         href="{{ home / enclosure.href }}"/>
     {% endfor %}
     <id>tag:{{ home.host }},{{ post.timestamp.strftime('%Y-%m-%d') }}:{{ post.url }}.html</id>
-    <updated>{{ post.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ') }}</updated>
+    <updated>{{ post.timestamp.replace(microsecond=0).isoformat() }}</updated>
     <summary type="html">
         {{ post.metadata.summary }}
         &lt;p&gt;&lt;a href="{{ home / post.url }}.html"&gt;Permalink&lt;/p&gt;
