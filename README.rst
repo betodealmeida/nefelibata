@@ -2,6 +2,14 @@
 nefelibata
 ==========
 
+.. image:: https://readthedocs.org/projects/nefelibata/badge/?version=latest
+   :target: https://nefelibata.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+.. image:: https://badge.fury.io/py/nefelibata.svg
+   :target: https://badge.fury.io/py/nefelibata
+.. image:: https://img.shields.io/pypi/pyversions/nefelibata
+   :alt: PyPI - Python Version
+
 A blog engine focusing on **data ownership** and **persistence**.
 
 How is it different?
