@@ -62,7 +62,7 @@ Here, the file ``nefelibata.yaml`` stores the configuration for your site. The `
 Configuring your site
 -----------------------
 
-The file ``nefelibata.yaml.full`` has comments describing all the sections.
+The file ``nefelibata.yaml.full`` has comments describing all the sections. You can edit it and rename it to ``nefelibata.yaml``.
 
 Creating a new post
 -------------------
@@ -88,7 +88,7 @@ You'll notice that the ``index.mkd`` file has headers and a body. The file itsel
 
 - ``subject``: this is the title of your post.
 - ``summary``: this is a one-line summary of your post.
-- ``keywords``: a comma-separated list of keywords/tags/tags.
+- ``keywords``: a comma-separated list of keywords/tags.
 
 Additionally, once the post is published a ``date`` header will be added.
 
@@ -113,8 +113,3 @@ Finally, you can publish your site with the command:
     $ nb publish
 
 This will upload the site using any configured publishers (like S3), and announce new posts to social networks.
-
-What's next?
-============
-
-If you want to customize your site, take a look at the ``templates/`` directory inside your site. The templates are written in `Jinja2 <https://palletsprojects.com/p/jinja/>`_.
