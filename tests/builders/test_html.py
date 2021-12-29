@@ -263,12 +263,12 @@ async def test_builder_site(
     <title>道&amp;c.</title>
     <link rel="self" type="application/atom+xml" href="https://example.com/atom.xml" />
     <id>https://example.com/</id>
-    <updated>2020-12-31T16:04:00Z</updated>
+    <updated>2020-12-31T16:00:00Z</updated>
 <entry>
     <title>This is your first post</title>
     <link rel="alternate" type="text/html" href="https://example.com/first/index.html" />
     <id>tag:example.com,2020-12-31:first/index.html</id>
-    <updated>2020-12-31T16:04:00Z</updated>
+    <updated>2020-12-31T16:00:00Z</updated>
     <summary type="html">
         Hello, world!
         &lt;p&gt;&lt;a href="https://example.com/first/index.html"&gt;Permalink&lt;/p&gt;
