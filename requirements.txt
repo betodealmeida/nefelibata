@@ -28,7 +28,7 @@ icalendar==4.0.9
 idna==3.3
 jinja2==2.11.3
 jmespath==0.10.0
-lxml==4.7.1
+lxml==4.9.1
 marko==1.1.0
 markupsafe==2.0.1
 mastodon.py==1.5.1
