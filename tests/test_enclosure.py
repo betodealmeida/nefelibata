@@ -48,15 +48,16 @@ def test_get_enclosures(mocker: MockerFixture, fs: FakeFilesystem, root: Path) -
     path = root / "posts/first/index.mkd"
 
     # create supported files
-    (root / "posts/first/song.mp3").touch()
-    (root / "posts/first/photo.jpg").touch()
-    (root / "posts/first/logo.png").touch()
+    fs.create_file(root / "posts/first/song.mp3")
+    fs.create_file(root / "posts/first/photo.jpg")
+    fs.create_file(root / "posts/first/logo.png")
+    fs.create_file(root / "posts/first/bundle.zip")
 
     # create non-supported file
-    (root / "posts/first/test.txt").touch()
+    fs.create_file(root / "posts/first/test.txt")
 
     enclosures = get_enclosures(root, path.parent)
-    assert len(enclosures) == 3
+    assert len(enclosures) == 4
 
     assert enclosures[0].dict() == {
         "path": Path("/path/to/blog/posts/first/song.mp3"),
@@ -86,4 +87,12 @@ def test_get_enclosures(mocker: MockerFixture, fs: FakeFilesystem, root: Path) -
         "length": 0,
         "path": Path("/path/to/blog/posts/first/logo.png"),
         "type": "image/png",
+    }
+
+    assert enclosures[3].dict() == {
+        "path": Path("/path/to/blog/posts/first/bundle.zip"),
+        "description": "bundle.zip",
+        "type": "application/zip",
+        "length": 0,
+        "href": "first/bundle.zip",
     }

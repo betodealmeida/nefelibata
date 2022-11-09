@@ -23,6 +23,24 @@ class Enclosure(BaseModel):
     length: int
     href: str
 
+    @classmethod
+    def from_path(cls, root: Path, path: Path) -> "Enclosure":
+        """
+        Build an enclosure from a path to a file.
+        """
+        mimetype, _ = mimetypes.guess_type(path)
+        length = path.stat().st_size
+        href = urllib.parse.quote(str(path.relative_to(root / "posts")))
+        description = path.name
+
+        return cls(
+            path=path,
+            description=description,
+            type=mimetype,
+            length=length,
+            href=href,
+        )
+
 
 def get_pretty_duration(duration: float) -> str:
     """
@@ -99,12 +117,6 @@ class ImageEnclosure(Enclosure):
     An image.
     """
 
-    path: Path
-    description: str
-    type: str
-    length: int
-    href: str
-
     @classmethod
     def from_path(cls, root: Path, path: Path) -> "ImageEnclosure":
         """
@@ -135,6 +147,7 @@ mimetype_map: Dict[str, Type[Enclosure]] = {
     "audio/mpeg": MP3Enclosure,
     "image/jpeg": ImageEnclosure,
     "image/png": ImageEnclosure,
+    "application/zip": Enclosure,
 }
 
 
