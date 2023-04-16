@@ -25,14 +25,14 @@ class CommandPublisher(Publisher):
         root: Path,
         config: Config,
         path: str,
-        post_commands: List[str],
-        site_commands: List[str],
+        post_commands: Optional[List[str]] = None,
+        site_commands: Optional[List[str]] = None,
         **kwargs: Any,
     ):
         super().__init__(root, config, path, **kwargs)
 
-        self.post_commands = post_commands
-        self.site_commands = site_commands
+        self.post_commands = post_commands or []
+        self.site_commands = site_commands or []
 
     async def publish(
         self,
@@ -58,6 +58,11 @@ class CommandPublisher(Publisher):
 
         for command in self.site_commands:
             _logger.info("Running command %s", command)
-            subprocess.run(command, shell=True, check=True)
+            subprocess.run(
+                command,
+                shell=True,
+                check=True,
+                env={"build": build},
+            )
 
         return Publishing(timestamp=datetime.now(timezone.utc))

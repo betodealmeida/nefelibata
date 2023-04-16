@@ -107,6 +107,9 @@ async def test_publish(
                 "notify.py",
                 shell=True,
                 check=True,
+                env={
+                    "build": Path("/path/to/blog/build/generic"),
+                },
             ),
         ],
     )
