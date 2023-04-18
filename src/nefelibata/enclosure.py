@@ -128,8 +128,9 @@ class ImageEnclosure(Enclosure):
 
         if mimetype == "image/jpeg":
             exif = piexif.load(str(path))
-            description = (
-                exif["0th"][piexif.ImageIFD.ImageDescription] or f"Image {path.name}"
+            description = exif["0th"].get(
+                piexif.ImageIFD.ImageDescription,
+                f"Image {path.name}",
             )
         else:
             description = f"Image {path.name}"
