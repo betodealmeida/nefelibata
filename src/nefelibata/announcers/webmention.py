@@ -229,7 +229,7 @@ class WebmentionAnnouncer(Announcer):
                         id=entry["wm-id"],
                         name=entry.get("name", entry["wm-source"]),
                         summary=entry.get("summary", {}).get("value"),
-                        content=entry["content"]["text"],
+                        content=entry.get("content", {}).get("text"),
                         published=dateutil.parser.parse(entry["published"]),
                         updated=None,
                         author=Author(
