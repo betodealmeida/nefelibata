@@ -3,7 +3,7 @@
 This is the Gemini capsule of {{ config.author.name }}.
 
 => {{ config.author.url }} Website
-=> mailto://{{ config.author.email }} Email address
+=> mailto:{{ config.author.email }} Email address
 => {{ home / 'feed.gmi' }} Gemlog
 {% if posts %}
 
