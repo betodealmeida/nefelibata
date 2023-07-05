@@ -196,7 +196,7 @@ async def test_builder_site(
 This is the Gemini capsule of Beto Dealmeida.
 
 => https://taoetc.org/ Website
-=> mailto://roberto@dealmeida.net Email address
+=> mailto:roberto@dealmeida.net Email address
 => gemini://localhost:1965/feed.gmi Gemlog
 
 ## Posts
