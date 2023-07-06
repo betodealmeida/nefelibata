@@ -10,6 +10,7 @@ from collections import defaultdict
 from io import BytesIO
 from pathlib import Path
 from typing import Dict, Iterator, Tuple
+from urllib.parse import urlparse
 
 import marko
 import piexif
@@ -46,7 +47,8 @@ def is_local(url: str) -> bool:
 
     For now we return true if the URL is relative.
     """
-    return "://" not in url
+    parsed = urlparse(url)
+    return parsed.netloc == ""
 
 
 async def get_resource_extension(session: ClientSession, url: str) -> str:
