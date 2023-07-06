@@ -42,7 +42,11 @@ class GeminiRenderer(Renderer):
 
         Dummy method to help with type annotations.
         """
-        return cast(str, super().render_children(element))
+        return (
+            cast(str, super().render_children(element))
+            if hasattr(element, "children")
+            else ""
+        )
 
     def render_paragraph(self, element) -> str:
         """

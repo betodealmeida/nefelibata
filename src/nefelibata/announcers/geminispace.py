@@ -20,6 +20,12 @@ from nefelibata.post import Post
 _logger = logging.getLogger(__name__)
 
 
+denylist = [
+    "skyjake.fi/~Cosmos/since",
+    "skyjake.fi:1965/~Cosmos/since",
+]
+
+
 class GeminispaceAnnouncer(Announcer):
 
     """
@@ -83,12 +89,13 @@ class GeminispaceAnnouncer(Announcer):
                 if state == 1 and line.startswith("=>"):
                     _, url, name = re.split(r"\s+", line, 2)
 
-                    id_ = f"backlink,{url}"
-                    interactions[id_] = Interaction(
-                        id=id_,
-                        name=name,
-                        url=url,
-                        type="backlink",
-                    )
+                    if not any(denied in url for denied in denylist):
+                        id_ = f"backlink,{url}"
+                        interactions[id_] = Interaction(
+                            id=id_,
+                            name=name,
+                            url=url,
+                            type="backlink",
+                        )
 
         return interactions
