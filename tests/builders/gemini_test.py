@@ -10,7 +10,7 @@ from freezegun import freeze_time
 from marko import Markdown
 from pytest_mock import MockerFixture
 
-from nefelibata.builders.gemini import GeminiBuilder, GeminiRenderer
+from nefelibata.builders.gemini import GeminiBuilder, GemtextRenderer
 from nefelibata.config import Config, SocialModel
 from nefelibata.enclosure import Enclosure
 from nefelibata.post import Post
@@ -280,11 +280,11 @@ Crafted with ❤️ using Nefelibata
 
 def test_gemini_renderer() -> None:
     """
-    Test ``GeminiRenderer``.
+    Test ``GemtextRenderer``.
     """
     double_space = "  "
 
-    gemini = Markdown(renderer=GeminiRenderer)
+    gemini = Markdown(renderer=GemtextRenderer)
 
     assert (
         gemini.convert(
@@ -353,7 +353,7 @@ def test_gemini_renderer_link_ref_def() -> None:
     """
     Test rendering a link definition reference.
     """
-    gemini = Markdown(renderer=GeminiRenderer)
+    gemini = Markdown(renderer=GemtextRenderer)
 
     assert (
         gemini.convert(
@@ -377,7 +377,7 @@ def test_gemini_renderer_links() -> None:
     """
     Test rendering links.
     """
-    gemini = Markdown(renderer=GeminiRenderer)
+    gemini = Markdown(renderer=GemtextRenderer)
     assert (
         gemini.convert(
             """
@@ -433,7 +433,7 @@ def test_gemini_renderer_padding_after_link_ref_def() -> None:
 
     Ideally we shouldn't be left with an empty line.
     """
-    gemini = Markdown(renderer=GeminiRenderer)
+    gemini = Markdown(renderer=GemtextRenderer)
     assert (
         gemini.convert(
             """
@@ -459,7 +459,7 @@ def test_gemini_renderer_image() -> None:
     """
     Test rendering images.
     """
-    gemini = Markdown(renderer=GeminiRenderer)
+    gemini = Markdown(renderer=GemtextRenderer)
     assert (
         gemini.convert(
             """
@@ -480,5 +480,200 @@ This is a paragraph.
 => https://assets.digitalocean.com/articles/alligator/boo.svg Alt text
 
 That is it.
+"""
+    )
+
+
+def test_gemini_renderer_nested_link() -> None:
+    """
+    Test rendering links inside an indent (eg, blockquote).
+    """
+    gemini = Markdown(renderer=GemtextRenderer)
+    assert (
+        gemini.convert(
+            """
+> This is a quote. [source](https://example.org/)
+""",
+        )
+        == """
+> This is a quote. source
+
+=> https://example.org/ source
+"""
+    )
+
+
+def test_gemini_render_code_block() -> None:
+    """
+    Test rendering a code block.
+    """
+    gemini = Markdown(renderer=GemtextRenderer)
+    assert (
+        gemini.convert(
+            """
+This is a paragraph.
+
+    This is some code.
+
+Back to text.
+""",
+        )
+        == """
+This is a paragraph.
+
+```
+This is some code.
+```
+
+Back to text.
+"""
+    )
+
+
+def test_gemini_render_html_block() -> None:
+    """
+    Test rendering an HTML block.
+    """
+    gemini = Markdown(renderer=GemtextRenderer)
+    assert (
+        gemini.convert(
+            """
+This is a paragraph.
+
+<pre>
+<em>Here's some HTML</em>
+</pre>
+
+Back to text.
+""",
+        )
+        == """
+This is a paragraph.
+
+```
+<pre>
+<em>Here's some HTML</em>
+</pre>
+```
+
+Back to text.
+"""
+    )
+
+
+def test_gemini_render_thematic_break() -> None:
+    """
+    Test rendering a thematic break.
+    """
+    gemini = Markdown(renderer=GemtextRenderer)
+    assert (
+        gemini.convert(
+            """
+This is a paragraph.
+
+----
+
+This is another.
+""",
+        )
+        == """
+This is a paragraph.
+
+----
+
+This is another.
+"""
+    )
+
+
+def test_gemini_render_setext_heading() -> None:
+    """
+    Test rendering a heading.
+    """
+    gemini = Markdown(renderer=GemtextRenderer)
+    assert (
+        gemini.convert(
+            """
+Introduction
+============
+
+This is a paragraph.
+
+Subsection
+----------
+
+This is another.
+""",
+        )
+        == """
+# Introduction
+
+This is a paragraph.
+
+## Subsection
+
+This is another.
+"""
+    )
+
+
+def test_gemini_render_inline_html() -> None:
+    """
+    Test rendering a code block.
+    """
+    gemini = Markdown(renderer=GemtextRenderer)
+    assert (
+        gemini.convert(
+            """
+This is a paragraph with <em>HTML</em>.
+""",
+        )
+        == """
+This is a paragraph with <em>HTML</em>.
+"""
+    )
+
+
+def test_gemini_render_plaintext() -> None:
+    """
+    Test rendering a plain text block.
+    """
+    gemini = Markdown(renderer=GemtextRenderer)
+    assert (
+        gemini.convert(
+            """
+<plaintext>
+This is a paragraph.
+</plaintext>
+""",
+        )
+        == """
+```
+<plaintext>
+This is a paragraph.
+</plaintext>
+```
+"""
+    )
+
+
+def test_gemini_render_literal() -> None:
+    """
+    Test rendering a literal.
+    """
+    gemini = Markdown(renderer=GemtextRenderer)
+    assert (
+        gemini.convert(
+            r"""
+\> foo
+======
+
+This is a paragraph.
+""",
+        )
+        == """
+# > foo
+
+This is a paragraph.
 """
     )
