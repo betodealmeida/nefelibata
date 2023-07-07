@@ -82,7 +82,7 @@ class MastodonAnnouncer(Announcer):
         urls = "\n".join(
             builder.absolute_url(post).human_repr() for builder in self.builders
         )
-        tags = " ".join(f"#{tag}" for tag in post.tags)
+        tags = " ".join(f"#{tag}" for tag in sorted(post.tags))
         status = f"{summary}\n\n{urls}\n\n{tags}".strip()
 
         _logger.info("Announcing post %s on Mastodon", post.path)

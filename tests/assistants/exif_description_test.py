@@ -121,3 +121,48 @@ I have 2 images:
             piexif.ImageIFD.ImageDescription: b"Description of an image",
         },
     }
+
+
+@pytest.mark.asyncio
+async def test_assistant_exif_set(
+    mocker: MockerFixture,
+    root: Path,
+    config: Config,
+    post: Post,
+) -> None:
+    """
+    Test the assistant.
+    """
+    mocker.patch(
+        "nefelibata.assistants.exif_description.get_image_description",
+        return_value="Description of an image",
+    )
+    piexif = mocker.patch("nefelibata.assistants.exif_description.piexif")
+    exif = {
+        "0th": {
+            piexif.ImageIFD.ImageDescription: b"Description of an image",
+        },
+    }
+    piexif.load.return_value = exif
+
+    assistant = ExifDescriptionAssistant(root, config)
+
+    post.content = """
+I have 2 images:
+
+- ![First image](https://example.com/photo.jpg)
+- ![Second image](img/logo.png)
+    """
+    post.enclosures = [
+        ImageEnclosure(
+            path=post.path.parent / "img/logo.png",
+            description="Image logo.png",
+            type="image/jpeg",
+            length=1234,
+            href="img/logo.png",
+        ),
+    ]
+
+    await assistant.process_post(post)
+
+    piexif.insert.assert_not_called()
