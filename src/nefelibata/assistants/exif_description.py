@@ -78,6 +78,12 @@ class ExifDescriptionAssistant(Assistant):
                 _logger.warning("invalid image data in %s", enclosure.path)
                 continue
 
+            if exif["0th"].get(piexif.ImageIFD.ImageDescription) == description.encode(
+                "utf-8",
+            ):
+                _logger.info("EXIF description already set in %s", enclosure.path)
+                continue
+
             _logger.info("adding EXIF description to %s", enclosure.path)
             exif["0th"][piexif.ImageIFD.ImageDescription] = description.encode("utf-8")
             piexif.insert(piexif.dump(exif), str(enclosure.path))
