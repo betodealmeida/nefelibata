@@ -3,7 +3,6 @@ Enclosures for media associated with posts.
 """
 
 import mimetypes
-import urllib.parse
 from pathlib import Path
 from typing import Dict, List, Type, Union
 
@@ -30,7 +29,7 @@ class Enclosure(BaseModel):
         """
         mimetype, _ = mimetypes.guess_type(path)
         length = path.stat().st_size
-        href = urllib.parse.quote(str(path.relative_to(root / "posts")))
+        href = str(path.relative_to(root / "posts"))
         description = path.name
 
         return cls(
@@ -85,7 +84,7 @@ class MP3Enclosure(Enclosure):
         Build an enclosure from a path to an MP3.
         """
         length = path.stat().st_size
-        href = urllib.parse.quote(str(path.relative_to(root / "posts")))
+        href = str(path.relative_to(root / "posts"))
 
         mp3 = MP3(path)
         title = str(mp3.get("TIT2", path.stem))
@@ -124,7 +123,7 @@ class ImageEnclosure(Enclosure):
         """
         mimetype, _ = mimetypes.guess_type(path)
         length = path.stat().st_size
-        href = urllib.parse.quote(str(path.relative_to(root / "posts")))
+        href = str(path.relative_to(root / "posts"))
 
         if mimetype == "image/jpeg":
             exif = piexif.load(str(path))
